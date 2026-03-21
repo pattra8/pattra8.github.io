@@ -195,6 +195,12 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
 /* edit btn in detail */
 .edit-issue-btn{display:flex;align-items:center;gap:5px;background:#eff6ff;border:1.5px solid #bfdbfe;color:#1d4ed8;border-radius:20px;padding:5px 12px;font-family:'Sarabun',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .15s;margin-bottom:2px}
 .edit-issue-btn:hover{background:#dbeafe}
+/* ── DRAG & DROP ── */
+.card.dragging{opacity:.4;transform:scale(.98);cursor:grabbing}
+.col-body.drag-over{outline:2.5px dashed var(--accent);outline-offset:-4px;background-color:rgba(45,106,79,.06)}
+.col-body.drag-over-todo{outline-color:var(--todo-c);background-color:rgba(59,130,246,.06)}
+.col-body.drag-over-doing{outline-color:var(--doing-c);background-color:rgba(245,158,11,.06)}
+.col-body.drag-over-done{outline-color:var(--done-c);background-color:rgba(34,197,94,.06)}
 #col-todo{background:#f0f7ff}
 #col-doing{background:#fffbf0}
 #col-done{background:#f0fdf4}
@@ -243,17 +249,17 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
   <div class="col">
     <div class="col-stripe cs-todo"></div>
     <div class="col-hd" onclick="toggleCol('todo')" style="cursor:pointer"><div class="col-hl"><span>📋</span><span class="col-lbl" style="color:var(--todo-c)">รอดำเนินการ</span></div><div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-todo" id="cnt-todo">0</span><button class="col-toggle" id="toggle-todo">▾</button></div></div>
-    <div class="col-body" id="col-todo"></div>
+    <div class="col-body" id="col-todo" ondragover="onDragOver(event,'todo')" ondragleave="onDragLeave(event,'todo')" ondrop="onDrop(event,'todo')"></div>
   </div>
   <div class="col">
     <div class="col-stripe cs-doing"></div>
     <div class="col-hd" onclick="toggleCol('doing')" style="cursor:pointer"><div class="col-hl"><span>🔧</span><span class="col-lbl" style="color:#b45309">กำลังดำเนินการ</span></div><div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-doing" id="cnt-doing">0</span><button class="col-toggle" id="toggle-doing">▾</button></div></div>
-    <div class="col-body" id="col-doing"></div>
+    <div class="col-body" id="col-doing" ondragover="onDragOver(event,'doing')" ondragleave="onDragLeave(event,'doing')" ondrop="onDrop(event,'doing')"></div>
   </div>
   <div class="col">
     <div class="col-stripe cs-done"></div>
     <div class="col-hd" onclick="toggleCol('done')" style="cursor:pointer"><div class="col-hl"><span>✅</span><span class="col-lbl" style="color:#15803d">เสร็จแล้ว</span></div><div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-done" id="cnt-done">0</span><button class="col-toggle" id="toggle-done">▾</button></div></div>
-    <div class="col-body" id="col-done"></div>
+    <div class="col-body" id="col-done" ondragover="onDragOver(event,'done')" ondragleave="onDragLeave(event,'done')" ondrop="onDrop(event,'done')"></div>
   </div>
 </div>
 
@@ -704,14 +710,29 @@ async function submitPrivate(){
 /* admin */
 function openAdminLogin(){if(isAdmin){logoutAdmin();return}document.getElementById('adminOverlay').classList.remove('hidden');setTimeout(()=>document.getElementById('adminPw').focus(),100)}
 function closeAdminModal(){document.getElementById('adminOverlay').classList.add('hidden');document.getElementById('adminPw').value=''}
+function setAdminUI(on){
+  document.getElementById('adminToggle').textContent=on?'🟢 Admin Mode':'🔑 Admin';
+  document.getElementById('adminToggle').classList.toggle('admin-on',on);
+}
+function checkAdminSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem('admin_session'));
+    if(s&&Date.now()-s.ts<24*60*60*1000){isAdmin=true;setAdminUI(true);}
+    else localStorage.removeItem('admin_session');
+  }catch(e){}
+}
 function loginAdmin(){
   if(document.getElementById('adminPw').value===APWD){
-    isAdmin=true;closeAdminModal();document.getElementById('adminToggle').textContent='🟢 Admin Mode';document.getElementById('adminToggle').classList.add('admin-on');
+    isAdmin=true;
+    localStorage.setItem('admin_session',JSON.stringify({ts:Date.now()}));
+    closeAdminModal();setAdminUI(true);
     renderBoard();updateBanner();toast('🔑 เข้าสู่ระบบ Admin แล้ว');
   }else{toast('❌ รหัสผ่านไม่ถูกต้อง');document.getElementById('adminPw').value=''}
 }
 function logoutAdmin(){
-  isAdmin=false;document.getElementById('adminToggle').textContent='🔑 Admin';document.getElementById('adminToggle').classList.remove('admin-on');
+  isAdmin=false;
+  localStorage.removeItem('admin_session');
+  setAdminUI(false);
   closeInbox();if(curId!==null)closeDetail();renderBoard();updateBanner();toast('👋 ออกจาก Admin Mode แล้ว');
 }
 document.getElementById('adminOverlay').addEventListener('click',function(e){if(e.target===this)closeAdminModal()});
@@ -838,6 +859,20 @@ function closeLightbox(){document.getElementById('lightbox').classList.add('hidd
 /* render board */
 function makeCard(item){
   const div=document.createElement('div');div.className='card';div.onclick=()=>openDetail(item.id,false);
+  if(isAdmin){
+    div.setAttribute('draggable','true');
+    div.setAttribute('data-id',item.id);
+    div.setAttribute('data-status',item.status);
+    div.addEventListener('dragstart',e=>{
+      e.dataTransfer.setData('text/plain',item.id);
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(()=>div.classList.add('dragging'),0);
+    });
+    div.addEventListener('dragend',()=>{
+      div.classList.remove('dragging');
+      document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done'));
+    });
+  }
   const voted=sessionStorage.getItem('voter_'+item.id),votes=item.votes||0;
   const hasMedia=item.media&&item.media.length>0;
   let mvH='';
@@ -866,6 +901,30 @@ function toggleCol(st){
   if(!colEl)return;
   colEl.classList.toggle('collapsed');
 }
+/* ── DRAG & DROP HANDLERS ── */
+function onDragOver(e, st){
+  if(!isAdmin)return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  const col=document.getElementById('col-'+st);
+  col.classList.add('drag-over','drag-over-'+st);
+}
+function onDragLeave(e, st){
+  const col=document.getElementById('col-'+st);
+  col.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done');
+}
+async function onDrop(e, newStatus){
+  if(!isAdmin)return;
+  e.preventDefault();
+  const id=e.dataTransfer.getData('text/plain');
+  if(!id)return;
+  const item=publicIssues.find(x=>x.id===id);
+  if(!item||item.status===newStatus)return;
+  document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done'));
+  await moveCard(id,newStatus,false,false);
+  const lbl={todo:'📋 รอดำเนินการ',doing:'🔧 กำลังดำเนินการ',done:'✅ เสร็จแล้ว'};
+  toast(`ย้ายไป ${lbl[newStatus]} แล้ว ✓`);
+}
 function renderBoard(){
   const cols={todo:[],doing:[],done:[]};
   publicIssues.forEach(item=>(cols[item.status]||cols.todo).push(item));
@@ -882,10 +941,16 @@ function renderBoard(){
 }
 
 // Firebase handles data — no seed needed
+checkAdminSession();
 updateBanner();
 
 // ── EXPOSE ALL FUNCTIONS TO GLOBAL SCOPE (needed for onclick= in HTML) ──
 window.toggleCol=toggleCol;
+window.onDragOver=onDragOver;
+window.onDragLeave=onDragLeave;
+window.onDrop=onDrop;
+window.checkAdminSession=checkAdminSession;
+window.setAdminUI=setAdminUI;
 window.openModal=openModal;
 window.closeModal=closeModal;
 window.openPrivateModal=openPrivateModal;
