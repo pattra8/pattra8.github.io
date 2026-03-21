@@ -39,7 +39,7 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:13px 22px 32px}
 @media(max-width:800px){.board{grid-template-columns:1fr}}
 .col{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 190px);min-height:400px;overflow:visible;border:1.5px solid var(--border);transition:max-height .3s ease,opacity .3s}
-.col.collapsed{max-height:54px}
+.col.collapsed{height:54px!important;min-height:unset!important}
 .col.collapsed .col-body{display:none}
 .col-toggle{background:none;border:none;cursor:pointer;font-size:.85rem;color:var(--muted);padding:2px 4px;border-radius:6px;transition:transform .25s;line-height:1}
 .col.collapsed .col-toggle{transform:rotate(-90deg)}
