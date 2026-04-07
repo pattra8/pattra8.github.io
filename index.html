@@ -654,28 +654,29 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
 <script>
 // ── EMAIL CONFIG — fill these in after setting up EmailJS ──
 const EMAIL_CFG = {
-  publicKey:  'YOUR_PUBLIC_KEY',   // from EmailJS dashboard → Account
-  serviceId:  'YOUR_SERVICE_ID',   // from EmailJS → Email Services
-  templateId: 'YOUR_TEMPLATE_ID',  // from EmailJS → Email Templates
-  adminEmail: 'mrteam388@gmail.com' // your receiving email
+  publicKey:  'nWHoOf02K6bRVpsfV',
+  serviceId:  'service_ktvu6dn',
+  templateId: 'template_cs2rtrp',
+  adminEmail: 'athaoon@gmail.com,mrteam388@gmail.com'
 };
 // Initialize EmailJS
-if(EMAIL_CFG.publicKey !== 'YOUR_PUBLIC_KEY'){
+if(EMAIL_CFG.publicKey){
   emailjs.init({ publicKey: EMAIL_CFG.publicKey });
 }
 // Called after a new issue is submitted
 window.notifyAdminByEmail = function(params){
-  if(EMAIL_CFG.publicKey==='YOUR_PUBLIC_KEY') return; // not configured yet
+  if(!EMAIL_CFG.publicKey || !EMAIL_CFG.serviceId || !EMAIL_CFG.templateId) return;
   emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
-    to_email:  EMAIL_CFG.adminEmail,
-    issue_type: params.isPrivate ? '🔒 แบบส่วนตัว' : '📋 สาธารณะ',
-    house:      params.house || '(ไม่ระบุ)',
-    category:   params.cat  || '—',
-    title:      params.title || '—',
-    desc:       params.desc  || '(ไม่มีรายละเอียด)',
-    priority:   params.priority==='urgent' ? '🚨 ด่วนมาก' : params.priority==='high' ? '⚠️ ด่วน' : '📌 ปกติ',
-    date:       new Date().toLocaleString('th-TH'),
-    site_url:   'https://pattra8.github.io'
+    email: EMAIL_CFG.adminEmail,
+    reply_to: EMAIL_CFG.adminEmail,
+    issue_type: params.isPrivate ? 'แจ้งปัญหาแบบส่วนตัว' : 'แจ้งปัญหาสาธารณะ',
+    house: params.house || '(ไม่ระบุ)',
+    category: params.cat || '—',
+    title: params.title || '—',
+    description: params.desc || '(ไม่มีรายละเอียด)',
+    priority: params.priority === 'urgent' ? 'ด่วนมาก' : params.priority === 'high' ? 'ด่วน' : 'ปกติ',
+    date: params.date || new Date().toLocaleString('th-TH'),
+    board_url: 'https://pattra8.github.io'
   }).catch(e=>console.warn('EmailJS error:',e));
 };
 </script>
@@ -988,7 +989,7 @@ async function submitReport(){
     });
     pendingFiles=[];
     // Notify admin by email
-    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ประสงค์ออกนาม)':house,cat,title,desc,priority,isPrivate:false});
+    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ประสงค์ออกนาม)':house,cat,title,desc,priority,date:ds(),isPrivate:false});
     const modal=document.getElementById('reportOverlay').querySelector('.modal');
     modal.innerHTML=`
       <h2>✅ แจ้งปัญหาเรียบร้อยแล้ว!</h2>
@@ -1023,7 +1024,7 @@ async function submitPrivate(){
     closePrivateModal();
     toast('🔒 ส่งถึงนิติฯ เรียบร้อยแล้ว — เห็นเฉพาะ Admin ค่ะ');
     // Notify admin by email
-    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ระบุ)':house,cat,title,desc,priority:'normal',isPrivate:true});
+    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ระบุ)':house,cat,title,desc,priority:'normal',date:ds(),isPrivate:true});
   }catch(e){toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่');console.error(e);}
 }
 
