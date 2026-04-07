@@ -657,7 +657,7 @@ const EMAIL_CFG = {
   publicKey:  'nWHoOf02K6bRVpsfV',
   serviceId:  'service_ktvu6dn',
   templateId: 'template_cs2rtrp',
-  adminEmail: 'athaoon@gmail.com,mrteam388@gmail.com'
+  adminEmails: ['athaoon@gmail.com', 'mrteam388@gmail.com']
 };
 // Initialize EmailJS
 if(EMAIL_CFG.publicKey){
@@ -666,9 +666,8 @@ if(EMAIL_CFG.publicKey){
 // Called after a new issue is submitted
 window.notifyAdminByEmail = function(params){
   if(!EMAIL_CFG.publicKey || !EMAIL_CFG.serviceId || !EMAIL_CFG.templateId) return;
-  emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
-    email: EMAIL_CFG.adminEmail,
-    reply_to: EMAIL_CFG.adminEmail,
+  const baseParams = {
+    reply_to: EMAIL_CFG.adminEmails[0],
     issue_type: params.isPrivate ? 'แจ้งปัญหาแบบส่วนตัว' : 'แจ้งปัญหาสาธารณะ',
     house: params.house || '(ไม่ระบุ)',
     category: params.cat || '—',
@@ -677,7 +676,21 @@ window.notifyAdminByEmail = function(params){
     priority: params.priority === 'urgent' ? 'ด่วนมาก' : params.priority === 'high' ? 'ด่วน' : 'ปกติ',
     date: params.date || new Date().toLocaleString('th-TH'),
     board_url: 'https://pattra8.github.io'
-  }).catch(e=>console.warn('EmailJS error:',e));
+  };
+  Promise.allSettled(
+    EMAIL_CFG.adminEmails.map(email =>
+      emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
+        ...baseParams,
+        email
+      })
+    )
+  ).then(results => {
+    results.forEach((result, index) => {
+      if(result.status === 'rejected'){
+        console.warn(`EmailJS error for ${EMAIL_CFG.adminEmails[index]}:`, result.reason);
+      }
+    });
+  });
 };
 </script>
 
