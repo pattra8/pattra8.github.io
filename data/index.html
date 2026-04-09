@@ -3,249 +3,296 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ตรวจสอบข้อมูลลูกบ้าน — หมู่บ้านพัตรา</title>
+  <title>ตรวจสอบข้อมูลลูกบ้าน — หมู่บ้านภัทราวิลล่า 8</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
-      background: #f5f7fa;
-      color: #333;
-    }
-    header {
-      background: #1a3a5c;
-      color: white;
-      padding: 20px 24px;
-      text-align: center;
-    }
-    header h1 { font-size: 1.4rem; font-weight: 700; }
-    header p { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+    body { font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif; background: #f0f4f8; color: #2d3748; }
 
-    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+    header {
+      background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
+      color: white; padding: 28px 24px; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.02em; }
+    header p { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
 
     .notice {
-      background: #e8f4fd;
-      border-left: 4px solid #2196F3;
-      padding: 12px 16px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-      color: #1565c0;
+      background: #ebf5fb; border-left: 4px solid #2196F3;
+      padding: 13px 16px; border-radius: 6px; margin-bottom: 20px;
+      font-size: 0.88rem; color: #1565c0; line-height: 1.6;
     }
 
-    .search-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
+    .search-bar { margin-bottom: 18px; }
     .search-bar input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-family: inherit;
+      width: 100%; padding: 11px 16px; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+      background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: border-color 0.2s;
     }
-    .search-bar input:focus {
-      outline: none;
-      border-color: #1a3a5c;
-    }
+    .search-bar input:focus { outline: none; border-color: #2563a8; box-shadow: 0 0 0 3px rgba(37,99,168,0.1); }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-    thead { background: #1a3a5c; color: white; }
-    th { padding: 12px 14px; text-align: left; font-size: 0.9rem; }
-    td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; vertical-align: middle; }
+    /* Card-based table */
+    .table-wrap { background: white; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #1a3a5c; }
+    th { padding: 13px 16px; text-align: left; font-size: 0.82rem; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+    td { padding: 13px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f9fbff; }
+    tr:hover td { background: #f8fbff; }
 
-    .btn-report {
-      background: #e65100;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-family: inherit;
-      white-space: nowrap;
+    /* Censored field styles */
+    .field-visible { color: #1e293b; }
+    .field-censored {
+      font-family: monospace; color: #94a3b8; letter-spacing: 0.08em;
+      font-size: 0.82rem; background: #f1f5f9; padding: 2px 7px;
+      border-radius: 4px; display: inline-block;
     }
-    .btn-report:hover { background: #bf360c; }
+    .field-label { font-size: 0.7rem; color: #94a3b8; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
 
-    .no-email { color: #aaa; font-style: italic; font-size: 0.82rem; }
+    .no-email { color: #cbd5e1; font-style: italic; font-size: 0.82rem; }
 
-    /* Modal */
+    /* Report button — subtle */
+    .btn-report {
+      background: white; color: #e65100; border: 1.5px solid #e65100;
+      padding: 5px 13px; border-radius: 6px; cursor: pointer;
+      font-size: 0.8rem; font-family: inherit; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-report:hover { background: #e65100; color: white; }
+
+    /* ===== MODAL ===== */
     .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55); z-index: 1000;
+      align-items: center; justify-content: center; padding: 16px;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: white;
-      border-radius: 10px;
-      padding: 28px 24px;
-      width: 100%;
-      max-width: 480px;
-      margin: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      background: white; border-radius: 14px; width: 100%; max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden;
     }
-    .modal h2 { font-size: 1.1rem; color: #1a3a5c; margin-bottom: 6px; }
-    .modal .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 18px; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+
+    /* Modal header */
+    .modal-header {
+      background: #1a3a5c; color: white; padding: 18px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0 4px; }
+    .modal-close:hover { color: white; }
+
+    .modal-body { padding: 20px 22px; }
+
+    /* Current data display box */
+    .current-data-box {
+      background: #fef9c3; border: 1.5px solid #fde047; border-radius: 8px;
+      padding: 14px 16px; margin-bottom: 18px;
+    }
+    .current-data-box .box-title {
+      font-size: 0.75rem; font-weight: 700; color: #92400e;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .data-row { display: flex; gap: 8px; align-items: baseline; margin-bottom: 5px; }
+    .data-row:last-child { margin-bottom: 0; }
+    .data-key { font-size: 0.78rem; color: #78716c; min-width: 90px; }
+    .data-val { font-size: 0.9rem; color: #1c1917; font-weight: 600; }
+    .data-val.empty { color: #a8a29e; font-weight: 400; font-style: italic; font-size: 0.82rem; }
+
+    /* Arrow section */
+    .change-arrow {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 10px 14px;
+    }
+    .arrow-old { color: #dc2626; text-decoration: line-through; font-size: 0.88rem; flex: 1; }
+    .arrow-icon { color: #16a34a; font-size: 1.1rem; flex-shrink: 0; }
+    .arrow-new { color: #16a34a; font-size: 0.88rem; font-weight: 600; flex: 1; font-style: italic; }
+    .arrow-placeholder { color: #86efac; font-style: italic; font-size: 0.82rem; }
+
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 4px; }
     .form-group input, .form-group textarea, .form-group select {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      font-family: inherit;
+      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1;
+      border-radius: 6px; font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s;
     }
-    .form-group input:focus, .form-group textarea:focus {
-      outline: none;
-      border-color: #1a3a5c;
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: #2563a8; box-shadow: 0 0 0 3px rgba(37,99,168,0.1);
     }
-    .form-group textarea { resize: vertical; min-height: 80px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 0 22px 20px; }
     .btn-cancel {
-      background: #eee; color: #555; border: none;
-      padding: 9px 18px; border-radius: 5px; cursor: pointer;
-      font-family: inherit; font-size: 0.9rem;
+      background: #f1f5f9; color: #64748b; border: none;
+      padding: 9px 20px; border-radius: 7px; cursor: pointer; font-family: inherit; font-size: 0.9rem;
     }
+    .btn-cancel:hover { background: #e2e8f0; }
     .btn-submit {
       background: #1a3a5c; color: white; border: none;
-      padding: 9px 18px; border-radius: 5px; cursor: pointer;
-      font-family: inherit; font-size: 0.9rem;
+      padding: 9px 22px; border-radius: 7px; cursor: pointer; font-family: inherit; font-size: 0.9rem;
     }
     .btn-submit:hover { background: #14304d; }
-    .btn-cancel:hover { background: #ddd; }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .success-msg {
-      display: none;
-      background: #e8f5e9;
-      border-left: 4px solid #43a047;
-      padding: 12px 16px;
-      border-radius: 4px;
-      color: #2e7d32;
-      font-size: 0.9rem;
-      margin-top: 14px;
+    .success-screen {
+      display: none; padding: 36px 22px; text-align: center;
     }
+    .success-screen .icon { font-size: 3rem; margin-bottom: 12px; }
+    .success-screen h3 { color: #16a34a; font-size: 1.1rem; margin-bottom: 6px; }
+    .success-screen p { color: #64748b; font-size: 0.88rem; }
 
-    footer {
-      text-align: center;
-      padding: 24px;
-      font-size: 0.8rem;
-      color: #aaa;
-    }
+    footer { text-align: center; padding: 28px 16px; font-size: 0.78rem; color: #94a3b8; }
 
-    @media (max-width: 600px) {
-      th:nth-child(3), td:nth-child(3) { display: none; }
+    @media (max-width: 640px) {
+      .hide-mobile { display: none; }
+      th, td { padding: 10px 10px; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>ตรวจสอบข้อมูลลูกบ้าน</h1>
-  <p>หมู่บ้านพัตรา — กรุณาตรวจสอบชื่อ นามสกุล และอีเมลของท่าน</p>
+  <h1>หมู่บ้านภัทราวิลล่า 8</h1>
+  <p>กรุณาตรวจสอบชื่อ นามสกุล และอีเมลของท่าน</p>
 </header>
 
 <div class="container">
   <div class="notice">
-    📋 ข้อมูลที่แสดงได้แก่ <strong>บ้านเลขที่ · ชื่อ-นามสกุล · อีเมล</strong> หากพบว่าข้อมูลไม่ถูกต้อง กรุณากดปุ่ม <strong>"แจ้งแก้ไข"</strong> เพื่อแจ้งนิติบุคคล
+    📋 ระบบแสดงเฉพาะ <strong>บ้านเลขที่ · ชื่อ-นามสกุล · อีเมล</strong> ข้อมูลอื่นถูกซ่อนไว้เพื่อความเป็นส่วนตัว<br>
+    หากพบว่าข้อมูลไม่ถูกต้อง กรุณากดปุ่ม <strong>แจ้งแก้ไข</strong> นิติบุคคลจะติดต่อกลับโดยเร็ว
   </div>
 
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 ค้นหาด้วยบ้านเลขที่หรือชื่อ..." oninput="filterTable()" />
+    <input type="text" id="searchInput" placeholder="🔍 ค้นหาบ้านเลขที่หรือชื่อ..." oninput="filterTable()" />
   </div>
 
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>บ้านเลขที่</th>
-        <th>ชื่อ-นามสกุล</th>
-        <th>อีเมล</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      <!-- Populated by JS -->
-    </tbody>
-  </table>
-
-  <p id="noResult" style="display:none; text-align:center; padding:20px; color:#888;">ไม่พบข้อมูลที่ค้นหา</p>
+  <div class="table-wrap">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>บ้านเลขที่</th>
+          <th>ชื่อ-นามสกุล</th>
+          <th class="hide-mobile">อีเมล</th>
+          <th class="hide-mobile">ข้อมูลอื่น</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+  <p id="noResult" style="display:none; text-align:center; padding:24px; color:#94a3b8;">ไม่พบข้อมูลที่ค้นหา</p>
 </div>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h2>แจ้งแก้ไขข้อมูล</h2>
-    <p class="subtitle">กรุณากรอกข้อมูลที่ต้องการแก้ไข นิติบุคคลจะติดต่อกลับโดยเร็ว</p>
+    <div class="modal-header">
+      <h2>✏️ แจ้งแก้ไขข้อมูล</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
 
-    <form id="reportForm" action="https://formspree.io/f/xnjoykgp" method="POST">
-      <input type="hidden" name="_subject" value="แจ้งแก้ไขข้อมูลลูกบ้าน" />
-      <input type="hidden" name="house_no" id="f_house_no" />
+    <!-- Form view -->
+    <div id="formView">
+      <div class="modal-body">
+        <!-- Current data box -->
+        <div class="current-data-box">
+          <div class="box-title">⚠️ ข้อมูลปัจจุบันของท่าน</div>
+          <div class="data-row">
+            <span class="data-key">บ้านเลขที่</span>
+            <span class="data-val" id="cur_house">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-key">ชื่อ-นามสกุล</span>
+            <span class="data-val" id="cur_name">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-key">อีเมล</span>
+            <span class="data-val" id="cur_email">—</span>
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label>บ้านเลขที่</label>
-        <input type="text" id="f_house_display" readonly style="background:#f5f5f5;" />
-      </div>
+        <!-- Change preview -->
+        <div class="change-arrow" id="changePreview" style="display:none;">
+          <span class="arrow-old" id="preview_old"></span>
+          <span class="arrow-icon">→</span>
+          <span class="arrow-new" id="preview_new"></span>
+        </div>
 
-      <div class="form-group">
-        <label>ข้อมูลที่ต้องการแก้ไข</label>
-        <select name="field_to_change" required>
-          <option value="">-- เลือกประเภทข้อมูล --</option>
-          <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
-          <option value="อีเมล">อีเมล</option>
-          <option value="อื่นๆ">อื่นๆ</option>
-        </select>
-      </div>
+        <form id="reportForm">
+          <input type="hidden" id="f_house_no" />
+          <input type="hidden" id="f_cur_name" />
+          <input type="hidden" id="f_cur_email" />
 
-      <div class="form-group">
-        <label>ข้อมูลที่ถูกต้อง (ใหม่)</label>
-        <input type="text" name="correct_value" placeholder="กรอกข้อมูลที่ถูกต้อง" required />
-      </div>
+          <div class="form-group">
+            <label>ต้องการแก้ไขข้อมูลใด</label>
+            <select id="f_field" required onchange="updatePreview()">
+              <option value="">-- เลือกประเภทข้อมูล --</option>
+              <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
+              <option value="อีเมล">อีเมล</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
 
-      <div class="form-group">
-        <label>ชื่อผู้แจ้ง (เพื่อให้นิติติดต่อกลับ)</label>
-        <input type="text" name="reporter_name" placeholder="ชื่อของคุณ" required />
-      </div>
+          <div class="form-group">
+            <label>ข้อมูลที่ถูกต้อง (ใหม่)</label>
+            <input type="text" id="f_new_val" placeholder="กรอกข้อมูลที่ถูกต้อง" required oninput="updatePreview()" />
+          </div>
 
-      <div class="form-group">
-        <label>เบอร์โทร / อีเมลสำหรับติดต่อกลับ</label>
-        <input type="text" name="contact_info" placeholder="เบอร์โทรหรืออีเมล" required />
-      </div>
+          <div class="form-group">
+            <label>ชื่อผู้แจ้ง</label>
+            <input type="text" id="f_reporter" placeholder="ชื่อของท่าน" required />
+          </div>
 
-      <div class="form-group">
-        <label>หมายเหตุเพิ่มเติม (ถ้ามี)</label>
-        <textarea name="notes" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
-      </div>
+          <div class="form-group">
+            <label>เบอร์โทร / อีเมลสำหรับติดต่อกลับ</label>
+            <input type="text" id="f_contact" placeholder="เบอร์โทรหรืออีเมล" required />
+          </div>
 
-      <div id="successMsg" class="success-msg">
-        ✅ ส่งคำร้องเรียบร้อยแล้ว นิติบุคคลจะติดต่อกลับโดยเร็ว
+          <div class="form-group">
+            <label>หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+            <textarea id="f_notes" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+          </div>
+        </form>
       </div>
 
       <div class="modal-actions">
         <button type="button" class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-        <button type="submit" class="btn-submit">ส่งแจ้งแก้ไข</button>
+        <button type="button" class="btn-submit" id="submitBtn" onclick="submitForm()">ส่งแจ้งแก้ไข</button>
       </div>
-    </form>
+    </div>
+
+    <!-- Success view -->
+    <div class="success-screen" id="successView">
+      <div class="icon">✅</div>
+      <h3>ส่งคำร้องเรียบร้อยแล้ว</h3>
+      <p>นิติบุคคลได้รับข้อมูลของท่านแล้ว<br>จะติดต่อกลับโดยเร็วที่สุด</p>
+    </div>
   </div>
 </div>
 
-<footer>ข้อมูลนี้เป็นความลับ — ใช้สำหรับตรวจสอบข้อมูลส่วนตัวเท่านั้น</footer>
+<footer>ข้อมูลนี้เป็นความลับ — ใช้สำหรับตรวจสอบข้อมูลส่วนตัวเท่านั้น · หมู่บ้านภัทราวิลล่า 8</footer>
 
 <script>
   let allData = [];
+
+  function censor(str, keepFirst = 1, keepLast = 0) {
+    if (!str || str === 'nan') return null;
+    const s = str.trim();
+    if (s.length <= keepFirst + keepLast + 1) return '*'.repeat(s.length);
+    const stars = '*'.repeat(Math.max(3, s.length - keepFirst - keepLast));
+    return s.slice(0, keepFirst) + stars + (keepLast ? s.slice(-keepLast) : '');
+  }
+
+  function censorEmail(email) {
+    if (!email || email === 'nan') return null;
+    const parts = email.split('@');
+    if (parts.length !== 2) return censor(email, 2);
+    const user = parts[0];
+    const domain = parts[1];
+    const censoredUser = user.length <= 2 ? user[0] + '***' : user.slice(0, 2) + '***';
+    return censoredUser + '@' + domain;
+  }
 
   async function loadData() {
     try {
@@ -254,7 +301,7 @@
       renderTable(allData);
     } catch (e) {
       document.getElementById('tableBody').innerHTML =
-        '<tr><td colspan="4" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+        '<tr><td colspan="5" style="text-align:center;color:#dc2626;padding:24px;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
     }
   }
 
@@ -267,18 +314,41 @@
       return;
     }
     noResult.style.display = 'none';
-    tbody.innerHTML = data.map(r => `
-      <tr>
-        <td><strong>${r.house_no || '—'}</strong></td>
-        <td>${r.name || '—'}</td>
-        <td>${r.email ? `<a href="mailto:${r.email}" style="color:#1565c0;">${r.email}</a>` : '<span class="no-email">ไม่มีอีเมล</span>'}</td>
-        <td><button class="btn-report" onclick="openModal('${escHtml(r.house_no)}')">แจ้งแก้ไข</button></td>
-      </tr>
-    `).join('');
+
+    tbody.innerHTML = data.map(r => {
+      const hasEmail = r.email && r.email !== 'nan' && r.email.trim() !== '';
+      const emailDisplay = hasEmail
+        ? `<span class="field-visible">${r.email}</span>`
+        : `<span class="no-email">ไม่มีอีเมล</span>`;
+
+      const phone = r.phone && r.phone !== 'nan' ? r.phone.trim() : null;
+      const zone  = r.zone  && r.zone  !== 'nan' ? r.zone.trim()  : null;
+      const plot  = r.plot  && r.plot  !== 'nan' ? r.plot.trim()  : null;
+      const deed  = r.deed_no && r.deed_no !== 'nan' ? r.deed_no.trim() : null;
+
+      const phoneCensored = phone ? censor(phone, 3, 2) : null;
+      const zonePlot = (zone || plot) ? `${zone || ''}${plot ? '-'+plot : ''}` : null;
+      const deedCensored = deed ? censor(deed, 2) : null;
+
+      const othersHtml = [
+        phoneCensored ? `<span class="field-label">โทร</span><span class="field-censored">${phoneCensored}</span>` : '',
+        zonePlot      ? `<span class="field-label">โซน/แปลง</span><span class="field-censored">${zonePlot}</span>` : '',
+        deedCensored  ? `<span class="field-label">โฉนด</span><span class="field-censored">${deedCensored}</span>` : '',
+      ].filter(Boolean).join(' &nbsp; ');
+
+      return `
+        <tr>
+          <td><strong class="field-visible">${r.house_no || '—'}</strong></td>
+          <td class="field-visible">${r.name || '—'}</td>
+          <td class="hide-mobile">${emailDisplay}</td>
+          <td class="hide-mobile" style="font-size:0.8rem;">${othersHtml || '<span style="color:#cbd5e1">—</span>'}</td>
+          <td><button class="btn-report" onclick="openModal('${esc(r.house_no)}','${esc(r.name)}','${esc(r.email)}')">แจ้งแก้ไข</button></td>
+        </tr>`;
+    }).join('');
   }
 
-  function escHtml(str) {
-    return (str || '').replace(/'/g, "\\'");
+  function esc(s) {
+    return (s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
   }
 
   function filterTable() {
@@ -291,13 +361,34 @@
     renderTable(filtered);
   }
 
-  function openModal(houseNo) {
+  function openModal(houseNo, name, email) {
+    const cleanEmail = (!email || email === 'nan') ? '' : email;
     document.getElementById('f_house_no').value = houseNo;
-    document.getElementById('f_house_display').value = houseNo;
-    document.getElementById('successMsg').style.display = 'none';
-    document.getElementById('reportForm').reset();
-    document.getElementById('f_house_no').value = houseNo;
-    document.getElementById('f_house_display').value = houseNo;
+    document.getElementById('f_cur_name').value = name || '';
+    document.getElementById('f_cur_email').value = cleanEmail;
+
+    document.getElementById('cur_house').textContent = houseNo || '—';
+    document.getElementById('cur_name').textContent = name || '—';
+
+    const emailEl = document.getElementById('cur_email');
+    if (cleanEmail) {
+      emailEl.textContent = cleanEmail;
+      emailEl.className = 'data-val';
+    } else {
+      emailEl.textContent = 'ไม่มีอีเมล';
+      emailEl.className = 'data-val empty';
+    }
+
+    document.getElementById('f_field').value = '';
+    document.getElementById('f_new_val').value = '';
+    document.getElementById('f_reporter').value = '';
+    document.getElementById('f_contact').value = '';
+    document.getElementById('f_notes').value = '';
+    document.getElementById('changePreview').style.display = 'none';
+
+    document.getElementById('formView').style.display = 'block';
+    document.getElementById('successView').style.display = 'none';
+    document.getElementById('submitBtn').disabled = false;
     document.getElementById('modalOverlay').classList.add('active');
   }
 
@@ -305,32 +396,88 @@
     document.getElementById('modalOverlay').classList.remove('active');
   }
 
-  // Close on overlay click
-  document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-  });
+  function updatePreview() {
+    const field = document.getElementById('f_field').value;
+    const newVal = document.getElementById('f_new_val').value.trim();
+    const previewBox = document.getElementById('changePreview');
 
-  // Handle Formspree AJAX submission
-  document.getElementById('reportForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const form = e.target;
-    const data = new FormData(form);
+    if (!field) { previewBox.style.display = 'none'; return; }
+
+    let oldVal = '';
+    if (field === 'ชื่อ-นามสกุล') oldVal = document.getElementById('f_cur_name').value;
+    else if (field === 'อีเมล') oldVal = document.getElementById('f_cur_email').value;
+    else oldVal = '(ข้อมูลเดิม)';
+
+    document.getElementById('preview_old').textContent = oldVal || '(ว่าง)';
+    const newEl = document.getElementById('preview_new');
+    if (newVal) {
+      newEl.textContent = newVal;
+      newEl.style.fontStyle = 'normal';
+    } else {
+      newEl.textContent = 'กรอกข้อมูลใหม่ด้านล่าง...';
+      newEl.style.fontStyle = 'italic';
+    }
+    previewBox.style.display = 'flex';
+  }
+
+  async function submitForm() {
+    const field    = document.getElementById('f_field').value;
+    const newVal   = document.getElementById('f_new_val').value.trim();
+    const reporter = document.getElementById('f_reporter').value.trim();
+    const contact  = document.getElementById('f_contact').value.trim();
+    const notes    = document.getElementById('f_notes').value.trim();
+    const houseNo  = document.getElementById('f_house_no').value;
+    const curName  = document.getElementById('f_cur_name').value;
+    const curEmail = document.getElementById('f_cur_email').value;
+
+    if (!field || !newVal || !reporter || !contact) {
+      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังส่ง...';
+
+    let oldVal = field === 'ชื่อ-นามสกุล' ? curName : field === 'อีเมล' ? curEmail : '-';
+
+    const formData = new FormData();
+    formData.append('บ้านเลขที่', houseNo);
+    formData.append('ข้อมูลที่ต้องการแก้ไข', field);
+    formData.append('ข้อมูลเดิม', oldVal || '-');
+    formData.append('ข้อมูลใหม่', newVal);
+    formData.append('ชื่อผู้แจ้ง', reporter);
+    formData.append('ติดต่อกลับ', contact);
+    formData.append('หมายเหตุ', notes || '-');
+
     try {
-      const res = await fetch(form.action, {
+      const res = await fetch('https://formspree.io/f/xnjoykgp', {
         method: 'POST',
-        body: data,
+        body: formData,
         headers: { 'Accept': 'application/json' }
       });
+
       if (res.ok) {
-        document.getElementById('successMsg').style.display = 'block';
-        form.querySelectorAll('input:not([readonly]):not([type=hidden]), textarea, select').forEach(el => el.value = '');
-        setTimeout(closeModal, 2500);
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+        setTimeout(closeModal, 3000);
       } else {
+        const errData = await res.json().catch(() => ({}));
+        console.error('Formspree error:', errData);
         alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        btn.disabled = false;
+        btn.textContent = 'ส่งแจ้งแก้ไข';
       }
-    } catch(err) {
-      alert('ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่');
+    } catch (err) {
+      console.error(err);
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+      btn.disabled = false;
+      btn.textContent = 'ส่งแจ้งแก้ไข';
     }
+  }
+
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
   });
 
   loadData();
