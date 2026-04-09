@@ -3,392 +3,838 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ตรวจสอบข้อมูลลูกบ้าน — หมู่บ้านภัทราวิลล่า 8</title>
+  <title>ภัทราวิลล่า 8 — ตรวจสอบข้อมูล</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --navy:   #0f2744;
+      --navy2:  #1a3a5c;
+      --gold:   #c9a84c;
+      --gold2:  #f0d080;
+      --cream:  #fdfaf4;
+      --slate:  #64748b;
+      --border: #e8edf3;
+      --red:    #e53e3e;
+      --green:  #22c55e;
+      --bg:     #f4f7fb;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif; background: #f0f4f8; color: #2d3748; }
 
+    body {
+      font-family: 'IBM Plex Sans Thai', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: #1a202c;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
     header {
-      background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
-      color: white; padding: 28px 24px; text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      background: var(--navy);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
     }
-    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.02em; }
-    header p { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
-
-    .container { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
-
-    .notice {
-      background: #ebf5fb; border-left: 4px solid #2196F3;
-      padding: 13px 16px; border-radius: 6px; margin-bottom: 20px;
-      font-size: 0.88rem; color: #1565c0; line-height: 1.6;
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.08);
+      pointer-events: none;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 20%;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.05);
+      pointer-events: none;
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .header-logo {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(201,168,76,0.3);
+    }
+    .header-text h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .header-text p {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 3px;
+    }
+    .header-badge {
+      margin-left: auto;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold2);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 20px;
     }
 
-    .search-bar { margin-bottom: 18px; }
-    .search-bar input {
-      width: 100%; padding: 11px 16px; border: 1px solid #d1d5db;
-      border-radius: 8px; font-size: 0.95rem; font-family: inherit;
-      background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      transition: border-color 0.2s;
+    /* ── SUBHEADER STRIP ── */
+    .subheader {
+      background: var(--navy2);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .search-bar input:focus { outline: none; border-color: #2563a8; box-shadow: 0 0 0 3px rgba(37,99,168,0.1); }
-
-    /* Card-based table */
-    .table-wrap { background: white; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    thead { background: #1a3a5c; }
-    th { padding: 13px 16px; text-align: left; font-size: 0.82rem; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-    td { padding: 13px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f8fbff; }
-
-    /* Censored field styles */
-    .field-visible { color: #1e293b; }
-    .field-censored {
-      font-family: monospace; color: #94a3b8; letter-spacing: 0.08em;
-      font-size: 0.82rem; background: #f1f5f9; padding: 2px 7px;
-      border-radius: 4px; display: inline-block;
+    .subheader-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .field-label { font-size: 0.7rem; color: #94a3b8; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .subheader-tag {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .subheader-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.5; }
 
-    .no-email { color: #cbd5e1; font-style: italic; font-size: 0.82rem; }
+    /* ── CONTAINER ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
 
-    /* Report button — subtle */
+    /* ── NOTICE CARD ── */
+    .notice-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .notice-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .notice-text { font-size: 0.85rem; color: #4a5568; line-height: 1.65; }
+    .notice-text strong { color: var(--navy); }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px 11px 42px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #1a202c;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--navy2);
+      box-shadow: 0 0 0 3px rgba(26,58,92,0.08);
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: #a0aec0;
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+    .result-count {
+      font-size: 0.78rem;
+      color: var(--slate);
+      white-space: nowrap;
+      background: white;
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+
+    /* ── CARD GRID ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── RESIDENT CARD ── */
+    .res-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .res-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+      transform: translateY(-1px);
+    }
+
+    /* card top bar with house no */
+    .res-card-top {
+      background: var(--navy);
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .house-no-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .house-icon {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+    .house-no {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.02em;
+    }
+    .house-no-label {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* card body */
+    .res-card-body {
+      padding: 14px 16px 12px;
+      flex: 1;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f1f5f9;
+      align-items: center;
+    }
+    .field-row:last-child { border-bottom: none; }
+
+    .field-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .field-icon.name-icon  { background: #eff6ff; }
+    .field-icon.email-icon { background: #f0fdf4; }
+    .field-icon.phone-icon { background: #fff7ed; }
+
+    .field-content { flex: 1; min-width: 0; }
+    .field-label {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 2px;
+    }
+    .field-value {
+      font-size: 0.88rem;
+      color: #1e293b;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .field-value.censored {
+      font-family: 'IBM Plex Mono', monospace;
+      color: #64748b;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+    }
+    .field-value.empty {
+      color: #cbd5e1;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 0.82rem;
+    }
+
+    /* card footer */
+    .res-card-footer {
+      padding: 10px 16px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: flex-end;
+    }
     .btn-report {
-      background: white; color: #e65100; border: 1.5px solid #e65100;
-      padding: 5px 13px; border-radius: 6px; cursor: pointer;
-      font-size: 0.8rem; font-family: inherit; white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1.5px solid #e2e8f0;
+      color: #64748b;
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
       transition: all 0.15s;
     }
-    .btn-report:hover { background: #e65100; color: white; }
+    .btn-report:hover {
+      border-color: var(--navy2);
+      background: var(--navy2);
+      color: white;
+    }
+    .btn-report .btn-icon { font-size: 0.75rem; }
 
-    /* ===== MODAL ===== */
+    .no-result {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      grid-column: 1 / -1;
+    }
+    .no-result .big { font-size: 2.5rem; margin-bottom: 12px; }
+
+    /* ── MODAL ── */
     .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(15,23,42,0.55); z-index: 1000;
-      align-items: center; justify-content: center; padding: 16px;
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(10,18,30,0.65);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(3px);
     }
     .modal-overlay.active { display: flex; }
+
     .modal {
-      background: white; border-radius: 14px; width: 100%; max-width: 500px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden;
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Modal header */
     .modal-header {
-      background: #1a3a5c; color: white; padding: 18px 22px;
-      display: flex; align-items: center; justify-content: space-between;
+      background: var(--navy);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .modal-header h2 { font-size: 1rem; font-weight: 700; }
-    .modal-close { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0 4px; }
-    .modal-close:hover { color: white; }
+    .modal-header-left { display: flex; align-items: center; gap: 10px; }
+    .modal-header-icon {
+      width: 34px; height: 34px;
+      background: rgba(201,168,76,0.2);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem;
+    }
+    .modal-header h2 { font-size: 0.95rem; color: white; font-weight: 600; }
+    .modal-header p  { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .modal-close {
+      background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.6);
+      width: 30px; height: 30px; border-radius: 8px;
+      font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.2); color: white; }
 
     .modal-body { padding: 20px 22px; }
 
-    /* Current data display box */
-    .current-data-box {
-      background: #fef9c3; border: 1.5px solid #fde047; border-radius: 8px;
-      padding: 14px 16px; margin-bottom: 18px;
+    /* current data snapshot */
+    .snapshot-box {
+      background: #fefce8;
+      border: 1.5px solid #fde68a;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
     }
-    .current-data-box .box-title {
-      font-size: 0.75rem; font-weight: 700; color: #92400e;
-      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
-      display: flex; align-items: center; gap: 6px;
+    .snapshot-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #92400e;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    .data-row { display: flex; gap: 8px; align-items: baseline; margin-bottom: 5px; }
-    .data-row:last-child { margin-bottom: 0; }
-    .data-key { font-size: 0.78rem; color: #78716c; min-width: 90px; }
-    .data-val { font-size: 0.9rem; color: #1c1917; font-weight: 600; }
-    .data-val.empty { color: #a8a29e; font-weight: 400; font-style: italic; font-size: 0.82rem; }
+    .snapshot-fields { display: flex; flex-direction: column; gap: 6px; }
+    .snapshot-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .snapshot-key {
+      font-size: 0.73rem;
+      color: #a16207;
+      min-width: 100px;
+      font-weight: 500;
+    }
+    .snapshot-val {
+      font-size: 0.85rem;
+      color: #1c1917;
+      font-weight: 600;
+    }
+    .snapshot-val.empty { color: #a8a29e; font-weight: 400; font-style: italic; }
 
-    /* Arrow section */
-    .change-arrow {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
-      background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 10px 14px;
+    /* change preview arrow box */
+    .change-box {
+      display: none;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      align-items: center;
+      gap: 8px;
     }
-    .arrow-old { color: #dc2626; text-decoration: line-through; font-size: 0.88rem; flex: 1; }
-    .arrow-icon { color: #16a34a; font-size: 1.1rem; flex-shrink: 0; }
-    .arrow-new { color: #16a34a; font-size: 0.88rem; font-weight: 600; flex: 1; font-style: italic; }
-    .arrow-placeholder { color: #86efac; font-style: italic; font-size: 0.82rem; }
+    .change-box.show { display: flex; }
+    .change-old {
+      flex: 1;
+      font-size: 0.82rem;
+      color: #dc2626;
+      text-decoration: line-through;
+      word-break: break-all;
+    }
+    .change-arrow-icon { color: #16a34a; font-size: 1rem; flex-shrink: 0; }
+    .change-new {
+      flex: 1;
+      font-size: 0.85rem;
+      color: #15803d;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .change-new.placeholder { color: #86efac; font-style: italic; font-weight: 400; }
 
-    .form-group { margin-bottom: 13px; }
-    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1;
-      border-radius: 6px; font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s;
+    /* form fields */
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 5px;
+      letter-spacing: 0.03em;
     }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-      outline: none; border-color: #2563a8; box-shadow: 0 0 0 3px rgba(37,99,168,0.1);
+    .form-group label .req { color: #dc2626; margin-left: 2px; }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: #1e293b;
+      background: white;
+      transition: all 0.2s;
     }
-    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--navy2);
+      box-shadow: 0 0 0 3px rgba(26,58,92,0.08);
+    }
+    .form-group textarea { resize: vertical; min-height: 64px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 0 22px 20px; }
+    /* modal footer */
+    .modal-footer {
+      padding: 0 22px 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
     .btn-cancel {
-      background: #f1f5f9; color: #64748b; border: none;
-      padding: 9px 20px; border-radius: 7px; cursor: pointer; font-family: inherit; font-size: 0.9rem;
+      background: #f8fafc; color: #64748b; border: 1.5px solid #e2e8f0;
+      padding: 9px 20px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.15s;
     }
-    .btn-cancel:hover { background: #e2e8f0; }
+    .btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
     .btn-submit {
-      background: #1a3a5c; color: white; border: none;
-      padding: 9px 22px; border-radius: 7px; cursor: pointer; font-family: inherit; font-size: 0.9rem;
+      background: var(--navy); color: white; border: none;
+      padding: 9px 22px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 7px;
+      transition: background 0.15s;
     }
-    .btn-submit:hover { background: #14304d; }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-submit:hover { background: var(--navy2); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
-    .success-screen {
-      display: none; padding: 36px 22px; text-align: center;
+    /* success view */
+    .success-view {
+      display: none;
+      padding: 44px 22px;
+      text-align: center;
     }
-    .success-screen .icon { font-size: 3rem; margin-bottom: 12px; }
-    .success-screen h3 { color: #16a34a; font-size: 1.1rem; margin-bottom: 6px; }
-    .success-screen p { color: #64748b; font-size: 0.88rem; }
+    .success-view .s-icon {
+      width: 64px; height: 64px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 16px;
+      border: 2px solid #86efac;
+    }
+    .success-view h3 { font-size: 1.05rem; color: #15803d; margin-bottom: 6px; }
+    .success-view p { font-size: 0.83rem; color: #64748b; line-height: 1.6; }
 
-    footer { text-align: center; padding: 28px 16px; font-size: 0.78rem; color: #94a3b8; }
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+    footer span { color: #cbd5e1; margin: 0 6px; }
 
-    @media (max-width: 640px) {
-      .hide-mobile { display: none; }
-      th, td { padding: 10px 10px; }
+    /* ── RESPONSIVE ── */
+    @media (max-width: 540px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .header-badge { display: none; }
     }
   </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <h1>หมู่บ้านภัทราวิลล่า 8</h1>
-  <p>กรุณาตรวจสอบชื่อ นามสกุล และอีเมลของท่าน</p>
+  <div class="header-inner">
+    <div class="header-logo">🏘️</div>
+    <div class="header-text">
+      <h1>หมู่บ้านภัทราวิลล่า 8</h1>
+      <p>ระบบตรวจสอบข้อมูลผู้พักอาศัย</p>
+    </div>
+    <div class="header-badge">Resident Portal</div>
+  </div>
 </header>
-
-<div class="container">
-  <div class="notice">
-    📋 ระบบแสดงเฉพาะ <strong>บ้านเลขที่ · ชื่อ-นามสกุล · อีเมล</strong> ข้อมูลอื่นถูกซ่อนไว้เพื่อความเป็นส่วนตัว<br>
-    หากพบว่าข้อมูลไม่ถูกต้อง กรุณากดปุ่ม <strong>แจ้งแก้ไข</strong> นิติบุคคลจะติดต่อกลับโดยเร็ว
+<div class="subheader">
+  <div class="subheader-inner">
+    <span class="subheader-tag">ข้อมูลส่วนตัว</span>
+    <div class="subheader-dot"></div>
+    <span class="subheader-tag">เฉพาะเจ้าของข้อมูลเท่านั้น</span>
+    <div class="subheader-dot"></div>
+    <span class="subheader-tag">Confidential</span>
   </div>
-
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="🔍 ค้นหาบ้านเลขที่หรือชื่อ..." oninput="filterTable()" />
-  </div>
-
-  <div class="table-wrap">
-    <table id="dataTable">
-      <thead>
-        <tr>
-          <th>บ้านเลขที่</th>
-          <th>ชื่อ-นามสกุล</th>
-          <th class="hide-mobile">อีเมล</th>
-          <th class="hide-mobile">ข้อมูลอื่น</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-  <p id="noResult" style="display:none; text-align:center; padding:24px; color:#94a3b8;">ไม่พบข้อมูลที่ค้นหา</p>
 </div>
 
-<!-- Modal -->
+<!-- MAIN -->
+<div class="container">
+  <div class="notice-card">
+    <div class="notice-icon">🔒</div>
+    <div class="notice-text">
+      ระบบนี้แสดงเฉพาะ <strong>บ้านเลขที่ · ชื่อ-นามสกุล · อีเมล · เบอร์โทร (บางส่วน)</strong>
+      ข้อมูลอื่นถูกซ่อนเพื่อความเป็นส่วนตัว
+      หากพบข้อมูลไม่ถูกต้อง กดปุ่ม <strong>แจ้งแก้ไข</strong> เพื่อส่งคำร้องถึงนิติบุคคล
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="ค้นหาบ้านเลขที่ หรือ ชื่อ-นามสกุล..." oninput="filterCards()" />
+    </div>
+    <div class="result-count" id="resultCount">— รายการ</div>
+  </div>
+
+  <div class="card-grid" id="cardGrid">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="modal-header">
-      <h2>✏️ แจ้งแก้ไขข้อมูล</h2>
+      <div class="modal-header-left">
+        <div class="modal-header-icon">✏️</div>
+        <div>
+          <h2>แจ้งแก้ไขข้อมูล</h2>
+          <p>บ้านเลขที่ <span id="mHouseNo">—</span></p>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
 
-    <!-- Form view -->
+    <!-- FORM VIEW -->
     <div id="formView">
       <div class="modal-body">
-        <!-- Current data box -->
-        <div class="current-data-box">
-          <div class="box-title">⚠️ ข้อมูลปัจจุบันของท่าน</div>
-          <div class="data-row">
-            <span class="data-key">บ้านเลขที่</span>
-            <span class="data-val" id="cur_house">—</span>
-          </div>
-          <div class="data-row">
-            <span class="data-key">ชื่อ-นามสกุล</span>
-            <span class="data-val" id="cur_name">—</span>
-          </div>
-          <div class="data-row">
-            <span class="data-key">อีเมล</span>
-            <span class="data-val" id="cur_email">—</span>
+
+        <!-- Current data snapshot -->
+        <div class="snapshot-box">
+          <div class="snapshot-title">📋 ข้อมูลปัจจุบัน</div>
+          <div class="snapshot-fields">
+            <div class="snapshot-field">
+              <span class="snapshot-key">👤 ชื่อ-นามสกุล</span>
+              <span class="snapshot-val" id="snap_name">—</span>
+            </div>
+            <div class="snapshot-field">
+              <span class="snapshot-key">✉️ อีเมล</span>
+              <span class="snapshot-val" id="snap_email">—</span>
+            </div>
+            <div class="snapshot-field">
+              <span class="snapshot-key">📞 เบอร์โทร</span>
+              <span class="snapshot-val" id="snap_phone">—</span>
+            </div>
           </div>
         </div>
 
         <!-- Change preview -->
-        <div class="change-arrow" id="changePreview" style="display:none;">
-          <span class="arrow-old" id="preview_old"></span>
-          <span class="arrow-icon">→</span>
-          <span class="arrow-new" id="preview_new"></span>
+        <div class="change-box" id="changeBox">
+          <span class="change-old" id="changeOld">—</span>
+          <span class="change-arrow-icon">→</span>
+          <span class="change-new" id="changeNew">—</span>
         </div>
 
-        <form id="reportForm">
-          <input type="hidden" id="f_house_no" />
-          <input type="hidden" id="f_cur_name" />
-          <input type="hidden" id="f_cur_email" />
+        <!-- Form -->
+        <div class="form-group">
+          <label>ต้องการแก้ไข <span class="req">*</span></label>
+          <select id="f_field" required onchange="onFieldChange()">
+            <option value="">— เลือกประเภทข้อมูล —</option>
+            <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
+            <option value="อีเมล">อีเมล</option>
+            <option value="เบอร์โทร">เบอร์โทร</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+        </div>
 
-          <div class="form-group">
-            <label>ต้องการแก้ไขข้อมูลใด</label>
-            <select id="f_field" required onchange="updatePreview()">
-              <option value="">-- เลือกประเภทข้อมูล --</option>
-              <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
-              <option value="อีเมล">อีเมล</option>
-              <option value="อื่นๆ">อื่นๆ</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label>ข้อมูลที่ถูกต้อง (ใหม่) <span class="req">*</span></label>
+          <input type="text" id="f_new_val" placeholder="กรอกข้อมูลที่ถูกต้อง" oninput="onNewValInput()" />
+        </div>
 
+        <div class="form-row">
           <div class="form-group">
-            <label>ข้อมูลที่ถูกต้อง (ใหม่)</label>
-            <input type="text" id="f_new_val" placeholder="กรอกข้อมูลที่ถูกต้อง" required oninput="updatePreview()" />
+            <label>ชื่อผู้แจ้ง <span class="req">*</span></label>
+            <input type="text" id="f_reporter" placeholder="ชื่อของท่าน" />
           </div>
+          <div class="form-group">
+            <label>ติดต่อกลับ <span class="req">*</span></label>
+            <input type="text" id="f_contact" placeholder="เบอร์ / อีเมล" />
+          </div>
+        </div>
 
-          <div class="form-group">
-            <label>ชื่อผู้แจ้ง</label>
-            <input type="text" id="f_reporter" placeholder="ชื่อของท่าน" required />
-          </div>
+        <div class="form-group">
+          <label>หมายเหตุเพิ่มเติม</label>
+          <textarea id="f_notes" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
+        </div>
 
-          <div class="form-group">
-            <label>เบอร์โทร / อีเมลสำหรับติดต่อกลับ</label>
-            <input type="text" id="f_contact" placeholder="เบอร์โทรหรืออีเมล" required />
-          </div>
-
-          <div class="form-group">
-            <label>หมายเหตุเพิ่มเติม (ถ้ามี)</label>
-            <textarea id="f_notes" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
-          </div>
-        </form>
       </div>
-
-      <div class="modal-actions">
-        <button type="button" class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-        <button type="button" class="btn-submit" id="submitBtn" onclick="submitForm()">ส่งแจ้งแก้ไข</button>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+          <span>📨</span> ส่งคำร้อง
+        </button>
       </div>
     </div>
 
-    <!-- Success view -->
-    <div class="success-screen" id="successView">
-      <div class="icon">✅</div>
-      <h3>ส่งคำร้องเรียบร้อยแล้ว</h3>
-      <p>นิติบุคคลได้รับข้อมูลของท่านแล้ว<br>จะติดต่อกลับโดยเร็วที่สุด</p>
+    <!-- SUCCESS VIEW -->
+    <div class="success-view" id="successView">
+      <div class="s-icon">✅</div>
+      <h3>ส่งคำร้องเรียบร้อยแล้ว!</h3>
+      <p>นิติบุคคลได้รับคำร้องของท่านแล้ว<br>จะติดต่อกลับโดยเร็วที่สุด</p>
     </div>
+
   </div>
 </div>
 
-<footer>ข้อมูลนี้เป็นความลับ — ใช้สำหรับตรวจสอบข้อมูลส่วนตัวเท่านั้น · หมู่บ้านภัทราวิลล่า 8</footer>
+<footer>
+  หมู่บ้านภัทราวิลล่า 8 <span>·</span> ข้อมูลส่วนบุคคลเป็นความลับ <span>·</span> Resident Portal
+</footer>
 
 <script>
   let allData = [];
+  let currentRecord = {};
 
-  function censor(str, keepFirst = 1, keepLast = 0) {
-    if (!str || str === 'nan') return null;
-    const s = str.trim();
-    if (s.length <= keepFirst + keepLast + 1) return '*'.repeat(s.length);
-    const stars = '*'.repeat(Math.max(3, s.length - keepFirst - keepLast));
-    return s.slice(0, keepFirst) + stars + (keepLast ? s.slice(-keepLast) : '');
+  /* ── censor helpers ── */
+  function censorPhone(p) {
+    if (!p || p === 'nan') return null;
+    const s = p.replace(/\D/g, '');          // digits only
+    if (s.length < 6) return p;
+    // show first 3, last 2, mask middle  e.g. 089-***-9464 → 089-***-64
+    return s.slice(0,3) + '-***-' + s.slice(-2);
   }
 
-  function censorEmail(email) {
-    if (!email || email === 'nan') return null;
-    const parts = email.split('@');
-    if (parts.length !== 2) return censor(email, 2);
-    const user = parts[0];
-    const domain = parts[1];
-    const censoredUser = user.length <= 2 ? user[0] + '***' : user.slice(0, 2) + '***';
-    return censoredUser + '@' + domain;
+  function censorEmail(e) {
+    if (!e || e === 'nan' || !e.includes('@')) return null;
+    const [u, d] = e.split('@');
+    const masked = u.length <= 2 ? u[0] + '**' : u.slice(0,2) + '***';
+    return masked + '@' + d;
   }
 
+  /* ── load data ── */
   async function loadData() {
     try {
       const res = await fetch('data.json');
       allData = await res.json();
-      renderTable(allData);
-    } catch (e) {
-      document.getElementById('tableBody').innerHTML =
-        '<tr><td colspan="5" style="text-align:center;color:#dc2626;padding:24px;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+      renderCards(allData);
+    } catch(e) {
+      document.getElementById('cardGrid').innerHTML =
+        '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลได้</div>';
     }
   }
 
-  function renderTable(data) {
-    const tbody = document.getElementById('tableBody');
-    const noResult = document.getElementById('noResult');
-    if (data.length === 0) {
-      tbody.innerHTML = '';
-      noResult.style.display = 'block';
+  /* ── render cards ── */
+  function renderCards(data) {
+    const grid = document.getElementById('cardGrid');
+    const count = document.getElementById('resultCount');
+    count.textContent = `${data.length} รายการ`;
+
+    if (!data.length) {
+      grid.innerHTML = '<div class="no-result"><div class="big">🔍</div>ไม่พบข้อมูลที่ค้นหา</div>';
       return;
     }
-    noResult.style.display = 'none';
 
-    tbody.innerHTML = data.map(r => {
-      const hasEmail = r.email && r.email !== 'nan' && r.email.trim() !== '';
+    grid.innerHTML = data.map(r => {
+      const hasEmail = r.email && r.email !== 'nan' && r.email.trim();
+      const hasPhone = r.phone && r.phone !== 'nan' && r.phone.trim();
+
       const emailDisplay = hasEmail
-        ? `<span class="field-visible">${r.email}</span>`
-        : `<span class="no-email">ไม่มีอีเมล</span>`;
+        ? `<span class="field-value">${r.email}</span>`
+        : `<span class="field-value empty">ไม่มีข้อมูล</span>`;
 
-      const phone = r.phone && r.phone !== 'nan' ? r.phone.trim() : null;
-      const zone  = r.zone  && r.zone  !== 'nan' ? r.zone.trim()  : null;
-      const plot  = r.plot  && r.plot  !== 'nan' ? r.plot.trim()  : null;
-      const deed  = r.deed_no && r.deed_no !== 'nan' ? r.deed_no.trim() : null;
-
-      const phoneCensored = phone ? censor(phone, 3, 2) : null;
-      const zonePlot = (zone || plot) ? `${zone || ''}${plot ? '-'+plot : ''}` : null;
-      const deedCensored = deed ? censor(deed, 2) : null;
-
-      const othersHtml = [
-        phoneCensored ? `<span class="field-label">โทร</span><span class="field-censored">${phoneCensored}</span>` : '',
-        zonePlot      ? `<span class="field-label">โซน/แปลง</span><span class="field-censored">${zonePlot}</span>` : '',
-        deedCensored  ? `<span class="field-label">โฉนด</span><span class="field-censored">${deedCensored}</span>` : '',
-      ].filter(Boolean).join(' &nbsp; ');
+      const phoneMasked = hasPhone ? censorPhone(r.phone) : null;
+      const phoneDisplay = phoneMasked
+        ? `<span class="field-value censored">${phoneMasked}</span>`
+        : `<span class="field-value empty">ไม่มีข้อมูล</span>`;
 
       return `
-        <tr>
-          <td><strong class="field-visible">${r.house_no || '—'}</strong></td>
-          <td class="field-visible">${r.name || '—'}</td>
-          <td class="hide-mobile">${emailDisplay}</td>
-          <td class="hide-mobile" style="font-size:0.8rem;">${othersHtml || '<span style="color:#cbd5e1">—</span>'}</td>
-          <td><button class="btn-report" onclick="openModal('${esc(r.house_no)}','${esc(r.name)}','${esc(r.email)}')">แจ้งแก้ไข</button></td>
-        </tr>`;
+      <div class="res-card">
+        <div class="res-card-top">
+          <div class="house-no-badge">
+            <span class="house-icon">🏠</span>
+            <div>
+              <div class="house-no-label">House No.</div>
+              <div class="house-no">${r.house_no || '—'}</div>
+            </div>
+          </div>
+        </div>
+        <div class="res-card-body">
+          <div class="field-row">
+            <div class="field-icon name-icon">👤</div>
+            <div class="field-content">
+              <div class="field-label">Name</div>
+              <div class="field-value">${r.name || '<span style="color:#cbd5e1;font-style:italic;font-weight:400">ไม่มีข้อมูล</span>'}</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon email-icon">✉️</div>
+            <div class="field-content">
+              <div class="field-label">Email</div>
+              ${emailDisplay}
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon phone-icon">📞</div>
+            <div class="field-content">
+              <div class="field-label">Phone</div>
+              ${phoneDisplay}
+            </div>
+          </div>
+        </div>
+        <div class="res-card-footer">
+          <button class="btn-report" onclick="openModal('${esc(r.house_no)}','${esc(r.name)}','${esc(r.email)}','${esc(r.phone)}')">
+            <span class="btn-icon">✏️</span> แจ้งแก้ไข
+          </button>
+        </div>
+      </div>`;
     }).join('');
   }
 
   function esc(s) {
-    return (s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
+    return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
   }
 
-  function filterTable() {
+  /* ── search / filter ── */
+  function filterCards() {
     const q = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!q) { renderTable(allData); return; }
-    const filtered = allData.filter(r =>
-      (r.house_no || '').toLowerCase().includes(q) ||
-      (r.name || '').toLowerCase().includes(q)
-    );
-    renderTable(filtered);
+    if (!q) { renderCards(allData); return; }
+    renderCards(allData.filter(r =>
+      (r.house_no||'').toLowerCase().includes(q) ||
+      (r.name||'').toLowerCase().includes(q)
+    ));
   }
 
-  function openModal(houseNo, name, email) {
-    const cleanEmail = (!email || email === 'nan') ? '' : email;
-    document.getElementById('f_house_no').value = houseNo;
-    document.getElementById('f_cur_name').value = name || '';
-    document.getElementById('f_cur_email').value = cleanEmail;
+  /* ── modal ── */
+  function openModal(houseNo, name, email, phone) {
+    const cleanEmail = (!email || email==='nan') ? '' : email;
+    const cleanPhone = (!phone || phone==='nan') ? '' : phone;
+    const cleanName  = (!name  || name ==='nan') ? '' : name;
 
-    document.getElementById('cur_house').textContent = houseNo || '—';
-    document.getElementById('cur_name').textContent = name || '—';
+    currentRecord = { houseNo, name: cleanName, email: cleanEmail, phone: cleanPhone };
 
-    const emailEl = document.getElementById('cur_email');
-    if (cleanEmail) {
-      emailEl.textContent = cleanEmail;
-      emailEl.className = 'data-val';
-    } else {
-      emailEl.textContent = 'ไม่มีอีเมล';
-      emailEl.className = 'data-val empty';
-    }
+    document.getElementById('mHouseNo').textContent = houseNo;
 
-    document.getElementById('f_field').value = '';
-    document.getElementById('f_new_val').value = '';
-    document.getElementById('f_reporter').value = '';
-    document.getElementById('f_contact').value = '';
-    document.getElementById('f_notes').value = '';
-    document.getElementById('changePreview').style.display = 'none';
+    const setSnap = (id, val) => {
+      const el = document.getElementById(id);
+      if (val) { el.textContent = val; el.className = 'snapshot-val'; }
+      else { el.textContent = 'ไม่มีข้อมูล'; el.className = 'snapshot-val empty'; }
+    };
+    setSnap('snap_name',  cleanName);
+    setSnap('snap_email', cleanEmail);
+    setSnap('snap_phone', cleanPhone || '—');
 
+    ['f_field','f_new_val','f_reporter','f_contact','f_notes'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+    });
+    document.getElementById('changeBox').className = 'change-box';
     document.getElementById('formView').style.display = 'block';
     document.getElementById('successView').style.display = 'none';
     document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').innerHTML = '<span>📨</span> ส่งคำร้อง';
     document.getElementById('modalOverlay').classList.add('active');
   }
 
@@ -396,88 +842,88 @@
     document.getElementById('modalOverlay').classList.remove('active');
   }
 
-  function updatePreview() {
-    const field = document.getElementById('f_field').value;
-    const newVal = document.getElementById('f_new_val').value.trim();
-    const previewBox = document.getElementById('changePreview');
+  function onFieldChange() { updatePreview(); }
+  function onNewValInput() { updatePreview(); }
 
-    if (!field) { previewBox.style.display = 'none'; return; }
+  function updatePreview() {
+    const field  = document.getElementById('f_field').value;
+    const newVal = document.getElementById('f_new_val').value.trim();
+    const box    = document.getElementById('changeBox');
+
+    if (!field) { box.className = 'change-box'; return; }
 
     let oldVal = '';
-    if (field === 'ชื่อ-นามสกุล') oldVal = document.getElementById('f_cur_name').value;
-    else if (field === 'อีเมล') oldVal = document.getElementById('f_cur_email').value;
+    if (field === 'ชื่อ-นามสกุล') oldVal = currentRecord.name  || '(ว่าง)';
+    else if (field === 'อีเมล')   oldVal = currentRecord.email || '(ว่าง)';
+    else if (field === 'เบอร์โทร') oldVal = currentRecord.phone || '(ว่าง)';
     else oldVal = '(ข้อมูลเดิม)';
 
-    document.getElementById('preview_old').textContent = oldVal || '(ว่าง)';
-    const newEl = document.getElementById('preview_new');
+    document.getElementById('changeOld').textContent = oldVal;
+    const newEl = document.getElementById('changeNew');
     if (newVal) {
       newEl.textContent = newVal;
-      newEl.style.fontStyle = 'normal';
+      newEl.className = 'change-new';
     } else {
-      newEl.textContent = 'กรอกข้อมูลใหม่ด้านล่าง...';
-      newEl.style.fontStyle = 'italic';
+      newEl.textContent = 'พิมพ์ข้อมูลใหม่ด้านล่าง...';
+      newEl.className = 'change-new placeholder';
     }
-    previewBox.style.display = 'flex';
+    box.className = 'change-box show';
   }
 
+  /* ── submit ── */
   async function submitForm() {
     const field    = document.getElementById('f_field').value;
     const newVal   = document.getElementById('f_new_val').value.trim();
     const reporter = document.getElementById('f_reporter').value.trim();
     const contact  = document.getElementById('f_contact').value.trim();
     const notes    = document.getElementById('f_notes').value.trim();
-    const houseNo  = document.getElementById('f_house_no').value;
-    const curName  = document.getElementById('f_cur_name').value;
-    const curEmail = document.getElementById('f_cur_email').value;
 
     if (!field || !newVal || !reporter || !contact) {
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      alert('กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
       return;
     }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.textContent = 'กำลังส่ง...';
+    btn.innerHTML = '<span>⏳</span> กำลังส่ง...';
 
-    let oldVal = field === 'ชื่อ-นามสกุล' ? curName : field === 'อีเมล' ? curEmail : '-';
+    let oldVal = '';
+    if (field === 'ชื่อ-นามสกุล') oldVal = currentRecord.name;
+    else if (field === 'อีเมล')   oldVal = currentRecord.email;
+    else if (field === 'เบอร์โทร') oldVal = currentRecord.phone;
 
-    const formData = new FormData();
-    formData.append('บ้านเลขที่', houseNo);
-    formData.append('ข้อมูลที่ต้องการแก้ไข', field);
-    formData.append('ข้อมูลเดิม', oldVal || '-');
-    formData.append('ข้อมูลใหม่', newVal);
-    formData.append('ชื่อผู้แจ้ง', reporter);
-    formData.append('ติดต่อกลับ', contact);
-    formData.append('หมายเหตุ', notes || '-');
+    const fd = new FormData();
+    fd.append('บ้านเลขที่',           currentRecord.houseNo);
+    fd.append('ข้อมูลที่แก้ไข',       field);
+    fd.append('ข้อมูลเดิม',           oldVal || '-');
+    fd.append('ข้อมูลใหม่ที่ถูกต้อง', newVal);
+    fd.append('ชื่อผู้แจ้ง',          reporter);
+    fd.append('ช่องทางติดต่อกลับ',    contact);
+    fd.append('หมายเหตุ',             notes || '-');
 
     try {
       const res = await fetch('https://formspree.io/f/xnjoykgp', {
-        method: 'POST',
-        body: formData,
+        method: 'POST', body: fd,
         headers: { 'Accept': 'application/json' }
       });
-
       if (res.ok) {
         document.getElementById('formView').style.display = 'none';
         document.getElementById('successView').style.display = 'block';
-        setTimeout(closeModal, 3000);
+        setTimeout(closeModal, 3200);
       } else {
-        const errData = await res.json().catch(() => ({}));
-        console.error('Formspree error:', errData);
-        alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+        alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
         btn.disabled = false;
-        btn.textContent = 'ส่งแจ้งแก้ไข';
+        btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
       }
-    } catch (err) {
-      console.error(err);
-      alert('ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+    } catch(err) {
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต');
       btn.disabled = false;
-      btn.textContent = 'ส่งแจ้งแก้ไข';
+      btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
     }
   }
 
-  document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
 
   loadData();
