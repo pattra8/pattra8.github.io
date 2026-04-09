@@ -572,15 +572,6 @@
 
 <!-- MAIN -->
 <div class="container">
-  <div class="notice-card">
-    <div class="notice-icon">🔒</div>
-    <div class="notice-text">
-      ระบบนี้แสดงเฉพาะ <strong>บ้านเลขที่ · ชื่อ-นามสกุล · อีเมล · เบอร์โทร (บางส่วน)</strong>
-      ข้อมูลอื่นถูกซ่อนเพื่อความเป็นส่วนตัว
-      หากพบข้อมูลไม่ถูกต้อง กดปุ่ม <strong>แจ้งแก้ไข</strong> เพื่อส่งคำร้องถึงนิติบุคคล
-    </div>
-  </div>
-
   <div class="search-wrap">
     <div class="search-box">
       <span class="search-icon">🔍</span>
@@ -893,6 +884,8 @@
     else if (field === 'เบอร์โทร') oldVal = currentRecord.phone;
 
     const fd = new FormData();
+    fd.append('_subject',              '[ภัทราวิลล่า 8] แจ้งแก้ไขข้อมูล บ้านเลขที่ ' + currentRecord.houseNo);
+    fd.append('_replyto',              contact.includes('@') ? contact : 'noreply@pattra8.com');
     fd.append('บ้านเลขที่',           currentRecord.houseNo);
     fd.append('ข้อมูลที่แก้ไข',       field);
     fd.append('ข้อมูลเดิม',           oldVal || '-');
@@ -906,17 +899,22 @@
         method: 'POST', body: fd,
         headers: { 'Accept': 'application/json' }
       });
-      if (res.ok) {
+
+      let resData = {};
+      try { resData = await res.json(); } catch(e) {}
+
+      if (res.ok && resData.ok) {
         document.getElementById('formView').style.display = 'none';
         document.getElementById('successView').style.display = 'block';
         setTimeout(closeModal, 3200);
       } else {
-        alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+        const errMsg = resData.error || resData.errors?.[0]?.message || 'Unknown error';
+        alert('เกิดข้อผิดพลาด: ' + errMsg + '\n\nกรุณาลองใหม่อีกครั้ง');
         btn.disabled = false;
         btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
       }
     } catch(err) {
-      alert('ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต');
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต\n(' + err.message + ')');
       btn.disabled = false;
       btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
     }
