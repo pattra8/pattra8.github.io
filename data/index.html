@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ตรวจสอบข้อมูลลูกบ้าน — หมู่บ้านพัตรา</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+    header {
+      background: #1a3a5c;
+      color: white;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+    .notice {
+      background: #e8f4fd;
+      border-left: 4px solid #2196F3;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #1565c0;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: #1a3a5c;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    thead { background: #1a3a5c; color: white; }
+    th { padding: 12px 14px; text-align: left; font-size: 0.9rem; }
+    td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fbff; }
+
+    .btn-report {
+      background: #e65100;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-report:hover { background: #bf360c; }
+
+    .no-email { color: #aaa; font-style: italic; font-size: 0.82rem; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 10px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      margin: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal h2 { font-size: 1.1rem; color: #1a3a5c; margin-bottom: 6px; }
+    .modal .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 18px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 4px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #1a3a5c;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+    .btn-cancel {
+      background: #eee; color: #555; border: none;
+      padding: 9px 18px; border-radius: 5px; cursor: pointer;
+      font-family: inherit; font-size: 0.9rem;
+    }
+    .btn-submit {
+      background: #1a3a5c; color: white; border: none;
+      padding: 9px 18px; border-radius: 5px; cursor: pointer;
+      font-family: inherit; font-size: 0.9rem;
+    }
+    .btn-submit:hover { background: #14304d; }
+    .btn-cancel:hover { background: #ddd; }
+
+    .success-msg {
+      display: none;
+      background: #e8f5e9;
+      border-left: 4px solid #43a047;
+      padding: 12px 16px;
+      border-radius: 4px;
+      color: #2e7d32;
+      font-size: 0.9rem;
+      margin-top: 14px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    @media (max-width: 600px) {
+      th:nth-child(3), td:nth-child(3) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ตรวจสอบข้อมูลลูกบ้าน</h1>
+  <p>หมู่บ้านพัตรา — กรุณาตรวจสอบชื่อ นามสกุล และอีเมลของท่าน</p>
+</header>
+
+<div class="container">
+  <div class="notice">
+    📋 ข้อมูลที่แสดงได้แก่ <strong>บ้านเลขที่ · ชื่อ-นามสกุล · อีเมล</strong> หากพบว่าข้อมูลไม่ถูกต้อง กรุณากดปุ่ม <strong>"แจ้งแก้ไข"</strong> เพื่อแจ้งนิติบุคคล
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 ค้นหาด้วยบ้านเลขที่หรือชื่อ..." oninput="filterTable()" />
+  </div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>บ้านเลขที่</th>
+        <th>ชื่อ-นามสกุล</th>
+        <th>อีเมล</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Populated by JS -->
+    </tbody>
+  </table>
+
+  <p id="noResult" style="display:none; text-align:center; padding:20px; color:#888;">ไม่พบข้อมูลที่ค้นหา</p>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>แจ้งแก้ไขข้อมูล</h2>
+    <p class="subtitle">กรุณากรอกข้อมูลที่ต้องการแก้ไข นิติบุคคลจะติดต่อกลับโดยเร็ว</p>
+
+    <form id="reportForm" action="https://formspree.io/f/xnjoykgp" method="POST">
+      <input type="hidden" name="_subject" value="แจ้งแก้ไขข้อมูลลูกบ้าน" />
+      <input type="hidden" name="house_no" id="f_house_no" />
+
+      <div class="form-group">
+        <label>บ้านเลขที่</label>
+        <input type="text" id="f_house_display" readonly style="background:#f5f5f5;" />
+      </div>
+
+      <div class="form-group">
+        <label>ข้อมูลที่ต้องการแก้ไข</label>
+        <select name="field_to_change" required>
+          <option value="">-- เลือกประเภทข้อมูล --</option>
+          <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
+          <option value="อีเมล">อีเมล</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>ข้อมูลที่ถูกต้อง (ใหม่)</label>
+        <input type="text" name="correct_value" placeholder="กรอกข้อมูลที่ถูกต้อง" required />
+      </div>
+
+      <div class="form-group">
+        <label>ชื่อผู้แจ้ง (เพื่อให้นิติติดต่อกลับ)</label>
+        <input type="text" name="reporter_name" placeholder="ชื่อของคุณ" required />
+      </div>
+
+      <div class="form-group">
+        <label>เบอร์โทร / อีเมลสำหรับติดต่อกลับ</label>
+        <input type="text" name="contact_info" placeholder="เบอร์โทรหรืออีเมล" required />
+      </div>
+
+      <div class="form-group">
+        <label>หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+        <textarea name="notes" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+      </div>
+
+      <div id="successMsg" class="success-msg">
+        ✅ ส่งคำร้องเรียบร้อยแล้ว นิติบุคคลจะติดต่อกลับโดยเร็ว
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+        <button type="submit" class="btn-submit">ส่งแจ้งแก้ไข</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer>ข้อมูลนี้เป็นความลับ — ใช้สำหรับตรวจสอบข้อมูลส่วนตัวเท่านั้น</footer>
+
+<script>
+  let allData = [];
+
+  async function loadData() {
+    try {
+      const res = await fetch('data.json');
+      allData = await res.json();
+      renderTable(allData);
+    } catch (e) {
+      document.getElementById('tableBody').innerHTML =
+        '<tr><td colspan="4" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+    }
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    const noResult = document.getElementById('noResult');
+    if (data.length === 0) {
+      tbody.innerHTML = '';
+      noResult.style.display = 'block';
+      return;
+    }
+    noResult.style.display = 'none';
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td><strong>${r.house_no || '—'}</strong></td>
+        <td>${r.name || '—'}</td>
+        <td>${r.email ? `<a href="mailto:${r.email}" style="color:#1565c0;">${r.email}</a>` : '<span class="no-email">ไม่มีอีเมล</span>'}</td>
+        <td><button class="btn-report" onclick="openModal('${escHtml(r.house_no)}')">แจ้งแก้ไข</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function escHtml(str) {
+    return (str || '').replace(/'/g, "\\'");
+  }
+
+  function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!q) { renderTable(allData); return; }
+    const filtered = allData.filter(r =>
+      (r.house_no || '').toLowerCase().includes(q) ||
+      (r.name || '').toLowerCase().includes(q)
+    );
+    renderTable(filtered);
+  }
+
+  function openModal(houseNo) {
+    document.getElementById('f_house_no').value = houseNo;
+    document.getElementById('f_house_display').value = houseNo;
+    document.getElementById('successMsg').style.display = 'none';
+    document.getElementById('reportForm').reset();
+    document.getElementById('f_house_no').value = houseNo;
+    document.getElementById('f_house_display').value = houseNo;
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+
+  // Close on overlay click
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Handle Formspree AJAX submission
+  document.getElementById('reportForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        document.getElementById('successMsg').style.display = 'block';
+        form.querySelectorAll('input:not([readonly]):not([type=hidden]), textarea, select').forEach(el => el.value = '');
+        setTimeout(closeModal, 2500);
+      } else {
+        alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      }
+    } catch(err) {
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่');
+    }
+  });
+
+  loadData();
+</script>
+</body>
+</html>

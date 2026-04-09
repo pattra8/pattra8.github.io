@@ -1,0 +1,614 @@
+[
+  {
+    "house_no": "38/1",
+    "name": "คุณดาริน จงมั่นเกษมสุข",
+    "email": "darlin.chungmankasemsuk@gmail.com",
+    "phone": "089-119-9464",
+    "deed_no": "14837.0",
+    "zone": "A1",
+    "plot": "68.0"
+  },
+  {
+    "house_no": "38/2",
+    "name": "คุณทิพยวรรณ วงศ์ทองศรี",
+    "email": "",
+    "phone": "081-561-6654",
+    "deed_no": "14836.0",
+    "zone": "A2",
+    "plot": "67.0"
+  },
+  {
+    "house_no": "38/3",
+    "name": "คุณญาณภัค",
+    "email": "",
+    "phone": "086-976-9338",
+    "deed_no": "14835.0",
+    "zone": "A3",
+    "plot": "66.0"
+  },
+  {
+    "house_no": "38/4",
+    "name": "คุณพจนีย์ มิ่งสำแดง",
+    "email": "Potjanee6555@gmail.com",
+    "phone": "084-334-6655",
+    "deed_no": "14834.0",
+    "zone": "A4",
+    "plot": "65.0"
+  },
+  {
+    "house_no": "38/5",
+    "name": "คุณญาดา ตันธีรพัฒน์",
+    "email": "ytanteerapat@gmail.com",
+    "phone": "087-592-6969",
+    "deed_no": "14833.0",
+    "zone": "A5",
+    "plot": "64.0"
+  },
+  {
+    "house_no": "38/6",
+    "name": "คุณวรวุฒิ เตชะเกษมบัณฑิตย์",
+    "email": "ytanteerapat@gmail.com",
+    "phone": "081-375-9905",
+    "deed_no": "14832.0",
+    "zone": "A6",
+    "plot": "63.0"
+  },
+  {
+    "house_no": "38/7",
+    "name": "คุณทศพร มากมณี",
+    "email": "",
+    "phone": "081-409-0154",
+    "deed_no": "14831.0",
+    "zone": "E1",
+    "plot": "62.0"
+  },
+  {
+    "house_no": "38/8",
+    "name": "คุณหทัยรัตน์ ตั้งทัศนา",
+    "email": "viewjai13@gmail.com",
+    "phone": "081-488-4611",
+    "deed_no": "14830.0",
+    "zone": "E2",
+    "plot": "61.0"
+  },
+  {
+    "house_no": "38/9",
+    "name": "คุณดวงกมล พานิชชาติ",
+    "email": "totter2071@gmail.com",
+    "phone": "086-824-9442",
+    "deed_no": "14829.0",
+    "zone": "E3",
+    "plot": ""
+  },
+  {
+    "house_no": "38/10",
+    "name": "คุณอวยพร บูรรุ่งโรจน์",
+    "email": "",
+    "phone": "081-311-2118",
+    "deed_no": "14828.0",
+    "zone": "E4",
+    "plot": "59.0"
+  },
+  {
+    "house_no": "38/11",
+    "name": "คุณมีพร กองทอง",
+    "email": "meeporn.ko@gmail.com",
+    "phone": "081-835-5977",
+    "deed_no": "14827.0",
+    "zone": "E5",
+    "plot": "58.0"
+  },
+  {
+    "house_no": "38/12",
+    "name": "ปรีดา ศุภกุล",
+    "email": "sup.preeda@gmail.com",
+    "phone": "095-446-6156",
+    "deed_no": "14826.0",
+    "zone": "E6",
+    "plot": "57.0"
+  },
+  {
+    "house_no": "38/13",
+    "name": "คุณปิยะพงศ์ วรรณภาพรรณ์",
+    "email": "piyapong.dp.viega@gmail.com",
+    "phone": "086-300-2996",
+    "deed_no": "14825.0",
+    "zone": "E7",
+    "plot": "56.0"
+  },
+  {
+    "house_no": "38/14",
+    "name": "บริษัท บริหารสินทรัพย์กรุงเทพพาณิชย์ จำกัด (มหาชน)บริษัท บริหารสินทรัพย์กรุงเทพพาณิชย์ จำกัด (มหาชน) บริษัท บริหารสินทรัพย์กรุงเทพพาณิชย์ จำกัด (มหาชน)",
+    "email": "",
+    "phone": "086-819-9487",
+    "deed_no": "14824.0",
+    "zone": "E8",
+    "plot": "55.0"
+  },
+  {
+    "house_no": "38/15",
+    "name": "คุณภัทร์ฐิรญา อิทธิวิบูลย์ถาวร",
+    "email": "quickyseries@hotmail.com",
+    "phone": "085-694-6556",
+    "deed_no": "14823.0",
+    "zone": "E9",
+    "plot": "54.0"
+  },
+  {
+    "house_no": "38/16",
+    "name": "คุณธันยพัฒน์ เตชสิริวิภาส",
+    "email": "gnot29@gmail.com",
+    "phone": "088-875-1400",
+    "deed_no": "14822.0",
+    "zone": "E10",
+    "plot": "53.0"
+  },
+  {
+    "house_no": "38/17",
+    "name": "คุณณัฐพล",
+    "email": "miss_miemy@hotmail.com",
+    "phone": "080-818-4842",
+    "deed_no": "14821.0",
+    "zone": "E11",
+    "plot": "52.0"
+  },
+  {
+    "house_no": "38/18",
+    "name": "คุณสาริสา ทองกิตติกุล",
+    "email": "tonyhayeast@gmail.com",
+    "phone": "095-156-4159",
+    "deed_no": "14820.0",
+    "zone": "E12",
+    "plot": "51.0"
+  },
+  {
+    "house_no": "38/19",
+    "name": "คุณเยี่ยม เศรษฐบุตร",
+    "email": "superyiam@hotmail.com",
+    "phone": "085-489-5519",
+    "deed_no": "14819.0",
+    "zone": "E13",
+    "plot": "50.0"
+  },
+  {
+    "house_no": "38/20",
+    "name": "คุณณัฐพล แสนวิเศษ",
+    "email": "",
+    "phone": "080-920-2200",
+    "deed_no": "14818.0",
+    "zone": "E14",
+    "plot": "49.0"
+  },
+  {
+    "house_no": "38/21",
+    "name": "คุณมนต์ศักดิ์ สู่ศิลวัฒน์ ",
+    "email": "susinwathappy789@gmail.com",
+    "phone": "089-774-7579",
+    "deed_no": "14817.0",
+    "zone": "E15",
+    "plot": "48.0"
+  },
+  {
+    "house_no": "38/22",
+    "name": "คุณเดชา ไพโรจน์จิรกาล",
+    "email": "",
+    "phone": "081-209-3313",
+    "deed_no": "14816.0",
+    "zone": "E16",
+    "plot": "47.0"
+  },
+  {
+    "house_no": "38/23",
+    "name": "คุณป้อมเพชร ไพเมือง",
+    "email": "",
+    "phone": "082-489-2002",
+    "deed_no": "14815.0",
+    "zone": "E17",
+    "plot": "46.0"
+  },
+  {
+    "house_no": "38/24",
+    "name": "คุณนันทวัฒน์ พรหมะวีระ",
+    "email": "iamredfruit@gmail.com",
+    "phone": "081-867-7904",
+    "deed_no": "14814.0",
+    "zone": "E18",
+    "plot": "45.0"
+  },
+  {
+    "house_no": "38/25",
+    "name": "คุณเวชยันต์ พรวิศณุกุล",
+    "email": "vetchayan@yahoo.com",
+    "phone": "086-379-9815",
+    "deed_no": "14813.0",
+    "zone": "E19",
+    "plot": "44.0"
+  },
+  {
+    "house_no": "38/26",
+    "name": "คุณพัฒนศักดิ์ วรสายัณห์",
+    "email": "mukem@hotmail.com",
+    "phone": "081-753-1676",
+    "deed_no": "14812.0",
+    "zone": "E20",
+    "plot": "43.0"
+  },
+  {
+    "house_no": "38/27",
+    "name": "คุณวริษฐ์ อภิสิทธิ์เสรีกุล",
+    "email": "",
+    "phone": "085-944-4789",
+    "deed_no": "14811.0",
+    "zone": "D15",
+    "plot": "42.0"
+  },
+  {
+    "house_no": "38/28",
+    "name": "คุณจิดาภา พาณิชย์กุล",
+    "email": "jidaaaa@yahoo.com",
+    "phone": "081-569-6732",
+    "deed_no": "14810.0",
+    "zone": "D14",
+    "plot": "41.0"
+  },
+  {
+    "house_no": "38/29",
+    "name": "คุณอำนวย วิจักรสกุล",
+    "email": "nuay1236931@gmail.com",
+    "phone": "",
+    "deed_no": "14809.0",
+    "zone": "D13",
+    "plot": "40.0"
+  },
+  {
+    "house_no": "38/30",
+    "name": "คุณภานุวัฒน์ พึ่งพาพงศ์",
+    "email": "",
+    "phone": "081-372-4448",
+    "deed_no": "14808.0",
+    "zone": "D12",
+    "plot": "39.0"
+  },
+  {
+    "house_no": "38/31",
+    "name": "คุณบุศรินทร์ ภัทรไกร",
+    "email": "bussarin9923@gmail.com",
+    "phone": "081-534-2924",
+    "deed_no": "14807.0",
+    "zone": "D11",
+    "plot": "38.0"
+  },
+  {
+    "house_no": "38/32",
+    "name": "คุณเพียงพธู ทองพนัง",
+    "email": "otnap_p@hotmail.com",
+    "phone": "089-894-6339",
+    "deed_no": "14806.0",
+    "zone": "D10",
+    "plot": "37.0"
+  },
+  {
+    "house_no": "38/33",
+    "name": "คุณชินทัต  ทวิชาติวรบุตร",
+    "email": "gnot29@gmail.com",
+    "phone": "081-641-6575",
+    "deed_no": "14805.0",
+    "zone": "D9",
+    "plot": "36.0"
+  },
+  {
+    "house_no": "38/34",
+    "name": "คุณปาริตา แก้วจุนันท์",
+    "email": "paritaforkids@gmail.com",
+    "phone": "081-444-9476",
+    "deed_no": "14804.0",
+    "zone": "D8",
+    "plot": "35.0"
+  },
+  {
+    "house_no": "38/35",
+    "name": "คุณชวดล ตรีสุวรรณ",
+    "email": "iamchawadol@gmail.com",
+    "phone": "090-909-3835",
+    "deed_no": "14803.0",
+    "zone": "D7",
+    "plot": "34.0"
+  },
+  {
+    "house_no": "38/36",
+    "name": "คุณพฤกษ์ ทองพนัง",
+    "email": "pruekth@gmail.com",
+    "phone": "085-419-4659",
+    "deed_no": "14802.0",
+    "zone": "D6",
+    "plot": "33.0"
+  },
+  {
+    "house_no": "38/37",
+    "name": "คุณศศิธร คำสม",
+    "email": "jjmallmp@gmail.com",
+    "phone": "089-676-7443",
+    "deed_no": "14801.0",
+    "zone": "D5",
+    "plot": "32.0"
+  },
+  {
+    "house_no": "38/38",
+    "name": "คุณวาทิต สกุลแพทย์",
+    "email": "watitsakulpat@gmail.com",
+    "phone": "081-868-8252",
+    "deed_no": "14800.0",
+    "zone": "D4",
+    "plot": "31.0"
+  },
+  {
+    "house_no": "38/39",
+    "name": "คุณพันธุ์วดี พินทุโยธิน",
+    "email": "\tpanwadeep7@hotmail.com",
+    "phone": "081-371-3215",
+    "deed_no": "14799.0",
+    "zone": "D3",
+    "plot": "30.0"
+  },
+  {
+    "house_no": "38/40",
+    "name": "คุณกุญชญา สร้อยนาค",
+    "email": "",
+    "phone": "089-837-7549",
+    "deed_no": "14798.0",
+    "zone": "D2",
+    "plot": "29.0"
+  },
+  {
+    "house_no": "38/41",
+    "name": "คุณทินกร ภูวิศักดิวงศ์",
+    "email": "",
+    "phone": "082-334-5906",
+    "deed_no": "14797.0",
+    "zone": "D1",
+    "plot": "28.0"
+  },
+  {
+    "house_no": "38/42",
+    "name": "คุณปิยะ ศิรประชา",
+    "email": "",
+    "phone": "089-494-6464",
+    "deed_no": "14796.0",
+    "zone": "C1",
+    "plot": "27.0"
+  },
+  {
+    "house_no": "38/43",
+    "name": "คุณกุลณิชา",
+    "email": "",
+    "phone": "081-825-8859",
+    "deed_no": "14795.0",
+    "zone": "C2",
+    "plot": "26.0"
+  },
+  {
+    "house_no": "38/44",
+    "name": "คุณรณกาจ อักษรกุล",
+    "email": "\tronnakart.aksornkul@gmail.com",
+    "phone": "081-947-9255",
+    "deed_no": "14794.0",
+    "zone": "C3",
+    "plot": "25.0"
+  },
+  {
+    "house_no": "38/45",
+    "name": "คุณทองชนก สงกะมิลินท",
+    "email": "thongchanok@gmail.com",
+    "phone": "090-965-4256",
+    "deed_no": "14793.0",
+    "zone": "C4",
+    "plot": "24.0"
+  },
+  {
+    "house_no": "38/46",
+    "name": "คุณพลพจน์ นิลสงเคราะห์",
+    "email": "aok_wong@hotmail.com ",
+    "phone": "088-099-4055",
+    "deed_no": "14792.0",
+    "zone": "C5",
+    "plot": "23.0"
+  },
+  {
+    "house_no": "38/47",
+    "name": "คุณรพีพร เถื่อนศิริ",
+    "email": "nhoy.rapeeporn@gmail.com",
+    "phone": "081-842-5284",
+    "deed_no": "14791.0",
+    "zone": "C6",
+    "plot": "22.0"
+  },
+  {
+    "house_no": "38/48",
+    "name": "คุณกษิดิศ ลักษณ์ไชยาพร",
+    "email": "",
+    "phone": "081-668-4525",
+    "deed_no": "14790.0",
+    "zone": "C7",
+    "plot": "21.0"
+  },
+  {
+    "house_no": "38/49",
+    "name": "คุณศรรักษ์ ฉายารักษ์",
+    "email": "sornrak@hotmail.com",
+    "phone": "088-809-4652",
+    "deed_no": "14789.0",
+    "zone": "C8",
+    "plot": "20.0"
+  },
+  {
+    "house_no": "38/50",
+    "name": "คุณปรารถา สาหร่าย",
+    "email": "psprattanas@gmail.com",
+    "phone": "081-497-9418",
+    "deed_no": "14788.0",
+    "zone": "C9",
+    "plot": "19.0"
+  },
+  {
+    "house_no": "38/51",
+    "name": "คุณญาณิชศา การุญวิชญ์",
+    "email": "",
+    "phone": "085-777-5544",
+    "deed_no": "14787.0",
+    "zone": "C10",
+    "plot": "18.0"
+  },
+  {
+    "house_no": "38/52",
+    "name": "คุณอรรถกฤต สิริวัฒนาพาท  ",
+    "email": "athaoon@hotmail.com",
+    "phone": "081-345-1511",
+    "deed_no": "14786.0",
+    "zone": "C11",
+    "plot": "17.0"
+  },
+  {
+    "house_no": "38/53",
+    "name": "คุณเดชา มงคล",
+    "email": "decha.mongkhol@gmail.com",
+    "phone": "081-819-1212",
+    "deed_no": "14785.0",
+    "zone": "C12",
+    "plot": "16.0"
+  },
+  {
+    "house_no": "38/54",
+    "name": "คุณทิศวรรณ วงศ์ถิรวุฒิ",
+    "email": "wtisawan@gmail.com",
+    "phone": "086-397-7139",
+    "deed_no": "14784.0",
+    "zone": "C13",
+    "plot": "15.0"
+  },
+  {
+    "house_no": "38/55",
+    "name": "คุณศิริพร วัชรินทร์กาญจน์",
+    "email": "nuinutt@hotmail.com",
+    "phone": "084-975-2345",
+    "deed_no": "14783.0",
+    "zone": "C14",
+    "plot": "14.0"
+  },
+  {
+    "house_no": "38/56",
+    "name": "คุณชุลีกร ตฤณธีรบูลย์",
+    "email": "",
+    "phone": "083-093-1989",
+    "deed_no": "14782.0",
+    "zone": "C15",
+    "plot": "13.0"
+  },
+  {
+    "house_no": "38/57",
+    "name": "คุณปฐมกุล ภัทราลังการ",
+    "email": "surface_sss@hotmail.com",
+    "phone": "",
+    "deed_no": "",
+    "zone": "",
+    "plot": ""
+  },
+  {
+    "house_no": "38/58",
+    "name": "คุณสุปรานี พงษ์จินดาวานิช",
+    "email": "being.cooler@gmail.com",
+    "phone": "089-205-4067",
+    "deed_no": "14780.0",
+    "zone": "B11",
+    "plot": "11.0"
+  },
+  {
+    "house_no": "38/59",
+    "name": "คุณพรหมพจน์ พัวพันประสงศ์",
+    "email": "giftgift.kv@gmail.com",
+    "phone": "065-091-5583",
+    "deed_no": "14779.0",
+    "zone": "B10",
+    "plot": "10.0"
+  },
+  {
+    "house_no": "38/60",
+    "name": "คุณณัฐชนา ประจุมาศ",
+    "email": "",
+    "phone": "089-144-8577",
+    "deed_no": "14778.0",
+    "zone": "B9",
+    "plot": "9.0"
+  },
+  {
+    "house_no": "38/61",
+    "name": "คุณชนกพล สกลผดุงเขตต์",
+    "email": "chanokpol@hotmail.com",
+    "phone": "081-682-2687",
+    "deed_no": "14777.0",
+    "zone": "B8",
+    "plot": "8.0"
+  },
+  {
+    "house_no": "38/62",
+    "name": "คุณวสันต์ ลีลานันทกิจ",
+    "email": "",
+    "phone": "084-533-8877",
+    "deed_no": "14776.0",
+    "zone": "B7",
+    "plot": "7.0"
+  },
+  {
+    "house_no": "38/63",
+    "name": "คุณอลิศรา ฮัววานิช",
+    "email": "nantaphol@gmail.com",
+    "phone": "081-843-0242",
+    "deed_no": "14775.0",
+    "zone": "B6",
+    "plot": "6.0"
+  },
+  {
+    "house_no": "38/64",
+    "name": "คุณพงษ์พิพัฒน์",
+    "email": "thailocaldesign@gmail.com",
+    "phone": "081-707-0305",
+    "deed_no": "14774.0",
+    "zone": "B5",
+    "plot": "5.0"
+  },
+  {
+    "house_no": "38/65",
+    "name": "คุณพลเศรษฐ์",
+    "email": "phonlasets@gmail.com",
+    "phone": "086-869-3354",
+    "deed_no": "14773.0",
+    "zone": "B4",
+    "plot": "4.0"
+  },
+  {
+    "house_no": "38/66",
+    "name": "คุณรัชนีวรรณ ขำมั่น",
+    "email": "rachaneewan.kathy@gmail.com",
+    "phone": "081-567-9545",
+    "deed_no": "14772.0",
+    "zone": "B3",
+    "plot": "3.0"
+  },
+  {
+    "house_no": "38/67",
+    "name": "คุณพสิษฐ์ ศิรเบญจพิศุทธิ์",
+    "email": "kpongthep@hotmail.com",
+    "phone": "081-027-2005",
+    "deed_no": "14771.0",
+    "zone": "B2",
+    "plot": "2.0"
+  },
+  {
+    "house_no": "38/68",
+    "name": "คุณวันทนีย์",
+    "email": "awayday2508@hotmail.com",
+    "phone": "081-814-3975",
+    "deed_no": "14770.0",
+    "zone": "B1",
+    "plot": "1.0"
+  }
+]

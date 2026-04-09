@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — ข้อมูลลูกบ้าน</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    /* Login Screen */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: white;
+      padding: 40px 36px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .login-box h1 { font-size: 1.3rem; color: #1a3a5c; margin-bottom: 8px; }
+    .login-box p { font-size: 0.87rem; color: #888; margin-bottom: 24px; }
+    .login-box input[type=password] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      margin-bottom: 14px;
+      text-align: center;
+      letter-spacing: 4px;
+    }
+    .login-box input[type=password]:focus { outline: none; border-color: #1a3a5c; }
+    .login-box button {
+      width: 100%;
+      background: #1a3a5c;
+      color: white;
+      border: none;
+      padding: 11px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .login-box button:hover { background: #14304d; }
+    .login-error { color: #c00; font-size: 0.85rem; margin-top: 10px; display: none; }
+
+    /* Admin Dashboard */
+    .dashboard { display: none; }
+    header {
+      background: #1a3a5c;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 1.2rem; }
+    header .badge {
+      background: #e65100;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .logout-btn {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .toolbar {
+      max-width: 1200px;
+      margin: 20px auto 12px;
+      padding: 0 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .toolbar input {
+      flex: 1;
+      padding: 9px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .toolbar input:focus { outline: none; border-color: #1a3a5c; }
+    .record-count { font-size: 0.85rem; color: #888; white-space: nowrap; }
+
+    .table-wrap {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      min-width: 820px;
+    }
+    thead { background: #1a3a5c; color: white; }
+    th { padding: 11px 13px; text-align: left; font-size: 0.85rem; white-space: nowrap; }
+    td { padding: 10px 13px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fbff; }
+    .no-val { color: #ccc; font-style: italic; }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.78rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div style="font-size:2.5rem; margin-bottom:12px;">🔐</div>
+    <h1>Admin Access</h1>
+    <p>กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
+    <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" autofocus />
+    <button onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="login-error" id="loginError">รหัสผ่านไม่ถูกต้อง</div>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div class="dashboard" id="dashboard">
+  <header>
+    <div>
+      <h1>Admin — ข้อมูลลูกบ้าน</h1>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge">ADMIN</span>
+      <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
+    <span class="record-count" id="recordCount"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="adminTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>บ้านเลขที่</th>
+          <th>ชื่อ-นามสกุล</th>
+          <th>อีเมล</th>
+          <th>โทรศัพท์</th>
+          <th>โซน</th>
+          <th>แปลงที่</th>
+          <th>เลขที่โฉนด</th>
+        </tr>
+      </thead>
+      <tbody id="adminBody"></tbody>
+    </table>
+  </div>
+
+  <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
+</div>
+
+<script>
+  // ======================================================
+  // ⚠️  CHANGE THIS PASSWORD before uploading to GitHub!
+  // ======================================================
+  const ADMIN_PASSWORD = 'pattra2024admin';
+  // ======================================================
+
+  let allData = [];
+
+  function doLogin() {
+    const pw = document.getElementById('pwInput').value;
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      loadAdminData();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+    }
+  }
+
+  function doLogout() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    allData = [];
+    document.getElementById('adminBody').innerHTML = '';
+  }
+
+  async function loadAdminData() {
+    try {
+      const res = await fetch('data.json');
+      allData = await res.json();
+      renderAdmin(allData);
+    } catch (e) {
+      document.getElementById('adminBody').innerHTML =
+        '<tr><td colspan="8" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลด data.json</td></tr>';
+    }
+  }
+
+  function renderAdmin(data) {
+    const tbody = document.getElementById('adminBody');
+    document.getElementById('recordCount').textContent = `${data.length} รายการ`;
+    tbody.innerHTML = data.map((r, i) => `
+      <tr>
+        <td style="color:#aaa">${i + 1}</td>
+        <td><strong>${r.house_no || '<span class="no-val">—</span>'}</strong></td>
+        <td>${r.name || '<span class="no-val">—</span>'}</td>
+        <td>${r.email || '<span class="no-val">—</span>'}</td>
+        <td>${r.phone || '<span class="no-val">—</span>'}</td>
+        <td>${r.zone || '<span class="no-val">—</span>'}</td>
+        <td>${r.plot || '<span class="no-val">—</span>'}</td>
+        <td>${r.deed_no || '<span class="no-val">—</span>'}</td>
+      </tr>
+    `).join('');
+  }
+
+  function filterAdmin() {
+    const q = document.getElementById('adminSearch').value.toLowerCase().trim();
+    if (!q) { renderAdmin(allData); return; }
+    const filtered = allData.filter(r =>
+      Object.values(r).some(v => (v || '').toLowerCase().includes(q))
+    );
+    renderAdmin(filtered);
+  }
+</script>
+</body>
+</html>
