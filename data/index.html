@@ -361,8 +361,9 @@
       z-index: 1000;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 20px 16px;
       backdrop-filter: blur(3px);
+      overflow-y: auto;
     }
     .modal-overlay.active { display: flex; }
 
@@ -371,9 +372,12 @@
       border-radius: 16px;
       width: 100%;
       max-width: 500px;
+      max-height: calc(100vh - 40px);
       overflow: hidden;
       box-shadow: 0 24px 80px rgba(0,0,0,0.25);
       animation: slideUp 0.2s ease;
+      display: flex;
+      flex-direction: column;
     }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -405,7 +409,16 @@
     }
     .modal-close:hover { background: rgba(255,255,255,0.2); color: white; }
 
-    .modal-body { padding: 20px 22px; }
+    #formView {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      min-height: 0;
+    }
 
     /* current data snapshot */
     .snapshot-box {
@@ -529,10 +542,13 @@
 
     /* modal footer */
     .modal-footer {
-      padding: 0 22px 20px;
+      padding: 14px 22px 20px;
       display: flex;
       gap: 10px;
       justify-content: flex-end;
+      background: white;
+      border-top: 1px solid #eef2f7;
+      flex-shrink: 0;
     }
     .btn-cancel {
       background: #f8fafc; color: #64748b; border: 1.5px solid #e2e8f0;
@@ -585,6 +601,18 @@
       .card-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
       .header-badge { display: none; }
+      .modal-overlay {
+        align-items: flex-start;
+        padding: 10px;
+      }
+      .modal {
+        max-height: calc(100vh - 20px);
+        border-radius: 14px;
+      }
+      .modal-body { padding: 16px; }
+      .modal-footer {
+        padding: 12px 16px 16px;
+      }
     }
   </style>
 </head>
@@ -900,7 +928,7 @@
     document.getElementById('changeBox').className = 'change-box';
     document.getElementById('singleValueGroup').style.display = 'block';
     document.getElementById('multiFields').className = 'multi-fields';
-    document.getElementById('formView').style.display = 'block';
+    document.getElementById('formView').style.display = 'flex';
     document.getElementById('successView').style.display = 'none';
     document.getElementById('submitBtn').disabled = false;
     document.getElementById('submitBtn').innerHTML = '<span>📨</span> ส่งคำร้อง';
