@@ -86,6 +86,18 @@
       font-size: 0.85rem;
     }
     .logout-btn:hover { background: rgba(255,255,255,0.25); }
+    .main-page-btn {
+      background: #f5d169;
+      color: #12304d;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .main-page-btn:hover { background: #f7dd8c; }
 
     .toolbar {
       max-width: 1200px;
@@ -317,6 +329,7 @@
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
       <span class="badge">ADMIN</span>
+      <button class="main-page-btn" onclick="window.location.href='./'">หน้าข้อมูลหลัก</button>
       <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
     </div>
   </header>
