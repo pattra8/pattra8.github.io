@@ -393,7 +393,6 @@
   // ⚠️  CHANGE THIS PASSWORD before uploading to GitHub!
   // ======================================================
   const ADMIN_PASSWORD = 'PATTRADATA';
-  const SHEET_SYNC_URL = 'https://script.google.com/macros/s/AKfycbwI_7ZXE0Zj-4YstLhslQJjIlQDXrsRTYu79FNrUkL2BUN9ro58yOJUh1us7xQw7Hu2/exec';
   const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
   // ======================================================
@@ -532,42 +531,9 @@
       target[key] = document.getElementById(`edit_${key}`).value.trim();
     });
 
-    syncRecordToSheet(target);
     filterAdmin();
     closeEditModal();
-  }
-
-  function syncRecordToSheet(record) {
-    const iframeName = `sheetSync_${Date.now()}`;
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = SHEET_SYNC_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'payload';
-    input.value = JSON.stringify({
-      password: ADMIN_PASSWORD,
-      record,
-    });
-
-    iframe.addEventListener('load', () => {
-      setTimeout(() => {
-        iframe.remove();
-        form.remove();
-      }, 1000);
-    });
-
-    form.appendChild(input);
-    document.body.appendChild(iframe);
-    document.body.appendChild(form);
-    form.submit();
+    alert('บันทึกในหน้า admin แล้ว\n\nหมายเหตุ: Google Sheet sync ยังไม่เปิดใช้งาน เพราะ Apps Script ยังบังคับ Google login');
   }
 
   function downloadData() {
