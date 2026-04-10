@@ -393,6 +393,7 @@
   // ⚠️  CHANGE THIS PASSWORD before uploading to GitHub!
   // ======================================================
   const ADMIN_PASSWORD = 'PATTRADATA';
+  const SHEET_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentSheetSync';
   const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
   // ======================================================
@@ -523,7 +524,7 @@
     editingIndex = -1;
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (editingIndex < 0) return;
 
     const target = allData[editingIndex];
@@ -533,7 +534,30 @@
 
     filterAdmin();
     closeEditModal();
-    alert('บันทึกในหน้า admin แล้ว\n\nหมายเหตุ: Google Sheet sync ยังไม่เปิดใช้งาน เพราะ Apps Script ยังบังคับ Google login');
+
+    try {
+      await syncRecordToSheet(target);
+      alert('บันทึกสำเร็จแล้ว\n\nข้อมูลใน Google Sheet ถูกอัปเดตแล้ว');
+    } catch (error) {
+      alert('บันทึกในหน้า admin แล้ว แต่ sync Google Sheet ไม่สำเร็จ\n\n' + error.message);
+    }
+  }
+
+  async function syncRecordToSheet(record) {
+    const response = await fetch(SHEET_SYNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password: ADMIN_PASSWORD,
+        record,
+      }),
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+    return result;
   }
 
   function downloadData() {
