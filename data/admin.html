@@ -396,18 +396,42 @@
   // ⚠️  CHANGE THIS PASSWORD before uploading to GitHub!
   // ======================================================
   const ADMIN_PASSWORD = 'PATTRADATA';
+  const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
+  const ADMIN_SESSION_DAYS = 7;
   // ======================================================
 
   let allData = [];
   let filteredData = [];
   let editingIndex = -1;
 
+  function getSessionExpiry() {
+    return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0);
+  }
+
+  function hasValidSession() {
+    return Date.now() < getSessionExpiry();
+  }
+
+  function startAdminSession() {
+    const expiresAt = Date.now() + (ADMIN_SESSION_DAYS * 24 * 60 * 60 * 1000);
+    localStorage.setItem(ADMIN_SESSION_KEY, String(expiresAt));
+  }
+
+  function clearAdminSession() {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+  }
+
+  function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadAdminData();
+  }
+
   function doLogin() {
     const pw = document.getElementById('pwInput').value;
     if (pw === ADMIN_PASSWORD) {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      loadAdminData();
+      startAdminSession();
+      showDashboard();
     } else {
       document.getElementById('loginError').style.display = 'block';
       document.getElementById('pwInput').value = '';
@@ -416,6 +440,7 @@
   }
 
   function doLogout() {
+    clearAdminSession();
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('pwInput').value = '';
@@ -528,6 +553,10 @@
   document.getElementById('editModal').addEventListener('click', (event) => {
     if (event.target === document.getElementById('editModal')) closeEditModal();
   });
+
+  if (hasValidSession()) {
+    showDashboard();
+  }
 </script>
 </body>
 </html>
