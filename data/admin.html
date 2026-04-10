@@ -429,6 +429,8 @@
   let allData = [];
   let filteredData = [];
   let editingIndex = -1;
+  let originalEditRecord = null;
+  const EDIT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
 
   function getSessionExpiry() {
     return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0);
@@ -547,7 +549,9 @@
     if (!record) return;
 
     document.getElementById('editHouseLabel').textContent = `บ้านเลขที่ ${record.house_no || '—'}`;
-    ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'].forEach(key => {
+    originalEditRecord = {};
+    EDIT_FIELDS.forEach(key => {
+      originalEditRecord[key] = record[key] || '';
       document.getElementById(`edit_${key}`).value = record[key] || '';
     });
     document.getElementById('editModal').classList.add('show');
@@ -556,15 +560,27 @@
   function closeEditModal() {
     document.getElementById('editModal').classList.remove('show');
     editingIndex = -1;
+    originalEditRecord = null;
+  }
+
+  function getEditFormRecord() {
+    return EDIT_FIELDS.reduce((record, key) => {
+      record[key] = document.getElementById(`edit_${key}`).value.trim();
+      return record;
+    }, {});
+  }
+
+  function hasEditChanges() {
+    if (!originalEditRecord) return false;
+    const currentRecord = getEditFormRecord();
+    return EDIT_FIELDS.some(key => (currentRecord[key] || '') !== (originalEditRecord[key] || ''));
   }
 
   async function saveEdit() {
     if (editingIndex < 0) return;
 
     const target = allData[editingIndex];
-    ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'].forEach(key => {
-      target[key] = document.getElementById(`edit_${key}`).value.trim();
-    });
+    Object.assign(target, getEditFormRecord());
 
     filterAdmin();
     closeEditModal();
@@ -599,7 +615,8 @@
   }
 
   document.getElementById('editModal').addEventListener('click', (event) => {
-    if (event.target === document.getElementById('editModal')) closeEditModal();
+    if (event.target !== document.getElementById('editModal')) return;
+    if (!hasEditChanges()) closeEditModal();
   });
 
   if (hasValidSession()) {
