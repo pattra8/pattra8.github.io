@@ -709,6 +709,7 @@
 </footer>
 
 <script>
+  const DATA_API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentSheetSync';
   let allData = [];
   let currentRecord = {};
 
@@ -731,12 +732,18 @@
   /* ── load data ── */
   async function loadData() {
     try {
-      const res = await fetch('data.json');
-      allData = await res.json();
+      const res = await fetch(`${DATA_API_URL}?t=${Date.now()}`, {
+        cache: 'no-store',
+      });
+      const result = await res.json();
+      if (!res.ok || !result.ok) {
+        throw new Error(result.error || `HTTP ${res.status}`);
+      }
+      allData = result.data;
       renderCards(allData);
     } catch(e) {
       document.getElementById('cardGrid').innerHTML =
-        '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลได้</div>';
+        '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลจาก Google Sheet ได้</div>';
     }
   }
 

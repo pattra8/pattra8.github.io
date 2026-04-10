@@ -323,9 +323,9 @@
 
   <div class="toolbar">
     <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
-    <button class="toolbar-btn" onclick="downloadData()">ดาวน์โหลด data.json</button>
+    <button class="toolbar-btn" onclick="openResidentSheet()">เปิด Google Sheet</button>
     <span class="record-count" id="recordCount"></span>
-    <div class="toolbar-note">แก้ไขข้อมูลจากปุ่ม Edit แล้วกดดาวน์โหลดไฟล์ใหม่ เพื่อนำไปแทนที่ `data.json` เดิม</div>
+    <div class="toolbar-note">Master data: Google Sheet — หน้า admin อ่าน/เขียนข้อมูลจาก Sheet โดยตรง</div>
   </div>
 
   <div class="table-wrap">
@@ -408,6 +408,7 @@
   // ======================================================
   const ADMIN_PASSWORD = 'PATTRADATA';
   const SHEET_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentSheetSync';
+  const RESIDENT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1NU6B7Yf225JGOpgqmQVLrHJl2tvxPtRR1gbtmBjYZyo/edit';
   const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
   // ======================================================
@@ -474,17 +475,8 @@
       filteredData = [...allData];
       renderAdmin(filteredData);
     } catch (e) {
-      try {
-        const fallback = await fetch(`data.json?t=${Date.now()}`, {
-          cache: 'no-store',
-        });
-        allData = await fallback.json();
-        filteredData = [...allData];
-        renderAdmin(filteredData);
-      } catch (fallbackError) {
-        document.getElementById('adminBody').innerHTML =
-          '<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลดข้อมูลจาก Google Sheet หรือ data.json</td></tr>';
-      }
+      document.getElementById('adminBody').innerHTML =
+        '<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลดข้อมูลจาก Google Sheet</td></tr>';
     }
   }
 
@@ -589,16 +581,8 @@
     return result;
   }
 
-  function downloadData() {
-    const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'data.json';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+  function openResidentSheet() {
+    window.open(RESIDENT_SHEET_URL, '_blank', 'noopener');
   }
 
   document.getElementById('editModal').addEventListener('click', (event) => {
