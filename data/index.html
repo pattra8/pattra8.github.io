@@ -96,20 +96,26 @@
       border-radius: 20px;
     }
     .admin-btn {
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.18);
-      font-size: 0.72rem;
+      margin-left: 12px;
+      background: #fff7df;
+      border: 2px solid var(--gold2);
+      color: var(--navy);
+      font-size: 0.86rem;
+      font-weight: 700;
       cursor: pointer;
-      padding: 5px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.04em;
-      transition: all 0.2s;
+      padding: 10px 18px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
       font-family: inherit;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18), 0 0 0 4px rgba(240,208,128,0.12);
+      min-width: 92px;
+      text-align: center;
     }
     .admin-btn:hover {
-      color: rgba(255,255,255,0.55);
-      background: rgba(255,255,255,0.07);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.22), 0 0 0 5px rgba(240,208,128,0.18);
+      filter: brightness(1.02);
     }
 
     /* ── SUBHEADER STRIP ── */
@@ -574,7 +580,7 @@
       <p>ระบบตรวจสอบข้อมูลผู้พักอาศัย</p>
     </div>
     <div class="header-badge">Resident Portal</div>
-    <button class="admin-btn" onclick="window.location.href='admin.html'">⚙</button>
+    <button class="admin-btn" onclick="window.location.href='admin.html'">Admin</button>
   </div>
 </header>
 <div class="subheader">

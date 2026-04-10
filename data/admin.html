@@ -94,6 +94,7 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .toolbar input {
       flex: 1;
@@ -105,6 +106,23 @@
     }
     .toolbar input:focus { outline: none; border-color: #1a3a5c; }
     .record-count { font-size: 0.85rem; color: #888; white-space: nowrap; }
+    .toolbar-btn {
+      background: #1a3a5c;
+      color: white;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .toolbar-btn:hover { background: #14304d; }
+    .toolbar-note {
+      width: 100%;
+      font-size: 0.8rem;
+      color: #666;
+    }
 
     .table-wrap {
       max-width: 1200px;
@@ -127,6 +145,139 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f9fbff; }
     .no-val { color: #ccc; font-style: italic; }
+    .col-house { white-space: nowrap; width: 90px; }
+    .col-name {
+      min-width: 260px;
+      max-width: 320px;
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.45;
+    }
+    .col-email {
+      min-width: 210px;
+      max-width: 260px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+    }
+    .col-phone {
+      min-width: 145px;
+      white-space: nowrap;
+    }
+    .col-zone, .col-plot, .col-deed { white-space: nowrap; }
+    .col-actions {
+      width: 90px;
+      white-space: nowrap;
+    }
+    .edit-btn {
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fdba74;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .edit-btn:hover {
+      background: #ffedd5;
+      border-color: #fb923c;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 30;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      background: #1a3a5c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .modal-header h2 { font-size: 1rem; }
+    .modal-close {
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .modal-body {
+      padding: 18px 20px 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 0.8rem;
+      color: #555;
+      font-weight: 600;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d6dce5;
+      border-radius: 7px;
+      font-size: 0.92rem;
+      font-family: inherit;
+    }
+    .modal-footer {
+      padding: 0 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .save-note {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .ghost-btn, .primary-btn {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .ghost-btn {
+      background: #eef2f7;
+      color: #475569;
+    }
+    .primary-btn {
+      background: #1a3a5c;
+      color: white;
+    }
+    .ghost-btn:hover { background: #e2e8f0; }
+    .primary-btn:hover { background: #14304d; }
 
     footer {
       text-align: center;
@@ -164,7 +315,9 @@
 
   <div class="toolbar">
     <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
+    <button class="toolbar-btn" onclick="downloadData()">ดาวน์โหลด data.json</button>
     <span class="record-count" id="recordCount"></span>
+    <div class="toolbar-note">แก้ไขข้อมูลจากปุ่ม Edit แล้วกดดาวน์โหลดไฟล์ใหม่ เพื่อนำไปแทนที่ `data.json` เดิม</div>
   </div>
 
   <div class="table-wrap">
@@ -176,9 +329,10 @@
           <th>ชื่อ-นามสกุล</th>
           <th>อีเมล</th>
           <th>โทรศัพท์</th>
+          <th>เลขที่โฉนด</th>
           <th>โซน</th>
           <th>แปลงที่</th>
-          <th>เลขที่โฉนด</th>
+          <th>จัดการ</th>
         </tr>
       </thead>
       <tbody id="adminBody"></tbody>
@@ -186,6 +340,55 @@
   </div>
 
   <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>แก้ไขข้อมูลลูกบ้าน</h2>
+        <div id="editHouseLabel" style="font-size:0.82rem; opacity:0.8; margin-top:4px;">บ้านเลขที่ —</div>
+      </div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="edit_house_no">บ้านเลขที่</label>
+        <input id="edit_house_no" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_name">ชื่อ-นามสกุล</label>
+        <input id="edit_name" type="text" />
+      </div>
+      <div class="form-group full">
+        <label for="edit_email">อีเมล</label>
+        <input id="edit_email" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_phone">โทรศัพท์</label>
+        <input id="edit_phone" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_deed_no">เลขที่โฉนด</label>
+        <input id="edit_deed_no" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_zone">โซน</label>
+        <input id="edit_zone" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_plot">แปลงที่</label>
+        <input id="edit_plot" type="text" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="save-note">บันทึกในหน้านี้ทันที แล้วค่อยดาวน์โหลดไฟล์ใหม่</div>
+      <div class="modal-actions">
+        <button class="ghost-btn" onclick="closeEditModal()">ยกเลิก</button>
+        <button class="primary-btn" onclick="saveEdit()">บันทึกการแก้ไข</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -196,6 +399,8 @@
   // ======================================================
 
   let allData = [];
+  let filteredData = [];
+  let editingIndex = -1;
 
   function doLogin() {
     const pw = document.getElementById('pwInput').value;
@@ -223,10 +428,11 @@
     try {
       const res = await fetch('data.json');
       allData = await res.json();
-      renderAdmin(allData);
+      filteredData = [...allData];
+      renderAdmin(filteredData);
     } catch (e) {
       document.getElementById('adminBody').innerHTML =
-        '<tr><td colspan="8" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลด data.json</td></tr>';
+        '<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลด data.json</td></tr>';
     }
   }
 
@@ -236,25 +442,92 @@
     tbody.innerHTML = data.map((r, i) => `
       <tr>
         <td style="color:#aaa">${i + 1}</td>
-        <td><strong>${r.house_no || '<span class="no-val">—</span>'}</strong></td>
-        <td>${r.name || '<span class="no-val">—</span>'}</td>
-        <td>${r.email || '<span class="no-val">—</span>'}</td>
-        <td>${r.phone || '<span class="no-val">—</span>'}</td>
-        <td>${r.zone || '<span class="no-val">—</span>'}</td>
-        <td>${r.plot || '<span class="no-val">—</span>'}</td>
-        <td>${r.deed_no || '<span class="no-val">—</span>'}</td>
+        <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
+        <td class="col-name">${showVal(r.name)}</td>
+        <td class="col-email">${showVal(r.email)}</td>
+        <td class="col-phone">${showVal(r.phone)}</td>
+        <td class="col-deed">${showVal(r.deed_no)}</td>
+        <td class="col-zone">${showVal(r.zone)}</td>
+        <td class="col-plot">${showVal(r.plot)}</td>
+        <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${findOriginalIndex(r)})">Edit</button></td>
       </tr>
     `).join('');
   }
 
+  function showVal(value) {
+    return value ? escHtml(value) : '<span class="no-val">—</span>';
+  }
+
+  function escHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function findOriginalIndex(record) {
+    return allData.indexOf(record);
+  }
+
   function filterAdmin() {
     const q = document.getElementById('adminSearch').value.toLowerCase().trim();
-    if (!q) { renderAdmin(allData); return; }
-    const filtered = allData.filter(r =>
+    if (!q) {
+      filteredData = [...allData];
+      renderAdmin(filteredData);
+      return;
+    }
+    filteredData = allData.filter(r =>
       Object.values(r).some(v => (v || '').toLowerCase().includes(q))
     );
-    renderAdmin(filtered);
+    renderAdmin(filteredData);
   }
+
+  function openEditModal(index) {
+    editingIndex = index;
+    const record = allData[index];
+    if (!record) return;
+
+    document.getElementById('editHouseLabel').textContent = `บ้านเลขที่ ${record.house_no || '—'}`;
+    ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'].forEach(key => {
+      document.getElementById(`edit_${key}`).value = record[key] || '';
+    });
+    document.getElementById('editModal').classList.add('show');
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+    editingIndex = -1;
+  }
+
+  function saveEdit() {
+    if (editingIndex < 0) return;
+
+    const target = allData[editingIndex];
+    ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'].forEach(key => {
+      target[key] = document.getElementById(`edit_${key}`).value.trim();
+    });
+
+    filterAdmin();
+    closeEditModal();
+  }
+
+  function downloadData() {
+    const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('editModal').addEventListener('click', (event) => {
+    if (event.target === document.getElementById('editModal')) closeEditModal();
+  });
 </script>
 </body>
 </html>
