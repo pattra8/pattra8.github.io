@@ -242,6 +242,17 @@
       font-size: 0.92rem;
       font-family: inherit;
     }
+    .form-group input[readonly] {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+    .readonly-hint {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
     .modal-footer {
       padding: 0 20px 20px;
       display: flex;
@@ -367,15 +378,18 @@
       </div>
       <div class="form-group">
         <label for="edit_deed_no">เลขที่โฉนด</label>
-        <input id="edit_deed_no" type="text" />
+        <input id="edit_deed_no" type="text" readonly />
+        <span class="readonly-hint">Read only</span>
       </div>
       <div class="form-group">
         <label for="edit_zone">โซน</label>
-        <input id="edit_zone" type="text" />
+        <input id="edit_zone" type="text" readonly />
+        <span class="readonly-hint">Read only</span>
       </div>
       <div class="form-group">
         <label for="edit_plot">แปลงที่</label>
-        <input id="edit_plot" type="text" />
+        <input id="edit_plot" type="text" readonly />
+        <span class="readonly-hint">Read only</span>
       </div>
     </div>
     <div class="modal-footer">
