@@ -463,13 +463,28 @@
 
   async function loadAdminData() {
     try {
-      const res = await fetch('data.json');
-      allData = await res.json();
+      const res = await fetch(`${SHEET_SYNC_URL}?t=${Date.now()}`, {
+        cache: 'no-store',
+      });
+      const result = await res.json();
+      if (!res.ok || !result.ok) {
+        throw new Error(result.error || `HTTP ${res.status}`);
+      }
+      allData = result.data;
       filteredData = [...allData];
       renderAdmin(filteredData);
     } catch (e) {
-      document.getElementById('adminBody').innerHTML =
-        '<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลด data.json</td></tr>';
+      try {
+        const fallback = await fetch(`data.json?t=${Date.now()}`, {
+          cache: 'no-store',
+        });
+        allData = await fallback.json();
+        filteredData = [...allData];
+        renderAdmin(filteredData);
+      } catch (fallbackError) {
+        document.getElementById('adminBody').innerHTML =
+          '<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">ไม่สามารถโหลดข้อมูลจาก Google Sheet หรือ data.json</td></tr>';
+      }
     }
   }
 
