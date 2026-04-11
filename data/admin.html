@@ -504,7 +504,7 @@
         <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
         <td class="col-name">${showVal(r.name)}</td>
         <td class="col-email">${showVal(r.email)}</td>
-        <td class="col-phone">${showVal(r.phone)}</td>
+        <td class="col-phone">${showVal(formatPhone(r.phone))}</td>
         <td class="col-deed">${showVal(r.deed_no)}</td>
         <td class="col-zone">${showVal(r.zone)}</td>
         <td class="col-plot">${showVal(r.plot)}</td>
@@ -515,6 +515,13 @@
 
   function showVal(value) {
     return value ? escHtml(value) : '<span class="no-val">—</span>';
+  }
+
+  function formatPhone(value) {
+    const rawValue = String(value || '').trim();
+    const digits = rawValue.replace(/\D/g, '');
+    if (digits.length !== 10) return rawValue;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
   }
 
   function escHtml(value) {
@@ -551,8 +558,9 @@
     document.getElementById('editHouseLabel').textContent = `บ้านเลขที่ ${record.house_no || '—'}`;
     originalEditRecord = {};
     EDIT_FIELDS.forEach(key => {
-      originalEditRecord[key] = record[key] || '';
-      document.getElementById(`edit_${key}`).value = record[key] || '';
+      const value = key === 'phone' ? formatPhone(record[key]) : (record[key] || '');
+      originalEditRecord[key] = value;
+      document.getElementById(`edit_${key}`).value = value;
     });
     document.getElementById('editModal').classList.add('show');
   }
@@ -580,7 +588,9 @@
     if (editingIndex < 0) return;
 
     const target = allData[editingIndex];
-    Object.assign(target, getEditFormRecord());
+    const formRecord = getEditFormRecord();
+    formRecord.phone = formatPhone(formRecord.phone);
+    Object.assign(target, formRecord);
 
     filterAdmin();
     closeEditModal();
