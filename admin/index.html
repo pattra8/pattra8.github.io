@@ -372,7 +372,7 @@
           </div>
           <div class="field">
             <label for="dateInput">วันที่แสดง</label>
-            <input id="dateInput" placeholder="เช่น 12 Apr 2026" />
+            <input id="dateInput" type="date" />
           </div>
         </div>
 
@@ -444,10 +444,30 @@
     }
 
     function formatDate(item) {
+      if (item.dateValue) return formatDateFromISO(item.dateValue);
       if (item.dateText) return item.dateText;
       const source = item.createdAt?.toDate ? item.createdAt.toDate() : null;
       if (!source) return '';
       return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function todayISO() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateFromISO(value) {
+      if (!value) return '';
+      const [year, month, day] = value.split('-').map(Number);
+      if (!year || !month || !day) return '';
+      return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
     }
 
     function requireLogin() {
@@ -462,6 +482,7 @@
     function resetForm(message) {
       form.reset();
       document.getElementById('docId').value = '';
+      document.getElementById('dateInput').value = todayISO();
       formTitle.textContent = 'เพิ่มประกาศ';
       cancelBtn.classList.add('hidden');
       formStatus.textContent = message || 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
@@ -515,7 +536,8 @@
         title: document.getElementById('titleInput').value.trim(),
         body: document.getElementById('bodyInput').value.trim(),
         type: document.getElementById('typeInput').value,
-        dateText: document.getElementById('dateInput').value.trim(),
+        dateValue: document.getElementById('dateInput').value || todayISO(),
+        dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
         updatedAt: serverTimestamp()
       };
 
@@ -553,7 +575,7 @@
         document.getElementById('titleInput').value = item.title || '';
         document.getElementById('bodyInput').value = item.body || '';
         document.getElementById('typeInput').value = item.type || 'normal';
-        document.getElementById('dateInput').value = item.dateText || formatDate(item);
+        document.getElementById('dateInput').value = item.dateValue || todayISO();
         formTitle.textContent = 'แก้ไขประกาศ';
         cancelBtn.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -583,6 +605,7 @@
     });
 
     requireLogin();
+    resetForm();
   </script>
 </body>
 </html>
