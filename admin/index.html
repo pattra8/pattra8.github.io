@@ -416,7 +416,7 @@
       appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
     };
 
-    const ADMIN_PASSWORD = 'nitipattra8';
+    const ADMIN_PASSWORDS = ['nitipattra8', 'team388'];
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const colRef = collection(db, 'announcements');
@@ -489,7 +489,7 @@
     }
 
     document.getElementById('loginBtn').addEventListener('click', () => {
-      if (passwordInput.value === ADMIN_PASSWORD) {
+      if (ADMIN_PASSWORDS.includes(passwordInput.value)) {
         sessionStorage.setItem('pattra_announce_admin', '1');
         loginError.classList.add('hidden');
         requireLogin();

@@ -91,6 +91,14 @@
       margin-top: 1px;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
     .header-btn {
       background: transparent;
       border: 1px solid var(--gold);
@@ -107,6 +115,16 @@
     }
     .header-btn:hover {
       background: var(--gold);
+      color: #fff;
+    }
+
+    .header-btn.secondary {
+      border-color: var(--border);
+      color: var(--taupe-mid);
+    }
+
+    .header-btn.secondary:hover {
+      border-color: var(--gold);
       color: #fff;
     }
 
@@ -212,6 +230,37 @@
       color: var(--text);
       margin-bottom: 44px;
       letter-spacing: 0.01em;
+    }
+
+    .section-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 44px;
+    }
+
+    .section-row .section-title {
+      margin-bottom: 0;
+    }
+
+    .admin-link {
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      background: var(--card);
+      border-radius: 8px;
+      padding: 9px 16px;
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .admin-link:hover {
+      background: var(--gold);
+      color: #fff;
     }
 
     /* ─── SERVICE CARDS ─── */
@@ -514,12 +563,15 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 640px) {
-      header { padding: 0 20px; }
+      header { padding: 0 16px; height: auto; min-height: 68px; gap: 12px; }
+      .header-actions { gap: 6px; }
+      .header-btn { padding: 7px 10px; font-size: 10px; }
       .hero { padding: 32px 20px 36px; }
       .hero h1 { font-size: 36px; }
       .hero-ornament { margin-bottom: 16px; }
       .hero-sub { margin-top: 12px; font-size: 14px; }
       .main { padding: 40px 16px 64px; }
+      .section-row { align-items: flex-start; flex-direction: column; margin-bottom: 32px; }
       .logo-sub { display: none; }
     }
   </style>
@@ -536,7 +588,10 @@
       <div class="logo-sub">Resident Services</div>
     </div>
   </a>
-  <a href="https://pattra8.github.io/report" class="header-btn">Report Issue</a>
+  <div class="header-actions">
+    <a href="https://pattra8.github.io/admin/" class="header-btn secondary">Admin</a>
+    <a href="https://pattra8.github.io/report" class="header-btn">Report Issue</a>
+  </div>
 </header>
 
 <!-- ─── HERO ─── -->
@@ -547,7 +602,7 @@
     <div class="hero-ornament-line r"></div>
   </div>
   <h1><em>Resident Services</em></h1>
-  <p class="hero-sub">เข้าถึงทุกบริการในที่เดียว</p>
+  <p class="hero-sub">โครงการหมู่บ้านภัทราวิลล่า 8</p>
 </section>
 
 <!-- ─── MAIN ─── -->
@@ -620,7 +675,10 @@
   <!-- Announcements -->
   <div id="announce">
     <div class="section-eyebrow">Latest</div>
-    <div class="section-title">ประกาศจากนิติบุคคล</div>
+    <div class="section-row">
+      <div class="section-title">ประกาศจากนิติบุคคล</div>
+      <a class="admin-link" href="https://pattra8.github.io/admin/">Manage Announcements</a>
+    </div>
 
     <div class="announce-grid" id="announceGrid">
       <div class="announce-empty">กำลังโหลดประกาศ...</div>
