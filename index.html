@@ -708,7 +708,7 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-const APWD = 'nitipattra8';
+const ADMIN_PASSWORDS = ['nitipattra8', 'team388'];
 
 let isAdmin = false;
 let pendingFiles = [], pendingPrivFiles = [];
@@ -1056,7 +1056,7 @@ function checkAdminSession(){
   }catch(e){}
 }
 function loginAdmin(){
-  if(document.getElementById('adminPw').value===APWD){
+  if(ADMIN_PASSWORDS.includes(document.getElementById('adminPw').value)){
     isAdmin=true;
     localStorage.setItem('admin_session',JSON.stringify({ts:Date.now()}));
     closeAdminModal();setAdminUI(true);
