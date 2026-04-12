@@ -675,7 +675,7 @@ window.notifyAdminByEmail = function(params){
     description: params.desc || '(ไม่มีรายละเอียด)',
     priority: params.priority === 'urgent' ? 'ด่วนมาก' : params.priority === 'high' ? 'ด่วน' : 'ปกติ',
     date: params.date || new Date().toLocaleString('th-TH'),
-    board_url: 'https://pattra8.github.io/report'
+    board_url: 'https://pattra8.github.io/report/'
   };
   Promise.allSettled(
     EMAIL_CFG.adminEmails.map(email =>
