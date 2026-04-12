@@ -417,6 +417,8 @@
     };
 
     const ADMIN_PASSWORDS = ['nitipattra8', 'team388'];
+    const SESSION_KEY = 'pattra_announce_admin_until';
+    const SESSION_DAYS = 30;
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const colRef = collection(db, 'announcements');
@@ -449,7 +451,9 @@
     }
 
     function requireLogin() {
-      const ok = sessionStorage.getItem('pattra_announce_admin') === '1';
+      const expiry = Number(localStorage.getItem(SESSION_KEY) || 0);
+      const ok = expiry > Date.now();
+      if (!ok) localStorage.removeItem(SESSION_KEY);
       loginCard.classList.toggle('hidden', ok);
       adminPanel.classList.toggle('hidden', !ok);
       return ok;
@@ -490,7 +494,8 @@
 
     document.getElementById('loginBtn').addEventListener('click', () => {
       if (ADMIN_PASSWORDS.includes(passwordInput.value)) {
-        sessionStorage.setItem('pattra_announce_admin', '1');
+        const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+        localStorage.setItem(SESSION_KEY, String(expiry));
         loginError.classList.add('hidden');
         requireLogin();
       } else {
