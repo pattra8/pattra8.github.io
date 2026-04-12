@@ -419,7 +419,8 @@
   // ======================================================
   // ⚠️  CHANGE THIS PASSWORD before uploading to GitHub!
   // ======================================================
-  const ADMIN_PASSWORD = 'PATTRADATA';
+  const ADMIN_SYNC_PASSWORD = 'PATTRADATA';
+  const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
   const SHEET_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentSheetSync';
   const RESIDENT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1NU6B7Yf225JGOpgqmQVLrHJl2tvxPtRR1gbtmBjYZyo/edit';
   const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
@@ -456,8 +457,8 @@
   }
 
   function doLogin() {
-    const pw = document.getElementById('pwInput').value;
-    if (pw === ADMIN_PASSWORD) {
+    const pw = document.getElementById('pwInput').value.trim().toLowerCase();
+    if (ADMIN_LOGIN_PASSWORDS.includes(pw)) {
       startAdminSession();
       showDashboard();
     } else {
@@ -608,7 +609,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        password: ADMIN_PASSWORD,
+        password: ADMIN_SYNC_PASSWORD,
         record,
       }),
     });
