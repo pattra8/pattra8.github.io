@@ -421,7 +421,7 @@
     .announce-card {
       background: var(--card);
       border-radius: 12px;
-      padding: 22px 24px;
+      padding: 26px 28px;
       border: 1px solid var(--border);
       display: flex;
       gap: 16px;
@@ -435,34 +435,35 @@
     }
 
     .announce-dot {
-      width: 6px; height: 6px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--gold);
-      margin-top: 6px;
+      margin-top: 8px;
       flex-shrink: 0;
     }
     .announce-dot.urgent { background: #c0392b; }
     .announce-dot.info   { background: var(--bg3); border: 1.5px solid var(--muted); }
 
     .announce-body strong {
-      font-size: 14px;
+      font-size: 17px;
       font-weight: 500;
       font-family: 'Prompt', sans-serif;
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      line-height: 1.45;
     }
 
     .announce-body p {
-      font-size: 13px;
+      font-size: 16px;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.75;
       font-weight: 300;
     }
 
     .announce-date {
-      font-size: 11px;
+      font-size: 13px;
       color: var(--gold);
-      margin-top: 8px;
+      margin-top: 12px;
       letter-spacing: 0.06em;
     }
 
@@ -572,6 +573,11 @@
       .hero-sub { margin-top: 12px; font-size: 14px; }
       .main { padding: 40px 16px 64px; }
       .section-row { align-items: flex-start; flex-direction: column; margin-bottom: 32px; }
+      .announce-grid { grid-template-columns: 1fr; gap: 12px; }
+      .announce-card { padding: 22px 20px; gap: 12px; }
+      .announce-body strong { font-size: 18px; line-height: 1.42; }
+      .announce-body p { font-size: 16px; line-height: 1.8; color: var(--taupe-mid); }
+      .announce-date { font-size: 14px; margin-top: 14px; }
       .logo-sub { display: none; }
     }
   </style>
