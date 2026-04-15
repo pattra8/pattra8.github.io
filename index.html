@@ -576,6 +576,34 @@
       border-color: var(--gold);
     }
 
+    /* ─── FILE CHIPS (non-image attachments) ─── */
+    .announce-file-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .announce-file-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--taupe-mid);
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 4px 9px;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .announce-file-chip:hover {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+      color: var(--gold);
+    }
+
     .pagination {
       display: flex;
       justify-content: center;
@@ -845,18 +873,55 @@ function openLightbox(src, alt) {
   lightbox.classList.add('open');
 }
 
+const FILE_EXT_ICONS = {
+  pdf: '📄', doc: '📝', docx: '📝', xls: '📊', xlsx: '📊', ppt: '📑', pptx: '📑'
+};
+
+function normaliseFiles(photos) {
+  if (!photos || !photos.length) return { images: [], docs: [] };
+  const images = [], docs = [];
+  photos.forEach((f, i) => {
+    if (typeof f === 'string') {
+      // legacy: plain base64 string → treat as image
+      images.push({ dataUrl: f, idx: i });
+    } else if (f.isImage) {
+      images.push({ dataUrl: f.dataUrl, idx: i });
+    } else {
+      docs.push({ dataUrl: f.dataUrl, name: f.name, ext: f.ext, cat: f.cat, idx: i });
+    }
+  });
+  return { images, docs };
+}
+
 function buildPhotoStrip(photos) {
   if (!photos || !photos.length) return '';
+  const { images, docs } = normaliseFiles(photos);
+
   const MAX_SHOW = 4;
-  const visible = photos.slice(0, MAX_SHOW);
-  const extra = photos.length - MAX_SHOW;
-  const thumbs = visible.map((src, i) =>
-    `<img class="announce-photo-thumb" src="${esc(src)}" alt="รูปภาพ ${i + 1}" data-photo-idx="${i}" loading="lazy" />`
+  const visibleImgs = images.slice(0, MAX_SHOW);
+  const extraImgs = images.length - MAX_SHOW;
+
+  const thumbsHtml = visibleImgs.map((f, i) =>
+    `<img class="announce-photo-thumb" src="${esc(f.dataUrl)}" alt="รูปภาพ ${i + 1}" data-img-idx="${i}" loading="lazy" />`
   ).join('');
-  const moreBtn = extra > 0
-    ? `<div class="announce-photo-more" data-all-photos="${esc(JSON.stringify(photos))}">+${extra}</div>`
+
+  const moreBtn = extraImgs > 0
+    ? `<div class="announce-photo-more" data-more-start="${MAX_SHOW}">+${extraImgs}</div>`
     : '';
-  return `<div class="announce-photos" data-photos="${esc(JSON.stringify(photos))}">${thumbs}${moreBtn}</div>`;
+
+  const imgStrip = (thumbsHtml || moreBtn)
+    ? `<div class="announce-photos" data-all-images="${esc(JSON.stringify(images.map(f => f.dataUrl)))}">${thumbsHtml}${moreBtn}</div>`
+    : '';
+
+  const chipStrip = docs.length
+    ? `<div class="announce-file-chips">${docs.map(f => {
+        const icon = FILE_EXT_ICONS[f.ext] || '📎';
+        const shortName = f.name.length > 28 ? f.name.slice(0, 25) + '…' : f.name;
+        return `<span class="announce-file-chip" title="${esc(f.name)}">${icon} ${esc(shortName)}</span>`;
+      }).join('')}</div>`
+    : '';
+
+  return imgStrip + chipStrip;
 }
 
 function esc(value) {
@@ -902,19 +967,18 @@ function renderAnnouncements() {
 
   // Photo lightbox click delegation
   grid.querySelectorAll('.announce-photos').forEach(strip => {
-    const allPhotos = JSON.parse(strip.dataset.photos || '[]');
+    const allImages = JSON.parse(strip.dataset.allImages || '[]');
     strip.querySelectorAll('.announce-photo-thumb').forEach(thumb => {
       thumb.addEventListener('click', () => {
-        const idx = Number(thumb.dataset.photoIdx);
-        openLightbox(allPhotos[idx], thumb.alt);
+        const idx = Number(thumb.dataset.imgIdx);
+        openLightbox(allImages[idx], thumb.alt);
       });
     });
     const moreBtn = strip.querySelector('.announce-photo-more');
     if (moreBtn) {
       moreBtn.addEventListener('click', () => {
-        // open the first hidden photo
-        const shown = strip.querySelectorAll('.announce-photo-thumb').length;
-        openLightbox(allPhotos[shown], `รูปภาพ ${shown + 1}`);
+        const start = Number(moreBtn.dataset.moreStart) || 4;
+        openLightbox(allImages[start], `รูปภาพ ${start + 1}`);
       });
     }
   });

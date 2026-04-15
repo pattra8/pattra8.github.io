@@ -252,48 +252,130 @@
 
     .error { color: var(--danger); }
 
-    .announcement {
-      border-top: 1px solid var(--border);
-      padding: 18px 0;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 18px;
+    /* ─── ANNOUNCEMENT LIST CARDS ─── */
+    .ann-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .ann-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .ann-card:hover { border-color: var(--gold); }
+
+    .ann-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
     }
 
-    .announcement:first-of-type { border-top: none; padding-top: 0; }
-    .announcement:last-child { padding-bottom: 0; }
+    .ann-type-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .ann-type-dot.urgent { background: #c0392b; }
+    .ann-type-dot.info   { background: var(--border); border: 1.5px solid var(--muted); }
 
-    .announcement h3 {
+    .ann-card-title {
       font-family: 'Prompt', sans-serif;
       font-weight: 500;
-      font-size: 15px;
-      margin-bottom: 5px;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.4;
+      flex: 1;
     }
 
-    .announcement p {
+    .ann-card-body {
+      font-size: 12px;
       color: var(--muted);
-      font-size: 13px;
       line-height: 1.55;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      margin-left: 17px;
       white-space: pre-wrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .meta {
+    .ann-card-footer {
       display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
       flex-wrap: wrap;
+      margin-left: 17px;
+    }
+
+    .ann-card-meta {
+      display: flex;
       align-items: center;
-      color: var(--gold);
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ann-date {
       font-size: 11px;
+      color: var(--gold);
       letter-spacing: 0.04em;
     }
 
-    .pill {
+    .ann-pill {
+      font-size: 10px;
       border: 1px solid var(--border);
       color: var(--taupe-mid);
       border-radius: 999px;
       padding: 2px 8px;
-      background: var(--bg);
+      background: var(--card);
+      letter-spacing: 0.03em;
+    }
+
+    .ann-file-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+      margin-bottom: 8px;
+    }
+
+    .ann-file-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--taupe-mid);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 7px;
+    }
+
+    .ann-file-chip svg { flex-shrink: 0; }
+
+    .ann-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ann-thumbnails {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+      margin-bottom: 8px;
+    }
+
+    .ann-thumbnails img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
     }
 
     .empty {
@@ -305,6 +387,10 @@
       text-align: center;
       font-size: 13px;
     }
+
+    /* legacy - keep for compat */
+    .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--gold); font-size: 11px; }
+    .pill { border: 1px solid var(--border); color: var(--taupe-mid); border-radius: 999px; padding: 2px 8px; background: var(--bg); }
 
     /* ─── PHOTO UPLOAD ─── */
     .photo-drop-zone {
@@ -356,8 +442,6 @@
 
     .photo-preview-item {
       position: relative;
-      width: 72px;
-      height: 72px;
       flex-shrink: 0;
     }
 
@@ -368,6 +452,40 @@
       border-radius: 8px;
       border: 1.5px solid var(--border);
       display: block;
+    }
+
+    /* non-image file preview tile */
+    .file-preview-tile {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .file-preview-tile .file-ext {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .file-preview-tile .file-name {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 4px;
+      word-break: break-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .photo-remove-btn {
@@ -469,12 +587,12 @@
         </div>
 
         <div class="field">
-          <label>รูปภาพประกอบ (ไม่จำเป็น)</label>
+          <label>ไฟล์แนบ / รูปภาพ (ไม่จำเป็น)</label>
           <div class="photo-drop-zone" id="photoDropZone">
-            <input type="file" id="photoFileInput" accept="image/*" multiple />
+            <input type="file" id="photoFileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple />
             <div class="photo-drop-label">
-              <span>เลือกรูปภาพ</span> หรือลากวางไฟล์ที่นี่<br/>
-              <small>รองรับ JPG, PNG, WebP · สูงสุด 5 ภาพ · แต่ละภาพไม่เกิน 2MB</small>
+              <span>เลือกไฟล์</span> หรือลากวางที่นี่<br/>
+              <small>รูปภาพ · PDF · Word · Excel · PowerPoint · สูงสุด 5 ไฟล์ · แนะนำไม่เกิน 5MB</small>
             </div>
           </div>
           <div class="photo-previews" id="photoPreviews"></div>
@@ -553,25 +671,51 @@
     const cancelBtn = document.getElementById('cancelBtn');
     const list = document.getElementById('announcementList');
 
-    // ─── PHOTO MANAGEMENT ───
-    const MAX_PHOTOS = 5;
-    const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
-    let pendingPhotos = []; // array of base64 data-URL strings
+    // ─── FILE MANAGEMENT ───
+    const MAX_FILES = 5;
+    const WARN_BYTES = 5 * 1024 * 1024;  // 5 MB — warn but allow
+    let pendingPhotos = []; // array of { dataUrl, name, isImage } objects
 
     const photoFileInput = document.getElementById('photoFileInput');
     const photoPreviews = document.getElementById('photoPreviews');
     const photoCount = document.getElementById('photoCount');
     const photoDropZone = document.getElementById('photoDropZone');
 
+    const FILE_ICONS = {
+      pdf:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b94d42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      doc:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2b5797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      xls:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6f42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      ppt:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d24726" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      file: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a7f76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+    };
+
+    function getFileCategory(name) {
+      const ext = name.split('.').pop().toLowerCase();
+      if (['jpg','jpeg','png','webp','gif','avif'].includes(ext)) return 'image';
+      if (ext === 'pdf') return 'pdf';
+      if (['doc','docx'].includes(ext)) return 'doc';
+      if (['xls','xlsx'].includes(ext)) return 'xls';
+      if (['ppt','pptx'].includes(ext)) return 'ppt';
+      return 'file';
+    }
+
+    function getFileIcon(cat) {
+      return FILE_ICONS[cat] || FILE_ICONS.file;
+    }
+
     function updatePhotoUI() {
-      photoPreviews.innerHTML = pendingPhotos.map((src, i) => `
-        <div class="photo-preview-item">
-          <img src="${src}" alt="รูป ${i + 1}" />
-          <button class="photo-remove-btn" type="button" data-photo-remove="${i}" title="ลบรูป">✕</button>
-        </div>
-      `).join('');
+      photoPreviews.innerHTML = pendingPhotos.map((f, i) => {
+        const inner = f.isImage
+          ? `<img src="${f.dataUrl}" alt="${f.name}" />`
+          : `<div class="file-preview-tile">${getFileIcon(f.cat)}<span class="file-ext">${f.ext}</span><span class="file-name">${f.name}</span></div>`;
+        return `
+          <div class="photo-preview-item">
+            ${inner}
+            <button class="photo-remove-btn" type="button" data-photo-remove="${i}" title="ลบไฟล์">✕</button>
+          </div>`;
+      }).join('');
       photoCount.textContent = pendingPhotos.length
-        ? `${pendingPhotos.length} / ${MAX_PHOTOS} ภาพ`
+        ? `${pendingPhotos.length} / ${MAX_FILES} ไฟล์`
         : '';
     }
 
@@ -592,20 +736,30 @@
     }
 
     async function addFiles(files) {
-      const remaining = MAX_PHOTOS - pendingPhotos.length;
+      const remaining = MAX_FILES - pendingPhotos.length;
       const toProcess = Array.from(files).slice(0, remaining);
-      const oversize = toProcess.filter(f => f.size > MAX_BYTES);
+
+      // warn about large files — ask if continue
+      const oversize = toProcess.filter(f => f.size > WARN_BYTES);
       if (oversize.length) {
-        formStatus.textContent = `รูปภาพบางไฟล์มีขนาดเกิน 2MB (${oversize.map(f => f.name).join(', ')})`;
-        formStatus.classList.add('error');
-        return;
+        const names = oversize.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join(', ');
+        const ok = window.confirm(`ไฟล์ต่อไปนี้มีขนาดใหญ่กว่า 5MB:\n${names}\n\nต้องการอัปโหลดต่อไหม?`);
+        if (!ok) return;
       }
+
       try {
         const encoded = await Promise.all(toProcess.map(fileToBase64));
-        pendingPhotos = [...pendingPhotos, ...encoded];
+        const newEntries = toProcess.map((file, i) => {
+          const cat = getFileCategory(file.name);
+          const ext = file.name.split('.').pop().toLowerCase();
+          return { dataUrl: encoded[i], name: file.name, isImage: cat === 'image', cat, ext };
+        });
+        pendingPhotos = [...pendingPhotos, ...newEntries];
         updatePhotoUI();
+        formStatus.textContent = 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
+        formStatus.classList.remove('error');
       } catch {
-        formStatus.textContent = 'ไม่สามารถโหลดรูปภาพได้';
+        formStatus.textContent = 'ไม่สามารถโหลดไฟล์ได้';
         formStatus.classList.add('error');
       }
     }
@@ -681,34 +835,54 @@
       updatePhotoUI();
     }
 
+    const TYPE_LABELS = { normal: 'ทั่วไป', urgent: 'เร่งด่วน', info: 'ข้อมูล' };
+
     function renderList(items) {
       if (!items.length) {
         list.innerHTML = '<div class="empty">ยังไม่มีประกาศ</div>';
         return;
       }
 
-      list.innerHTML = items.map(item => {
-        const photoThumbs = Array.isArray(item.photos) && item.photos.length
-          ? `<div class="announcement-photos">${item.photos.slice(0, 5).map((src, i) => `<img src="${esc(src)}" alt="รูป ${i + 1}" />`).join('')}${item.photos.length > 5 ? `<span style="font-size:11px;color:var(--muted);align-self:center;">+${item.photos.length - 5}</span>` : ''}</div>`
-          : '';
+      const cards = items.map(item => {
+        const photos = Array.isArray(item.photos) ? item.photos : [];
+        const images = photos.filter(f => (typeof f === 'string') || f.isImage);
+        const docs   = photos.filter(f => typeof f !== 'string' && !f.isImage);
+
+        const thumbsHtml = images.slice(0, 4).map(f => {
+          const src = typeof f === 'string' ? f : f.dataUrl;
+          return `<img src="${esc(src)}" alt="" />`;
+        }).join('') + (images.length > 4 ? `<span style="font-size:10px;color:var(--muted);align-self:center;">+${images.length - 4}</span>` : '');
+
+        const chipsHtml = docs.map(f =>
+          `<span class="ann-file-chip">${getFileIcon(f.cat)}<span>${esc(f.name)}</span></span>`
+        ).join('');
+
+        const typeLabel = TYPE_LABELS[item.type] || item.type || 'ทั่วไป';
+
         return `
-          <article class="announcement">
-            <div>
-              <h3>${esc(item.title)}</h3>
-              <p>${esc(item.body)}</p>
-              ${photoThumbs}
-              <div class="meta">
-                <span>${esc(formatDate(item))}</span>
-                <span class="pill">${esc(item.type || 'normal')}</span>
+          <div class="ann-card">
+            <div class="ann-card-top">
+              <div class="ann-type-dot ${esc(item.type || '')}"></div>
+              <div class="ann-card-title">${esc(item.title)}</div>
+            </div>
+            <div class="ann-card-body">${esc(item.body)}</div>
+            ${images.length ? `<div class="ann-thumbnails">${thumbsHtml}</div>` : ''}
+            ${docs.length   ? `<div class="ann-file-chips">${chipsHtml}</div>` : ''}
+            <div class="ann-card-footer">
+              <div class="ann-card-meta">
+                <span class="ann-date">${esc(formatDate(item))}</span>
+                <span class="ann-pill">${esc(typeLabel)}</span>
+                ${photos.length ? `<span class="ann-pill">${photos.length} ไฟล์</span>` : ''}
+              </div>
+              <div class="ann-card-actions">
+                <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">แก้ไข</button>
+                <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">ลบ</button>
               </div>
             </div>
-            <div class="actions">
-              <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">Edit</button>
-              <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">Delete</button>
-            </div>
-          </article>
-        `;
+          </div>`;
       }).join('');
+
+      list.innerHTML = `<div class="ann-list">${cards}</div>`;
     }
 
     document.getElementById('loginBtn').addEventListener('click', () => {
@@ -736,7 +910,7 @@
         type: document.getElementById('typeInput').value,
         dateValue: document.getElementById('dateInput').value || todayISO(),
         dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
-        photos: pendingPhotos.length ? pendingPhotos : [],
+        photos: pendingPhotos.length ? pendingPhotos.map(f => ({ dataUrl: f.dataUrl, name: f.name, isImage: f.isImage, cat: f.cat, ext: f.ext })) : [],
         updatedAt: serverTimestamp()
       };
 
@@ -775,7 +949,12 @@
         document.getElementById('bodyInput').value = item.body || '';
         document.getElementById('typeInput').value = item.type || 'normal';
         document.getElementById('dateInput').value = item.dateValue || todayISO();
-        pendingPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
+        // support both old format (plain strings) and new format (objects)
+        pendingPhotos = Array.isArray(item.photos) ? item.photos.map(f =>
+          typeof f === 'string'
+            ? { dataUrl: f, name: 'image', isImage: true, cat: 'image', ext: 'jpg' }
+            : f
+        ) : [];
         updatePhotoUI();
         formTitle.textContent = 'แก้ไขประกาศ';
         cancelBtn.classList.remove('hidden');
