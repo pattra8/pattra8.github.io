@@ -630,6 +630,110 @@
     .announce-photo-more { display: none; }
     .announce-file-chips { display: none; }
 
+    /* ─── FILE PREVIEW MODAL ─── */
+    .file-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(20,16,12,0.88);
+      backdrop-filter: blur(6px);
+      flex-direction: column;
+    }
+
+    .file-modal-overlay.open { display: flex; }
+
+    .file-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+
+    .file-modal-title {
+      font-size: 13px;
+      color: rgba(255,255,255,0.85);
+      font-family: 'Sarabun', sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: calc(100vw - 120px);
+    }
+
+    .file-modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .file-modal-download {
+      font-size: 12px;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid rgba(184,151,90,0.4);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-family: 'Sarabun', sans-serif;
+      transition: background 0.2s;
+      letter-spacing: 0.05em;
+    }
+
+    .file-modal-download:hover { background: rgba(184,151,90,0.15); }
+
+    .file-modal-close {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .file-modal-close:hover { background: rgba(255,255,255,0.2); }
+
+    .file-modal-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .file-modal-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+    }
+
+    /* unsupported file fallback */
+    .file-modal-fallback {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    .file-modal-fallback-icon { font-size: 52px; }
+    .file-modal-fallback-name { font-size: 15px; color: rgba(255,255,255,0.8); }
+    .file-modal-fallback-note { font-size: 13px; }
+
     .pagination {
       display: flex;
       justify-content: center;
@@ -846,10 +950,22 @@
 
 </main>
 
-<!-- ─── LIGHTBOX ─── -->
+<!-- ─── LIGHTBOX (images) ─── -->
 <div class="lightbox-overlay" id="lightboxOverlay" role="dialog" aria-modal="true">
   <button class="lightbox-close" id="lightboxClose" aria-label="ปิด">✕</button>
   <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+</div>
+
+<!-- ─── FILE PREVIEW MODAL ─── -->
+<div class="file-modal-overlay" id="fileModalOverlay" role="dialog" aria-modal="true">
+  <div class="file-modal-header">
+    <div class="file-modal-title" id="fileModalTitle"></div>
+    <div class="file-modal-actions">
+      <a class="file-modal-download" id="fileModalDownload" download="">⬇ ดาวน์โหลด</a>
+      <button class="file-modal-close" id="fileModalClose" aria-label="ปิด">✕</button>
+    </div>
+  </div>
+  <div class="file-modal-body" id="fileModalBody"></div>
 </div>
 
 <!-- ─── FOOTER ─── -->
@@ -887,11 +1003,76 @@ let currentPage = 1;
 
 const grid = document.getElementById('announceGrid');
 const pager = document.getElementById('announcePagination');
+
+// ── Image lightbox ──
 const lightbox = document.getElementById('lightboxOverlay');
 const lightboxImg = document.getElementById('lightboxImg');
 document.getElementById('lightboxClose').addEventListener('click', () => lightbox.classList.remove('open'));
 lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+
+// ── File preview modal ──
+const fileModal = document.getElementById('fileModalOverlay');
+const fileModalTitle = document.getElementById('fileModalTitle');
+const fileModalBody = document.getElementById('fileModalBody');
+const fileModalDownload = document.getElementById('fileModalDownload');
+document.getElementById('fileModalClose').addEventListener('click', closeFileModal);
+fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
+
+function closeFileModal() {
+  fileModal.classList.remove('open');
+  fileModalBody.innerHTML = ''; // release blob/iframe memory
+}
+
+function openFilePreview(dataUrl, name, ext) {
+  fileModalTitle.textContent = name;
+  fileModalDownload.href = dataUrl;
+  fileModalDownload.download = name;
+  fileModalBody.innerHTML = '';
+
+  const previewable = ['pdf'];
+  const officeTypes = ['doc','docx','xls','xlsx','ppt','pptx'];
+
+  if (previewable.includes(ext)) {
+    // PDF — native browser iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = dataUrl;
+    iframe.title = name;
+    fileModalBody.appendChild(iframe);
+  } else if (officeTypes.includes(ext)) {
+    // Office files — convert dataUrl to blob URL for iframe
+    const byteStr = atob(dataUrl.split(',')[1]);
+    const mime = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new Uint8Array(byteStr.length);
+    for (let i = 0; i < byteStr.length; i++) ab[i] = byteStr.charCodeAt(i);
+    const blob = new Blob([ab], { type: mime });
+    const blobUrl = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+    // Google Docs Viewer needs a public URL — Office files show fallback with download
+    fileModalBody.innerHTML = `
+      <div class="file-modal-fallback">
+        <div class="file-modal-fallback-icon">${ext === 'pdf' ? '📄' : ext.startsWith('doc') ? '📝' : ext.startsWith('xls') ? '📊' : '📑'}</div>
+        <div class="file-modal-fallback-name">${esc(name)}</div>
+        <div class="file-modal-fallback-note">ไฟล์ประเภทนี้ไม่สามารถแสดง preview ใน browser ได้โดยตรง</div>
+        <a href="${blobUrl}" download="${esc(name)}" style="margin-top:8px;padding:10px 24px;background:var(--gold);color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-family:'Sarabun',sans-serif;">⬇ ดาวน์โหลดเพื่อเปิด</a>
+      </div>`;
+  } else {
+    fileModalBody.innerHTML = `
+      <div class="file-modal-fallback">
+        <div class="file-modal-fallback-icon">📎</div>
+        <div class="file-modal-fallback-name">${esc(name)}</div>
+        <div class="file-modal-fallback-note">กด "ดาวน์โหลด" เพื่อเปิดไฟล์</div>
+      </div>`;
+  }
+
+  fileModal.classList.add('open');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    lightbox.classList.remove('open');
+    closeFileModal();
+  }
+});
 
 function openLightbox(src, alt) {
   lightboxImg.src = src;
@@ -938,12 +1119,16 @@ function buildPhotoStrip(photos) {
     ? `<div class="announce-more-tile" data-more-start="${MAX_SHOW_IMG}">+${extraImgs}</div>`
     : '';
 
-  // doc tiles — same size, same grid
+  // doc tiles — same size, click opens file preview
   const docTiles = docs.map(f => {
     const icon = FILE_EXT_ICONS[f.ext] || '📎';
     const shortName = f.name.length > 16 ? f.name.slice(0, 13) + '…' : f.name;
     return `
-      <div class="announce-tile" title="${esc(f.name)}">
+      <div class="announce-tile"
+           title="${esc(f.name)}"
+           data-file-dataurl="${esc(f.dataUrl)}"
+           data-file-name="${esc(f.name)}"
+           data-file-ext="${esc(f.ext || 'file')}">
         <div class="announce-file-tile">
           <div class="announce-file-tile-icon">${icon}</div>
           <div class="announce-file-tile-ext">${esc(f.ext || 'file')}</div>
@@ -999,12 +1184,16 @@ function renderAnnouncements() {
   // Attachment tile click delegation
   grid.querySelectorAll('.announce-attachments').forEach(strip => {
     const allImages = JSON.parse(strip.dataset.allImages || '[]');
+
+    // image tiles → lightbox
     strip.querySelectorAll('[data-img-idx]').forEach(tile => {
       tile.addEventListener('click', () => {
         const idx = Number(tile.dataset.imgIdx);
         openLightbox(allImages[idx], `รูปภาพ ${idx + 1}`);
       });
     });
+
+    // +N more tile → lightbox first hidden image
     const moreTile = strip.querySelector('.announce-more-tile');
     if (moreTile) {
       moreTile.addEventListener('click', () => {
@@ -1012,6 +1201,13 @@ function renderAnnouncements() {
         openLightbox(allImages[start], `รูปภาพ ${start + 1}`);
       });
     }
+
+    // doc/file tiles → file preview modal
+    strip.querySelectorAll('[data-file-dataurl]').forEach(tile => {
+      tile.addEventListener('click', () => {
+        openFilePreview(tile.dataset.fileDataurl, tile.dataset.fileName, tile.dataset.fileExt);
+      });
+    });
   });
 
   renderPagination(totalPages);
