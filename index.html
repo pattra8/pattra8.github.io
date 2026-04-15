@@ -478,6 +478,104 @@
       text-align: center;
     }
 
+    /* ─── ANNOUNCE PHOTOS ─── */
+    .announce-photos {
+      display: flex;
+      gap: 7px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .announce-photo-thumb {
+      width: 68px;
+      height: 68px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      background: var(--bg2);
+    }
+
+    .announce-photo-thumb:hover {
+      transform: scale(1.06);
+      border-color: var(--gold);
+      box-shadow: 0 4px 14px rgba(184,151,90,0.22);
+    }
+
+    /* ─── LIGHTBOX ─── */
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(30,24,20,0.82);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      backdrop-filter: blur(4px);
+    }
+
+    .lightbox-overlay.open {
+      display: flex;
+    }
+
+    .lightbox-img {
+      max-width: min(90vw, 720px);
+      max-height: 82vh;
+      border-radius: 12px;
+      object-fit: contain;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      animation: lb-in 0.18s ease;
+    }
+
+    @keyframes lb-in {
+      from { opacity: 0; transform: scale(0.94); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .lightbox-close:hover { background: rgba(255,255,255,0.22); }
+
+    .announce-photo-more {
+      width: 68px;
+      height: 68px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--gold-pale);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .announce-photo-more:hover {
+      background: var(--bg3);
+      border-color: var(--gold);
+    }
+
     .pagination {
       display: flex;
       justify-content: center;
@@ -596,7 +694,7 @@
   </a>
   <div class="header-actions">
     <a href="https://pattra8.github.io/admin/" class="header-btn secondary">Admin</a>
-    <a href="https://pattra8.github.io/report/" class="header-btn">Report Issue</a>
+    <a href="https://pattra8.github.io/report" class="header-btn">Report Issue</a>
   </div>
 </header>
 
@@ -620,7 +718,7 @@
   <div class="services-grid">
 
     <!-- 1. แจ้งปัญหา -->
-    <a href="https://pattra8.github.io/report/" class="service-card featured">
+    <a href="https://pattra8.github.io/report" class="service-card featured">
       <div class="tag">Live</div>
       <div class="service-icon">🔧</div>
       <div class="service-title">แจ้งปัญหา / ซ่อมแซม</div>
@@ -694,12 +792,18 @@
 
 </main>
 
+<!-- ─── LIGHTBOX ─── -->
+<div class="lightbox-overlay" id="lightboxOverlay" role="dialog" aria-modal="true">
+  <button class="lightbox-close" id="lightboxClose" aria-label="ปิด">✕</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+</div>
+
 <!-- ─── FOOTER ─── -->
 <footer>
   <div class="footer-logo">Pattra Villa 8</div>
   <div class="footer-tagline">Resident Services</div>
   <div class="footer-links">
-    <a href="https://pattra8.github.io/report/">Report Issue</a>
+    <a href="https://pattra8.github.io/report">Report Issue</a>
     <a href="https://pattravilla8.web.app/payment.html">Payment</a>
     <a href="https://pattravilla8.web.app/report.html">Financial Report</a>
     <a href="https://pattra8.github.io/data/">Residents</a>
@@ -729,6 +833,31 @@ let currentPage = 1;
 
 const grid = document.getElementById('announceGrid');
 const pager = document.getElementById('announcePagination');
+const lightbox = document.getElementById('lightboxOverlay');
+const lightboxImg = document.getElementById('lightboxImg');
+document.getElementById('lightboxClose').addEventListener('click', () => lightbox.classList.remove('open'));
+lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+
+function openLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || '';
+  lightbox.classList.add('open');
+}
+
+function buildPhotoStrip(photos) {
+  if (!photos || !photos.length) return '';
+  const MAX_SHOW = 4;
+  const visible = photos.slice(0, MAX_SHOW);
+  const extra = photos.length - MAX_SHOW;
+  const thumbs = visible.map((src, i) =>
+    `<img class="announce-photo-thumb" src="${esc(src)}" alt="รูปภาพ ${i + 1}" data-photo-idx="${i}" loading="lazy" />`
+  ).join('');
+  const moreBtn = extra > 0
+    ? `<div class="announce-photo-more" data-all-photos="${esc(JSON.stringify(photos))}">+${extra}</div>`
+    : '';
+  return `<div class="announce-photos" data-photos="${esc(JSON.stringify(photos))}">${thumbs}${moreBtn}</div>`;
+}
 
 function esc(value) {
   return String(value || '').replace(/[&<>"']/g, char => ({
@@ -765,10 +894,30 @@ function renderAnnouncements() {
       <div class="announce-body">
         <strong>${esc(item.title)}</strong>
         <p>${esc(item.body)}</p>
+        ${buildPhotoStrip(item.photos)}
         <div class="announce-date">${esc(formatDate(item))}</div>
       </div>
     </div>
   `).join('');
+
+  // Photo lightbox click delegation
+  grid.querySelectorAll('.announce-photos').forEach(strip => {
+    const allPhotos = JSON.parse(strip.dataset.photos || '[]');
+    strip.querySelectorAll('.announce-photo-thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const idx = Number(thumb.dataset.photoIdx);
+        openLightbox(allPhotos[idx], thumb.alt);
+      });
+    });
+    const moreBtn = strip.querySelector('.announce-photo-more');
+    if (moreBtn) {
+      moreBtn.addEventListener('click', () => {
+        // open the first hidden photo
+        const shown = strip.querySelectorAll('.announce-photo-thumb').length;
+        openLightbox(allPhotos[shown], `รูปภาพ ${shown + 1}`);
+      });
+    }
+  });
 
   renderPagination(totalPages);
 }

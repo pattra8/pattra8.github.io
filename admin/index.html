@@ -306,6 +306,113 @@
       font-size: 13px;
     }
 
+    /* ─── PHOTO UPLOAD ─── */
+    .photo-drop-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .photo-drop-zone:hover,
+    .photo-drop-zone.drag-over {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+    }
+
+    .photo-drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 0;
+    }
+
+    .photo-drop-label {
+      font-size: 13px;
+      color: var(--muted);
+      pointer-events: none;
+      line-height: 1.6;
+    }
+
+    .photo-drop-label span {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .photo-previews {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .photo-preview-item {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+    }
+
+    .photo-preview-item img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      display: block;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      transition: transform 0.15s;
+    }
+
+    .photo-remove-btn:hover { transform: scale(1.15); }
+
+    .photo-count {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .announcement-photos {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .announcement-photos img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
     @media (max-width: 760px) {
       header { padding: 0 18px; }
       .brand-sub { display: none; }
@@ -359,6 +466,19 @@
         <div class="field">
           <label for="bodyInput">รายละเอียด</label>
           <textarea id="bodyInput" required maxlength="600" placeholder="รายละเอียดประกาศสำหรับลูกบ้าน"></textarea>
+        </div>
+
+        <div class="field">
+          <label>รูปภาพประกอบ (ไม่จำเป็น)</label>
+          <div class="photo-drop-zone" id="photoDropZone">
+            <input type="file" id="photoFileInput" accept="image/*" multiple />
+            <div class="photo-drop-label">
+              <span>เลือกรูปภาพ</span> หรือลากวางไฟล์ที่นี่<br/>
+              <small>รองรับ JPG, PNG, WebP · สูงสุด 5 ภาพ · แต่ละภาพไม่เกิน 2MB</small>
+            </div>
+          </div>
+          <div class="photo-previews" id="photoPreviews"></div>
+          <div class="photo-count" id="photoCount"></div>
         </div>
 
         <div class="form-row">
@@ -433,6 +553,76 @@
     const cancelBtn = document.getElementById('cancelBtn');
     const list = document.getElementById('announcementList');
 
+    // ─── PHOTO MANAGEMENT ───
+    const MAX_PHOTOS = 5;
+    const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+    let pendingPhotos = []; // array of base64 data-URL strings
+
+    const photoFileInput = document.getElementById('photoFileInput');
+    const photoPreviews = document.getElementById('photoPreviews');
+    const photoCount = document.getElementById('photoCount');
+    const photoDropZone = document.getElementById('photoDropZone');
+
+    function updatePhotoUI() {
+      photoPreviews.innerHTML = pendingPhotos.map((src, i) => `
+        <div class="photo-preview-item">
+          <img src="${src}" alt="รูป ${i + 1}" />
+          <button class="photo-remove-btn" type="button" data-photo-remove="${i}" title="ลบรูป">✕</button>
+        </div>
+      `).join('');
+      photoCount.textContent = pendingPhotos.length
+        ? `${pendingPhotos.length} / ${MAX_PHOTOS} ภาพ`
+        : '';
+    }
+
+    photoPreviews.addEventListener('click', e => {
+      const btn = e.target.closest('[data-photo-remove]');
+      if (!btn) return;
+      pendingPhotos.splice(Number(btn.dataset.photoRemove), 1);
+      updatePhotoUI();
+    });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function addFiles(files) {
+      const remaining = MAX_PHOTOS - pendingPhotos.length;
+      const toProcess = Array.from(files).slice(0, remaining);
+      const oversize = toProcess.filter(f => f.size > MAX_BYTES);
+      if (oversize.length) {
+        formStatus.textContent = `รูปภาพบางไฟล์มีขนาดเกิน 2MB (${oversize.map(f => f.name).join(', ')})`;
+        formStatus.classList.add('error');
+        return;
+      }
+      try {
+        const encoded = await Promise.all(toProcess.map(fileToBase64));
+        pendingPhotos = [...pendingPhotos, ...encoded];
+        updatePhotoUI();
+      } catch {
+        formStatus.textContent = 'ไม่สามารถโหลดรูปภาพได้';
+        formStatus.classList.add('error');
+      }
+    }
+
+    photoFileInput.addEventListener('change', e => {
+      if (e.target.files.length) addFiles(e.target.files);
+      photoFileInput.value = '';
+    });
+
+    photoDropZone.addEventListener('dragover', e => { e.preventDefault(); photoDropZone.classList.add('drag-over'); });
+    photoDropZone.addEventListener('dragleave', () => photoDropZone.classList.remove('drag-over'));
+    photoDropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      photoDropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+    });
+
     function esc(value) {
       return String(value || '').replace(/[&<>"']/g, char => ({
         '&': '&amp;',
@@ -487,6 +677,8 @@
       cancelBtn.classList.add('hidden');
       formStatus.textContent = message || 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
       formStatus.classList.remove('error');
+      pendingPhotos = [];
+      updatePhotoUI();
     }
 
     function renderList(items) {
@@ -495,22 +687,28 @@
         return;
       }
 
-      list.innerHTML = items.map(item => `
-        <article class="announcement">
-          <div>
-            <h3>${esc(item.title)}</h3>
-            <p>${esc(item.body)}</p>
-            <div class="meta">
-              <span>${esc(formatDate(item))}</span>
-              <span class="pill">${esc(item.type || 'normal')}</span>
+      list.innerHTML = items.map(item => {
+        const photoThumbs = Array.isArray(item.photos) && item.photos.length
+          ? `<div class="announcement-photos">${item.photos.slice(0, 5).map((src, i) => `<img src="${esc(src)}" alt="รูป ${i + 1}" />`).join('')}${item.photos.length > 5 ? `<span style="font-size:11px;color:var(--muted);align-self:center;">+${item.photos.length - 5}</span>` : ''}</div>`
+          : '';
+        return `
+          <article class="announcement">
+            <div>
+              <h3>${esc(item.title)}</h3>
+              <p>${esc(item.body)}</p>
+              ${photoThumbs}
+              <div class="meta">
+                <span>${esc(formatDate(item))}</span>
+                <span class="pill">${esc(item.type || 'normal')}</span>
+              </div>
             </div>
-          </div>
-          <div class="actions">
-            <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">Edit</button>
-            <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">Delete</button>
-          </div>
-        </article>
-      `).join('');
+            <div class="actions">
+              <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">Edit</button>
+              <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">Delete</button>
+            </div>
+          </article>
+        `;
+      }).join('');
     }
 
     document.getElementById('loginBtn').addEventListener('click', () => {
@@ -538,6 +736,7 @@
         type: document.getElementById('typeInput').value,
         dateValue: document.getElementById('dateInput').value || todayISO(),
         dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
+        photos: pendingPhotos.length ? pendingPhotos : [],
         updatedAt: serverTimestamp()
       };
 
@@ -576,6 +775,8 @@
         document.getElementById('bodyInput').value = item.body || '';
         document.getElementById('typeInput').value = item.type || 'normal';
         document.getElementById('dateInput').value = item.dateValue || todayISO();
+        pendingPhotos = Array.isArray(item.photos) ? [...item.photos] : [];
+        updatePhotoUI();
         formTitle.textContent = 'แก้ไขประกาศ';
         cancelBtn.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
