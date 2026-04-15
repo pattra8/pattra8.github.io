@@ -516,6 +516,35 @@
       margin-top: 6px;
     }
 
+    /* ─── SAVE PROGRESS BAR ─── */
+    .save-progress {
+      display: none;
+      margin-top: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg2);
+      height: 6px;
+    }
+
+    .save-progress.active { display: block; }
+
+    .save-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light, #cead75));
+      border-radius: 8px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .save-progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .save-progress-label.active { display: block; }
+
     .announcement-photos {
       display: flex;
       gap: 6px;
@@ -618,6 +647,10 @@
           <button type="submit" id="saveBtn">Save Announcement</button>
           <button type="button" class="btn-secondary hidden" id="cancelBtn">Cancel Edit</button>
         </div>
+        <div class="save-progress" id="saveProgress">
+          <div class="save-progress-bar" id="saveProgressBar"></div>
+        </div>
+        <div class="save-progress-label" id="saveProgressLabel"></div>
         <p class="notice" id="formStatus">ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh</p>
       </form>
 
@@ -670,6 +703,24 @@
     const formStatus = document.getElementById('formStatus');
     const cancelBtn = document.getElementById('cancelBtn');
     const list = document.getElementById('announcementList');
+    const saveProgress = document.getElementById('saveProgress');
+    const saveProgressBar = document.getElementById('saveProgressBar');
+    const saveProgressLabel = document.getElementById('saveProgressLabel');
+
+    function showProgress(pct, label) {
+      saveProgress.classList.add('active');
+      saveProgressLabel.classList.add('active');
+      saveProgressBar.style.width = pct + '%';
+      saveProgressLabel.textContent = label;
+      formStatus.textContent = '';
+    }
+
+    function hideProgress() {
+      saveProgress.classList.remove('active');
+      saveProgressLabel.classList.remove('active');
+      saveProgressBar.style.width = '0%';
+      saveProgressLabel.textContent = '';
+    }
 
     // ─── FILE MANAGEMENT ───
     const MAX_FILES = 5;
@@ -735,6 +786,37 @@
       });
     }
 
+    // Compress image via canvas — max 1600px on longest side, quality 0.82
+    function compressImage(file) {
+      return new Promise((resolve, reject) => {
+        const MAX_DIM = 1600;
+        const QUALITY = 0.82;
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            let { width, height } = img;
+            if (width <= MAX_DIM && height <= MAX_DIM && file.size < 500 * 1024) {
+              // small enough — skip canvas, return original
+              resolve(e.target.result);
+              return;
+            }
+            const scale = Math.min(MAX_DIM / width, MAX_DIM / height, 1);
+            const canvas = document.createElement('canvas');
+            canvas.width  = Math.round(width  * scale);
+            canvas.height = Math.round(height * scale);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', QUALITY));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     async function addFiles(files) {
       const remaining = MAX_FILES - pendingPhotos.length;
       const toProcess = Array.from(files).slice(0, remaining);
@@ -748,7 +830,10 @@
       }
 
       try {
-        const encoded = await Promise.all(toProcess.map(fileToBase64));
+        const encoded = await Promise.all(toProcess.map(file => {
+          const cat = getFileCategory(file.name);
+          return cat === 'image' ? compressImage(file) : fileToBase64(file);
+        }));
         const newEntries = toProcess.map((file, i) => {
           const cat = getFileCategory(file.name);
           const ext = file.name.split('.').pop().toLowerCase();
@@ -833,6 +918,7 @@
       formStatus.classList.remove('error');
       pendingPhotos = [];
       updatePhotoUI();
+      hideProgress();
     }
 
     const TYPE_LABELS = { normal: 'ทั่วไป', urgent: 'เร่งด่วน', info: 'ข้อมูล' };
@@ -916,21 +1002,37 @@
 
       if (!data.title || !data.body) return;
 
-      formStatus.textContent = 'กำลังบันทึก...';
+      formStatus.textContent = '';
       formStatus.classList.remove('error');
+      document.getElementById('saveBtn').disabled = true;
 
       try {
+        // Step 1: preparing
+        showProgress(20, 'กำลังเตรียมข้อมูล...');
+        await new Promise(r => setTimeout(r, 120));
+
+        // Step 2: uploading
+        showProgress(55, `กำลังบันทึก${pendingPhotos.length ? ` (${pendingPhotos.length} ไฟล์)` : ''}...`);
+        await new Promise(r => setTimeout(r, 80));
+
         if (id) {
           await updateDoc(doc(db, 'announcements', id), data);
-          resetForm('แก้ไขประกาศเรียบร้อยแล้ว');
         } else {
           await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-          resetForm('เพิ่มประกาศเรียบร้อยแล้ว');
         }
+
+        // Step 3: done
+        showProgress(100, '✓ บันทึกเรียบร้อยแล้ว');
+        await new Promise(r => setTimeout(r, 600));
+        hideProgress();
+        resetForm(id ? 'แก้ไขประกาศเรียบร้อยแล้ว' : 'เพิ่มประกาศเรียบร้อยแล้ว');
       } catch (error) {
         console.error(error);
+        hideProgress();
         formStatus.textContent = 'บันทึกไม่สำเร็จ กรุณาตรวจสอบ Firestore permissions';
         formStatus.classList.add('error');
+      } finally {
+        document.getElementById('saveBtn').disabled = false;
       }
     });
 
