@@ -917,14 +917,35 @@
   /* ── load data ── */
   async function loadData() {
     try {
-      const res = await fetch(`${DATA_API_URL}?t=${Date.now()}`, {
-        cache: 'no-store',
-      });
-      const result = await res.json();
-      if (!res.ok || !result.ok) {
-        throw new Error(result.error || `HTTP ${res.status}`);
+      // Fetch resident data (Cloud Function) + vehicle data (static JSON) in parallel
+      const [resRes, vehRes] = await Promise.all([
+        fetch(`${DATA_API_URL}?t=${Date.now()}`, { cache: 'no-store' }),
+        fetch(`/data/vehicles_clean.json?t=${Date.now()}`, { cache: 'no-store' })
+      ]);
+
+      const result = await resRes.json();
+      if (!resRes.ok || !result.ok) {
+        throw new Error(result.error || `HTTP ${resRes.status}`);
       }
-      allData = result.data;
+
+      // Build vehicle lookup map
+      let vehicleMap = {};
+      if (vehRes.ok) {
+        const vData = await vehRes.json();
+        vData.forEach(v => { vehicleMap[v.house_no] = v; });
+      }
+
+      // Merge vehicle data into resident records
+      allData = result.data.map(r => {
+        const v = vehicleMap[r.house_no];
+        return {
+          ...r,
+          vehicles: v
+            ? { cars: v.cars, motorcycles: v.motorcycles, last_updated: v.last_updated }
+            : { cars: [], motorcycles: [], last_updated: null }
+        };
+      });
+
       // Do NOT render on load — wait for user to search
     } catch(e) {
       document.getElementById('cardGrid').innerHTML =
