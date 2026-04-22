@@ -981,7 +981,9 @@
     const q = document.getElementById('searchInput').value.trim();
     const resultBar = document.getElementById('resultBar');
 
-    if (!q) {
+    // require at least "38/X" — one digit after the slash
+    const hasSpecificNumber = /\/\d+/.test(q) || (/^\d+$/.test(q) && q.length >= 1);
+    if (!q || !hasSpecificNumber) {
       document.getElementById('cardGrid').innerHTML = '';
       resultBar.style.display = 'none';
       return;
@@ -1176,6 +1178,9 @@
   document.getElementById('modalOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
+
+  // Pre-fill search with "38/" as default prefix
+  document.getElementById('searchInput').value = '38/';
 
   loadData();
 </script>
