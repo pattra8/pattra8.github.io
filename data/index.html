@@ -878,7 +878,7 @@
         throw new Error(result.error || `HTTP ${res.status}`);
       }
       allData = result.data;
-      renderCards(allData);
+      // Do NOT render on load — wait for user to search
     } catch(e) {
       document.getElementById('cardGrid').innerHTML =
         '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลจาก Google Sheet ได้</div>';
