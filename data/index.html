@@ -242,27 +242,13 @@
     }
 
     /* ── VEHICLE SECTION ── */
-    .vehicle-row {
-      padding: 9px 0 6px;
-      border-top: 1px solid #f1f5f9;
-      margin-top: 2px;
-    }
-    .vehicle-label {
-      font-size: 0.65rem;
-      color: #94a3b8;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      margin-bottom: 6px;
-    }
-    .plate-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
-    .plate-group:last-child { margin-bottom: 0; }
-    .plate-type {
-      font-size: 0.67rem;
-      color: #94a3b8;
-      margin-right: 2px;
-      flex-shrink: 0;
-      line-height: 22px;
+    .field-icon.car-icon  { background: #eff6ff; }
+    .field-icon.moto-icon { background: #fef9ec; }
+    .plate-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
     }
     .plate-chip {
       display: inline-flex;
@@ -270,7 +256,7 @@
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
       border-radius: 5px;
-      padding: 2px 8px;
+      padding: 2px 9px;
       font-size: 0.78rem;
       font-weight: 600;
       color: #334155;
@@ -281,11 +267,6 @@
       background: #fef9ec;
       border-color: #fde68a;
       color: #78350f;
-    }
-    .plate-empty {
-      font-size: 0.78rem;
-      color: #cbd5e1;
-      font-style: italic;
     }
 
     /* ── LAST UPDATED BADGE ── */
@@ -809,6 +790,14 @@
               <span class="snapshot-key">📞 เบอร์โทร</span>
               <span class="snapshot-val" id="snap_phone">—</span>
             </div>
+            <div class="snapshot-field">
+              <span class="snapshot-key">🚗 รถยนต์</span>
+              <span class="snapshot-val" id="snap_cars">—</span>
+            </div>
+            <div class="snapshot-field">
+              <span class="snapshot-key">🏍 มอเตอร์ไซค์</span>
+              <span class="snapshot-val" id="snap_motos">—</span>
+            </div>
           </div>
         </div>
 
@@ -827,7 +816,9 @@
             <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
             <option value="อีเมล">อีเมล</option>
             <option value="เบอร์โทร">เบอร์โทร</option>
-            <option value="หลายรายการ">ชื่อ + อีเมล + เบอร์โทร</option>
+            <option value="ทะเบียนรถยนต์">🚗 ทะเบียนรถยนต์</option>
+            <option value="ทะเบียนมอเตอร์ไซค์">🏍 ทะเบียนมอเตอร์ไซค์</option>
+            <option value="หลายรายการ">แก้ไขหลายรายการพร้อมกัน</option>
             <option value="อื่นๆ">อื่นๆ</option>
           </select>
         </div>
@@ -851,6 +842,14 @@
               <label>เบอร์โทรใหม่</label>
               <input type="text" id="f_new_phone" placeholder="เบอร์โทรที่ถูกต้อง" oninput="onNewValInput()" />
             </div>
+          </div>
+          <div class="form-group">
+            <label>🚗 ทะเบียนรถยนต์ใหม่</label>
+            <input type="text" id="f_new_cars" placeholder="คั่นด้วยลูกน้ำ เช่น 5ขฌ9398, 3กศ535" oninput="onNewValInput()" />
+          </div>
+          <div class="form-group">
+            <label>🏍 ทะเบียนมอเตอร์ไซค์ใหม่</label>
+            <input type="text" id="f_new_motos" placeholder="คั่นด้วยลูกน้ำ เช่น 1กฐ1717" oninput="onNewValInput()" />
           </div>
         </div>
 
@@ -997,7 +996,7 @@
           ${vehicleRow(r)}
         </div>
         <div class="res-card-footer">
-          <button class="btn-report" onclick="openModal('${esc(r.house_no)}','${esc(r.name)}','${esc(r.email)}','${esc(r.phone)}')">
+          <button class="btn-report" onclick="openModal('${esc(r.house_no)}')">
             <span class="btn-icon">✏️</span> แจ้งแก้ไข
           </button>
         </div>
@@ -1024,24 +1023,39 @@
     if (!v) return '';
     const hasCars  = v.cars  && v.cars.length  > 0;
     const hasMotos = v.motorcycles && v.motorcycles.length > 0;
+
     if (!hasCars && !hasMotos) {
-      return `<div class="vehicle-row">
-        <div class="vehicle-label">🚗 ทะเบียนรถ</div>
-        <span class="plate-empty">ยังไม่มีข้อมูลทะเบียน</span>
+      return `
+      <div class="field-row">
+        <div class="field-icon car-icon">🚗</div>
+        <div class="field-content">
+          <div class="field-label">ทะเบียนรถ</div>
+          <span class="field-value empty">ยังไม่มีข้อมูลทะเบียน</span>
+        </div>
       </div>`;
     }
-    let html = `<div class="vehicle-row"><div class="vehicle-label">🚗 ทะเบียนรถ</div>`;
+
+    let html = '';
     if (hasCars) {
-      html += `<div class="plate-group"><span class="plate-type">🚗</span>`;
-      html += v.cars.map(p => `<span class="plate-chip">${escHtml(p)}</span>`).join('');
-      html += `</div>`;
+      html += `
+      <div class="field-row">
+        <div class="field-icon car-icon">🚗</div>
+        <div class="field-content">
+          <div class="field-label">รถยนต์</div>
+          <div class="plate-wrap">${v.cars.map(p => `<span class="plate-chip">${escHtml(p)}</span>`).join('')}</div>
+        </div>
+      </div>`;
     }
     if (hasMotos) {
-      html += `<div class="plate-group"><span class="plate-type">🏍</span>`;
-      html += v.motorcycles.map(p => `<span class="plate-chip moto">${escHtml(p)}</span>`).join('');
-      html += `</div>`;
+      html += `
+      <div class="field-row">
+        <div class="field-icon moto-icon">🏍</div>
+        <div class="field-content">
+          <div class="field-label">มอเตอร์ไซค์</div>
+          <div class="plate-wrap">${v.motorcycles.map(p => `<span class="plate-chip moto">${escHtml(p)}</span>`).join('')}</div>
+        </div>
+      </div>`;
     }
-    html += `</div>`;
     return html;
   }
 
@@ -1077,28 +1091,43 @@
   }
 
   /* ── modal ── */
-  function openModal(houseNo, name, email, phone) {
-    const cleanEmail = (!email || email==='nan') ? '' : email;
-    const cleanPhone = (!phone || phone==='nan') ? '' : phone;
-    const cleanName  = (!name  || name ==='nan') ? '' : name;
+  function openModal(houseNo) {
+    const r = allData.find(x => x.house_no === houseNo);
+    if (!r) return;
 
-    currentRecord = { houseNo, name: cleanName, email: cleanEmail, phone: cleanPhone };
+    const cleanEmail = (!r.email || r.email==='nan') ? '' : r.email;
+    const cleanPhone = (!r.phone || r.phone==='nan') ? '' : r.phone;
+    const cleanName  = (!r.name  || r.name ==='nan') ? '' : r.name;
+    const cars  = (r.vehicles?.cars  || []);
+    const motos = (r.vehicles?.motorcycles || []);
+
+    currentRecord = {
+      houseNo,
+      name:        cleanName,
+      email:       cleanEmail,
+      phone:       cleanPhone,
+      cars,
+      motorcycles: motos
+    };
 
     document.getElementById('mHouseNo').textContent = houseNo;
 
     const setSnap = (id, val) => {
       const el = document.getElementById(id);
       if (val) { el.textContent = val; el.className = 'snapshot-val'; }
-      else { el.textContent = 'ไม่มีข้อมูล'; el.className = 'snapshot-val empty'; }
+      else      { el.textContent = 'ไม่มีข้อมูล'; el.className = 'snapshot-val empty'; }
     };
     setSnap('snap_name',  cleanName);
     setSnap('snap_email', cleanEmail);
     setSnap('snap_phone', cleanPhone || '—');
+    setSnap('snap_cars',  cars.length  ? cars.join(', ')  : '');
+    setSnap('snap_motos', motos.length ? motos.join(', ') : '');
 
-    ['f_field','f_new_val','f_new_name','f_new_email','f_new_phone','f_reporter','f_contact','f_notes'].forEach(id => {
+    ['f_field','f_new_val','f_new_name','f_new_email','f_new_phone','f_new_cars','f_new_motos','f_reporter','f_contact','f_notes'].forEach(id => {
       const el = document.getElementById(id);
-      el.value = '';
+      if (el) el.value = '';
     });
+    document.getElementById('f_new_val').placeholder = 'กรอกข้อมูลที่ถูกต้อง';
     document.getElementById('changeBox').className = 'change-box';
     document.getElementById('singleValueGroup').style.display = 'block';
     document.getElementById('multiFields').className = 'multi-fields';
@@ -1114,9 +1143,14 @@
   }
 
   function onFieldChange() {
-    const isMulti = document.getElementById('f_field').value === 'หลายรายการ';
+    const field = document.getElementById('f_field').value;
+    const isMulti   = field === 'หลายรายการ';
+    const isVehicle = field === 'ทะเบียนรถยนต์' || field === 'ทะเบียนมอเตอร์ไซค์';
     document.getElementById('singleValueGroup').style.display = isMulti ? 'none' : 'block';
     document.getElementById('multiFields').className = isMulti ? 'multi-fields show' : 'multi-fields';
+    document.getElementById('f_new_val').placeholder = isVehicle
+      ? 'คั่นด้วยลูกน้ำ เช่น 5ขฌ9398, 3กศ535'
+      : 'กรอกข้อมูลที่ถูกต้อง';
     updatePreview();
   }
   function onNewValInput() { updatePreview(); }
@@ -1125,29 +1159,21 @@
     const field = document.getElementById('f_field').value;
     if (field === 'หลายรายการ') {
       return [
-        {
-          label: 'ชื่อ-นามสกุล',
-          oldVal: currentRecord.name || '(ว่าง)',
-          newVal: document.getElementById('f_new_name').value.trim(),
-        },
-        {
-          label: 'อีเมล',
-          oldVal: currentRecord.email || '(ว่าง)',
-          newVal: document.getElementById('f_new_email').value.trim(),
-        },
-        {
-          label: 'เบอร์โทร',
-          oldVal: currentRecord.phone || '(ว่าง)',
-          newVal: document.getElementById('f_new_phone').value.trim(),
-        },
+        { label: 'ชื่อ-นามสกุล',       oldVal: currentRecord.name  || '(ว่าง)', newVal: document.getElementById('f_new_name').value.trim() },
+        { label: 'อีเมล',              oldVal: currentRecord.email || '(ว่าง)', newVal: document.getElementById('f_new_email').value.trim() },
+        { label: 'เบอร์โทร',           oldVal: currentRecord.phone || '(ว่าง)', newVal: document.getElementById('f_new_phone').value.trim() },
+        { label: 'ทะเบียนรถยนต์',      oldVal: currentRecord.cars.join(', ')  || '(ว่าง)', newVal: document.getElementById('f_new_cars').value.trim() },
+        { label: 'ทะเบียนมอเตอร์ไซค์', oldVal: currentRecord.motorcycles.join(', ') || '(ว่าง)', newVal: document.getElementById('f_new_motos').value.trim() },
       ].filter(item => item.newVal);
     }
 
     const newVal = document.getElementById('f_new_val').value.trim();
     let oldVal = '';
-    if (field === 'ชื่อ-นามสกุล') oldVal = currentRecord.name  || '(ว่าง)';
-    else if (field === 'อีเมล')   oldVal = currentRecord.email || '(ว่าง)';
-    else if (field === 'เบอร์โทร') oldVal = currentRecord.phone || '(ว่าง)';
+    if      (field === 'ชื่อ-นามสกุล')       oldVal = currentRecord.name  || '(ว่าง)';
+    else if (field === 'อีเมล')              oldVal = currentRecord.email || '(ว่าง)';
+    else if (field === 'เบอร์โทร')           oldVal = currentRecord.phone || '(ว่าง)';
+    else if (field === 'ทะเบียนรถยนต์')      oldVal = currentRecord.cars.join(', ')  || '(ว่าง)';
+    else if (field === 'ทะเบียนมอเตอร์ไซค์') oldVal = currentRecord.motorcycles.join(', ') || '(ว่าง)';
     else oldVal = '(ข้อมูลเดิม)';
 
     return field ? [{ label: field, oldVal, newVal }] : [];
