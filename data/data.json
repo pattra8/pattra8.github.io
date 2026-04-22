@@ -6,7 +6,15 @@
     "phone": "089-119-9464",
     "deed_no": "14837",
     "zone": "A1",
-    "plot": "68"
+    "plot": "68",
+    "vehicles": {
+      "cars": [
+        "5ขฌ9398",
+        "3กศ535"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/21/2026 19:43:11"
+    }
   },
   {
     "house_no": "38/2",
@@ -15,7 +23,14 @@
     "phone": "081-561-6654",
     "deed_no": "14836",
     "zone": "A2",
-    "plot": "67"
+    "plot": "67",
+    "vehicles": {
+      "cars": [
+        "3กม2495"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 11:36:01"
+    }
   },
   {
     "house_no": "38/3",
@@ -24,7 +39,16 @@
     "phone": "086-976-9338",
     "deed_no": "14835",
     "zone": "A3",
-    "plot": "66"
+    "plot": "66",
+    "vehicles": {
+      "cars": [
+        "9กร6955",
+        "ฮษ8193",
+        "6กณ6163"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 16:56:27"
+    }
   },
   {
     "house_no": "38/4",
@@ -33,7 +57,17 @@
     "phone": "084-334-6655",
     "deed_no": "14834",
     "zone": "A4",
-    "plot": "65"
+    "plot": "65",
+    "vehicles": {
+      "cars": [
+        "ศล86"
+      ],
+      "motorcycles": [
+        "5ขฉ3699",
+        "3ขน7239"
+      ],
+      "last_updated": "4/21/2026 19:23:54"
+    }
   },
   {
     "house_no": "38/5",
@@ -42,7 +76,16 @@
     "phone": "087-592-6969",
     "deed_no": "14833",
     "zone": "A5",
-    "plot": "64"
+    "plot": "64",
+    "vehicles": {
+      "cars": [
+        "8กท5106",
+        "4ขล714",
+        "ฆฉ3489"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 15:21:18"
+    }
   },
   {
     "house_no": "38/6",
@@ -51,7 +94,12 @@
     "phone": "081-375-9905",
     "deed_no": "14832",
     "zone": "A6",
-    "plot": "63"
+    "plot": "63",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/7",
@@ -60,7 +108,12 @@
     "phone": "081-409-0154",
     "deed_no": "14831",
     "zone": "E1",
-    "plot": "62"
+    "plot": "62",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/8",
@@ -69,7 +122,12 @@
     "phone": "081-488-4611",
     "deed_no": "14830",
     "zone": "E2",
-    "plot": "61"
+    "plot": "61",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/9",
@@ -78,7 +136,14 @@
     "phone": "086-824-9442",
     "deed_no": "14829",
     "zone": "E3",
-    "plot": ""
+    "plot": "",
+    "vehicles": {
+      "cars": [
+        "8กฮ6893"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 10:29:03"
+    }
   },
   {
     "house_no": "38/10",
@@ -87,7 +152,12 @@
     "phone": "081-311-2118",
     "deed_no": "14828",
     "zone": "E4",
-    "plot": "59"
+    "plot": "59",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/11",
@@ -96,7 +166,12 @@
     "phone": "081-835-5977",
     "deed_no": "14827",
     "zone": "E5",
-    "plot": "58"
+    "plot": "58",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/12",
@@ -105,7 +180,14 @@
     "phone": "095-446-6156",
     "deed_no": "14826",
     "zone": "E6",
-    "plot": "57"
+    "plot": "57",
+    "vehicles": {
+      "cars": [
+        "4ขง6370"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 15:21:48"
+    }
   },
   {
     "house_no": "38/13",
@@ -114,7 +196,12 @@
     "phone": "086-300-2996",
     "deed_no": "14825",
     "zone": "E7",
-    "plot": "56"
+    "plot": "56",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/14",
@@ -123,7 +210,15 @@
     "phone": "086-819-9487",
     "deed_no": "14824",
     "zone": "E8",
-    "plot": "55"
+    "plot": "55",
+    "vehicles": {
+      "cars": [
+        "สย6555",
+        "9กจ1464"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 12:16:02"
+    }
   },
   {
     "house_no": "38/15",
@@ -132,7 +227,18 @@
     "phone": "085-694-6556",
     "deed_no": "14823",
     "zone": "E9",
-    "plot": "54"
+    "plot": "54",
+    "vehicles": {
+      "cars": [
+        "9กน7959",
+        "ญว2626"
+      ],
+      "motorcycles": [
+        "1กฐ1717",
+        "1กฆ9898"
+      ],
+      "last_updated": "4/17/2026 15:22:49"
+    }
   },
   {
     "house_no": "38/16",
@@ -141,7 +247,14 @@
     "phone": "088-875-1400",
     "deed_no": "14822",
     "zone": "E10",
-    "plot": "53"
+    "plot": "53",
+    "vehicles": {
+      "cars": [
+        "4ขธ5876"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 19:18:33"
+    }
   },
   {
     "house_no": "38/17",
@@ -150,7 +263,18 @@
     "phone": "080-818-4842",
     "deed_no": "14821",
     "zone": "E11",
-    "plot": "52"
+    "plot": "52",
+    "vehicles": {
+      "cars": [
+        "5กด3330"
+      ],
+      "motorcycles": [
+        "1ขข7864",
+        "2กญ4818",
+        "1กผ1537"
+      ],
+      "last_updated": "4/17/2026 22:04:32"
+    }
   },
   {
     "house_no": "38/18",
@@ -159,7 +283,19 @@
     "phone": "095-156-4159",
     "deed_no": "14820",
     "zone": "E12",
-    "plot": "51"
+    "plot": "51",
+    "vehicles": {
+      "cars": [
+        "8กฬ6288",
+        "ฆว3818"
+      ],
+      "motorcycles": [
+        "2กพ3818",
+        "7กภ6844",
+        "4กย9034"
+      ],
+      "last_updated": "4/17/2026 21:08:14"
+    }
   },
   {
     "house_no": "38/19",
@@ -168,7 +304,16 @@
     "phone": "085-489-5519",
     "deed_no": "14819",
     "zone": "E13",
-    "plot": "50"
+    "plot": "50",
+    "vehicles": {
+      "cars": [
+        "4กศ9293",
+        "3กท5954",
+        "วต2323"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/21/2026 19:33:57"
+    }
   },
   {
     "house_no": "38/20",
@@ -177,7 +322,18 @@
     "phone": "080-920-2200",
     "deed_no": "14818",
     "zone": "E14",
-    "plot": "49"
+    "plot": "49",
+    "vehicles": {
+      "cars": [
+        "9กฎ6121",
+        "8กย6244"
+      ],
+      "motorcycles": [
+        "8ขก4076",
+        "กวข449"
+      ],
+      "last_updated": "4/21/2026 19:40:16"
+    }
   },
   {
     "house_no": "38/21",
@@ -186,7 +342,12 @@
     "phone": "089-774-7579",
     "deed_no": "14817",
     "zone": "E15",
-    "plot": "48"
+    "plot": "48",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/22",
@@ -195,7 +356,15 @@
     "phone": "081-209-3313",
     "deed_no": "14816",
     "zone": "E16",
-    "plot": "47"
+    "plot": "47",
+    "vehicles": {
+      "cars": [
+        "กล2068",
+        "8กง6137"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 10:16:37"
+    }
   },
   {
     "house_no": "38/23",
@@ -204,7 +373,17 @@
     "phone": "082-489-2002",
     "deed_no": "14815",
     "zone": "E17",
-    "plot": "46"
+    "plot": "46",
+    "vehicles": {
+      "cars": [
+        "4กม91",
+        "6ขด4532"
+      ],
+      "motorcycles": [
+        "5ขข9990"
+      ],
+      "last_updated": "4/20/2026 15:47:06"
+    }
   },
   {
     "house_no": "38/24",
@@ -213,7 +392,15 @@
     "phone": "081-867-7904",
     "deed_no": "14814",
     "zone": "E18",
-    "plot": "45"
+    "plot": "45",
+    "vehicles": {
+      "cars": [
+        "9กธ897",
+        "5ขญ897"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 8:16:50"
+    }
   },
   {
     "house_no": "38/25",
@@ -222,7 +409,12 @@
     "phone": "086-379-9815",
     "deed_no": "14813",
     "zone": "E19",
-    "plot": "44"
+    "plot": "44",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/26",
@@ -231,7 +423,16 @@
     "phone": "081-753-1676",
     "deed_no": "14812",
     "zone": "E20",
-    "plot": "43"
+    "plot": "43",
+    "vehicles": {
+      "cars": [
+        "ธอ9977"
+      ],
+      "motorcycles": [
+        "9กธ9977"
+      ],
+      "last_updated": "4/19/2026 12:59:31"
+    }
   },
   {
     "house_no": "38/27",
@@ -240,7 +441,17 @@
     "phone": "085-944-4789",
     "deed_no": "14811",
     "zone": "D15",
-    "plot": "42"
+    "plot": "42",
+    "vehicles": {
+      "cars": [
+        "ฐฐ9388",
+        "พบ988"
+      ],
+      "motorcycles": [
+        "3กญ3991"
+      ],
+      "last_updated": "4/21/2026 19:23:03"
+    }
   },
   {
     "house_no": "38/28",
@@ -249,7 +460,16 @@
     "phone": "081-569-6732",
     "deed_no": "14810",
     "zone": "D14",
-    "plot": "41"
+    "plot": "41",
+    "vehicles": {
+      "cars": [
+        "ภธ2322"
+      ],
+      "motorcycles": [
+        "7กผ9707"
+      ],
+      "last_updated": "4/20/2026 19:41:09"
+    }
   },
   {
     "house_no": "38/29",
@@ -258,7 +478,15 @@
     "phone": "",
     "deed_no": "14809",
     "zone": "D13",
-    "plot": "40"
+    "plot": "40",
+    "vehicles": {
+      "cars": [
+        "2กณ6357",
+        "2กฮ8759"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 15:41:40"
+    }
   },
   {
     "house_no": "38/30",
@@ -267,7 +495,15 @@
     "phone": "081-372-4448",
     "deed_no": "14808",
     "zone": "D12",
-    "plot": "39"
+    "plot": "39",
+    "vehicles": {
+      "cars": [
+        "ฌห1212",
+        "6ขบ7880"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 17:08:56"
+    }
   },
   {
     "house_no": "38/31",
@@ -276,7 +512,15 @@
     "phone": "081-534-2924",
     "deed_no": "14807",
     "zone": "D11",
-    "plot": "38"
+    "plot": "38",
+    "vehicles": {
+      "cars": [
+        "3ขค9396",
+        "2ขจ7964"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 10:53:17"
+    }
   },
   {
     "house_no": "38/32",
@@ -285,7 +529,15 @@
     "phone": "089-894-6339",
     "deed_no": "14806",
     "zone": "D10",
-    "plot": "37"
+    "plot": "37",
+    "vehicles": {
+      "cars": [
+        "5ขจ2826",
+        "อ6068"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 16:29:22"
+    }
   },
   {
     "house_no": "38/33",
@@ -294,7 +546,15 @@
     "phone": "081-641-6575",
     "deed_no": "14805",
     "zone": "D9",
-    "plot": "36"
+    "plot": "36",
+    "vehicles": {
+      "cars": [
+        "4กฎ933",
+        "ศอ933"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 9:50:21"
+    }
   },
   {
     "house_no": "38/34",
@@ -303,7 +563,12 @@
     "phone": "081-444-9476",
     "deed_no": "14804",
     "zone": "D8",
-    "plot": "35"
+    "plot": "35",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/35",
@@ -312,7 +577,15 @@
     "phone": "090-909-3835",
     "deed_no": "14803",
     "zone": "D7",
-    "plot": "34"
+    "plot": "34",
+    "vehicles": {
+      "cars": [
+        "3กค636",
+        "กษ1335"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 15:48:33"
+    }
   },
   {
     "house_no": "38/36",
@@ -321,7 +594,15 @@
     "phone": "085-419-4659",
     "deed_no": "14802",
     "zone": "D6",
-    "plot": "33"
+    "plot": "33",
+    "vehicles": {
+      "cars": [
+        "4กน6524",
+        "1ขร6592"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 21:09:31"
+    }
   },
   {
     "house_no": "38/37",
@@ -330,7 +611,17 @@
     "phone": "089-676-7443",
     "deed_no": "14801",
     "zone": "D5",
-    "plot": "32"
+    "plot": "32",
+    "vehicles": {
+      "cars": [
+        "2ขอ3991"
+      ],
+      "motorcycles": [
+        "8ขท38",
+        "9กฒ1015"
+      ],
+      "last_updated": "4/17/2026 23:04:44"
+    }
   },
   {
     "house_no": "38/38",
@@ -339,7 +630,16 @@
     "phone": "081-868-8252",
     "deed_no": "14800",
     "zone": "D4",
-    "plot": "31"
+    "plot": "31",
+    "vehicles": {
+      "cars": [
+        "ษศ1234",
+        "กณ1964",
+        "4ขฒ625"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 10:10:44"
+    }
   },
   {
     "house_no": "38/39",
@@ -348,7 +648,12 @@
     "phone": "081-371-3215",
     "deed_no": "14799",
     "zone": "D3",
-    "plot": "30"
+    "plot": "30",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/40",
@@ -357,7 +662,15 @@
     "phone": "089-837-7549",
     "deed_no": "14798",
     "zone": "D2",
-    "plot": "29"
+    "plot": "29",
+    "vehicles": {
+      "cars": [
+        "งค2879",
+        "8สก7314"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/20/2026 4:00:46"
+    }
   },
   {
     "house_no": "38/41",
@@ -366,7 +679,19 @@
     "phone": "082-334-5906",
     "deed_no": "14797",
     "zone": "D1",
-    "plot": "28"
+    "plot": "28",
+    "vehicles": {
+      "cars": [
+        "ฆถ5553",
+        "3ขพ268",
+        "6ขร5332"
+      ],
+      "motorcycles": [
+        "3ฒล8542",
+        "6ขร1737"
+      ],
+      "last_updated": "4/19/2026 11:54:21"
+    }
   },
   {
     "house_no": "38/42",
@@ -375,7 +700,12 @@
     "phone": "089-494-6464",
     "deed_no": "14796",
     "zone": "C1",
-    "plot": "27"
+    "plot": "27",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/43",
@@ -384,7 +714,17 @@
     "phone": "081-825-8859",
     "deed_no": "14795",
     "zone": "C2",
-    "plot": "26"
+    "plot": "26",
+    "vehicles": {
+      "cars": [
+        "2กฬ4389",
+        "7ขฉ6042"
+      ],
+      "motorcycles": [
+        "1ขห8542"
+      ],
+      "last_updated": "4/21/2026 19:26:02"
+    }
   },
   {
     "house_no": "38/44",
@@ -393,7 +733,16 @@
     "phone": "081-947-9255",
     "deed_no": "14794",
     "zone": "C3",
-    "plot": "25"
+    "plot": "25",
+    "vehicles": {
+      "cars": [
+        "7ขช3022"
+      ],
+      "motorcycles": [
+        "2กน9533"
+      ],
+      "last_updated": "4/17/2026 17:25:04"
+    }
   },
   {
     "house_no": "38/45",
@@ -402,7 +751,16 @@
     "phone": "090-965-4256",
     "deed_no": "14793",
     "zone": "C4",
-    "plot": "24"
+    "plot": "24",
+    "vehicles": {
+      "cars": [
+        "3ขท458",
+        "ชร8885",
+        "2ขด8864"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 10:27:13"
+    }
   },
   {
     "house_no": "38/46",
@@ -411,7 +769,12 @@
     "phone": "088-099-4055",
     "deed_no": "14792",
     "zone": "C5",
-    "plot": "23"
+    "plot": "23",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/47",
@@ -420,7 +783,18 @@
     "phone": "081-842-5284",
     "deed_no": "14791",
     "zone": "C6",
-    "plot": "22"
+    "plot": "22",
+    "vehicles": {
+      "cars": [
+        "4กฌ4968",
+        "1นข7675",
+        "7ขง4135"
+      ],
+      "motorcycles": [
+        "3ขง7122"
+      ],
+      "last_updated": "4/19/2026 13:19:53"
+    }
   },
   {
     "house_no": "38/48",
@@ -429,7 +803,20 @@
     "phone": "081-668-4525",
     "deed_no": "14790",
     "zone": "C7",
-    "plot": "21"
+    "plot": "21",
+    "vehicles": {
+      "cars": [
+        "3ขย1458",
+        "3ขย9833",
+        "6ขอ7715"
+      ],
+      "motorcycles": [
+        "ฬฬป81",
+        "5กภ7931",
+        "3ขฌ9006"
+      ],
+      "last_updated": "4/19/2026 10:48:49"
+    }
   },
   {
     "house_no": "38/49",
@@ -438,7 +825,14 @@
     "phone": "088-809-4652",
     "deed_no": "14789",
     "zone": "C8",
-    "plot": "20"
+    "plot": "20",
+    "vehicles": {
+      "cars": [
+        "1ขภ6065"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 9:40:16"
+    }
   },
   {
     "house_no": "38/50",
@@ -447,7 +841,15 @@
     "phone": "081-497-9418",
     "deed_no": "14788",
     "zone": "C9",
-    "plot": "19"
+    "plot": "19",
+    "vehicles": {
+      "cars": [
+        "5ขข9794",
+        "กข7378"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 18:38:39"
+    }
   },
   {
     "house_no": "38/51",
@@ -456,7 +858,12 @@
     "phone": "085-777-5544",
     "deed_no": "14787",
     "zone": "C10",
-    "plot": "18"
+    "plot": "18",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/52",
@@ -465,7 +872,17 @@
     "phone": "081-345-1511",
     "deed_no": "14786",
     "zone": "C11",
-    "plot": "17"
+    "plot": "17",
+    "vehicles": {
+      "cars": [
+        "7ขฒ5972",
+        "3กง1932"
+      ],
+      "motorcycles": [
+        "6ขฌ6495"
+      ],
+      "last_updated": "4/11/2026 22:47:00"
+    }
   },
   {
     "house_no": "38/53",
@@ -474,7 +891,15 @@
     "phone": "081-819-1212",
     "deed_no": "14785",
     "zone": "C12",
-    "plot": "16"
+    "plot": "16",
+    "vehicles": {
+      "cars": [
+        "ญษ7597",
+        "ญต3111"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 10:23:41"
+    }
   },
   {
     "house_no": "38/54",
@@ -483,7 +908,14 @@
     "phone": "086-397-7139",
     "deed_no": "14784",
     "zone": "C13",
-    "plot": "15"
+    "plot": "15",
+    "vehicles": {
+      "cars": [
+        "2ขญ8336"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 16:05:53"
+    }
   },
   {
     "house_no": "38/55",
@@ -492,7 +924,14 @@
     "phone": "084-975-2345",
     "deed_no": "14783",
     "zone": "C14",
-    "plot": "14"
+    "plot": "14",
+    "vehicles": {
+      "cars": [
+        "3กภ959"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 11:11:37"
+    }
   },
   {
     "house_no": "38/56",
@@ -501,7 +940,12 @@
     "phone": "083-093-1989",
     "deed_no": "14782",
     "zone": "C15",
-    "plot": "13"
+    "plot": "13",
+    "vehicles": {
+      "cars": [],
+      "motorcycles": [],
+      "last_updated": null
+    }
   },
   {
     "house_no": "38/57",
@@ -510,7 +954,16 @@
     "phone": "",
     "deed_no": "",
     "zone": "",
-    "plot": ""
+    "plot": "",
+    "vehicles": {
+      "cars": [
+        "7ขณ1955",
+        "ษว6611",
+        "5กย9165"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 9:43:51"
+    }
   },
   {
     "house_no": "38/58",
@@ -519,7 +972,15 @@
     "phone": "089-205-4067",
     "deed_no": "14780",
     "zone": "B11",
-    "plot": "11"
+    "plot": "11",
+    "vehicles": {
+      "cars": [
+        "ภฮ9926",
+        "3ขพ9942"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 15:49:12"
+    }
   },
   {
     "house_no": "38/59",
@@ -528,7 +989,17 @@
     "phone": "065-091-5583",
     "deed_no": "14779",
     "zone": "B10",
-    "plot": "10"
+    "plot": "10",
+    "vehicles": {
+      "cars": [
+        "6ขช7364",
+        "7กฐ2033"
+      ],
+      "motorcycles": [
+        "2กผ7701"
+      ],
+      "last_updated": "4/21/2026 19:28:06"
+    }
   },
   {
     "house_no": "38/60",
@@ -537,7 +1008,15 @@
     "phone": "089-144-8577",
     "deed_no": "14778",
     "zone": "B9",
-    "plot": "9"
+    "plot": "9",
+    "vehicles": {
+      "cars": [
+        "2กธ9288",
+        "5กล9993"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 16:02:42"
+    }
   },
   {
     "house_no": "38/61",
@@ -546,7 +1025,17 @@
     "phone": "081-682-2687",
     "deed_no": "14777",
     "zone": "B8",
-    "plot": "8"
+    "plot": "8",
+    "vehicles": {
+      "cars": [
+        "4ขณ9887",
+        "4กต1706"
+      ],
+      "motorcycles": [
+        "ฬปพ695"
+      ],
+      "last_updated": "4/17/2026 17:43:10"
+    }
   },
   {
     "house_no": "38/62",
@@ -555,7 +1044,15 @@
     "phone": "084-533-8877",
     "deed_no": "14776",
     "zone": "B7",
-    "plot": "7"
+    "plot": "7",
+    "vehicles": {
+      "cars": [
+        "9กถ328",
+        "1กส2652"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 15:05:22"
+    }
   },
   {
     "house_no": "38/63",
@@ -564,7 +1061,15 @@
     "phone": "081-843-0242",
     "deed_no": "14775",
     "zone": "B6",
-    "plot": "6"
+    "plot": "6",
+    "vehicles": {
+      "cars": [
+        "7ขญ6223",
+        "5กณ7062"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/21/2026 19:46:15"
+    }
   },
   {
     "house_no": "38/64",
@@ -573,7 +1078,17 @@
     "phone": "081-707-0305",
     "deed_no": "14774",
     "zone": "B5",
-    "plot": "5"
+    "plot": "5",
+    "vehicles": {
+      "cars": [
+        "5ขส9961",
+        "6กด2659"
+      ],
+      "motorcycles": [
+        "6กฌ670"
+      ],
+      "last_updated": "4/21/2026 19:48:30"
+    }
   },
   {
     "house_no": "38/65",
@@ -582,7 +1097,18 @@
     "phone": "086-869-3354",
     "deed_no": "14773",
     "zone": "B4",
-    "plot": "4"
+    "plot": "4",
+    "vehicles": {
+      "cars": [
+        "จก9299",
+        "ขว5888",
+        "2ขอ7859"
+      ],
+      "motorcycles": [
+        "2ขศ7926"
+      ],
+      "last_updated": "4/21/2026 21:04:18"
+    }
   },
   {
     "house_no": "38/66",
@@ -591,7 +1117,16 @@
     "phone": "081-567-9545",
     "deed_no": "14772",
     "zone": "B3",
-    "plot": "3"
+    "plot": "3",
+    "vehicles": {
+      "cars": [
+        "9กอ6779",
+        "4ขฒ627",
+        "1ขล672"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/19/2026 11:15:04"
+    }
   },
   {
     "house_no": "38/67",
@@ -600,7 +1135,16 @@
     "phone": "081-027-2005",
     "deed_no": "14771",
     "zone": "B2",
-    "plot": "2"
+    "plot": "2",
+    "vehicles": {
+      "cars": [
+        "2ขอ1822"
+      ],
+      "motorcycles": [
+        "6ขช922"
+      ],
+      "last_updated": "4/19/2026 10:30:02"
+    }
   },
   {
     "house_no": "38/68",
@@ -609,6 +1153,15 @@
     "phone": "081-814-3975",
     "deed_no": "14770",
     "zone": "B1",
-    "plot": "1"
+    "plot": "1",
+    "vehicles": {
+      "cars": [
+        "9กญ5868",
+        "สม4358",
+        "ฎบ9800"
+      ],
+      "motorcycles": [],
+      "last_updated": "4/17/2026 17:44:21"
+    }
   }
 ]

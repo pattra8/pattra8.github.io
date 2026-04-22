@@ -241,6 +241,53 @@
       border-radius: 8px;
     }
 
+    /* ── VEHICLE SECTION ── */
+    .vehicle-row {
+      padding: 9px 0 6px;
+      border-top: 1px solid #f1f5f9;
+      margin-top: 2px;
+    }
+    .vehicle-label {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+    .plate-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+    .plate-group:last-child { margin-bottom: 0; }
+    .plate-type {
+      font-size: 0.67rem;
+      color: #94a3b8;
+      margin-right: 2px;
+      flex-shrink: 0;
+      line-height: 22px;
+    }
+    .plate-chip {
+      display: inline-flex;
+      align-items: center;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #334155;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.04em;
+    }
+    .plate-chip.moto {
+      background: #fef9ec;
+      border-color: #fde68a;
+      color: #78350f;
+    }
+    .plate-empty {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      font-style: italic;
+    }
+
     /* ── LAST UPDATED BADGE ── */
     .updated-badge {
       display: inline-flex;
@@ -942,6 +989,7 @@
               ${phoneDisplay}
             </div>
           </div>
+          ${vehicleRow(r)}
         </div>
         <div class="res-card-footer">
           <button class="btn-report" onclick="openModal('${esc(r.house_no)}','${esc(r.name)}','${esc(r.email)}','${esc(r.phone)}')">
@@ -963,6 +1011,33 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  /* ── vehicle row renderer ── */
+  function vehicleRow(r) {
+    const v = r.vehicles;
+    if (!v) return '';
+    const hasCars  = v.cars  && v.cars.length  > 0;
+    const hasMotos = v.motorcycles && v.motorcycles.length > 0;
+    if (!hasCars && !hasMotos) {
+      return `<div class="vehicle-row">
+        <div class="vehicle-label">🚗 ทะเบียนรถ</div>
+        <span class="plate-empty">ยังไม่มีข้อมูลทะเบียน</span>
+      </div>`;
+    }
+    let html = `<div class="vehicle-row"><div class="vehicle-label">🚗 ทะเบียนรถ</div>`;
+    if (hasCars) {
+      html += `<div class="plate-group"><span class="plate-type">🚗</span>`;
+      html += v.cars.map(p => `<span class="plate-chip">${escHtml(p)}</span>`).join('');
+      html += `</div>`;
+    }
+    if (hasMotos) {
+      html += `<div class="plate-group"><span class="plate-type">🏍</span>`;
+      html += v.motorcycles.map(p => `<span class="plate-chip moto">${escHtml(p)}</span>`).join('');
+      html += `</div>`;
+    }
+    html += `</div>`;
+    return html;
   }
 
   /* ── date formatter ── */
