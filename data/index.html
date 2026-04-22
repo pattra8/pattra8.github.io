@@ -894,16 +894,15 @@
 </footer>
 
 <script>
-  const DATA_API_URL = 'https://script.google.com/macros/s/AKfycbyBqI0JhtzEsc6WgXFEyuGiaWrX5HMwe9VnongMTwyMQmCGpwlayWUm57ivZF8-m3_ajQ/exec';
+  const DATA_URL = 'https://pattra8.github.io/data/residents.json';
   let allData = [];
   let currentRecord = {};
 
   /* ── censor helpers ── */
   function censorPhone(p) {
     if (!p || p === 'nan') return null;
-    const s = p.replace(/\D/g, '');          // digits only
+    const s = p.replace(/\D/g, '');
     if (s.length < 6) return p;
-    // show first 3, last 2, mask middle  e.g. 089-***-9464 → 089-***-64
     return s.slice(0,3) + '-***-' + s.slice(-2);
   }
 
@@ -917,18 +916,16 @@
   /* ── load data ── */
   async function loadData() {
     try {
-      const res = await fetch(`${DATA_API_URL}?t=${Date.now()}`, { cache: 'no-store' });
-      const result = await res.json();
-      if (!res.ok || !result.ok) {
-        throw new Error(result.error || `HTTP ${res.status}`);
-      }
+      const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-      // Parse cars/motorcycles from comma-separated strings in Sheet
-      allData = result.data.map(r => ({
+      // cars/motorcycles are already arrays in residents.json
+      allData = data.map(r => ({
         ...r,
         vehicles: {
-          cars:        r.cars        ? r.cars.split(',').map(s => s.trim()).filter(Boolean) : [],
-          motorcycles: r.motorcycles ? r.motorcycles.split(',').map(s => s.trim()).filter(Boolean) : [],
+          cars:         Array.isArray(r.cars)        ? r.cars        : [],
+          motorcycles:  Array.isArray(r.motorcycles) ? r.motorcycles : [],
           last_updated: r.last_updated || null
         }
       }));
@@ -936,7 +933,7 @@
       // Do NOT render on load — wait for user to search
     } catch(e) {
       document.getElementById('cardGrid').innerHTML =
-        '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลจาก Google Sheet ได้</div>';
+        '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลได้</div>';
     }
   }
 
