@@ -159,50 +159,105 @@
     .notice-text { font-size: 0.85rem; color: #4a5568; line-height: 1.65; }
     .notice-text strong { color: var(--navy); }
 
-    /* ── SEARCH ── */
-    .search-wrap {
+    /* ── HERO SEARCH ── */
+    .hero-search {
+      padding: 52px 24px 44px;
+      text-align: center;
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      flex-direction: column;
       align-items: center;
     }
-    .search-box {
-      flex: 1;
-      position: relative;
+    .hero-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--navy), var(--navy2));
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(15,39,68,0.2);
     }
-    .search-box input {
+    .hero-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .hero-subtitle {
+      font-size: 0.85rem;
+      color: var(--slate);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .hero-input-wrap {
+      position: relative;
       width: 100%;
-      background: white;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 11px 16px 11px 42px;
-      font-size: 0.9rem;
+      max-width: 460px;
+    }
+    .hero-search-icon {
+      position: absolute;
+      left: 18px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.05rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .hero-input {
+      width: 100%;
+      padding: 16px 20px 16px 54px;
+      font-size: 1.05rem;
       font-family: inherit;
       color: #1a202c;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
       transition: all 0.2s;
     }
-    .search-box input:focus {
+    .hero-input:focus {
       outline: none;
-      border-color: var(--navy2);
-      box-shadow: 0 0 0 3px rgba(26,58,92,0.08);
+      border-color: var(--navy);
+      box-shadow: 0 0 0 4px rgba(15,39,68,0.1), 0 4px 20px rgba(0,0,0,0.07);
     }
-    .search-icon {
-      position: absolute;
-      left: 14px; top: 50%;
-      transform: translateY(-50%);
-      color: #a0aec0;
-      font-size: 0.95rem;
-      pointer-events: none;
+    .hero-hint {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+
+    /* ── RESULT BAR ── */
+    .result-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
     }
     .result-count {
       font-size: 0.78rem;
       color: var(--slate);
-      white-space: nowrap;
       background: white;
       border: 1px solid var(--border);
-      padding: 8px 14px;
+      padding: 6px 14px;
       border-radius: 8px;
+    }
+
+    /* ── LAST UPDATED BADGE ── */
+    .updated-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      background: #f8fafc;
+      border: 1px solid #e8edf3;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+    .updated-badge.has-date {
+      color: #64748b;
+      background: #f1f5f9;
     }
 
     /* ── CARD GRID ── */
@@ -642,16 +697,34 @@
 
 <!-- MAIN -->
 <div class="container">
-  <div class="search-wrap">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="ค้นหาบ้านเลขที่ หรือ ชื่อ-นามสกุล..." oninput="filterCards()" />
+
+  <!-- HERO SEARCH -->
+  <div class="hero-search" id="heroSearch">
+    <div class="hero-icon">🏘️</div>
+    <div class="hero-title">ตรวจสอบข้อมูลของท่าน</div>
+    <div class="hero-subtitle">พิมพ์บ้านเลขที่ของท่าน เพื่อดูข้อมูลเฉพาะของบ้านท่านเท่านั้น</div>
+    <div class="hero-input-wrap">
+      <span class="hero-search-icon">🔍</span>
+      <input
+        type="text"
+        id="searchInput"
+        class="hero-input"
+        placeholder="กรุณาพิมพ์บ้านเลขที่... เช่น 38/5"
+        oninput="filterCards()"
+        autocomplete="off"
+        inputmode="text"
+      />
     </div>
+    <div class="hero-hint">🔒 ระบบแสดงเฉพาะข้อมูลของบ้านที่ค้นหาเท่านั้น</div>
+  </div>
+
+  <!-- RESULT BAR (hidden until search) -->
+  <div class="result-bar" id="resultBar" style="display:none">
     <div class="result-count" id="resultCount">— รายการ</div>
   </div>
 
   <div class="card-grid" id="cardGrid">
-    <!-- populated by JS -->
+    <!-- populated by JS after search -->
   </div>
 </div>
 
@@ -892,14 +965,33 @@
       .replace(/'/g, '&#39;');
   }
 
-  /* ── search / filter ── */
+  /* ── date formatter ── */
+  function fmtDate(raw) {
+    if (!raw) return null;
+    try {
+      // handles "4/17/2026 15:21:18" or ISO strings
+      const d = new Date(raw);
+      if (isNaN(d)) return raw;
+      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+    } catch(e) { return raw; }
+  }
+
+  /* ── search / filter (house_no only for privacy) ── */
   function filterCards() {
-    const q = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!q) { renderCards(allData); return; }
-    renderCards(allData.filter(r =>
-      (r.house_no||'').toLowerCase().includes(q) ||
-      (r.name||'').toLowerCase().includes(q)
-    ));
+    const q = document.getElementById('searchInput').value.trim();
+    const resultBar = document.getElementById('resultBar');
+
+    if (!q) {
+      document.getElementById('cardGrid').innerHTML = '';
+      resultBar.style.display = 'none';
+      return;
+    }
+
+    resultBar.style.display = 'flex';
+    const filtered = allData.filter(r =>
+      (r.house_no || '').toLowerCase().includes(q.toLowerCase())
+    );
+    renderCards(filtered);
   }
 
   /* ── modal ── */

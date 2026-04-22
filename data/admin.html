@@ -353,6 +353,7 @@
           <th>เลขที่โฉนด</th>
           <th>โซน</th>
           <th>แปลงที่</th>
+          <th style="color:#94a3b8;font-weight:500;font-size:0.75rem;">Last Updated</th>
           <th>จัดการ</th>
         </tr>
       </thead>
@@ -509,9 +510,19 @@
         <td class="col-deed">${showVal(r.deed_no)}</td>
         <td class="col-zone">${showVal(r.zone)}</td>
         <td class="col-plot">${showVal(r.plot)}</td>
+        <td style="color:#94a3b8;font-size:0.75rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
         <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${findOriginalIndex(r)})">Edit</button></td>
       </tr>
     `).join('');
+  }
+
+  function fmtDate(raw) {
+    if (!raw) return '—';
+    try {
+      const d = new Date(raw);
+      if (isNaN(d)) return raw;
+      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+    } catch(e) { return raw; }
   }
 
   function showVal(value) {
