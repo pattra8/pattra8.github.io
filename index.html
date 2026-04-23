@@ -1089,12 +1089,12 @@ function normaliseFiles(photos) {
   const images = [], docs = [];
   photos.forEach((f, i) => {
     if (typeof f === 'string') {
-      // legacy: plain base64 string → treat as image
-      images.push({ dataUrl: f, idx: i });
+      // legacy base64 string
+      images.push({ url: f, idx: i });
     } else if (f.isImage) {
-      images.push({ dataUrl: f.dataUrl, idx: i });
+      images.push({ url: f.url || f.dataUrl || '', idx: i });
     } else {
-      docs.push({ dataUrl: f.dataUrl, name: f.name, ext: f.ext, cat: f.cat, idx: i });
+      docs.push({ url: f.url || f.dataUrl || '', name: f.name, ext: f.ext, cat: f.cat, idx: i });
     }
   });
   return { images, docs };
@@ -1111,7 +1111,7 @@ function buildPhotoStrip(photos) {
   // image tiles
   const imgTiles = images.slice(0, MAX_SHOW_IMG).map((f, i) => `
     <div class="announce-tile" data-img-idx="${i}">
-      <img class="announce-photo-thumb" src="${esc(f.dataUrl)}" alt="รูปภาพ ${i + 1}" loading="lazy" />
+      <img class="announce-photo-thumb" src="${esc(f.url)}" alt="รูปภาพ ${i + 1}" loading="lazy" />
     </div>`).join('');
 
   const extraImgs = images.length - MAX_SHOW_IMG;
@@ -1126,7 +1126,7 @@ function buildPhotoStrip(photos) {
     return `
       <div class="announce-tile"
            title="${esc(f.name)}"
-           data-file-dataurl="${esc(f.dataUrl)}"
+           data-file-dataurl="${esc(f.url)}"
            data-file-name="${esc(f.name)}"
            data-file-ext="${esc(f.ext || 'file')}">
         <div class="announce-file-tile">
@@ -1137,7 +1137,7 @@ function buildPhotoStrip(photos) {
       </div>`;
   }).join('');
 
-  return `<div class="announce-attachments" data-all-images="${esc(JSON.stringify(allImgUrls))}">${imgTiles}${moreTile}${docTiles}</div>`;
+  return `<div class="announce-attachments" data-all-images="${esc(JSON.stringify(images.map(f => f.url)))}">${imgTiles}${moreTile}${docTiles}</div>`;
 }
 
 function esc(value) {

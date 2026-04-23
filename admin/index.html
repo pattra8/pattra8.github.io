@@ -677,6 +677,13 @@
       orderBy,
       serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+      deleteObject
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
@@ -692,6 +699,7 @@
     const SESSION_DAYS = 30;
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
     const colRef = collection(db, 'announcements');
 
     const loginCard = document.getElementById('loginCard');
@@ -725,7 +733,9 @@
     // ─── FILE MANAGEMENT ───
     const MAX_FILES = 5;
     const WARN_BYTES = 5 * 1024 * 1024;  // 5 MB — warn but allow
-    let pendingPhotos = []; // array of { dataUrl, name, isImage } objects
+    // pendingPhotos: { file (File|null), previewUrl (string), name, isImage, cat, ext, storageUrl (string|null) }
+    // storageUrl = already uploaded (from existing announcement), file = new file to upload
+    let pendingPhotos = [];
 
     const photoFileInput = document.getElementById('photoFileInput');
     const photoPreviews = document.getElementById('photoPreviews');
@@ -757,7 +767,7 @@
     function updatePhotoUI() {
       photoPreviews.innerHTML = pendingPhotos.map((f, i) => {
         const inner = f.isImage
-          ? `<img src="${f.dataUrl}" alt="${f.name}" />`
+          ? `<img src="${f.previewUrl}" alt="${f.name}" />`
           : `<div class="file-preview-tile">${getFileIcon(f.cat)}<span class="file-ext">${f.ext}</span><span class="file-name">${f.name}</span></div>`;
         return `
           <div class="photo-preview-item">
@@ -777,39 +787,25 @@
       updatePhotoUI();
     });
 
-    function fileToBase64(file) {
+    // Generate a local preview URL for display before upload
+    function getPreviewUrl(file) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Compress image via canvas — max 1600px on longest side, quality 0.82
-    function compressImage(file) {
-      return new Promise((resolve, reject) => {
-        const MAX_DIM = 1600;
-        const QUALITY = 0.82;
+        const cat = getFileCategory(file.name);
+        if (cat !== 'image') { resolve(null); return; }
+        // compress for preview display only
+        const MAX_DIM = 400;
         const reader = new FileReader();
         reader.onerror = reject;
         reader.onload = e => {
           const img = new Image();
           img.onerror = reject;
           img.onload = () => {
-            let { width, height } = img;
-            if (width <= MAX_DIM && height <= MAX_DIM && file.size < 500 * 1024) {
-              // small enough — skip canvas, return original
-              resolve(e.target.result);
-              return;
-            }
-            const scale = Math.min(MAX_DIM / width, MAX_DIM / height, 1);
+            const scale = Math.min(MAX_DIM / img.width, MAX_DIM / img.height, 1);
             const canvas = document.createElement('canvas');
-            canvas.width  = Math.round(width  * scale);
-            canvas.height = Math.round(height * scale);
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', QUALITY));
+            canvas.width  = Math.round(img.width  * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.75));
           };
           img.src = e.target.result;
         };
@@ -821,7 +817,6 @@
       const remaining = MAX_FILES - pendingPhotos.length;
       const toProcess = Array.from(files).slice(0, remaining);
 
-      // warn about large files — ask if continue
       const oversize = toProcess.filter(f => f.size > WARN_BYTES);
       if (oversize.length) {
         const names = oversize.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join(', ');
@@ -830,14 +825,11 @@
       }
 
       try {
-        const encoded = await Promise.all(toProcess.map(file => {
-          const cat = getFileCategory(file.name);
-          return cat === 'image' ? compressImage(file) : fileToBase64(file);
-        }));
+        const previews = await Promise.all(toProcess.map(getPreviewUrl));
         const newEntries = toProcess.map((file, i) => {
           const cat = getFileCategory(file.name);
           const ext = file.name.split('.').pop().toLowerCase();
-          return { dataUrl: encoded[i], name: file.name, isImage: cat === 'image', cat, ext };
+          return { file, previewUrl: previews[i], name: file.name, isImage: cat === 'image', cat, ext, storageUrl: null };
         });
         pendingPhotos = [...pendingPhotos, ...newEntries];
         updatePhotoUI();
@@ -847,6 +839,15 @@
         formStatus.textContent = 'ไม่สามารถโหลดไฟล์ได้';
         formStatus.classList.add('error');
       }
+    }
+
+    // Upload a single file to Firebase Storage, return download URL
+    async function uploadToStorage(entry, announcementId) {
+      if (entry.storageUrl) return entry.storageUrl; // already uploaded
+      const path = `announcements/${announcementId}/${Date.now()}_${entry.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, entry.file);
+      return await getDownloadURL(storageRef);
     }
 
     photoFileInput.addEventListener('change', e => {
@@ -935,7 +936,7 @@
         const docs   = photos.filter(f => typeof f !== 'string' && !f.isImage);
 
         const thumbsHtml = images.slice(0, 4).map(f => {
-          const src = typeof f === 'string' ? f : f.dataUrl;
+          const src = typeof f === 'string' ? f : (f.url || f.dataUrl || '');
           return `<img src="${esc(src)}" alt="" />`;
         }).join('') + (images.length > 4 ? `<span style="font-size:10px;color:var(--muted);align-self:center;">+${images.length - 4}</span>` : '');
 
@@ -990,30 +991,49 @@
       event.preventDefault();
 
       const id = document.getElementById('docId').value;
-      const data = {
-        title: document.getElementById('titleInput').value.trim(),
-        body: document.getElementById('bodyInput').value.trim(),
-        type: document.getElementById('typeInput').value,
-        dateValue: document.getElementById('dateInput').value || todayISO(),
-        dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
-        photos: pendingPhotos.length ? pendingPhotos.map(f => ({ dataUrl: f.dataUrl, name: f.name, isImage: f.isImage, cat: f.cat, ext: f.ext })) : [],
-        updatedAt: serverTimestamp()
-      };
-
-      if (!data.title || !data.body) return;
+      const title = document.getElementById('titleInput').value.trim();
+      const body  = document.getElementById('bodyInput').value.trim();
+      if (!title || !body) return;
 
       formStatus.textContent = '';
       formStatus.classList.remove('error');
       document.getElementById('saveBtn').disabled = true;
 
       try {
-        // Step 1: preparing
-        showProgress(20, 'กำลังเตรียมข้อมูล...');
-        await new Promise(r => setTimeout(r, 120));
+        // Step 1: create/get doc ID so we can use it as storage folder
+        showProgress(15, 'กำลังเตรียมข้อมูล...');
+        const announcementId = id || `tmp_${Date.now()}`;
 
-        // Step 2: uploading
-        showProgress(55, `กำลังบันทึก${pendingPhotos.length ? ` (${pendingPhotos.length} ไฟล์)` : ''}...`);
-        await new Promise(r => setTimeout(r, 80));
+        // Step 2: upload new files to Firebase Storage
+        const newFiles = pendingPhotos.filter(f => f.file && !f.storageUrl);
+        if (newFiles.length) {
+          showProgress(30, `กำลังอัปโหลดไฟล์ (0 / ${newFiles.length})...`);
+          for (let i = 0; i < newFiles.length; i++) {
+            showProgress(30 + Math.round((i / newFiles.length) * 50), `กำลังอัปโหลดไฟล์ (${i + 1} / ${newFiles.length})...`);
+            newFiles[i].storageUrl = await uploadToStorage(newFiles[i], announcementId);
+          }
+        }
+
+        showProgress(85, 'กำลังบันทึกข้อมูล...');
+
+        // Step 3: build photos array with storage URLs only (no base64)
+        const photosData = pendingPhotos.map(f => ({
+          url: f.storageUrl,
+          name: f.name,
+          isImage: f.isImage,
+          cat: f.cat,
+          ext: f.ext
+        }));
+
+        const data = {
+          title,
+          body,
+          type: document.getElementById('typeInput').value,
+          dateValue: document.getElementById('dateInput').value || todayISO(),
+          dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
+          photos: photosData,
+          updatedAt: serverTimestamp()
+        };
 
         if (id) {
           await updateDoc(doc(db, 'announcements', id), data);
@@ -1021,15 +1041,14 @@
           await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
         }
 
-        // Step 3: done
         showProgress(100, '✓ บันทึกเรียบร้อยแล้ว');
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 700));
         hideProgress();
         resetForm(id ? 'แก้ไขประกาศเรียบร้อยแล้ว' : 'เพิ่มประกาศเรียบร้อยแล้ว');
       } catch (error) {
         console.error(error);
         hideProgress();
-        formStatus.textContent = 'บันทึกไม่สำเร็จ กรุณาตรวจสอบ Firestore permissions';
+        formStatus.textContent = `บันทึกไม่สำเร็จ: ${error.message || 'กรุณาตรวจสอบ Firebase permissions'}`;
         formStatus.classList.add('error');
       } finally {
         document.getElementById('saveBtn').disabled = false;
@@ -1051,12 +1070,14 @@
         document.getElementById('bodyInput').value = item.body || '';
         document.getElementById('typeInput').value = item.type || 'normal';
         document.getElementById('dateInput').value = item.dateValue || todayISO();
-        // support both old format (plain strings) and new format (objects)
-        pendingPhotos = Array.isArray(item.photos) ? item.photos.map(f =>
-          typeof f === 'string'
-            ? { dataUrl: f, name: 'image', isImage: true, cat: 'image', ext: 'jpg' }
-            : f
-        ) : [];
+        // load existing photos as already-uploaded entries (no file, just storageUrl)
+        pendingPhotos = Array.isArray(item.photos) ? item.photos.map(f => {
+          if (typeof f === 'string') {
+            // legacy base64 — treat as already uploaded image
+            return { file: null, previewUrl: f, name: 'image.jpg', isImage: true, cat: 'image', ext: 'jpg', storageUrl: f };
+          }
+          return { file: null, previewUrl: f.url, name: f.name, isImage: f.isImage, cat: f.cat, ext: f.ext, storageUrl: f.url };
+        }) : [];
         updatePhotoUI();
         formTitle.textContent = 'แก้ไขประกาศ';
         cancelBtn.classList.remove('hidden');
