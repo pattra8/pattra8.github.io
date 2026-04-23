@@ -973,11 +973,44 @@
     try {
       await commitToGitHub(allData, `Approve correction for house ${houseNo} via admin panel`);
       await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
+      card.style.transition = 'opacity 0.4s';
       card.style.opacity = '0.5';
       card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
       // Reload ข้อมูลจาก GitHub API ทันที (real-time — ไม่ต้องรอ CDN)
       await loadAdminData();
-      setTimeout(loadPending, 800);
+      // ลบ card ออกทันทีหลังแสดง success — ไม่รอ GitHub API ซึ่งอาจยังไม่ปิด issue
+      setTimeout(() => {
+        card.style.transition = 'all 0.5s';
+        card.style.opacity = '0';
+        card.style.maxHeight = card.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          card.style.maxHeight = '0';
+          card.style.overflow = 'hidden';
+          card.style.marginBottom = '0';
+          card.style.paddingBottom = '0';
+        });
+        setTimeout(() => {
+          card.remove();
+          // อัพเดต badge
+          const remaining = document.querySelectorAll('.pending-card').length;
+          const badge = document.getElementById('pendingBadge');
+          if (badge) {
+            if (remaining > 0) {
+              badge.textContent = remaining;
+              badge.classList.remove('hidden');
+            } else {
+              badge.textContent = '';
+              badge.classList.add('hidden');
+            }
+          }
+          if (remaining === 0) {
+            document.getElementById('pendingList').innerHTML =
+              '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอดำเนินการ</div>';
+          }
+        }, 500);
+      }, 1200);
+      // Background sync หลัง 5 วิ เผื่อ GitHub ปิด issue เสร็จแล้ว
+      setTimeout(loadPending, 5000);
     } catch(e) {
       alert('Approve ล้มเหลว: ' + e.message);
       btn.disabled = false;
@@ -998,9 +1031,40 @@
         ? `❌ ปฏิเสธโดย admin: ${reason}`
         : `❌ ปฏิเสธโดย admin (${new Date().toLocaleString('th-TH')})`;
       await closeIssue(issueNumber, comment);
+      card.style.transition = 'opacity 0.4s';
       card.style.opacity = '0.5';
       card.innerHTML = `<div style="padding:16px;text-align:center;color:#b91c1c;font-weight:600;">❌ ปฏิเสธแล้ว${reason ? ` — ${escHtml(reason)}` : ''}</div>`;
-      setTimeout(loadPending, 1500);
+      // ลบ card ออกทันที ไม่รอ GitHub API
+      setTimeout(() => {
+        card.style.transition = 'all 0.5s';
+        card.style.opacity = '0';
+        card.style.maxHeight = card.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          card.style.maxHeight = '0';
+          card.style.overflow = 'hidden';
+          card.style.marginBottom = '0';
+          card.style.paddingBottom = '0';
+        });
+        setTimeout(() => {
+          card.remove();
+          const remaining = document.querySelectorAll('.pending-card').length;
+          const badge = document.getElementById('pendingBadge');
+          if (badge) {
+            if (remaining > 0) {
+              badge.textContent = remaining;
+              badge.classList.remove('hidden');
+            } else {
+              badge.textContent = '';
+              badge.classList.add('hidden');
+            }
+          }
+          if (remaining === 0) {
+            document.getElementById('pendingList').innerHTML =
+              '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอดำเนินการ</div>';
+          }
+        }, 500);
+      }, 1200);
+      setTimeout(loadPending, 5000);
     } catch(e) {
       alert('ปฏิเสธล้มเหลว: ' + e.message);
       btn.disabled = false;
