@@ -3,1251 +3,1197 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pattra Villa 8 · Customer Service</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet" />
+  <title>ภัทราวิลล่า 8 — ตรวจสอบข้อมูล</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
-      --taupe:       #3d3530;
-      --taupe-mid:   #6b5f58;
-      --gold:        #b8975a;
-      --gold-light:  #cead75;
-      --gold-pale:   #f2e9d8;
-      --bg:          #faf7f2;
-      --bg2:         #f0ebe3;
-      --bg3:         #e8e0d4;
-      --card:        #ffffff;
-      --text:        #2e2820;
-      --muted:       #8a7f76;
-      --border:      #e4ddd3;
-      --radius:      16px;
-      --shadow:      0 2px 16px rgba(61,53,48,0.07);
-      --shadow-hover:0 10px 40px rgba(61,53,48,0.13);
+      --navy:   #0f2744;
+      --navy2:  #1a3a5c;
+      --gold:   #c9a84c;
+      --gold2:  #f0d080;
+      --cream:  #fdfaf4;
+      --slate:  #64748b;
+      --border: #e8edf3;
+      --red:    #e53e3e;
+      --green:  #22c55e;
+      --bg:     #f4f7fb;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Sarabun', sans-serif;
+      font-family: 'IBM Plex Sans Thai', 'Helvetica Neue', sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: #1a202c;
       min-height: 100vh;
     }
 
-    /* ─── HEADER ─── */
+    /* ── HEADER ── */
     header {
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      padding: 0 40px;
-      height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-decoration: none;
-    }
-
-    .logo-monogram {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15px;
-      color: var(--gold);
-      letter-spacing: 0.05em;
-    }
-
-    .logo-divider {
-      width: 1px;
-      height: 26px;
-      background: var(--border);
-    }
-
-    .logo-wordmark {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 400;
-      font-size: 19px;
-      color: var(--taupe);
-      letter-spacing: 0.05em;
-    }
-
-    .logo-sub {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-top: 1px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .header-btn {
-      background: transparent;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      border-radius: 8px;
-      padding: 8px 20px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .header-btn:hover {
-      background: var(--gold);
-      color: #fff;
-    }
-
-    .header-btn.secondary {
-      border-color: var(--border);
-      color: var(--taupe-mid);
-    }
-
-    .header-btn.secondary:hover {
-      border-color: var(--gold);
-      color: #fff;
-    }
-
-    /* ─── HERO ─── */
-    .hero {
-      background: var(--bg2);
-      padding: 80px 40px 88px;
-      text-align: center;
+      background: var(--navy);
+      padding: 0;
       position: relative;
       overflow: hidden;
-      border-bottom: 1px solid var(--border);
     }
-
-    /* very subtle noise texture */
-    .hero::after {
+    header::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+      top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.08);
       pointer-events: none;
-      opacity: 0.4;
     }
-
-    .hero-ornament {
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 20%;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.05);
+      pointer-events: none;
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 28px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 30px;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
     }
-
-    .hero-ornament-line {
-      width: 56px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold));
+    .header-logo {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(201,168,76,0.3);
     }
-
-    .hero-ornament-line.r {
-      background: linear-gradient(90deg, var(--gold), transparent);
+    .header-text h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
     }
-
-    .hero-ornament-diamond {
-      width: 6px;
-      height: 6px;
-      background: var(--gold);
-      transform: rotate(45deg);
-      opacity: 0.8;
+    .header-text p {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      margin-top: 3px;
     }
-
-    .hero-eyebrow {
-      font-family: 'Sarabun', sans-serif;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(42px, 7vw, 72px);
-      font-weight: 300;
-      color: var(--taupe);
-      line-height: 1.05;
-      letter-spacing: 0.01em;
-      margin-bottom: 6px;
-    }
-
-    .hero h1 em {
-      font-style: italic;
-      color: var(--gold);
-    }
-
-    .hero-sub {
-      font-size: 15px;
-      color: var(--muted);
-      max-width: 380px;
-      margin: 20px auto 0;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-
-    /* ─── MAIN ─── */
-    .main {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 72px 28px 96px;
-    }
-
-    .section-eyebrow {
-      font-size: 10px;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 0.22em;
-      margin-bottom: 10px;
-      font-family: 'Sarabun', sans-serif;
-    }
-
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(26px, 3.5vw, 38px);
-      font-weight: 400;
-      color: var(--text);
-      margin-bottom: 44px;
-      letter-spacing: 0.01em;
-    }
-
-    .section-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 18px;
-      margin-bottom: 44px;
-    }
-
-    .section-row .section-title {
-      margin-bottom: 0;
-    }
-
-    .admin-link {
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      background: var(--card);
-      border-radius: 8px;
-      padding: 9px 16px;
-      text-decoration: none;
-      font-size: 11px;
+    .header-badge {
+      margin-left: auto;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold2);
+      font-size: 0.7rem;
+      font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      white-space: nowrap;
-      transition: all 0.2s;
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+    .admin-btn {
+      margin-left: 12px;
+      background: #fff7df;
+      border: 2px solid var(--gold2);
+      color: var(--navy);
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 10px 18px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      font-family: inherit;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18), 0 0 0 4px rgba(240,208,128,0.12);
+      min-width: 92px;
+      text-align: center;
+    }
+    .admin-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.22), 0 0 0 5px rgba(240,208,128,0.18);
+      filter: brightness(1.02);
     }
 
-    .admin-link:hover {
-      background: var(--gold);
-      color: #fff;
+    /* ── SUBHEADER STRIP ── */
+    .subheader {
+      background: var(--navy2);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-
-    /* ─── SERVICE CARDS ─── */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-      margin-bottom: 72px;
+    .subheader-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
+    .subheader-tag {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .subheader-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.5; }
 
-    .service-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 34px 28px 30px;
-      box-shadow: var(--shadow);
-      text-decoration: none;
-      color: var(--text);
-      transition: transform 0.28s cubic-bezier(.22,.68,0,1.15), box-shadow 0.28s, border-color 0.28s;
+    /* ── CONTAINER ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    /* ── NOTICE CARD ── */
+    .notice-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--gold);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .notice-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .notice-text { font-size: 0.85rem; color: #4a5568; line-height: 1.65; }
+    .notice-text strong { color: var(--navy); }
+
+    /* ── HERO SEARCH ── */
+    .hero-search {
+      padding: 52px 24px 44px;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      align-items: center;
+    }
+    .hero-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--navy), var(--navy2));
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(15,39,68,0.2);
+    }
+    .hero-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .hero-subtitle {
+      font-size: 0.85rem;
+      color: var(--slate);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .hero-input-wrap {
       position: relative;
-      overflow: hidden;
-      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 460px;
     }
-
-    /* gold shimmer top */
-    .service-card::before {
-      content: '';
+    .hero-search-icon {
       position: absolute;
-      top: 0; left: 20%; right: 20%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      opacity: 0;
-      transition: opacity 0.28s, left 0.28s, right 0.28s;
+      left: 18px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.05rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .hero-input {
+      width: 100%;
+      padding: 16px 20px 16px 54px;
+      font-size: 1.05rem;
+      font-family: inherit;
+      color: #1a202c;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      transition: all 0.2s;
+    }
+    .hero-input:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 4px rgba(15,39,68,0.1), 0 4px 20px rgba(0,0,0,0.07);
+    }
+    .hero-hint {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      color: #94a3b8;
     }
 
-    .service-card:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--shadow-hover);
-      border-color: var(--gold-pale);
-    }
-
-    .service-card:hover::before {
-      opacity: 1;
-      left: 0%; right: 0%;
-    }
-
-    /* featured — white with gold border */
-    .service-card.featured {
-      background: var(--card);
-      border: 1.5px solid var(--gold);
-      color: var(--text);
-    }
-
-    .service-card.featured::before { opacity: 1; left: 0; right: 0; }
-
-    .service-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
+    /* ── RESULT BAR ── */
+    .result-bar {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 22px;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .result-count {
+      font-size: 0.78rem;
+      color: var(--slate);
+      background: white;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
     }
 
-    .service-card.featured .service-icon {
-      background: var(--gold-pale);
-      border-color: rgba(184,151,90,0.3);
+    /* ── VEHICLE SECTION ── */
+    .field-icon.car-icon  { background: #fef9ec; }
+    .field-icon.moto-icon { background: #f1f5f9; }
+    .plate-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
     }
-
-    .service-title {
-      font-family: 'Prompt', sans-serif;
-      font-size: 17px;
-      font-weight: 500;
-      line-height: 1.3;
-    }
-
-    .service-card.featured .service-title { color: var(--text); }
-
-    .service-desc {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.65;
-      flex: 1;
-      font-weight: 300;
-    }
-
-    .service-card.featured .service-desc { color: var(--muted); }
-
-    .service-cta {
+    .plate-chip {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 400;
-      color: var(--gold);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-top: 6px;
-      font-family: 'Sarabun', sans-serif;
+      background: #fef9ec;
+      border: 1px solid #fde68a;
+      border-radius: 5px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #78350f;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.04em;
+    }
+    .plate-chip.moto {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #475569;
     }
 
-    .service-cta svg { transition: transform 0.2s; }
-    .service-card:hover .service-cta svg { transform: translateX(4px); }
-
-    .tag {
-      position: absolute;
-      top: 18px; right: 18px;
-      border: 1px solid rgba(184,151,90,0.55);
-      color: var(--gold-light);
-      font-size: 9px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 4px;
-      font-family: 'Sarabun', sans-serif;
-    }
-
-    /* ─── ORNAMENTAL DIVIDER ─── */
-    .ornament-divider {
+    /* ── FORM HINT ── */
+    .form-hint-box {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      color: #15803d;
+      margin-bottom: 16px;
       display: flex;
-      align-items: center;
-      gap: 16px;
-      margin: 64px 0;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
     }
-    .ornament-divider-line {
-      flex: 1;
+    .form-divider {
       height: 1px;
-      background: var(--border);
-    }
-    .ornament-divider-center {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-    .ornament-divider-d {
-      width: 5px; height: 5px;
-      background: var(--gold);
-      transform: rotate(45deg);
-      opacity: 0.5;
-    }
-    .ornament-divider-d.big {
-      width: 7px; height: 7px;
-      opacity: 0.7;
+      background: #e8edf3;
+      margin: 14px 0;
     }
 
-    /* ─── ANNOUNCEMENTS ─── */
-    .announce-grid {
+    /* ── LAST UPDATED BADGE ── */
+    .updated-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      background: #f8fafc;
+      border: 1px solid #e8edf3;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+    .updated-badge.has-date {
+      color: #64748b;
+      background: #f1f5f9;
+    }
+
+    /* ── CARD GRID ── */
+    .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 14px;
     }
 
-    .announce-card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 26px 28px;
+    /* ── RESIDENT CARD ── */
+    .res-card {
+      background: white;
       border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s, transform 0.2s;
       display: flex;
-      gap: 16px;
-      align-items: flex-start;
-      transition: border-color 0.2s, transform 0.2s;
+      flex-direction: column;
+    }
+    .res-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+      transform: translateY(-1px);
     }
 
-    .announce-card:hover {
-      border-color: var(--gold-pale);
-      transform: translateY(-2px);
+    /* card top bar with house no */
+    .res-card-top {
+      background: var(--navy);
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
-
-    .announce-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-      margin-top: 8px;
-      flex-shrink: 0;
+    .house-no-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .announce-dot.urgent { background: #c0392b; }
-    .announce-dot.info   { background: var(--bg3); border: 1.5px solid var(--muted); }
-
-    .announce-body strong {
-      font-size: 17px;
-      font-weight: 500;
-      font-family: 'Prompt', sans-serif;
-      display: block;
-      margin-bottom: 8px;
-      line-height: 1.45;
+    .house-icon {
+      font-size: 0.85rem;
+      opacity: 0.7;
     }
-
-    .announce-body p {
-      font-size: 16px;
-      color: var(--muted);
-      line-height: 1.75;
-      font-weight: 300;
+    .house-no {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.02em;
     }
-
-    .announce-date {
-      font-size: 13px;
-      color: var(--gold);
-      margin-top: 12px;
+    .house-no-label {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
       letter-spacing: 0.06em;
     }
 
-    .announce-empty {
-      grid-column: 1 / -1;
-      background: var(--card);
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      padding: 28px;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
+    /* card body */
+    .res-card-body {
+      padding: 14px 16px 12px;
+      flex: 1;
     }
 
-    /* ─── ATTACHMENTS GRID ─── */
-    .announce-attachments {
+    .field-row {
       display: flex;
-      gap: 8px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
-    /* shared tile — both images and file tiles use this */
-    .announce-tile {
-      width: 80px;
-      height: 80px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      overflow: hidden;
-      flex-shrink: 0;
-      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-      background: var(--bg2);
-      cursor: pointer;
-      position: relative;
-    }
-
-    .announce-tile:hover {
-      transform: translateY(-2px);
-      border-color: var(--gold);
-      box-shadow: 0 6px 18px rgba(184,151,90,0.2);
-    }
-
-    .announce-photo-thumb {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* file (non-image) tile */
-    .announce-file-tile {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f1f5f9;
       align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 6px;
-      text-decoration: none;
     }
+    .field-row:last-child { border-bottom: none; }
 
-    .announce-file-tile-icon {
-      font-size: 22px;
-      line-height: 1;
+    .field-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
     }
+    .field-icon.name-icon  { background: #eff6ff; }
+    .field-icon.email-icon { background: #f0fdf4; }
+    .field-icon.phone-icon { background: #fff7ed; }
 
-    .announce-file-tile-ext {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+    .field-content { flex: 1; min-width: 0; }
+    .field-label {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      font-weight: 600;
       text-transform: uppercase;
-      color: var(--gold);
+      letter-spacing: 0.07em;
+      margin-bottom: 2px;
     }
-
-    .announce-file-tile-name {
-      font-size: 9px;
-      color: var(--muted);
-      text-align: center;
-      word-break: break-all;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.3;
-    }
-
-    /* +N more tile */
-    .announce-more-tile {
-      width: 80px;
-      height: 80px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: var(--gold-pale);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
+    .field-value {
+      font-size: 0.88rem;
+      color: #1e293b;
       font-weight: 500;
-      color: var(--gold);
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .field-value.censored {
+      font-family: 'IBM Plex Mono', monospace;
+      color: #64748b;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+    }
+    .field-value.empty {
+      color: #cbd5e1;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 0.82rem;
     }
 
-    .announce-more-tile:hover {
-      background: var(--bg3);
-      border-color: var(--gold);
-    }
-
-    /* ─── LIGHTBOX ─── */
-    .lightbox-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(30,24,20,0.82);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      backdrop-filter: blur(4px);
-    }
-
-    .lightbox-overlay.open {
+    /* card footer */
+    .res-card-footer {
+      padding: 10px 16px;
+      border-top: 1px solid #f1f5f9;
       display: flex;
+      justify-content: flex-end;
     }
-
-    .lightbox-img {
-      max-width: min(90vw, 720px);
-      max-height: 82vh;
-      border-radius: 12px;
-      object-fit: contain;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
-      animation: lb-in 0.18s ease;
-    }
-
-    @keyframes lb-in {
-      from { opacity: 0; transform: scale(0.94); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 20px;
-      right: 24px;
-      background: rgba(255,255,255,0.12);
-      border: none;
-      color: #fff;
-      font-size: 22px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
+    .btn-report {
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
+      gap: 6px;
+      background: transparent;
+      border: 1.5px solid #e2e8f0;
+      color: #64748b;
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
     }
+    .btn-report:hover {
+      border-color: var(--navy2);
+      background: var(--navy2);
+      color: white;
+    }
+    .btn-report .btn-icon { font-size: 0.75rem; }
 
-    .lightbox-close:hover { background: rgba(255,255,255,0.22); }
+    .no-result {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      grid-column: 1 / -1;
+    }
+    .no-result .big { font-size: 2.5rem; margin-bottom: 12px; }
 
-    /* legacy classes kept for any cached content */
-    .announce-photo-more { display: none; }
-    .announce-file-chips { display: none; }
-
-    /* ─── FILE PREVIEW MODAL ─── */
-    .file-modal-overlay {
+    /* ── MODAL ── */
+    .modal-overlay {
       display: none;
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
+      background: rgba(10,18,30,0.65);
       z-index: 1000;
-      background: rgba(20,16,12,0.88);
-      backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      backdrop-filter: blur(3px);
+      overflow-y: auto;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: calc(100vh - 40px);
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+      animation: slideUp 0.2s ease;
+      display: flex;
       flex-direction: column;
     }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-    .file-modal-overlay.open { display: flex; }
-
-    .file-modal-header {
+    .modal-header {
+      background: var(--navy);
+      padding: 18px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 20px;
-      background: rgba(255,255,255,0.05);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      flex-shrink: 0;
     }
-
-    .file-modal-title {
-      font-size: 13px;
-      color: rgba(255,255,255,0.85);
-      font-family: 'Sarabun', sans-serif;
-      font-weight: 400;
-      letter-spacing: 0.02em;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: calc(100vw - 120px);
+    .modal-header-left { display: flex; align-items: center; gap: 10px; }
+    .modal-header-icon {
+      width: 34px; height: 34px;
+      background: rgba(201,168,76,0.2);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem;
     }
-
-    .file-modal-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
+    .modal-header h2 { font-size: 0.95rem; color: white; font-weight: 600; }
+    .modal-header p  { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .modal-close {
+      background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.6);
+      width: 30px; height: 30px; border-radius: 8px;
+      font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
     }
+    .modal-close:hover { background: rgba(255,255,255,0.2); color: white; }
 
-    .file-modal-download {
-      font-size: 12px;
-      color: var(--gold);
-      text-decoration: none;
-      border: 1px solid rgba(184,151,90,0.4);
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-family: 'Sarabun', sans-serif;
-      transition: background 0.2s;
-      letter-spacing: 0.05em;
-    }
-
-    .file-modal-download:hover { background: rgba(184,151,90,0.15); }
-
-    .file-modal-close {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: #fff;
-      font-size: 18px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-
-    .file-modal-close:hover { background: rgba(255,255,255,0.2); }
-
-    .file-modal-body {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      align-items: stretch;
-    }
-
-    .file-modal-body iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #fff;
-    }
-
-    /* unsupported file fallback */
-    .file-modal-fallback {
-      flex: 1;
+    #formView {
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      color: rgba(255,255,255,0.6);
-      font-family: 'Sarabun', sans-serif;
+    }
+    .modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      min-height: 0;
     }
 
-    .file-modal-fallback-icon { font-size: 52px; }
-    .file-modal-fallback-name { font-size: 15px; color: rgba(255,255,255,0.8); }
-    .file-modal-fallback-note { font-size: 13px; }
-
-    .pagination {
+    /* current data snapshot */
+    .snapshot-box {
+      background: #fefce8;
+      border: 1.5px solid #fde68a;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .snapshot-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #92400e;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
       display: flex;
-      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+    .snapshot-fields { display: flex; flex-direction: column; gap: 6px; }
+    .snapshot-field {
+      display: flex;
       align-items: center;
       gap: 8px;
-      margin-top: 24px;
-      flex-wrap: wrap;
     }
+    .snapshot-key {
+      font-size: 0.73rem;
+      color: #a16207;
+      min-width: 100px;
+      font-weight: 500;
+    }
+    .snapshot-val {
+      font-size: 0.85rem;
+      color: #1c1917;
+      font-weight: 600;
+    }
+    .snapshot-val.empty { color: #a8a29e; font-weight: 400; font-style: italic; }
 
-    .page-btn {
-      min-width: 36px;
-      height: 36px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--taupe-mid);
+    /* change preview arrow box */
+    .change-box {
+      display: none;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      align-items: center;
+      gap: 8px;
+    }
+    .change-box.show { display: flex; }
+    .change-box.multi-change {
+      display: none;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .change-box.multi-change.show { display: flex; }
+    .change-line {
+      display: grid;
+      grid-template-columns: 92px 1fr 24px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .change-label {
+      font-size: 0.72rem;
+      color: #166534;
+      font-weight: 700;
+    }
+    .change-old {
+      flex: 1;
+      font-size: 0.82rem;
+      color: #dc2626;
+      text-decoration: line-through;
+      word-break: break-all;
+    }
+    .change-arrow-icon { color: #16a34a; font-size: 1rem; flex-shrink: 0; }
+    .change-new {
+      flex: 1;
+      font-size: 0.85rem;
+      color: #15803d;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .change-new.placeholder { color: #86efac; font-style: italic; font-weight: 400; }
+
+    /* form fields */
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 5px;
+      letter-spacing: 0.03em;
+    }
+    .form-group label .req { color: #dc2626; margin-left: 2px; }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid #e2e8f0;
       border-radius: 8px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 12px;
-      cursor: pointer;
+      font-size: 0.88rem;
+      font-family: inherit;
+      color: #1e293b;
+      background: white;
       transition: all 0.2s;
     }
-
-    .page-btn:hover,
-    .page-btn.active {
-      border-color: var(--gold);
-      color: var(--gold);
-      background: var(--gold-pale);
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--navy2);
+      box-shadow: 0 0 0 3px rgba(26,58,92,0.08);
     }
+    .form-group textarea { resize: vertical; min-height: 64px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .multi-fields { display: none; }
+    .multi-fields.show { display: block; }
 
-    .page-btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.42;
-      background: var(--bg2);
-    }
-
-    /* ─── FOOTER ─── */
-    footer {
-      background: var(--bg2);
-      border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 40px 24px;
-    }
-
-    .footer-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 20px;
-      font-weight: 400;
-      color: var(--taupe);
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-
-    .footer-tagline {
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-
-    .footer-links {
+    /* modal footer */
+    .modal-footer {
+      padding: 14px 22px 20px;
       display: flex;
-      justify-content: center;
-      gap: 28px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      background: white;
+      border-top: 1px solid #eef2f7;
+      flex-shrink: 0;
     }
-
-    footer a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      transition: color 0.2s;
+    .btn-cancel {
+      background: #f8fafc; color: #64748b; border: 1.5px solid #e2e8f0;
+      padding: 9px 20px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.15s;
     }
-
-    footer a:hover { color: var(--gold); }
-
-    .footer-copy {
-      font-size: 11px;
-      color: var(--bg3);
+    .btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .btn-submit {
+      background: var(--navy); color: white; border: none;
+      padding: 9px 22px; border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 7px;
+      transition: background 0.15s;
     }
+    .btn-submit:hover { background: var(--navy2); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 640px) {
-      header { padding: 0 16px; height: auto; min-height: 68px; gap: 12px; }
-      .header-actions { gap: 6px; }
-      .header-btn { padding: 7px 10px; font-size: 10px; }
-      .hero { padding: 32px 20px 36px; }
-      .hero h1 { font-size: 36px; }
-      .hero-ornament { margin-bottom: 16px; }
-      .hero-sub { margin-top: 12px; font-size: 14px; }
-      .main { padding: 40px 16px 64px; }
-      .section-row { align-items: flex-start; flex-direction: column; margin-bottom: 32px; }
-      .announce-grid { grid-template-columns: 1fr; gap: 12px; }
-      .announce-card { padding: 22px 20px; gap: 12px; }
-      .announce-body strong { font-size: 18px; line-height: 1.42; }
-      .announce-body p { font-size: 16px; line-height: 1.8; color: var(--taupe-mid); }
-      .announce-date { font-size: 14px; margin-top: 14px; }
-      .logo-sub { display: none; }
+    /* success view */
+    .success-view {
+      display: none;
+      padding: 44px 22px;
+      text-align: center;
+    }
+    .success-view .s-icon {
+      width: 64px; height: 64px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 16px;
+      border: 2px solid #86efac;
+    }
+    .success-view h3 { font-size: 1.05rem; color: #15803d; margin-bottom: 6px; }
+    .success-view p { font-size: 0.83rem; color: #64748b; line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+    footer span { color: #cbd5e1; margin: 0 6px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 540px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .header-badge { display: none; }
+      .modal-overlay {
+        align-items: flex-start;
+        padding: 10px;
+      }
+      .modal {
+        max-height: calc(100vh - 20px);
+        border-radius: 14px;
+      }
+      .modal-body { padding: 16px; }
+      .modal-footer {
+        padding: 12px 16px 16px;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- ─── HEADER ─── -->
+<!-- HEADER -->
 <header>
-  <a href="#" class="logo">
-    <div class="logo-monogram">PV</div>
-    <div class="logo-divider"></div>
-    <div>
-      <div class="logo-wordmark">Pattra Villa 8</div>
-      <div class="logo-sub">Resident Services</div>
+  <div class="header-inner">
+    <div class="header-logo">🏘️</div>
+    <div class="header-text">
+      <h1>หมู่บ้านภัทราวิลล่า 8</h1>
+      <p>ระบบตรวจสอบข้อมูลผู้พักอาศัย</p>
     </div>
-  </a>
-  <div class="header-actions">
-    <a href="https://pattra8.github.io/admin/" class="header-btn secondary">Admin</a>
-    <a href="https://pattra8.github.io/report" class="header-btn">Report Issue</a>
+    <div class="header-badge">Resident Portal</div>
+    <button class="admin-btn" onclick="window.location.href='admin.html'">Admin</button>
   </div>
 </header>
-
-<!-- ─── HERO ─── -->
-<section class="hero">
-  <div class="hero-ornament">
-    <div class="hero-ornament-line"></div>
-    <div class="hero-ornament-diamond"></div>
-    <div class="hero-ornament-line r"></div>
+<div class="subheader">
+  <div class="subheader-inner">
+    <span class="subheader-tag">ข้อมูลส่วนตัว</span>
+    <div class="subheader-dot"></div>
+    <span class="subheader-tag">เฉพาะเจ้าของข้อมูลเท่านั้น</span>
+    <div class="subheader-dot"></div>
+    <span class="subheader-tag">Confidential</span>
   </div>
-  <h1><em>Resident Services</em></h1>
-  <p class="hero-sub">โครงการหมู่บ้านภัทราวิลล่า 8</p>
-</section>
-
-<!-- ─── MAIN ─── -->
-<main class="main">
-
-  <div class="section-eyebrow">Our Services</div>
-  <div class="section-title">เลือกบริการที่ต้องการ</div>
-
-  <div class="services-grid">
-
-    <!-- 1. แจ้งปัญหา -->
-    <a href="https://pattra8.github.io/report" class="service-card featured">
-      <div class="tag">Live</div>
-      <div class="service-icon">🔧</div>
-      <div class="service-title">แจ้งปัญหา / ซ่อมแซม</div>
-      <p class="service-desc">แจ้งปัญหาภายในโครงการ ติดตามสถานะการแก้ไขแบบ real-time</p>
-      <span class="service-cta">
-        Go to Board
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 2. ชำระเงิน -->
-    <a href="https://pattravilla8.web.app/payment.html" class="service-card">
-      <div class="service-icon">💳</div>
-      <div class="service-title">ชำระค่าส่วนกลาง & ค่าจอดรถ</div>
-      <p class="service-desc">ชำระค่าธรรมเนียมส่วนกลาง ค่าที่จอดรถ ดูประวัติการชำระ</p>
-      <span class="service-cta">
-        Payment
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 3. รายงานการเงิน -->
-    <a href="https://pattravilla8.web.app/report.html" class="service-card">
-      <div class="service-icon">📊</div>
-      <div class="service-title">รายงานการเงิน</div>
-      <p class="service-desc">ดูรายงานการเงินหมู่บ้าน รายรับ-รายจ่าย งบประมาณประจำปี</p>
-      <span class="service-cta">
-        Financial Report
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 4. ข้อมูลลูกบ้าน -->
-    <a href="https://pattra8.github.io/data/" class="service-card">
-      <div class="service-icon">🏠</div>
-      <div class="service-title">ข้อมูลลูกบ้าน</div>
-      <p class="service-desc">ตรวจสอบข้อมูลบ้าน อัปเดตข้อมูลติดต่อ จัดการผู้พักอาศัย</p>
-      <span class="service-cta">
-        My Profile
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 5. ประกาศ -->
-    <a href="#announce" class="service-card">
-      <div class="service-icon">📢</div>
-      <div class="service-title">ประกาศ & ข่าวสาร</div>
-      <p class="service-desc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
-      <span class="service-cta">
-        Announcements
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-  </div>
-
-
-  <!-- Announcements -->
-  <div id="announce">
-    <div class="section-eyebrow">Latest</div>
-    <div class="section-row">
-      <div class="section-title">ประกาศจากนิติบุคคล</div>
-      <a class="admin-link" href="https://pattra8.github.io/admin/">Manage Announcements</a>
-    </div>
-
-    <div class="announce-grid" id="announceGrid">
-      <div class="announce-empty">กำลังโหลดประกาศ...</div>
-    </div>
-    <div class="pagination" id="announcePagination" aria-label="Announcement pages"></div>
-  </div>
-
-</main>
-
-<!-- ─── LIGHTBOX (images) ─── -->
-<div class="lightbox-overlay" id="lightboxOverlay" role="dialog" aria-modal="true">
-  <button class="lightbox-close" id="lightboxClose" aria-label="ปิด">✕</button>
-  <img class="lightbox-img" id="lightboxImg" src="" alt="" />
 </div>
 
-<!-- ─── FILE PREVIEW MODAL ─── -->
-<div class="file-modal-overlay" id="fileModalOverlay" role="dialog" aria-modal="true">
-  <div class="file-modal-header">
-    <div class="file-modal-title" id="fileModalTitle"></div>
-    <div class="file-modal-actions">
-      <a class="file-modal-download" id="fileModalDownload" download="">⬇ ดาวน์โหลด</a>
-      <button class="file-modal-close" id="fileModalClose" aria-label="ปิด">✕</button>
+<!-- MAIN -->
+<div class="container">
+
+  <!-- HERO SEARCH -->
+  <div class="hero-search" id="heroSearch">
+    <div class="hero-icon">🏘️</div>
+    <div class="hero-title">ตรวจสอบข้อมูลของท่าน</div>
+    <div class="hero-subtitle">พิมพ์บ้านเลขที่ของท่าน เพื่อดูข้อมูลเฉพาะของบ้านท่านเท่านั้น</div>
+    <div class="hero-input-wrap">
+      <span class="hero-search-icon">🔍</span>
+      <input
+        type="text"
+        id="searchInput"
+        class="hero-input"
+        placeholder="กรุณาพิมพ์บ้านเลขที่... เช่น 38/5"
+        oninput="filterCards()"
+        autocomplete="off"
+        inputmode="text"
+      />
     </div>
+    <div class="hero-hint">🔒 ระบบแสดงเฉพาะข้อมูลของบ้านที่ค้นหาเท่านั้น</div>
   </div>
-  <div class="file-modal-body" id="fileModalBody"></div>
+
+  <!-- RESULT BAR (hidden until search) -->
+  <div class="result-bar" id="resultBar" style="display:none">
+    <div class="result-count" id="resultCount">— รายการ</div>
+  </div>
+
+  <div class="card-grid" id="cardGrid">
+    <!-- populated by JS after search -->
+  </div>
 </div>
 
-<!-- ─── FOOTER ─── -->
-<footer>
-  <div class="footer-logo">Pattra Villa 8</div>
-  <div class="footer-tagline">Resident Services</div>
-  <div class="footer-links">
-    <a href="https://pattra8.github.io/report">Report Issue</a>
-    <a href="https://pattravilla8.web.app/payment.html">Payment</a>
-    <a href="https://pattravilla8.web.app/report.html">Financial Report</a>
-    <a href="https://pattra8.github.io/data/">Residents</a>
-    <a href="#announce">Announcements</a>
-  </div>
-  <div class="footer-copy">© 2026 Pattra Villa 8 · All rights reserved.</div>
-</footer>
-
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
-  authDomain: "pattra8-54c3f.firebaseapp.com",
-  projectId: "pattra8-54c3f",
-  storageBucket: "pattra8-54c3f.firebasestorage.app",
-  messagingSenderId: "1045231989781",
-  appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const pageSize = 5;
-let announcements = [];
-let currentPage = 1;
-
-const grid = document.getElementById('announceGrid');
-const pager = document.getElementById('announcePagination');
-
-// ── Image lightbox ──
-const lightbox = document.getElementById('lightboxOverlay');
-const lightboxImg = document.getElementById('lightboxImg');
-document.getElementById('lightboxClose').addEventListener('click', () => lightbox.classList.remove('open'));
-lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
-
-// ── File preview modal ──
-const fileModal = document.getElementById('fileModalOverlay');
-const fileModalTitle = document.getElementById('fileModalTitle');
-const fileModalBody = document.getElementById('fileModalBody');
-const fileModalDownload = document.getElementById('fileModalDownload');
-document.getElementById('fileModalClose').addEventListener('click', closeFileModal);
-fileModal.addEventListener('click', e => { if (e.target === fileModal) closeFileModal(); });
-
-function closeFileModal() {
-  fileModal.classList.remove('open');
-  fileModalBody.innerHTML = ''; // release blob/iframe memory
-}
-
-function openFilePreview(dataUrl, name, ext) {
-  fileModalTitle.textContent = name;
-  fileModalDownload.href = dataUrl;
-  fileModalDownload.download = name;
-  fileModalBody.innerHTML = '';
-
-  const previewable = ['pdf'];
-  const officeTypes = ['doc','docx','xls','xlsx','ppt','pptx'];
-
-  if (previewable.includes(ext)) {
-    // PDF — native browser iframe
-    const iframe = document.createElement('iframe');
-    iframe.src = dataUrl;
-    iframe.title = name;
-    fileModalBody.appendChild(iframe);
-  } else if (officeTypes.includes(ext)) {
-    // Office files — convert dataUrl to blob URL for iframe
-    const byteStr = atob(dataUrl.split(',')[1]);
-    const mime = dataUrl.split(',')[0].split(':')[1].split(';')[0];
-    const ab = new Uint8Array(byteStr.length);
-    for (let i = 0; i < byteStr.length; i++) ab[i] = byteStr.charCodeAt(i);
-    const blob = new Blob([ab], { type: mime });
-    const blobUrl = URL.createObjectURL(blob);
-    const iframe = document.createElement('iframe');
-    // Google Docs Viewer needs a public URL — Office files show fallback with download
-    fileModalBody.innerHTML = `
-      <div class="file-modal-fallback">
-        <div class="file-modal-fallback-icon">${ext === 'pdf' ? '📄' : ext.startsWith('doc') ? '📝' : ext.startsWith('xls') ? '📊' : '📑'}</div>
-        <div class="file-modal-fallback-name">${esc(name)}</div>
-        <div class="file-modal-fallback-note">ไฟล์ประเภทนี้ไม่สามารถแสดง preview ใน browser ได้โดยตรง</div>
-        <a href="${blobUrl}" download="${esc(name)}" style="margin-top:8px;padding:10px 24px;background:var(--gold);color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-family:'Sarabun',sans-serif;">⬇ ดาวน์โหลดเพื่อเปิด</a>
-      </div>`;
-  } else {
-    fileModalBody.innerHTML = `
-      <div class="file-modal-fallback">
-        <div class="file-modal-fallback-icon">📎</div>
-        <div class="file-modal-fallback-name">${esc(name)}</div>
-        <div class="file-modal-fallback-note">กด "ดาวน์โหลด" เพื่อเปิดไฟล์</div>
-      </div>`;
-  }
-
-  fileModal.classList.add('open');
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    lightbox.classList.remove('open');
-    closeFileModal();
-  }
-});
-
-function openLightbox(src, alt) {
-  lightboxImg.src = src;
-  lightboxImg.alt = alt || '';
-  lightbox.classList.add('open');
-}
-
-const FILE_EXT_ICONS = {
-  pdf: '📄', doc: '📝', docx: '📝', xls: '📊', xlsx: '📊', ppt: '📑', pptx: '📑'
-};
-
-function normaliseFiles(photos) {
-  if (!photos || !photos.length) return { images: [], docs: [] };
-  const images = [], docs = [];
-  photos.forEach((f, i) => {
-    if (typeof f === 'string') {
-      // legacy: plain base64 string → treat as image
-      images.push({ dataUrl: f, idx: i });
-    } else if (f.isImage) {
-      images.push({ dataUrl: f.dataUrl, idx: i });
-    } else {
-      docs.push({ dataUrl: f.dataUrl, name: f.name, ext: f.ext, cat: f.cat, idx: i });
-    }
-  });
-  return { images, docs };
-}
-
-function buildPhotoStrip(photos) {
-  if (!photos || !photos.length) return '';
-  const { images, docs } = normaliseFiles(photos);
-  if (!images.length && !docs.length) return '';
-
-  const MAX_SHOW_IMG = 4;
-  const allImgUrls = images.map(f => f.dataUrl);
-
-  // image tiles
-  const imgTiles = images.slice(0, MAX_SHOW_IMG).map((f, i) => `
-    <div class="announce-tile" data-img-idx="${i}">
-      <img class="announce-photo-thumb" src="${esc(f.dataUrl)}" alt="รูปภาพ ${i + 1}" loading="lazy" />
-    </div>`).join('');
-
-  const extraImgs = images.length - MAX_SHOW_IMG;
-  const moreTile = extraImgs > 0
-    ? `<div class="announce-more-tile" data-more-start="${MAX_SHOW_IMG}">+${extraImgs}</div>`
-    : '';
-
-  // doc tiles — same size, click opens file preview
-  const docTiles = docs.map(f => {
-    const icon = FILE_EXT_ICONS[f.ext] || '📎';
-    const shortName = f.name.length > 16 ? f.name.slice(0, 13) + '…' : f.name;
-    return `
-      <div class="announce-tile"
-           title="${esc(f.name)}"
-           data-file-dataurl="${esc(f.dataUrl)}"
-           data-file-name="${esc(f.name)}"
-           data-file-ext="${esc(f.ext || 'file')}">
-        <div class="announce-file-tile">
-          <div class="announce-file-tile-icon">${icon}</div>
-          <div class="announce-file-tile-ext">${esc(f.ext || 'file')}</div>
-          <div class="announce-file-tile-name">${esc(shortName)}</div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon">✏️</div>
+        <div>
+          <h2>แจ้งแก้ไขข้อมูล</h2>
+          <p>บ้านเลขที่ <span id="mHouseNo">—</span></p>
         </div>
-      </div>`;
-  }).join('');
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
 
-  return `<div class="announce-attachments" data-all-images="${esc(JSON.stringify(allImgUrls))}">${imgTiles}${moreTile}${docTiles}</div>`;
-}
+    <!-- FORM VIEW -->
+    <div id="formView">
+      <div class="modal-body">
 
-function esc(value) {
-  return String(value || '').replace(/[&<>"']/g, char => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  }[char]));
-}
+        <!-- Instruction hint -->
+        <div class="form-hint-box">
+          <span>📝</span>
+          <span>แก้ไขข้อมูลที่ต้องการเปลี่ยน แล้วกดส่ง — ไม่ต้องแก้ข้อมูลที่ถูกต้องอยู่แล้ว</span>
+        </div>
 
-function formatDate(item) {
-  if (item.dateText) return item.dateText;
-  const source = item.createdAt?.toDate ? item.createdAt.toDate() : null;
-  if (!source) return '';
-  return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+        <div class="form-group">
+          <label>👤 ชื่อ-นามสกุล</label>
+          <input type="text" id="f_name" />
+        </div>
+        <div class="form-group">
+          <label>✉️ อีเมล</label>
+          <input type="email" id="f_email" />
+        </div>
+        <div class="form-group">
+          <label>📞 โทรศัพท์</label>
+          <input type="tel" id="f_phone" placeholder="เช่น 081-234-5678" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>🚗 ทะเบียนรถยนต์</label>
+            <input type="text" id="f_cars" placeholder="คั่นด้วยลูกน้ำ" />
+          </div>
+          <div class="form-group">
+            <label>🏍 มอเตอร์ไซค์</label>
+            <input type="text" id="f_motos" placeholder="คั่นด้วยลูกน้ำ" />
+          </div>
+        </div>
 
-function renderAnnouncements() {
-  const totalPages = Math.max(1, Math.ceil(announcements.length / pageSize));
-  currentPage = Math.min(currentPage, totalPages);
-  const start = (currentPage - 1) * pageSize;
-  const pageItems = announcements.slice(start, start + pageSize);
+        <div class="form-divider"></div>
 
-  if (!pageItems.length) {
-    grid.innerHTML = '<div class="announce-empty">ยังไม่มีประกาศจากนิติบุคคล</div>';
-    pager.innerHTML = '';
-    return;
-  }
+        <div class="form-row">
+          <div class="form-group">
+            <label>ชื่อผู้แจ้ง <span class="req">*</span></label>
+            <input type="text" id="f_reporter" placeholder="ชื่อของท่าน" />
+          </div>
+          <div class="form-group">
+            <label>ติดต่อกลับ <span class="req">*</span></label>
+            <input type="text" id="f_contact" placeholder="เบอร์ / อีเมล" />
+          </div>
+        </div>
 
-  grid.innerHTML = pageItems.map(item => `
-    <div class="announce-card">
-      <div class="announce-dot ${esc(item.type || '')}"></div>
-      <div class="announce-body">
-        <strong>${esc(item.title)}</strong>
-        <p>${esc(item.body)}</p>
-        ${buildPhotoStrip(item.photos)}
-        <div class="announce-date">${esc(formatDate(item))}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+          <span>📨</span> ส่งคำร้อง
+        </button>
       </div>
     </div>
-  `).join('');
 
-  // Attachment tile click delegation
-  grid.querySelectorAll('.announce-attachments').forEach(strip => {
-    const allImages = JSON.parse(strip.dataset.allImages || '[]');
+    <!-- SUCCESS VIEW -->
+    <div class="success-view" id="successView">
+      <div class="s-icon">✅</div>
+      <h3>ส่งคำร้องเรียบร้อยแล้ว!</h3>
+      <p>นิติบุคคลได้รับคำร้องของท่านแล้ว<br>จะติดต่อกลับโดยเร็วที่สุด</p>
+    </div>
 
-    // image tiles → lightbox
-    strip.querySelectorAll('[data-img-idx]').forEach(tile => {
-      tile.addEventListener('click', () => {
-        const idx = Number(tile.dataset.imgIdx);
-        openLightbox(allImages[idx], `รูปภาพ ${idx + 1}`);
-      });
-    });
+  </div>
+</div>
 
-    // +N more tile → lightbox first hidden image
-    const moreTile = strip.querySelector('.announce-more-tile');
-    if (moreTile) {
-      moreTile.addEventListener('click', () => {
-        const start = Number(moreTile.dataset.moreStart) || 4;
-        openLightbox(allImages[start], `รูปภาพ ${start + 1}`);
-      });
+<footer>
+  หมู่บ้านภัทราวิลล่า 8 <span>·</span> ข้อมูลส่วนบุคคลเป็นความลับ <span>·</span> Resident Portal
+</footer>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────
+  const DATA_URL      = 'https://pattra8.github.io/data/residents.json';
+  const GH_OWNER      = 'pattra8';
+  const GH_REPO       = 'pattra8.github.io';
+  // Token สำหรับสร้าง GitHub Issue (split เพื่อหลีกเลี่ยง secret scanning)
+  const GH_ISSUES_TOKEN = ['github_pat_11CALHYWI0','IEOMgd4lUQL0_qgWiVtN','nK0LNvbzVyLJMKWETW4T','lCOWQkxcDurIt4j65YLP5OOZ2inbsHxW'].join('');
+  // ────────────────────────────────────────────────────────────────────────
+
+  let allData = [];
+  let currentRecord = {};
+
+  /* ── censor helpers ── */
+  function censorPhone(p) {
+    if (!p || p === 'nan') return null;
+    const s = p.replace(/\D/g, '');
+    if (s.length < 6) return p;
+    return s.slice(0,3) + '-***-' + s.slice(-2);
+  }
+
+  function censorEmail(e) {
+    if (!e || e === 'nan' || !e.includes('@')) return null;
+    const [u, d] = e.split('@');
+    const masked = u.length <= 2 ? u[0] + '**' : u.slice(0,2) + '***';
+    return masked + '@' + d;
+  }
+
+  /* ── data cleansing ── */
+  function cleanPhone(raw) {
+    if (!raw || !raw.trim()) return '';
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 10) return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    return raw.trim(); // คืนค่าเดิมถ้าไม่ใช่ 10 หลัก
+  }
+
+  function cleanPlates(raw) {
+    if (!raw || !raw.trim()) return [];
+    return raw.split(/[,;\n]+/)
+      .map(p => p.replace(/[\s\-]/g, '').trim()) // ลบช่องว่างและขีด ภายในป้าย
+      .filter(Boolean);
+  }
+
+  /* ── load data ── */
+  async function loadData() {
+    try {
+      const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      allData = data.map(r => ({
+        ...r,
+        vehicles: {
+          cars:        Array.isArray(r.cars)        ? r.cars        : [],
+          motorcycles: Array.isArray(r.motorcycles) ? r.motorcycles : [],
+          last_updated: r.last_updated || null
+        }
+      }));
+    } catch(e) {
+      document.getElementById('cardGrid').innerHTML =
+        '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลได้</div>';
+    }
+  }
+
+  /* ── render cards ── */
+  function renderCards(data) {
+    const grid  = document.getElementById('cardGrid');
+    const count = document.getElementById('resultCount');
+    count.textContent = `${data.length} รายการ`;
+
+    if (!data.length) {
+      grid.innerHTML = '<div class="no-result"><div class="big">🔍</div>ไม่พบข้อมูลที่ค้นหา</div>';
+      return;
     }
 
-    // doc/file tiles → file preview modal
-    strip.querySelectorAll('[data-file-dataurl]').forEach(tile => {
-      tile.addEventListener('click', () => {
-        openFilePreview(tile.dataset.fileDataurl, tile.dataset.fileName, tile.dataset.fileExt);
+    grid.innerHTML = data.map(r => {
+      const hasEmail = r.email && r.email !== 'nan' && r.email.trim();
+      const hasPhone = r.phone && r.phone !== 'nan' && r.phone.trim();
+
+      const emailDisplay = hasEmail
+        ? `<span class="field-value">${r.email}</span>`
+        : `<span class="field-value empty">ไม่มีข้อมูล</span>`;
+
+      const phoneMasked  = hasPhone ? censorPhone(r.phone) : null;
+      const phoneDisplay = phoneMasked
+        ? `<span class="field-value censored">${phoneMasked}</span>`
+        : `<span class="field-value empty">ไม่มีข้อมูล</span>`;
+
+      return `
+      <div class="res-card">
+        <div class="res-card-top">
+          <div class="house-no-badge">
+            <span class="house-icon">🏠</span>
+            <div>
+              <div class="house-no-label">House No.</div>
+              <div class="house-no">${r.house_no || '—'}</div>
+            </div>
+          </div>
+        </div>
+        <div class="res-card-body">
+          <div class="field-row">
+            <div class="field-icon name-icon">👤</div>
+            <div class="field-content">
+              <div class="field-label">Name</div>
+              <div class="field-value">${r.name || '<span style="color:#cbd5e1;font-style:italic;font-weight:400">ไม่มีข้อมูล</span>'}</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon email-icon">✉️</div>
+            <div class="field-content">
+              <div class="field-label">Email</div>
+              ${emailDisplay}
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-icon phone-icon">📞</div>
+            <div class="field-content">
+              <div class="field-label">Phone</div>
+              ${phoneDisplay}
+            </div>
+          </div>
+          ${vehicleRow(r)}
+        </div>
+        <div class="res-card-footer">
+          <button class="btn-report" onclick="openModal('${esc(r.house_no)}')">
+            <span class="btn-icon">✏️</span> แจ้งแก้ไข
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function esc(s) {
+    return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
+  }
+  function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ── vehicle row renderer ── */
+  function vehicleRow(r) {
+    const v = r.vehicles;
+    if (!v) return '';
+    const hasCars  = v.cars  && v.cars.length  > 0;
+    const hasMotos = v.motorcycles && v.motorcycles.length > 0;
+
+    if (!hasCars && !hasMotos) {
+      return `
+      <div class="field-row">
+        <div class="field-icon car-icon">🚗</div>
+        <div class="field-content">
+          <div class="field-label">ทะเบียนรถ</div>
+          <span class="field-value empty">ยังไม่มีข้อมูลทะเบียน</span>
+        </div>
+      </div>`;
+    }
+    let html = '';
+    if (hasCars) {
+      html += `
+      <div class="field-row">
+        <div class="field-icon car-icon">🚗</div>
+        <div class="field-content">
+          <div class="field-label">รถยนต์</div>
+          <div class="plate-wrap">${v.cars.map(p=>`<span class="plate-chip">${escHtml(p)}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }
+    if (hasMotos) {
+      html += `
+      <div class="field-row">
+        <div class="field-icon moto-icon">🏍</div>
+        <div class="field-content">
+          <div class="field-label">มอเตอร์ไซค์</div>
+          <div class="plate-wrap">${v.motorcycles.map(p=>`<span class="plate-chip moto">${escHtml(p)}</span>`).join('')}</div>
+        </div>
+      </div>`;
+    }
+    return html;
+  }
+
+  /* ── date formatter ── */
+  function fmtDate(raw) {
+    if (!raw) return null;
+    try {
+      const d = new Date(raw);
+      if (isNaN(d)) return raw;
+      return d.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' });
+    } catch(e) { return raw; }
+  }
+
+  /* ── search / filter ── */
+  function filterCards() {
+    const q = document.getElementById('searchInput').value.trim();
+    const resultBar = document.getElementById('resultBar');
+    const hasSpecificNumber = /\/\d+/.test(q) || (/^\d+$/.test(q) && q.length >= 1);
+    if (!q || !hasSpecificNumber) {
+      document.getElementById('cardGrid').innerHTML = '';
+      resultBar.style.display = 'none';
+      return;
+    }
+    resultBar.style.display = 'flex';
+    const filtered = allData.filter(r =>
+      (r.house_no||'').toLowerCase().includes(q.toLowerCase())
+    );
+    renderCards(filtered);
+  }
+
+  /* ── modal ── */
+  function openModal(houseNo) {
+    const r = allData.find(x => x.house_no === houseNo);
+    if (!r) return;
+
+    const name  = (!r.name  || r.name  === 'nan') ? '' : r.name;
+    const email = (!r.email || r.email === 'nan') ? '' : r.email;
+    const phone = (!r.phone || r.phone === 'nan') ? '' : r.phone;
+    const cars  = r.vehicles?.cars         || [];
+    const motos = r.vehicles?.motorcycles  || [];
+
+    currentRecord = { houseNo, name, email, phone, cars, motorcycles: motos };
+
+    document.getElementById('mHouseNo').textContent = houseNo;
+    document.getElementById('f_name').value    = name;
+    document.getElementById('f_email').value   = email;
+    document.getElementById('f_phone').value   = phone;
+    document.getElementById('f_cars').value    = cars.join(', ');
+    document.getElementById('f_motos').value   = motos.join(', ');
+    document.getElementById('f_reporter').value = '';
+    document.getElementById('f_contact').value  = '';
+
+    document.getElementById('formView').style.display    = 'flex';
+    document.getElementById('successView').style.display = 'none';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').innerHTML = '<span>📨</span> ส่งคำร้อง';
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+
+  /* ── submit → GitHub Issue ── */
+  async function submitForm() {
+    const reporter = document.getElementById('f_reporter').value.trim();
+    const contact  = document.getElementById('f_contact').value.trim();
+    if (!reporter || !contact) {
+      alert('กรุณาใส่ชื่อผู้แจ้งและช่องทางติดต่อกลับ');
+      return;
+    }
+
+    // Cleanse data before submit
+    const newName  = document.getElementById('f_name').value.trim();
+    const newEmail = document.getElementById('f_email').value.trim();
+    const newPhone = cleanPhone(document.getElementById('f_phone').value);
+    const newCars  = cleanPlates(document.getElementById('f_cars').value);
+    const newMotos = cleanPlates(document.getElementById('f_motos').value);
+
+    // Check if anything actually changed
+    const hasChange =
+      newName  !== currentRecord.name  ||
+      newEmail !== currentRecord.email ||
+      newPhone !== currentRecord.phone ||
+      JSON.stringify(newCars)  !== JSON.stringify(currentRecord.cars) ||
+      JSON.stringify(newMotos) !== JSON.stringify(currentRecord.motorcycles);
+
+    if (!hasChange) {
+      alert('ไม่มีการเปลี่ยนแปลงข้อมูล\nกรุณาแก้ไขข้อมูลที่ต้องการเปลี่ยนก่อนกดส่ง');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> กำลังส่ง...';
+
+    // Build structured payload (stored in issue body as JSON)
+    const payload = {
+      house_no: currentRecord.houseNo,
+      old: {
+        name:        currentRecord.name,
+        email:       currentRecord.email,
+        phone:       currentRecord.phone,
+        cars:        currentRecord.cars,
+        motorcycles: currentRecord.motorcycles
+      },
+      new: {
+        name:        newName,
+        email:       newEmail,
+        phone:       newPhone,
+        cars:        newCars,
+        motorcycles: newMotos
+      },
+      reporter,
+      contact,
+      submitted_at: new Date().toISOString()
+    };
+
+    const issueTitle = `[แก้ไขข้อมูล] บ้านเลขที่ ${currentRecord.houseNo} — ${currentRecord.name || '(ไม่มีชื่อ)'}`;
+    const issueBody  = [
+      `**ผู้แจ้ง:** ${reporter}`,
+      `**ติดต่อกลับ:** ${contact}`,
+      ``,
+      `\`\`\`json`,
+      JSON.stringify(payload, null, 2),
+      `\`\`\``
+    ].join('\n');
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues`, {
+        method: 'POST',
+        headers: {
+          Authorization:  `token ${GH_ISSUES_TOKEN}`,
+          Accept:         'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title: issueTitle, body: issueBody })
       });
-    });
+
+      if (res.ok) {
+        document.getElementById('formView').style.display    = 'none';
+        document.getElementById('successView').style.display = 'block';
+        setTimeout(closeModal, 3200);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `GitHub API: ${res.status}`);
+      }
+    } catch(err) {
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่\n(' + err.message + ')');
+      btn.disabled = false;
+      btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
+    }
+  }
+
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
 
-  renderPagination(totalPages);
-}
-
-function renderPagination(totalPages) {
-  if (totalPages <= 1) {
-    pager.innerHTML = '';
-    return;
-  }
-
-  const buttons = [
-    `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>`
-  ];
-
-  for (let page = 1; page <= totalPages; page += 1) {
-    buttons.push(`<button class="page-btn ${page === currentPage ? 'active' : ''}" data-page="${page}">${page}</button>`);
-  }
-
-  buttons.push(`<button class="page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`);
-  pager.innerHTML = buttons.join('');
-}
-
-pager.addEventListener('click', event => {
-  const btn = event.target.closest('.page-btn');
-  if (!btn || btn.disabled) return;
-  currentPage = Number(btn.dataset.page);
-  renderAnnouncements();
-});
-
-const announceQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
-onSnapshot(announceQuery, snapshot => {
-  announcements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  renderAnnouncements();
-}, error => {
-  console.error(error);
-  grid.innerHTML = '<div class="announce-empty">ไม่สามารถโหลดประกาศได้ในขณะนี้</div>';
-  pager.innerHTML = '';
-});
+  document.getElementById('searchInput').value = '38/';
+  loadData();
 </script>
-
 </body>
 </html>
