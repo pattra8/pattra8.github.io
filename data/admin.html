@@ -149,50 +149,32 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      min-width: 820px;
+      min-width: 700px;
     }
     thead { background: #1a3a5c; color: white; }
-    th { padding: 11px 13px; text-align: left; font-size: 0.85rem; white-space: nowrap; }
-    td { padding: 10px 13px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; vertical-align: middle; }
+    th { padding: 9px 10px; text-align: left; font-size: 0.78rem; white-space: nowrap; }
+    td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.8rem; vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f9fbff; }
     .no-val { color: #ccc; font-style: italic; }
-    .col-house { white-space: nowrap; width: 90px; }
-    .col-name {
-      min-width: 260px;
-      max-width: 320px;
-      white-space: normal;
-      word-break: break-word;
-      line-height: 1.45;
-    }
-    .col-email {
-      min-width: 280px;
-      white-space: nowrap;
-    }
-    .col-phone {
-      min-width: 145px;
-      white-space: nowrap;
-    }
+    .col-actions { width: 60px; white-space: nowrap; }
+    .col-house   { white-space: nowrap; width: 72px; }
+    .col-name    { min-width: 160px; max-width: 220px; white-space: normal; word-break: break-word; line-height: 1.4; }
+    .col-email   { min-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .col-phone   { min-width: 120px; white-space: nowrap; }
     .col-zone, .col-plot, .col-deed { white-space: nowrap; }
-    .col-actions {
-      width: 90px;
-      white-space: nowrap;
-    }
     .edit-btn {
       background: #fff7ed;
       color: #c2410c;
       border: 1px solid #fdba74;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 4px 9px;
+      border-radius: 5px;
       cursor: pointer;
       font-family: inherit;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
     }
-    .edit-btn:hover {
-      background: #ffedd5;
-      border-color: #fb923c;
-    }
+    .edit-btn:hover { background: #ffedd5; border-color: #fb923c; }
 
     .modal-overlay {
       display: none;
@@ -347,17 +329,17 @@
       <thead>
         <tr>
           <th>#</th>
+          <th>จัดการ</th>
           <th>บ้านเลขที่</th>
           <th>ชื่อ-นามสกุล</th>
           <th>อีเมล</th>
           <th>โทรศัพท์</th>
-          <th>เลขที่โฉนด</th>
+          <th>โฉนด</th>
           <th>โซน</th>
-          <th>แปลงที่</th>
+          <th>แปลง</th>
           <th>🚗 รถยนต์</th>
           <th>🏍 มอเตอร์ไซค์</th>
-          <th style="color:#94a3b8;font-weight:500;font-size:0.75rem;">Last Updated</th>
-          <th>จัดการ</th>
+          <th style="color:#94a3b8;font-weight:500;font-size:0.72rem;">Updated</th>
         </tr>
       </thead>
       <tbody id="adminBody"></tbody>
@@ -463,6 +445,7 @@
   const GH_PATH   = 'data/residents.json';
   const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
+  const GH_TOKEN_KEY       = 'pattra_gh_token';
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
   // ────────────────────────────────────────────────────────
 
@@ -470,7 +453,7 @@
   let filteredData  = [];
   let editingIndex  = -1;
   let originalSnap  = null;
-  let githubToken   = '';        // memory only, never persisted
+  let githubToken   = '';        // loaded from localStorage, cleared on logout
   let pendingSaveFn = null;      // callback after token entered
 
   // ── Session ─────────────────────────────────────────────
@@ -479,12 +462,16 @@
   function startAdminSession() {
     localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_DAYS * 86400000));
   }
-  function clearAdminSession() { localStorage.removeItem(ADMIN_SESSION_KEY); }
+  function clearAdminSession() {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+    localStorage.removeItem(GH_TOKEN_KEY);
+  }
 
   // ── Auth ─────────────────────────────────────────────────
   function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
+    githubToken = localStorage.getItem(GH_TOKEN_KEY) || '';
     loadAdminData();
   }
   function doLogin() {
@@ -505,6 +492,7 @@
     allData = []; filteredData = [];
     document.getElementById('adminBody').innerHTML = '';
     githubToken = '';
+    localStorage.removeItem(GH_TOKEN_KEY);
   }
 
   // ── Load data ────────────────────────────────────────────
@@ -536,7 +524,8 @@
         motos.length ? `🏍 ${motos.join(', ')}` : ''
       ].filter(Boolean).join('<br>') || '<span class="no-val">—</span>';
       return `<tr>
-        <td style="color:#aaa">${i + 1}</td>
+        <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
+        <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
         <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
         <td class="col-name">${showVal(r.name)}</td>
         <td class="col-email">${showVal(r.email)}</td>
@@ -544,10 +533,9 @@
         <td class="col-deed">${showVal(r.deed_no)}</td>
         <td class="col-zone">${showVal(r.zone)}</td>
         <td class="col-plot">${showVal(r.plot)}</td>
-        <td style="font-size:0.78rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
-        <td style="font-size:0.78rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
-        <td style="color:#94a3b8;font-size:0.75rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
-        <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
+        <td style="font-size:0.77rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
+        <td style="font-size:0.77rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
+        <td style="color:#94a3b8;font-size:0.72rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
       </tr>`;
     }).join('');
   }
@@ -676,6 +664,7 @@
     const t = document.getElementById('tokenInput').value.trim();
     if (!t) { alert('กรุณาใส่ token'); return; }
     githubToken = t;
+    localStorage.setItem(GH_TOKEN_KEY, t);
     document.getElementById('tokenModal').classList.remove('show');
     if (pendingSaveFn) { pendingSaveFn(); pendingSaveFn = null; }
   }
