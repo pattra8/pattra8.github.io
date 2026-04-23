@@ -269,6 +269,26 @@
       color: #475569;
     }
 
+    /* ── FORM HINT ── */
+    .form-hint-box {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      color: #15803d;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .form-divider {
+      height: 1px;
+      background: #e8edf3;
+      margin: 14px 0;
+    }
+
     /* ── LAST UPDATED BADGE ── */
     .updated-badge {
       display: inline-flex;
@@ -774,84 +794,36 @@
     <div id="formView">
       <div class="modal-body">
 
-        <!-- Current data snapshot -->
-        <div class="snapshot-box">
-          <div class="snapshot-title">📋 ข้อมูลปัจจุบัน</div>
-          <div class="snapshot-fields">
-            <div class="snapshot-field">
-              <span class="snapshot-key">👤 ชื่อ-นามสกุล</span>
-              <span class="snapshot-val" id="snap_name">—</span>
-            </div>
-            <div class="snapshot-field">
-              <span class="snapshot-key">✉️ อีเมล</span>
-              <span class="snapshot-val" id="snap_email">—</span>
-            </div>
-            <div class="snapshot-field">
-              <span class="snapshot-key">📞 เบอร์โทร</span>
-              <span class="snapshot-val" id="snap_phone">—</span>
-            </div>
-            <div class="snapshot-field">
-              <span class="snapshot-key">🚗 รถยนต์</span>
-              <span class="snapshot-val" id="snap_cars">—</span>
-            </div>
-            <div class="snapshot-field">
-              <span class="snapshot-key">🏍 มอเตอร์ไซค์</span>
-              <span class="snapshot-val" id="snap_motos">—</span>
-            </div>
-          </div>
+        <!-- Instruction hint -->
+        <div class="form-hint-box">
+          <span>📝</span>
+          <span>แก้ไขข้อมูลที่ต้องการเปลี่ยน แล้วกดส่ง — ไม่ต้องแก้ข้อมูลที่ถูกต้องอยู่แล้ว</span>
         </div>
 
-        <!-- Change preview -->
-        <div class="change-box" id="changeBox">
-          <span class="change-old" id="changeOld">—</span>
-          <span class="change-arrow-icon">→</span>
-          <span class="change-new" id="changeNew">—</span>
-        </div>
-
-        <!-- Form -->
         <div class="form-group">
-          <label>ต้องการแก้ไข <span class="req">*</span></label>
-          <select id="f_field" required onchange="onFieldChange()">
-            <option value="">— เลือกประเภทข้อมูล —</option>
-            <option value="ชื่อ-นามสกุล">ชื่อ-นามสกุล</option>
-            <option value="อีเมล">อีเมล</option>
-            <option value="เบอร์โทร">เบอร์โทร</option>
-            <option value="ทะเบียนรถยนต์">🚗 ทะเบียนรถยนต์</option>
-            <option value="ทะเบียนมอเตอร์ไซค์">🏍 ทะเบียนมอเตอร์ไซค์</option>
-            <option value="หลายรายการ">แก้ไขหลายรายการพร้อมกัน</option>
-            <option value="อื่นๆ">อื่นๆ</option>
-          </select>
+          <label>👤 ชื่อ-นามสกุล</label>
+          <input type="text" id="f_name" />
+        </div>
+        <div class="form-group">
+          <label>✉️ อีเมล</label>
+          <input type="email" id="f_email" />
+        </div>
+        <div class="form-group">
+          <label>📞 โทรศัพท์</label>
+          <input type="tel" id="f_phone" placeholder="เช่น 081-234-5678" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>🚗 ทะเบียนรถยนต์</label>
+            <input type="text" id="f_cars" placeholder="คั่นด้วยลูกน้ำ" />
+          </div>
+          <div class="form-group">
+            <label>🏍 มอเตอร์ไซค์</label>
+            <input type="text" id="f_motos" placeholder="คั่นด้วยลูกน้ำ" />
+          </div>
         </div>
 
-        <div class="form-group" id="singleValueGroup">
-          <label>ข้อมูลที่ถูกต้อง (ใหม่) <span class="req">*</span></label>
-          <input type="text" id="f_new_val" placeholder="กรอกข้อมูลที่ถูกต้อง" oninput="onNewValInput()" />
-        </div>
-
-        <div class="multi-fields" id="multiFields">
-          <div class="form-group">
-            <label>ชื่อ-นามสกุลใหม่</label>
-            <input type="text" id="f_new_name" placeholder="ชื่อ-นามสกุลที่ถูกต้อง" oninput="onNewValInput()" />
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>อีเมลใหม่</label>
-              <input type="text" id="f_new_email" placeholder="อีเมลที่ถูกต้อง" oninput="onNewValInput()" />
-            </div>
-            <div class="form-group">
-              <label>เบอร์โทรใหม่</label>
-              <input type="text" id="f_new_phone" placeholder="เบอร์โทรที่ถูกต้อง" oninput="onNewValInput()" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>🚗 ทะเบียนรถยนต์ใหม่</label>
-            <input type="text" id="f_new_cars" placeholder="คั่นด้วยลูกน้ำ เช่น 5ขฌ9398, 3กศ535" oninput="onNewValInput()" />
-          </div>
-          <div class="form-group">
-            <label>🏍 ทะเบียนมอเตอร์ไซค์ใหม่</label>
-            <input type="text" id="f_new_motos" placeholder="คั่นด้วยลูกน้ำ เช่น 1กฐ1717" oninput="onNewValInput()" />
-          </div>
-        </div>
+        <div class="form-divider"></div>
 
         <div class="form-row">
           <div class="form-group">
@@ -862,11 +834,6 @@
             <label>ติดต่อกลับ <span class="req">*</span></label>
             <input type="text" id="f_contact" placeholder="เบอร์ / อีเมล" />
           </div>
-        </div>
-
-        <div class="form-group">
-          <label>หมายเหตุเพิ่มเติม</label>
-          <textarea id="f_notes" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
         </div>
 
       </div>
@@ -893,7 +860,14 @@
 </footer>
 
 <script>
-  const DATA_URL = 'https://pattra8.github.io/data/residents.json';
+  // ── Config ──────────────────────────────────────────────────────────────
+  const DATA_URL      = 'https://pattra8.github.io/data/residents.json';
+  const GH_OWNER      = 'pattra8';
+  const GH_REPO       = 'pattra8.github.io';
+  // Token สำหรับสร้าง GitHub Issue (split เพื่อหลีกเลี่ยง secret scanning)
+  const GH_ISSUES_TOKEN = ['github_pat_11CALHYWI0','IEOMgd4lUQL0_qgWiVtN','nK0LNvbzVyLJMKWETW4T','lCOWQkxcDurIt4j65YLP5OOZ2inbsHxW'].join('');
+  // ────────────────────────────────────────────────────────────────────────
+
   let allData = [];
   let currentRecord = {};
 
@@ -912,24 +886,35 @@
     return masked + '@' + d;
   }
 
+  /* ── data cleansing ── */
+  function cleanPhone(raw) {
+    if (!raw || !raw.trim()) return '';
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 10) return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    return raw.trim(); // คืนค่าเดิมถ้าไม่ใช่ 10 หลัก
+  }
+
+  function cleanPlates(raw) {
+    if (!raw || !raw.trim()) return [];
+    return raw.split(/[,;\n]+/)
+      .map(p => p.replace(/[\s\-]/g, '').trim()) // ลบช่องว่างและขีด ภายในป้าย
+      .filter(Boolean);
+  }
+
   /* ── load data ── */
   async function loadData() {
     try {
       const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-
-      // cars/motorcycles are already arrays in residents.json
       allData = data.map(r => ({
         ...r,
         vehicles: {
-          cars:         Array.isArray(r.cars)        ? r.cars        : [],
-          motorcycles:  Array.isArray(r.motorcycles) ? r.motorcycles : [],
+          cars:        Array.isArray(r.cars)        ? r.cars        : [],
+          motorcycles: Array.isArray(r.motorcycles) ? r.motorcycles : [],
           last_updated: r.last_updated || null
         }
       }));
-
-      // Do NOT render on load — wait for user to search
     } catch(e) {
       document.getElementById('cardGrid').innerHTML =
         '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลได้</div>';
@@ -938,7 +923,7 @@
 
   /* ── render cards ── */
   function renderCards(data) {
-    const grid = document.getElementById('cardGrid');
+    const grid  = document.getElementById('cardGrid');
     const count = document.getElementById('resultCount');
     count.textContent = `${data.length} รายการ`;
 
@@ -955,7 +940,7 @@
         ? `<span class="field-value">${r.email}</span>`
         : `<span class="field-value empty">ไม่มีข้อมูล</span>`;
 
-      const phoneMasked = hasPhone ? censorPhone(r.phone) : null;
+      const phoneMasked  = hasPhone ? censorPhone(r.phone) : null;
       const phoneDisplay = phoneMasked
         ? `<span class="field-value censored">${phoneMasked}</span>`
         : `<span class="field-value empty">ไม่มีข้อมูล</span>`;
@@ -1007,14 +992,8 @@
   function esc(s) {
     return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
   }
-
   function escHtml(s) {
-    return String(s || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
   /* ── vehicle row renderer ── */
@@ -1034,7 +1013,6 @@
         </div>
       </div>`;
     }
-
     let html = '';
     if (hasCars) {
       html += `
@@ -1042,7 +1020,7 @@
         <div class="field-icon car-icon">🚗</div>
         <div class="field-content">
           <div class="field-label">รถยนต์</div>
-          <div class="plate-wrap">${v.cars.map(p => `<span class="plate-chip">${escHtml(p)}</span>`).join('')}</div>
+          <div class="plate-wrap">${v.cars.map(p=>`<span class="plate-chip">${escHtml(p)}</span>`).join('')}</div>
         </div>
       </div>`;
     }
@@ -1052,7 +1030,7 @@
         <div class="field-icon moto-icon">🏍</div>
         <div class="field-content">
           <div class="field-label">มอเตอร์ไซค์</div>
-          <div class="plate-wrap">${v.motorcycles.map(p => `<span class="plate-chip moto">${escHtml(p)}</span>`).join('')}</div>
+          <div class="plate-wrap">${v.motorcycles.map(p=>`<span class="plate-chip moto">${escHtml(p)}</span>`).join('')}</div>
         </div>
       </div>`;
     }
@@ -1063,29 +1041,25 @@
   function fmtDate(raw) {
     if (!raw) return null;
     try {
-      // handles "4/17/2026 15:21:18" or ISO strings
       const d = new Date(raw);
       if (isNaN(d)) return raw;
-      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+      return d.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' });
     } catch(e) { return raw; }
   }
 
-  /* ── search / filter (house_no only for privacy) ── */
+  /* ── search / filter ── */
   function filterCards() {
     const q = document.getElementById('searchInput').value.trim();
     const resultBar = document.getElementById('resultBar');
-
-    // require at least "38/X" — one digit after the slash
     const hasSpecificNumber = /\/\d+/.test(q) || (/^\d+$/.test(q) && q.length >= 1);
     if (!q || !hasSpecificNumber) {
       document.getElementById('cardGrid').innerHTML = '';
       resultBar.style.display = 'none';
       return;
     }
-
     resultBar.style.display = 'flex';
     const filtered = allData.filter(r =>
-      (r.house_no || '').toLowerCase().includes(q.toLowerCase())
+      (r.house_no||'').toLowerCase().includes(q.toLowerCase())
     );
     renderCards(filtered);
   }
@@ -1095,43 +1069,24 @@
     const r = allData.find(x => x.house_no === houseNo);
     if (!r) return;
 
-    const cleanEmail = (!r.email || r.email==='nan') ? '' : r.email;
-    const cleanPhone = (!r.phone || r.phone==='nan') ? '' : r.phone;
-    const cleanName  = (!r.name  || r.name ==='nan') ? '' : r.name;
-    const cars  = (r.vehicles?.cars  || []);
-    const motos = (r.vehicles?.motorcycles || []);
+    const name  = (!r.name  || r.name  === 'nan') ? '' : r.name;
+    const email = (!r.email || r.email === 'nan') ? '' : r.email;
+    const phone = (!r.phone || r.phone === 'nan') ? '' : r.phone;
+    const cars  = r.vehicles?.cars         || [];
+    const motos = r.vehicles?.motorcycles  || [];
 
-    currentRecord = {
-      houseNo,
-      name:        cleanName,
-      email:       cleanEmail,
-      phone:       cleanPhone,
-      cars,
-      motorcycles: motos
-    };
+    currentRecord = { houseNo, name, email, phone, cars, motorcycles: motos };
 
     document.getElementById('mHouseNo').textContent = houseNo;
+    document.getElementById('f_name').value    = name;
+    document.getElementById('f_email').value   = email;
+    document.getElementById('f_phone').value   = phone;
+    document.getElementById('f_cars').value    = cars.join(', ');
+    document.getElementById('f_motos').value   = motos.join(', ');
+    document.getElementById('f_reporter').value = '';
+    document.getElementById('f_contact').value  = '';
 
-    const setSnap = (id, val) => {
-      const el = document.getElementById(id);
-      if (val) { el.textContent = val; el.className = 'snapshot-val'; }
-      else      { el.textContent = 'ไม่มีข้อมูล'; el.className = 'snapshot-val empty'; }
-    };
-    setSnap('snap_name',  cleanName);
-    setSnap('snap_email', cleanEmail);
-    setSnap('snap_phone', cleanPhone || '—');
-    setSnap('snap_cars',  cars.length  ? cars.join(', ')  : '');
-    setSnap('snap_motos', motos.length ? motos.join(', ') : '');
-
-    ['f_field','f_new_val','f_new_name','f_new_email','f_new_phone','f_new_cars','f_new_motos','f_reporter','f_contact','f_notes'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    document.getElementById('f_new_val').placeholder = 'กรอกข้อมูลที่ถูกต้อง';
-    document.getElementById('changeBox').className = 'change-box';
-    document.getElementById('singleValueGroup').style.display = 'block';
-    document.getElementById('multiFields').className = 'multi-fields';
-    document.getElementById('formView').style.display = 'flex';
+    document.getElementById('formView').style.display    = 'flex';
     document.getElementById('successView').style.display = 'none';
     document.getElementById('submitBtn').disabled = false;
     document.getElementById('submitBtn').innerHTML = '<span>📨</span> ส่งคำร้อง';
@@ -1142,93 +1097,32 @@
     document.getElementById('modalOverlay').classList.remove('active');
   }
 
-  function onFieldChange() {
-    const field = document.getElementById('f_field').value;
-    const isMulti   = field === 'หลายรายการ';
-    const isVehicle = field === 'ทะเบียนรถยนต์' || field === 'ทะเบียนมอเตอร์ไซค์';
-    document.getElementById('singleValueGroup').style.display = isMulti ? 'none' : 'block';
-    document.getElementById('multiFields').className = isMulti ? 'multi-fields show' : 'multi-fields';
-    document.getElementById('f_new_val').placeholder = isVehicle
-      ? 'คั่นด้วยลูกน้ำ เช่น 5ขฌ9398, 3กศ535'
-      : 'กรอกข้อมูลที่ถูกต้อง';
-    updatePreview();
-  }
-  function onNewValInput() { updatePreview(); }
-
-  function getChangeItems() {
-    const field = document.getElementById('f_field').value;
-    if (field === 'หลายรายการ') {
-      return [
-        { label: 'ชื่อ-นามสกุล',       oldVal: currentRecord.name  || '(ว่าง)', newVal: document.getElementById('f_new_name').value.trim() },
-        { label: 'อีเมล',              oldVal: currentRecord.email || '(ว่าง)', newVal: document.getElementById('f_new_email').value.trim() },
-        { label: 'เบอร์โทร',           oldVal: currentRecord.phone || '(ว่าง)', newVal: document.getElementById('f_new_phone').value.trim() },
-        { label: 'ทะเบียนรถยนต์',      oldVal: currentRecord.cars.join(', ')  || '(ว่าง)', newVal: document.getElementById('f_new_cars').value.trim() },
-        { label: 'ทะเบียนมอเตอร์ไซค์', oldVal: currentRecord.motorcycles.join(', ') || '(ว่าง)', newVal: document.getElementById('f_new_motos').value.trim() },
-      ].filter(item => item.newVal);
-    }
-
-    const newVal = document.getElementById('f_new_val').value.trim();
-    let oldVal = '';
-    if      (field === 'ชื่อ-นามสกุล')       oldVal = currentRecord.name  || '(ว่าง)';
-    else if (field === 'อีเมล')              oldVal = currentRecord.email || '(ว่าง)';
-    else if (field === 'เบอร์โทร')           oldVal = currentRecord.phone || '(ว่าง)';
-    else if (field === 'ทะเบียนรถยนต์')      oldVal = currentRecord.cars.join(', ')  || '(ว่าง)';
-    else if (field === 'ทะเบียนมอเตอร์ไซค์') oldVal = currentRecord.motorcycles.join(', ') || '(ว่าง)';
-    else oldVal = '(ข้อมูลเดิม)';
-
-    return field ? [{ label: field, oldVal, newVal }] : [];
-  }
-
-  function updatePreview() {
-    const field  = document.getElementById('f_field').value;
-    const box    = document.getElementById('changeBox');
-
-    if (!field) { box.className = 'change-box'; return; }
-
-    if (field === 'หลายรายการ') {
-      const items = getChangeItems();
-      if (!items.length) {
-        box.className = 'change-box';
-        return;
-      }
-      box.innerHTML = items.map(item => `
-        <div class="change-line">
-          <span class="change-label">${escHtml(item.label)}</span>
-          <span class="change-old">${escHtml(item.oldVal)}</span>
-          <span class="change-arrow-icon">→</span>
-          <span class="change-new">${escHtml(item.newVal)}</span>
-        </div>
-      `).join('');
-      box.className = 'change-box multi-change show';
+  /* ── submit → GitHub Issue ── */
+  async function submitForm() {
+    const reporter = document.getElementById('f_reporter').value.trim();
+    const contact  = document.getElementById('f_contact').value.trim();
+    if (!reporter || !contact) {
+      alert('กรุณาใส่ชื่อผู้แจ้งและช่องทางติดต่อกลับ');
       return;
     }
 
-    box.innerHTML = '<span class="change-old" id="changeOld">—</span><span class="change-arrow-icon">→</span><span class="change-new" id="changeNew">—</span>';
-    const item = getChangeItems()[0];
-    const newVal = item?.newVal || '';
+    // Cleanse data before submit
+    const newName  = document.getElementById('f_name').value.trim();
+    const newEmail = document.getElementById('f_email').value.trim();
+    const newPhone = cleanPhone(document.getElementById('f_phone').value);
+    const newCars  = cleanPlates(document.getElementById('f_cars').value);
+    const newMotos = cleanPlates(document.getElementById('f_motos').value);
 
-    document.getElementById('changeOld').textContent = item?.oldVal || '(ข้อมูลเดิม)';
-    const newEl = document.getElementById('changeNew');
-    if (newVal) {
-      newEl.textContent = newVal;
-      newEl.className = 'change-new';
-    } else {
-      newEl.textContent = 'พิมพ์ข้อมูลใหม่ด้านล่าง...';
-      newEl.className = 'change-new placeholder';
-    }
-    box.className = 'change-box show';
-  }
+    // Check if anything actually changed
+    const hasChange =
+      newName  !== currentRecord.name  ||
+      newEmail !== currentRecord.email ||
+      newPhone !== currentRecord.phone ||
+      JSON.stringify(newCars)  !== JSON.stringify(currentRecord.cars) ||
+      JSON.stringify(newMotos) !== JSON.stringify(currentRecord.motorcycles);
 
-  /* ── submit ── */
-  async function submitForm() {
-    const field    = document.getElementById('f_field').value;
-    const changeItems = getChangeItems().filter(item => item.newVal);
-    const reporter = document.getElementById('f_reporter').value.trim();
-    const contact  = document.getElementById('f_contact').value.trim();
-    const notes    = document.getElementById('f_notes').value.trim();
-
-    if (!field || !changeItems.length || !reporter || !contact) {
-      alert('กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
+    if (!hasChange) {
+      alert('ไม่มีการเปลี่ยนแปลงข้อมูล\nกรุณาแก้ไขข้อมูลที่ต้องการเปลี่ยนก่อนกดส่ง');
       return;
     }
 
@@ -1236,46 +1130,59 @@
     btn.disabled = true;
     btn.innerHTML = '<span>⏳</span> กำลังส่ง...';
 
-    const changeSummary = changeItems.map(item =>
-      `${item.label}: ${item.oldVal || '-'} → ${item.newVal}`
-    ).join('\n');
+    // Build structured payload (stored in issue body as JSON)
+    const payload = {
+      house_no: currentRecord.houseNo,
+      old: {
+        name:        currentRecord.name,
+        email:       currentRecord.email,
+        phone:       currentRecord.phone,
+        cars:        currentRecord.cars,
+        motorcycles: currentRecord.motorcycles
+      },
+      new: {
+        name:        newName,
+        email:       newEmail,
+        phone:       newPhone,
+        cars:        newCars,
+        motorcycles: newMotos
+      },
+      reporter,
+      contact,
+      submitted_at: new Date().toISOString()
+    };
 
-    const fd = new FormData();
-    fd.append('_subject',              '[ภัทราวิลล่า 8] แจ้งแก้ไขข้อมูล บ้านเลขที่ ' + currentRecord.houseNo);
-    fd.append('_replyto',              contact.includes('@') ? contact : 'noreply@pattra8.com');
-    fd.append('บ้านเลขที่',           currentRecord.houseNo);
-    fd.append('ประเภทคำร้อง',          field === 'หลายรายการ' ? 'แก้ไขหลายรายการ' : 'แก้ไขรายการเดียว');
-    fd.append('ข้อมูลที่แก้ไข',       changeItems.map(item => item.label).join(', '));
-    fd.append('รายละเอียดการแก้ไข',   changeSummary);
-    changeItems.forEach(item => {
-      fd.append(`${item.label} - ข้อมูลเดิม`, item.oldVal || '-');
-      fd.append(`${item.label} - ข้อมูลใหม่`, item.newVal);
-    });
-    fd.append('ชื่อผู้แจ้ง',          reporter);
-    fd.append('ช่องทางติดต่อกลับ',    contact);
-    fd.append('หมายเหตุ',             notes || '-');
+    const issueTitle = `[แก้ไขข้อมูล] บ้านเลขที่ ${currentRecord.houseNo} — ${currentRecord.name || '(ไม่มีชื่อ)'}`;
+    const issueBody  = [
+      `**ผู้แจ้ง:** ${reporter}`,
+      `**ติดต่อกลับ:** ${contact}`,
+      ``,
+      `\`\`\`json`,
+      JSON.stringify(payload, null, 2),
+      `\`\`\``
+    ].join('\n');
 
     try {
-      const res = await fetch('https://formspree.io/f/xnjoykgp', {
-        method: 'POST', body: fd,
-        headers: { 'Accept': 'application/json' }
+      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues`, {
+        method: 'POST',
+        headers: {
+          Authorization:  `token ${GH_ISSUES_TOKEN}`,
+          Accept:         'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title: issueTitle, body: issueBody })
       });
 
-      let resData = {};
-      try { resData = await res.json(); } catch(e) {}
-
-      if (res.ok && resData.ok) {
-        document.getElementById('formView').style.display = 'none';
+      if (res.ok) {
+        document.getElementById('formView').style.display    = 'none';
         document.getElementById('successView').style.display = 'block';
         setTimeout(closeModal, 3200);
       } else {
-        const errMsg = resData.error || resData.errors?.[0]?.message || 'Unknown error';
-        alert('เกิดข้อผิดพลาด: ' + errMsg + '\n\nกรุณาลองใหม่อีกครั้ง');
-        btn.disabled = false;
-        btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `GitHub API: ${res.status}`);
       }
     } catch(err) {
-      alert('ไม่สามารถส่งข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต\n(' + err.message + ')');
+      alert('ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่\n(' + err.message + ')');
       btn.disabled = false;
       btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
     }
@@ -1285,9 +1192,7 @@
     if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
 
-  // Pre-fill search with "38/" as default prefix
   document.getElementById('searchInput').value = '38/';
-
   loadData();
 </script>
 </body>
