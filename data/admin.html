@@ -664,17 +664,24 @@
     if (tab === 'pending') loadPending();
   }
 
-  // ── Load resident data ────────────────────────────────────────────────────
+  // ── Load resident data (ดึงตรงจาก GitHub API — ไม่มี CDN cache) ──────────
   async function loadAdminData() {
     document.getElementById('toolbarNote').textContent = 'กำลังโหลด...';
     try {
-      const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      allData = await res.json();
+      // ใช้ GitHub Contents API แทน GitHub Pages — real-time, ไม่มี CDN delay
+      const res = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`,
+        { headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
+      );
+      if (!res.ok) throw new Error(`GitHub API: ${res.status}`);
+      const meta = await res.json();
+      // Decode base64 content (GitHub API returns base64-encoded file content)
+      const json = decodeURIComponent(escape(atob(meta.content.replace(/\n/g, ''))));
+      allData = JSON.parse(json);
       filteredData = [...allData];
       renderAdmin(filteredData);
       document.getElementById('toolbarNote').textContent =
-        `Database: residents.json · อัปเดตล่าสุด ${new Date().toLocaleTimeString('th-TH')}`;
+        `✅ Real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`;
     } catch(e) {
       document.getElementById('adminBody').innerHTML =
         `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
@@ -807,8 +814,8 @@
     document.getElementById('toolbarNote').textContent = 'กำลัง commit ขึ้น GitHub...';
     try {
       await commitToGitHub(allData);
-      document.getElementById('toolbarNote').textContent =
-        `${successMsg || '✅ สำเร็จ'} · ${new Date().toLocaleTimeString('th-TH')}`;
+      // Reload จาก GitHub API ทันทีหลัง commit — ไม่ต้องรอ CDN
+      await loadAdminData();
     } catch(e) {
       document.getElementById('toolbarNote').textContent = `❌ Commit ล้มเหลว: ${e.message}`;
       alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
@@ -966,11 +973,11 @@
     try {
       await commitToGitHub(allData, `Approve correction for house ${houseNo} via admin panel`);
       await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
-      filterAdmin();
       card.style.opacity = '0.5';
       card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
-      // Reload after brief delay
-      setTimeout(loadPending, 1500);
+      // Reload ข้อมูลจาก GitHub API ทันที (real-time — ไม่ต้องรอ CDN)
+      await loadAdminData();
+      setTimeout(loadPending, 800);
     } catch(e) {
       alert('Approve ล้มเหลว: ' + e.message);
       btn.disabled = false;
