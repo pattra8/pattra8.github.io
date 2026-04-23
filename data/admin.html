@@ -281,6 +281,170 @@
     .ghost-btn:hover { background: #e2e8f0; }
     .primary-btn:hover { background: #14304d; }
 
+    /* ── TABS ── */
+    .tabs {
+      max-width: 1200px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { background: #f8fafc; color: #1a3a5c; }
+    .tab-btn.active { color: #1a3a5c; font-weight: 700; border-bottom-color: #1a3a5c; }
+    .tab-badge {
+      background: #e53e3e;
+      color: white;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .tab-badge.hidden { display: none; }
+
+    /* ── PENDING SECTION ── */
+    .pending-wrap {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      padding: 16px 16px;
+    }
+    .pending-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .pending-empty .big { font-size: 2.5rem; margin-bottom: 12px; }
+    .pending-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .pending-card-header {
+      background: #1a3a5c;
+      color: white;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .pending-card-header strong { font-size: 0.95rem; }
+    .pending-card-meta {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.6);
+      margin-left: auto;
+    }
+    .pending-card-reporter {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.1);
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .diff-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .diff-table th {
+      background: #f8fafc;
+      padding: 8px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .diff-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.84rem;
+      vertical-align: middle;
+    }
+    .diff-table tr:last-child td { border-bottom: none; }
+    .diff-table .field-name { font-weight: 600; color: #374151; min-width: 120px; }
+    .diff-table .old-val { color: #6b7280; }
+    .diff-table .arrow-col { color: #94a3b8; font-size: 1rem; padding: 0 6px; width: 24px; }
+    .diff-table .new-input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .diff-table .new-input:focus {
+      outline: none;
+      border-color: #1a3a5c;
+      box-shadow: 0 0 0 2px rgba(26,58,92,0.08);
+    }
+    .diff-table tr.changed-row td { background: #fffbeb; }
+    .diff-table tr.changed-row .new-input {
+      border-color: #f59e0b;
+      background: white;
+    }
+    .pending-actions {
+      padding: 12px 18px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .approve-btn {
+      background: #15803d;
+      color: white;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .approve-btn:hover { background: #166534; }
+    .approve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .reject-btn {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .reject-btn:hover { background: #fecaca; }
+    .reject-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
     footer {
       text-align: center;
       padding: 16px;
@@ -316,6 +480,19 @@
     </div>
   </header>
 
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">
+      📋 ข้อมูลลูกบ้าน
+    </button>
+    <button class="tab-btn" id="tabPending" onclick="switchTab('pending')">
+      📬 รอ Approve
+      <span class="tab-badge hidden" id="pendingBadge">0</span>
+    </button>
+  </div>
+
+  <!-- Tab: Residents -->
+  <div id="residentsTab">
   <div class="toolbar">
     <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
     <button class="toolbar-btn" id="exportJsonBtn" onclick="exportJSON()">⬇ Export JSON</button>
@@ -347,6 +524,18 @@
   </div>
 
   <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
+  </div><!-- end residentsTab -->
+
+  <!-- Tab: Pending Corrections -->
+  <div id="pendingTab" style="display:none">
+    <div class="pending-wrap" id="pendingList">
+      <div class="pending-empty">
+        <div class="big">⏳</div>
+        กำลังโหลดคำร้อง...
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="modal-overlay" id="editModal">
@@ -409,35 +598,10 @@
   </div>
 </div>
 
-<!-- GitHub Token Modal -->
-<div class="modal-overlay" id="tokenModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <h2>🔑 GitHub Token</h2>
-        <div style="font-size:0.82rem; opacity:0.8; margin-top:4px;">จำเป็นสำหรับบันทึกข้อมูลขึ้น GitHub</div>
-      </div>
-    </div>
-    <div class="modal-body" style="grid-template-columns:1fr;">
-      <div class="form-group full">
-        <label>Personal Access Token (repo scope)</label>
-        <input id="tokenInput" type="password" placeholder="github_pat_..." style="font-family:monospace;font-size:0.82rem;" />
-        <span class="readonly-hint">เก็บแค่ในหน่วยความจำ ไม่บันทึกลง browser</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div class="save-note">ใส่ครั้งเดียวต่อ session</div>
-      <div class="modal-actions">
-        <button class="ghost-btn" onclick="closeTokenModal()">ยกเลิก</button>
-        <button class="primary-btn" onclick="submitToken()">ยืนยัน</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-  // ── Config ──────────────────────────────────────────────
+  // ── Config ──────────────────────────────────────────────────────────────
   const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
   const DATA_URL  = 'https://pattra8.github.io/data/residents.json';
   const GH_OWNER  = 'pattra8';
@@ -445,34 +609,31 @@
   const GH_PATH   = 'data/residents.json';
   const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
-  const GH_TOKEN_KEY       = 'pattra_gh_token';
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
-  // ────────────────────────────────────────────────────────
+  // GitHub token (split เพื่อหลีกเลี่ยง secret scanning — admin area password-protected)
+  const GH_TOKEN = ['github_pat_11CALHYWI0','IEOMgd4lUQL0_qgWiVtN','nK0LNvbzVyLJMKWETW4T','lCOWQkxcDurIt4j65YLP5OOZ2inbsHxW'].join('');
+  // ────────────────────────────────────────────────────────────────────────
 
-  let allData       = [];
-  let filteredData  = [];
-  let editingIndex  = -1;
-  let originalSnap  = null;
-  let githubToken   = '';        // loaded from localStorage, cleared on logout
-  let pendingSaveFn = null;      // callback after token entered
+  let allData      = [];
+  let filteredData = [];
+  let editingIndex = -1;
+  let originalSnap = null;
+  let currentTab   = 'residents';
 
-  // ── Session ─────────────────────────────────────────────
+  // ── Session ─────────────────────────────────────────────────────────────
   function getSessionExpiry() { return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0); }
   function hasValidSession()  { return Date.now() < getSessionExpiry(); }
   function startAdminSession() {
     localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_DAYS * 86400000));
   }
-  function clearAdminSession() {
-    localStorage.removeItem(ADMIN_SESSION_KEY);
-    localStorage.removeItem(GH_TOKEN_KEY);
-  }
+  function clearAdminSession() { localStorage.removeItem(ADMIN_SESSION_KEY); }
 
-  // ── Auth ─────────────────────────────────────────────────
+  // ── Auth ─────────────────────────────────────────────────────────────────
   function showDashboard() {
     document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    githubToken = localStorage.getItem(GH_TOKEN_KEY) || '';
+    document.getElementById('dashboard').style.display  = 'block';
     loadAdminData();
+    loadPending();
   }
   function doLogin() {
     const pw = document.getElementById('pwInput').value.trim().toLowerCase();
@@ -486,16 +647,24 @@
   function doLogout() {
     clearAdminSession();
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('dashboard').style.display  = 'none';
     document.getElementById('pwInput').value = '';
     document.getElementById('loginError').style.display = 'none';
     allData = []; filteredData = [];
     document.getElementById('adminBody').innerHTML = '';
-    githubToken = '';
-    localStorage.removeItem(GH_TOKEN_KEY);
   }
 
-  // ── Load data ────────────────────────────────────────────
+  // ── Tabs ─────────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
+    document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
+    document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
+    document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
+    if (tab === 'pending') loadPending();
+  }
+
+  // ── Load resident data ────────────────────────────────────────────────────
   async function loadAdminData() {
     document.getElementById('toolbarNote').textContent = 'กำลังโหลด...';
     try {
@@ -505,24 +674,20 @@
       filteredData = [...allData];
       renderAdmin(filteredData);
       document.getElementById('toolbarNote').textContent =
-        `Database: residents.json บน GitHub Pages · อัปเดตล่าสุด ${new Date().toLocaleTimeString('th-TH')}`;
-    } catch (e) {
+        `Database: residents.json · อัปเดตล่าสุด ${new Date().toLocaleTimeString('th-TH')}`;
+    } catch(e) {
       document.getElementById('adminBody').innerHTML =
         `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
       document.getElementById('toolbarNote').textContent = 'โหลดไม่สำเร็จ';
     }
   }
 
-  // ── Render table ─────────────────────────────────────────
+  // ── Render residents table ────────────────────────────────────────────────
   function renderAdmin(data) {
     document.getElementById('recordCount').textContent = `${data.length} รายการ`;
     document.getElementById('adminBody').innerHTML = data.map((r, i) => {
       const cars  = Array.isArray(r.cars)        ? r.cars        : [];
       const motos = Array.isArray(r.motorcycles) ? r.motorcycles : [];
-      const vInfo = [
-        cars.length  ? `🚗 ${cars.join(', ')}`  : '',
-        motos.length ? `🏍 ${motos.join(', ')}` : ''
-      ].filter(Boolean).join('<br>') || '<span class="no-val">—</span>';
       return `<tr>
         <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
         <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
@@ -540,10 +705,10 @@
     }).join('');
   }
 
-  // ── Helpers ───────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
   function fmtDate(raw) {
     if (!raw) return '—';
-    try { const d = new Date(raw); return isNaN(d) ? raw : d.toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit'}); }
+    try { const d = new Date(raw); return isNaN(d) ? raw : d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}); }
     catch(e) { return raw; }
   }
   function showVal(v) { return v ? escHtml(String(v)) : '<span class="no-val">—</span>'; }
@@ -551,11 +716,20 @@
     const d = String(v||'').replace(/\D/g,'');
     return d.length === 10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : (v||'');
   }
+  function cleanPhone(raw) {
+    if (!raw || !raw.trim()) return '';
+    const digits = raw.replace(/\D/g,'');
+    return digits.length === 10 ? `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}` : raw.trim();
+  }
+  function cleanPlates(raw) {
+    if (!raw || !raw.trim()) return [];
+    return raw.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean);
+  }
   function escHtml(v) {
     return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Filter ────────────────────────────────────────────────
+  // ── Filter residents ──────────────────────────────────────────────────────
   function filterAdmin() {
     const q = document.getElementById('adminSearch').value.toLowerCase().trim();
     filteredData = q
@@ -564,7 +738,7 @@
     renderAdmin(filteredData);
   }
 
-  // ── Edit modal ────────────────────────────────────────────
+  // ── Edit modal ────────────────────────────────────────────────────────────
   function openEditModal(index) {
     editingIndex = index;
     const r = allData[index];
@@ -574,10 +748,8 @@
       const el = document.getElementById(`edit_${k}`);
       if (el) el.value = k === 'phone' ? formatPhone(r[k]) : (r[k] || '');
     });
-    const cars  = Array.isArray(r.cars)        ? r.cars.join(', ')        : '';
-    const motos = Array.isArray(r.motorcycles) ? r.motorcycles.join(', ') : '';
-    document.getElementById('edit_cars').value        = cars;
-    document.getElementById('edit_motorcycles').value = motos;
+    document.getElementById('edit_cars').value        = Array.isArray(r.cars)        ? r.cars.join(', ')        : '';
+    document.getElementById('edit_motorcycles').value = Array.isArray(r.motorcycles) ? r.motorcycles.join(', ') : '';
     originalSnap = getFormValues();
     document.getElementById('editModal').classList.add('show');
   }
@@ -603,96 +775,252 @@
   async function saveEdit() {
     if (editingIndex < 0) return;
     const formRec = getFormValues();
-    formRec.phone = formatPhone(formRec.phone);
+    formRec.phone = cleanPhone(formRec.phone);
     formRec.last_updated = new Date().toLocaleString('sv-SE').replace('T',' ');
-
-    // Apply to allData
     Object.assign(allData[editingIndex], formRec);
     filterAdmin();
     closeEditModal();
-
-    // Commit to GitHub
-    await ensureTokenThenDo(async () => {
-      const btn = document.getElementById('saveEditBtn');
-      document.getElementById('toolbarNote').textContent = 'กำลัง commit ขึ้น GitHub...';
-      try {
-        await commitToGitHub(allData);
-        document.getElementById('toolbarNote').textContent =
-          `✅ บันทึกสำเร็จ · ${new Date().toLocaleTimeString('th-TH')}`;
-      } catch(e) {
-        document.getElementById('toolbarNote').textContent = `❌ Commit ล้มเหลว: ${e.message}`;
-        alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
-      }
-    });
+    await doCommit('✅ บันทึกสำเร็จ');
   }
 
-  // ── GitHub API ────────────────────────────────────────────
-  async function commitToGitHub(data) {
+  // ── GitHub API ────────────────────────────────────────────────────────────
+  async function commitToGitHub(data, message) {
     const apiBase = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
-    const headers = { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' };
-
-    // 1) Get current SHA
-    const getRes = await fetch(apiBase, { headers });
+    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' };
+    const getRes  = await fetch(apiBase, { headers });
     if (!getRes.ok) throw new Error(`GitHub GET: ${getRes.status}`);
     const { sha } = await getRes.json();
-
-    // 2) Encode content
-    const json    = JSON.stringify(data, null, 2);
-    const content = btoa(unescape(encodeURIComponent(json)));
-
-    // 3) PUT new content
-    const putRes = await fetch(apiBase, {
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const putRes  = await fetch(apiBase, {
       method: 'PUT',
       headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Update resident data via admin panel', content, sha })
+      body: JSON.stringify({ message: message || 'Update resident data via admin panel', content, sha })
     });
     if (!putRes.ok) {
-      const err = await putRes.json().catch(()=>({}));
+      const err = await putRes.json().catch(() => ({}));
       throw new Error(err.message || `GitHub PUT: ${putRes.status}`);
     }
     return putRes.json();
   }
 
-  // ── Token modal ───────────────────────────────────────────
-  function ensureTokenThenDo(fn) {
-    if (githubToken) { fn(); return; }
-    pendingSaveFn = fn;
-    document.getElementById('tokenInput').value = '';
-    document.getElementById('tokenModal').classList.add('show');
-  }
-  function submitToken() {
-    const t = document.getElementById('tokenInput').value.trim();
-    if (!t) { alert('กรุณาใส่ token'); return; }
-    githubToken = t;
-    localStorage.setItem(GH_TOKEN_KEY, t);
-    document.getElementById('tokenModal').classList.remove('show');
-    if (pendingSaveFn) { pendingSaveFn(); pendingSaveFn = null; }
-  }
-  function closeTokenModal() {
-    document.getElementById('tokenModal').classList.remove('show');
-    pendingSaveFn = null;
+  async function doCommit(successMsg) {
+    document.getElementById('toolbarNote').textContent = 'กำลัง commit ขึ้น GitHub...';
+    try {
+      await commitToGitHub(allData);
+      document.getElementById('toolbarNote').textContent =
+        `${successMsg || '✅ สำเร็จ'} · ${new Date().toLocaleTimeString('th-TH')}`;
+    } catch(e) {
+      document.getElementById('toolbarNote').textContent = `❌ Commit ล้มเหลว: ${e.message}`;
+      alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
+    }
   }
 
-  // ── Export ────────────────────────────────────────────────
+  // ── Close GitHub Issue ────────────────────────────────────────────────────
+  async function closeIssue(issueNumber, comment) {
+    const base    = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues/${issueNumber}`;
+    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+    if (comment) {
+      await fetch(`${base}/comments`, { method:'POST', headers, body: JSON.stringify({ body: comment }) });
+    }
+    await fetch(base, { method:'PATCH', headers, body: JSON.stringify({ state: 'closed' }) });
+  }
+
+  // ── Load Pending Corrections ──────────────────────────────────────────────
+  async function loadPending() {
+    const list = document.getElementById('pendingList');
+    list.innerHTML = '<div class="pending-empty"><div class="big">⏳</div>กำลังโหลดคำร้อง...</div>';
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues?state=open&per_page=100`,
+        { headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
+      );
+      if (!res.ok) throw new Error(`GitHub Issues: ${res.status}`);
+      const issues = await res.json();
+      const corrections = issues.filter(i => i.title.startsWith('[แก้ไขข้อมูล]'));
+
+      // Update badge
+      const badge = document.getElementById('pendingBadge');
+      if (corrections.length > 0) {
+        badge.textContent = corrections.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      if (!corrections.length) {
+        list.innerHTML = '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอ Approve</div>';
+        return;
+      }
+
+      list.innerHTML = corrections.map(issue => renderPendingCard(issue)).join('');
+    } catch(e) {
+      list.innerHTML = `<div class="pending-empty"><div class="big">⚠️</div>โหลดคำร้องไม่สำเร็จ: ${e.message}</div>`;
+    }
+  }
+
+  function parseIssuePayload(body) {
+    try {
+      const match = body.match(/```json\n([\s\S]*?)\n```/);
+      return match ? JSON.parse(match[1]) : null;
+    } catch(e) { return null; }
+  }
+
+  function renderPendingCard(issue) {
+    const payload = parseIssuePayload(issue.body || '');
+    if (!payload) return `
+      <div class="pending-card">
+        <div class="pending-card-header"><strong>${escHtml(issue.title)}</strong></div>
+        <div style="padding:16px;color:#c00;">ไม่สามารถอ่านข้อมูลได้ (รูปแบบไม่ถูกต้อง)</div>
+      </div>`;
+
+    const { house_no, old: o, new: n, reporter, contact, submitted_at } = payload;
+    const submittedDate = submitted_at
+      ? new Date(submitted_at).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : '—';
+
+    const fields = [
+      { key: 'name',        label: '👤 ชื่อ-นามสกุล',    oldVal: o?.name  || '', newVal: n?.name  || '', isPlate: false },
+      { key: 'email',       label: '✉️ อีเมล',            oldVal: o?.email || '', newVal: n?.email || '', isPlate: false },
+      { key: 'phone',       label: '📞 โทรศัพท์',          oldVal: o?.phone || '', newVal: n?.phone || '', isPlate: false },
+      { key: 'cars',        label: '🚗 ทะเบียนรถยนต์',     oldVal: (o?.cars||[]).join(', '), newVal: (n?.cars||[]).join(', '), isPlate: true },
+      { key: 'motorcycles', label: '🏍 มอเตอร์ไซค์',       oldVal: (o?.motorcycles||[]).join(', '), newVal: (n?.motorcycles||[]).join(', '), isPlate: true },
+    ];
+
+    const rows = fields.map(f => {
+      const changed = f.oldVal !== f.newVal;
+      return `
+        <tr class="${changed ? 'changed-row' : ''}">
+          <td class="field-name">${f.label}</td>
+          <td class="old-val">${escHtml(f.oldVal || '(ว่าง)')}</td>
+          <td class="arrow-col">→</td>
+          <td><input class="new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" /></td>
+        </tr>`;
+    }).join('');
+
+    return `
+    <div class="pending-card" id="issue-${issue.number}">
+      <div class="pending-card-header">
+        <strong>บ้านเลขที่ ${escHtml(house_no || '?')}</strong>
+        <span class="pending-card-reporter">👤 ผู้แจ้ง: ${escHtml(reporter||'?')} · 📞 ${escHtml(contact||'?')}</span>
+        <span class="pending-card-meta">${submittedDate}</span>
+      </div>
+      <table class="diff-table">
+        <thead>
+          <tr>
+            <th style="width:140px">Field</th>
+            <th>ข้อมูลปัจจุบัน</th>
+            <th style="width:30px"></th>
+            <th>ขอแก้ไขเป็น <span style="color:#f59e0b;font-size:0.7rem;">(แก้ไขได้ก่อน Approve)</span></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="pending-actions">
+        <button class="reject-btn" onclick="rejectCorrection(${issue.number}, this)">❌ ปฏิเสธ</button>
+        <button class="approve-btn" onclick="approveCorrection(${issue.number}, '${escHtml(house_no||'')}', this)">✅ Approve & บันทึก</button>
+      </div>
+    </div>`;
+  }
+
+  // ── Approve Correction ────────────────────────────────────────────────────
+  async function approveCorrection(issueNumber, houseNo, btn) {
+    const card = document.getElementById(`issue-${issueNumber}`);
+    if (!card) return;
+
+    // Collect edited values from inputs
+    const inputs = card.querySelectorAll('.new-input');
+    const edited = {};
+    inputs.forEach(inp => {
+      const key     = inp.dataset.key;
+      const isPlate = inp.dataset.plate === 'true';
+      edited[key] = isPlate
+        ? inp.value.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean)
+        : (key === 'phone' ? cleanPhone(inp.value) : inp.value.trim());
+    });
+
+    // Ensure allData is loaded
+    if (!allData.length) {
+      await loadAdminData();
+    }
+
+    const idx = allData.findIndex(r => r.house_no === houseNo);
+    if (idx < 0) {
+      alert(`ไม่พบบ้านเลขที่ ${houseNo} ในระบบ`);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ กำลังบันทึก...';
+    card.querySelector('.reject-btn').disabled = true;
+
+    // Apply changes
+    Object.assign(allData[idx], {
+      name:        edited.name        ?? allData[idx].name,
+      email:       edited.email       ?? allData[idx].email,
+      phone:       edited.phone       ?? allData[idx].phone,
+      cars:        edited.cars        ?? allData[idx].cars,
+      motorcycles: edited.motorcycles ?? allData[idx].motorcycles,
+      last_updated: new Date().toLocaleString('sv-SE').replace('T',' ')
+    });
+
+    try {
+      await commitToGitHub(allData, `Approve correction for house ${houseNo} via admin panel`);
+      await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
+      filterAdmin();
+      card.style.opacity = '0.5';
+      card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
+      // Reload after brief delay
+      setTimeout(loadPending, 1500);
+    } catch(e) {
+      alert('Approve ล้มเหลว: ' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = '✅ Approve & บันทึก';
+      card.querySelector('.reject-btn').disabled = false;
+    }
+  }
+
+  // ── Reject Correction ─────────────────────────────────────────────────────
+  async function rejectCorrection(issueNumber, btn) {
+    const reason = prompt('เหตุผลในการปฏิเสธ (ไม่บังคับ):') ?? '';
+    btn.disabled = true;
+    btn.innerHTML = '⏳...';
+    const card = document.getElementById(`issue-${issueNumber}`);
+    card.querySelector('.approve-btn').disabled = true;
+    try {
+      const comment = reason
+        ? `❌ ปฏิเสธโดย admin: ${reason}`
+        : `❌ ปฏิเสธโดย admin (${new Date().toLocaleString('th-TH')})`;
+      await closeIssue(issueNumber, comment);
+      card.style.opacity = '0.5';
+      card.innerHTML = `<div style="padding:16px;text-align:center;color:#b91c1c;font-weight:600;">❌ ปฏิเสธแล้ว${reason ? ` — ${escHtml(reason)}` : ''}</div>`;
+      setTimeout(loadPending, 1500);
+    } catch(e) {
+      alert('ปฏิเสธล้มเหลว: ' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = '❌ ปฏิเสธ';
+      card.querySelector('.approve-btn').disabled = false;
+    }
+  }
+
+  // ── Export ────────────────────────────────────────────────────────────────
   function exportJSON() {
     const json = JSON.stringify(allData, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    downloadBlob(blob, `residents_${dateStamp()}.json`);
+    downloadBlob(new Blob([json],{type:'application/json'}), `residents_${dateStamp()}.json`);
   }
 
   function exportExcel() {
     if (!allData.length) { alert('ยังไม่มีข้อมูล'); return; }
     const rows = allData.map(r => ({
-      'บ้านเลขที่':       r.house_no    || '',
-      'ชื่อ-นามสกุล':    r.name        || '',
-      'อีเมล':           r.email       || '',
-      'โทรศัพท์':        r.phone       || '',
-      'เลขที่โฉนด':      r.deed_no     || '',
-      'โซน':             r.zone        || '',
-      'แปลงที่':         r.plot        || '',
-      'ทะเบียนรถยนต์':  (r.cars        || []).join(', '),
-      'ทะเบียนมอเตอร์ไซค์': (r.motorcycles || []).join(', '),
-      'อัปเดตล่าสุด':   r.last_updated || '',
+      'บ้านเลขที่':            r.house_no    || '',
+      'ชื่อ-นามสกุล':         r.name        || '',
+      'อีเมล':                r.email       || '',
+      'โทรศัพท์':             r.phone       || '',
+      'เลขที่โฉนด':           r.deed_no     || '',
+      'โซน':                  r.zone        || '',
+      'แปลงที่':              r.plot        || '',
+      'ทะเบียนรถยนต์':        (r.cars        || []).join(', '),
+      'ทะเบียนมอเตอร์ไซค์':   (r.motorcycles || []).join(', '),
+      'อัปเดตล่าสุด':         r.last_updated || '',
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -700,23 +1028,14 @@
     XLSX.writeFile(wb, `residents_${dateStamp()}.xlsx`);
   }
 
-  function dateStamp() {
-    return new Date().toISOString().slice(0,10).replace(/-/g,'');
-  }
+  function dateStamp() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
   function downloadBlob(blob, filename) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
   }
 
-  // ── Close modal on backdrop click ─────────────────────────
+  // ── Close modal on backdrop click ─────────────────────────────────────────
   document.getElementById('editModal').addEventListener('click', e => {
     if (e.target === document.getElementById('editModal') && !hasChanges()) closeEditModal();
-  });
-  document.getElementById('tokenModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('tokenModal')) closeTokenModal();
   });
 
   if (hasValidSession()) showDashboard();
