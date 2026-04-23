@@ -861,7 +861,8 @@
 
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
-  const DATA_URL      = 'https://pattra8.github.io/data/residents.json';
+  // raw.githubusercontent.com มี cache สั้นกว่า GitHub Pages (~1 min vs ~10 min)
+  const DATA_URL      = 'https://raw.githubusercontent.com/pattra8/pattra8.github.io/main/data/residents.json';
   const GH_OWNER      = 'pattra8';
   const GH_REPO       = 'pattra8.github.io';
   // Token สำหรับสร้าง GitHub Issue (split เพื่อหลีกเลี่ยง secret scanning)
