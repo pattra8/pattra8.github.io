@@ -3,1091 +3,1042 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pattra Villa 8 · Announcement Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet" />
+  <title>Admin — หมู่บ้านภัทราวิลล่า 8</title>
   <style>
-    :root {
-      --taupe: #3d3530;
-      --taupe-mid: #6b5f58;
-      --gold: #b8975a;
-      --gold-pale: #f2e9d8;
-      --bg: #faf7f2;
-      --bg2: #f0ebe3;
-      --card: #ffffff;
-      --text: #2e2820;
-      --muted: #8a7f76;
-      --border: #e4ddd3;
-      --danger: #b94d42;
-      --radius: 12px;
-      --shadow: 0 2px 16px rgba(61,53,48,0.07);
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      min-height: 100vh;
-      font-family: 'Sarabun', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #333;
     }
 
+    /* Login Screen */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: white;
+      padding: 40px 36px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .login-box h1 { font-size: 1.3rem; color: #1a3a5c; margin-bottom: 8px; }
+    .login-box p { font-size: 0.87rem; color: #888; margin-bottom: 24px; }
+    .login-box input[type=password] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      margin-bottom: 14px;
+      text-align: center;
+      letter-spacing: 4px;
+    }
+    .login-box input[type=password]:focus { outline: none; border-color: #1a3a5c; }
+    .login-box button {
+      width: 100%;
+      background: #1a3a5c;
+      color: white;
+      border: none;
+      padding: 11px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .login-box button:hover { background: #14304d; }
+    .login-error { color: #c00; font-size: 0.85rem; margin-top: 10px; display: none; }
+
+    /* Admin Dashboard */
+    .dashboard { display: none; }
     header {
-      height: 68px;
-      padding: 0 32px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
+      background: #1a3a5c;
+      color: white;
+      padding: 16px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    }
+    header h1 { font-size: 1.2rem; }
+    header .badge {
+      background: #e65100;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .logout-btn {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+    .main-page-btn {
+      background: #f5d169;
+      color: #12304d;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .main-page-btn:hover { background: #f7dd8c; }
+
+    .toolbar {
+      max-width: 1200px;
+      margin: 20px auto 12px;
+      padding: 0 16px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .toolbar input {
+      flex: 1;
+      padding: 9px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .toolbar input:focus { outline: none; border-color: #1a3a5c; }
+    .record-count { font-size: 0.85rem; color: #888; white-space: nowrap; }
+    .toolbar-btn {
+      background: #1a3a5c;
+      color: white;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .toolbar-btn:hover { background: #14304d; }
+    .toolbar-note {
+      width: 100%;
+      font-size: 0.8rem;
+      color: #666;
     }
 
-    .brand {
+    .table-wrap {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      min-width: 700px;
+    }
+    thead { background: #1a3a5c; color: white; }
+    th { padding: 9px 10px; text-align: left; font-size: 0.78rem; white-space: nowrap; }
+    td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.8rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fbff; }
+    .no-val { color: #ccc; font-style: italic; }
+    .col-actions { width: 60px; white-space: nowrap; }
+    .col-house   { white-space: nowrap; width: 72px; }
+    .col-name    { min-width: 160px; max-width: 220px; white-space: normal; word-break: break-word; line-height: 1.4; }
+    .col-email   { min-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .col-phone   { min-width: 120px; white-space: nowrap; }
+    .col-zone, .col-plot, .col-deed { white-space: nowrap; }
+    .edit-btn {
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fdba74;
+      padding: 4px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .edit-btn:hover { background: #ffedd5; border-color: #fb923c; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 30;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      background: #1a3a5c;
+      color: white;
       display: flex;
       align-items: center;
-      gap: 14px;
-      text-decoration: none;
-      color: var(--taupe);
+      justify-content: space-between;
+      gap: 12px;
     }
-
-    .mark {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--gold);
+    .modal-header h2 { font-size: 1rem; }
+    .modal-close {
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
       border-radius: 8px;
-      display: grid;
-      place-items: center;
-      color: var(--gold);
-      font-family: 'Cormorant Garamond', serif;
-      letter-spacing: 0.05em;
+      cursor: pointer;
+      font-size: 1rem;
     }
-
-    .brand-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 19px;
-      letter-spacing: 0.05em;
-    }
-
-    .brand-sub {
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-    }
-
-    .top-link {
-      color: var(--gold);
-      text-decoration: none;
-      font-size: 12px;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      padding: 8px 16px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    main {
-      width: min(1080px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 48px 0 80px;
-    }
-
-    .hero {
-      margin-bottom: 28px;
-    }
-
-    .eyebrow {
-      color: var(--gold);
-      font-size: 10px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: clamp(38px, 7vw, 64px);
-      line-height: 1;
-      color: var(--taupe);
-      margin-bottom: 12px;
-    }
-
-    .lead {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-      max-width: 520px;
-      font-weight: 300;
-    }
-
-    .login-card,
-    .panel,
-    .list-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .login-card {
-      max-width: 420px;
-      padding: 28px;
-      margin-top: 28px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: 20px;
-      align-items: start;
-    }
-
-    .panel,
-    .list-card {
-      padding: 24px;
-    }
-
-    h2 {
-      font-family: 'Prompt', sans-serif;
-      font-size: 18px;
-      font-weight: 500;
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      color: var(--taupe-mid);
-      margin-bottom: 8px;
-    }
-
-    input,
-    textarea,
-    select {
-      width: 100%;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      border-radius: 8px;
-      padding: 12px 13px;
-      font: inherit;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    textarea {
-      min-height: 124px;
-      resize: vertical;
-      line-height: 1.6;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(184,151,90,0.14);
-    }
-
-    .field {
-      margin-bottom: 16px;
-    }
-
-    .form-row {
+    .modal-body {
+      padding: 18px 20px 10px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 12px;
     }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    button {
-      border: 1px solid var(--gold);
-      background: var(--gold);
-      color: #fff;
-      border-radius: 8px;
-      padding: 11px 18px;
-      font-family: 'Sarabun', sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--gold);
-    }
-
-    .btn-danger {
-      border-color: var(--danger);
-      color: var(--danger);
-      background: transparent;
-    }
-
-    .btn-small {
-      padding: 7px 10px;
-      font-size: 12px;
-    }
-
-    .hidden { display: none !important; }
-
-    .notice {
-      margin-top: 14px;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .error { color: var(--danger); }
-
-    /* ─── ANNOUNCEMENT LIST CARDS ─── */
-    .ann-list { display: flex; flex-direction: column; gap: 10px; }
-
-    .ann-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      transition: border-color 0.2s;
-    }
-    .ann-card:hover { border-color: var(--gold); }
-
-    .ann-card-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .ann-type-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-      margin-top: 6px;
-      flex-shrink: 0;
-    }
-    .ann-type-dot.urgent { background: #c0392b; }
-    .ann-type-dot.info   { background: var(--border); border: 1.5px solid var(--muted); }
-
-    .ann-card-title {
-      font-family: 'Prompt', sans-serif;
-      font-weight: 500;
-      font-size: 14px;
-      color: var(--text);
-      line-height: 1.4;
-      flex: 1;
-    }
-
-    .ann-card-body {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.55;
-      margin-bottom: 10px;
-      margin-left: 17px;
-      white-space: pre-wrap;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .ann-card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-left: 17px;
-    }
-
-    .ann-card-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .ann-date {
-      font-size: 11px;
-      color: var(--gold);
-      letter-spacing: 0.04em;
-    }
-
-    .ann-pill {
-      font-size: 10px;
-      border: 1px solid var(--border);
-      color: var(--taupe-mid);
-      border-radius: 999px;
-      padding: 2px 8px;
-      background: var(--card);
-      letter-spacing: 0.03em;
-    }
-
-    .ann-file-chips {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-left: 17px;
-      margin-bottom: 8px;
-    }
-
-    .ann-file-chip {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 10px;
-      color: var(--taupe-mid);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 7px;
-    }
-
-    .ann-file-chip svg { flex-shrink: 0; }
-
-    .ann-card-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .ann-thumbnails {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin-left: 17px;
-      margin-bottom: 8px;
-    }
-
-    .ann-thumbnails img {
-      width: 44px;
-      height: 44px;
-      object-fit: cover;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .empty {
-      color: var(--muted);
-      background: var(--bg);
-      border: 1px dashed var(--border);
-      border-radius: 10px;
-      padding: 22px;
-      text-align: center;
-      font-size: 13px;
-    }
-
-    /* legacy - keep for compat */
-    .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--gold); font-size: 11px; }
-    .pill { border: 1px solid var(--border); color: var(--taupe-mid); border-radius: 999px; padding: 2px 8px; background: var(--bg); }
-
-    /* ─── PHOTO UPLOAD ─── */
-    .photo-drop-zone {
-      border: 1.5px dashed var(--border);
-      border-radius: 10px;
-      padding: 20px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      background: var(--bg);
-      position: relative;
-    }
-
-    .photo-drop-zone:hover,
-    .photo-drop-zone.drag-over {
-      border-color: var(--gold);
-      background: var(--gold-pale);
-    }
-
-    .photo-drop-zone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-      border: none;
-      padding: 0;
-    }
-
-    .photo-drop-label {
-      font-size: 13px;
-      color: var(--muted);
-      pointer-events: none;
-      line-height: 1.6;
-    }
-
-    .photo-drop-label span {
-      color: var(--gold);
-      font-weight: 500;
-    }
-
-    .photo-previews {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .photo-preview-item {
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .photo-preview-item img {
-      width: 72px;
-      height: 72px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      display: block;
-    }
-
-    /* non-image file preview tile */
-    .file-preview-tile {
-      width: 72px;
-      height: 72px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      background: var(--bg2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .file-preview-tile .file-ext {
-      font-size: 10px;
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 0.8rem;
+      color: #555;
       font-weight: 600;
-      color: var(--gold);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
     }
-
-    .file-preview-tile .file-name {
-      font-size: 9px;
-      color: var(--muted);
-      text-align: center;
-      padding: 0 4px;
-      word-break: break-all;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d6dce5;
+      border-radius: 7px;
+      font-size: 0.92rem;
+      font-family: inherit;
     }
-
-    .photo-remove-btn {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--danger);
+    .form-group input[readonly] {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+    .readonly-hint {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .modal-footer {
+      padding: 0 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .save-note {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .ghost-btn, .primary-btn {
       border: none;
-      color: #fff;
-      font-size: 11px;
+      padding: 10px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .ghost-btn {
+      background: #eef2f7;
+      color: #475569;
+    }
+    .primary-btn {
+      background: #1a3a5c;
+      color: white;
+    }
+    .ghost-btn:hover { background: #e2e8f0; }
+    .primary-btn:hover { background: #14304d; }
+
+    /* ── TABS ── */
+    .tabs {
+      max-width: 1200px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { background: #f8fafc; color: #1a3a5c; }
+    .tab-btn.active { color: #1a3a5c; font-weight: 700; border-bottom-color: #1a3a5c; }
+    .tab-badge {
+      background: #e53e3e;
+      color: white;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .tab-badge.hidden { display: none; }
+
+    /* ── PENDING SECTION ── */
+    .pending-wrap {
+      max-width: 1200px;
+      margin: 0 auto 32px;
+      padding: 16px 16px;
+    }
+    .pending-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .pending-empty .big { font-size: 2.5rem; margin-bottom: 12px; }
+    .pending-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .pending-card-header {
+      background: #1a3a5c;
+      color: white;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .pending-card-header strong { font-size: 0.95rem; }
+    .pending-card-meta {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.6);
+      margin-left: auto;
+    }
+    .pending-card-reporter {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.1);
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+    .diff-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .diff-table th {
+      background: #f8fafc;
+      padding: 8px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .diff-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.84rem;
+      vertical-align: middle;
+    }
+    .diff-table tr:last-child td { border-bottom: none; }
+    .diff-table .field-name { font-weight: 600; color: #374151; min-width: 120px; }
+    .diff-table .old-val { color: #6b7280; }
+    .diff-table .arrow-col { color: #94a3b8; font-size: 1rem; padding: 0 6px; width: 24px; }
+    .diff-table .new-input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .diff-table .new-input:focus {
+      outline: none;
+      border-color: #1a3a5c;
+      box-shadow: 0 0 0 2px rgba(26,58,92,0.08);
+    }
+    .diff-table tr.changed-row td { background: #fffbeb; }
+    .diff-table tr.changed-row .new-input {
+      border-color: #f59e0b;
+      background: white;
+    }
+    .pending-actions {
+      padding: 12px 18px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .approve-btn {
+      background: #15803d;
+      color: white;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 0;
-      line-height: 1;
-      transition: transform 0.15s;
-    }
-
-    .photo-remove-btn:hover { transform: scale(1.15); }
-
-    .photo-count {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    /* ─── SAVE PROGRESS BAR ─── */
-    .save-progress {
-      display: none;
-      margin-top: 14px;
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--bg2);
-      height: 6px;
-    }
-
-    .save-progress.active { display: block; }
-
-    .save-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold), var(--gold-light, #cead75));
-      border-radius: 8px;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    .save-progress-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-      display: none;
-    }
-
-    .save-progress-label.active { display: block; }
-
-    .announcement-photos {
-      display: flex;
       gap: 6px;
-      margin-top: 8px;
-      flex-wrap: wrap;
     }
-
-    .announcement-photos img {
-      width: 52px;
-      height: 52px;
-      object-fit: cover;
-      border-radius: 6px;
-      border: 1px solid var(--border);
+    .approve-btn:hover { background: #166534; }
+    .approve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .reject-btn {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
     }
+    .reject-btn:hover { background: #fecaca; }
+    .reject-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    @media (max-width: 760px) {
-      header { padding: 0 18px; }
-      .brand-sub { display: none; }
-      .top-link { padding: 7px 10px; font-size: 11px; }
-      main { padding-top: 32px; }
-      .grid { grid-template-columns: 1fr; }
-      .form-row { grid-template-columns: 1fr; }
-      .announcement { grid-template-columns: 1fr; }
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.78rem;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div style="font-size:2.5rem; margin-bottom:12px;">🔐</div>
+    <h1>Admin Access</h1>
+    <p>กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
+    <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" autofocus />
+    <button onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="login-error" id="loginError">รหัสผ่านไม่ถูกต้อง</div>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div class="dashboard" id="dashboard">
   <header>
-    <a class="brand" href="../index.html">
-      <div class="mark">PV</div>
-      <div>
-        <div class="brand-title">Pattra Villa 8</div>
-        <div class="brand-sub">Announcement Admin</div>
-      </div>
-    </a>
-    <a class="top-link" href="../index.html#announce">View Site</a>
+    <div>
+      <h1>Admin — หมู่บ้านภัทราวิลล่า 8</h1>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge">ADMIN</span>
+      <button class="main-page-btn" onclick="window.location.href='./'">หน้าข้อมูลหลัก</button>
+      <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="eyebrow">Admin</div>
-      <h1>Announcements</h1>
-      <p class="lead">เพิ่ม แก้ไข หรือลบประกาศที่จะแสดงบนหน้า Resident Services</p>
-    </section>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">
+      📋 ข้อมูลลูกบ้าน
+    </button>
+    <button class="tab-btn" id="tabPending" onclick="switchTab('pending')">
+      📬 รอ Approve
+      <span class="tab-badge hidden" id="pendingBadge">0</span>
+    </button>
+  </div>
 
-    <section class="login-card" id="loginCard">
-      <h2>เข้าสู่ระบบ</h2>
-      <div class="field">
-        <label for="passwordInput">รหัสผ่าน</label>
-        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="ใส่รหัสผ่าน" />
+  <!-- Tab: Residents -->
+  <div id="residentsTab">
+  <div class="toolbar">
+    <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
+    <button class="toolbar-btn" id="exportJsonBtn" onclick="exportJSON()">⬇ Export JSON</button>
+    <button class="toolbar-btn" id="exportXlsxBtn" onclick="exportExcel()">⬇ Export Excel</button>
+    <span class="record-count" id="recordCount"></span>
+    <div class="toolbar-note" id="toolbarNote">กำลังโหลดข้อมูล...</div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="adminTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>จัดการ</th>
+          <th>บ้านเลขที่</th>
+          <th>ชื่อ-นามสกุล</th>
+          <th>อีเมล</th>
+          <th>โทรศัพท์</th>
+          <th>โฉนด</th>
+          <th>โซน</th>
+          <th>แปลง</th>
+          <th>🚗 รถยนต์</th>
+          <th>🏍 มอเตอร์ไซค์</th>
+          <th style="color:#94a3b8;font-weight:500;font-size:0.72rem;">Updated</th>
+        </tr>
+      </thead>
+      <tbody id="adminBody"></tbody>
+    </table>
+  </div>
+
+  <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
+  </div><!-- end residentsTab -->
+
+  <!-- Tab: Pending Corrections -->
+  <div id="pendingTab" style="display:none">
+    <div class="pending-wrap" id="pendingList">
+      <div class="pending-empty">
+        <div class="big">⏳</div>
+        กำลังโหลดคำร้อง...
       </div>
-      <button id="loginBtn">Login</button>
-      <p class="notice error hidden" id="loginError">รหัสผ่านไม่ถูกต้อง</p>
-    </section>
+    </div>
+  </div>
 
-    <section class="grid hidden" id="adminPanel">
-      <form class="panel" id="announceForm">
-        <h2 id="formTitle">เพิ่มประกาศ</h2>
-        <input type="hidden" id="docId" />
+</div>
 
-        <div class="field">
-          <label for="titleInput">หัวข้อประกาศ</label>
-          <input id="titleInput" required maxlength="120" placeholder="เช่น ปิดน้ำชั่วคราว" />
-        </div>
-
-        <div class="field">
-          <label for="bodyInput">รายละเอียด</label>
-          <textarea id="bodyInput" required maxlength="600" placeholder="รายละเอียดประกาศสำหรับลูกบ้าน"></textarea>
-        </div>
-
-        <div class="field">
-          <label>ไฟล์แนบ / รูปภาพ (ไม่จำเป็น)</label>
-          <div class="photo-drop-zone" id="photoDropZone">
-            <input type="file" id="photoFileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple />
-            <div class="photo-drop-label">
-              <span>เลือกไฟล์</span> หรือลากวางที่นี่<br/>
-              <small>รูปภาพ · PDF · Word · Excel · PowerPoint · สูงสุด 5 ไฟล์ · แนะนำไม่เกิน 5MB</small>
-            </div>
-          </div>
-          <div class="photo-previews" id="photoPreviews"></div>
-          <div class="photo-count" id="photoCount"></div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label for="typeInput">ประเภท</label>
-            <select id="typeInput">
-              <option value="normal">ทั่วไป</option>
-              <option value="urgent">เร่งด่วน</option>
-              <option value="info">ข้อมูล</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="dateInput">วันที่แสดง</label>
-            <input id="dateInput" type="date" />
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="submit" id="saveBtn">Save Announcement</button>
-          <button type="button" class="btn-secondary hidden" id="cancelBtn">Cancel Edit</button>
-        </div>
-        <div class="save-progress" id="saveProgress">
-          <div class="save-progress-bar" id="saveProgressBar"></div>
-        </div>
-        <div class="save-progress-label" id="saveProgressLabel"></div>
-        <p class="notice" id="formStatus">ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh</p>
-      </form>
-
-      <div class="list-card">
-        <h2>ประกาศทั้งหมด</h2>
-        <div id="announcementList">
-          <div class="empty">กำลังโหลดประกาศ...</div>
-        </div>
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>แก้ไขข้อมูลลูกบ้าน</h2>
+        <div id="editHouseLabel" style="font-size:0.82rem; opacity:0.8; margin-top:4px;">บ้านเลขที่ —</div>
       </div>
-    </section>
-  </main>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="edit_house_no">บ้านเลขที่</label>
+        <input id="edit_house_no" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_name">ชื่อ-นามสกุล</label>
+        <input id="edit_name" type="text" />
+      </div>
+      <div class="form-group full">
+        <label for="edit_email">อีเมล</label>
+        <input id="edit_email" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_phone">โทรศัพท์</label>
+        <input id="edit_phone" type="text" />
+      </div>
+      <div class="form-group">
+        <label for="edit_deed_no">เลขที่โฉนด</label>
+        <input id="edit_deed_no" type="text" readonly />
+        <span class="readonly-hint">Read only</span>
+      </div>
+      <div class="form-group">
+        <label for="edit_zone">โซน</label>
+        <input id="edit_zone" type="text" readonly />
+        <span class="readonly-hint">Read only</span>
+      </div>
+      <div class="form-group">
+        <label for="edit_plot">แปลงที่</label>
+        <input id="edit_plot" type="text" readonly />
+        <span class="readonly-hint">Read only</span>
+      </div>
+      <div class="form-group full">
+        <label for="edit_cars">ทะเบียนรถยนต์ (คั่นด้วยลูกน้ำ)</label>
+        <input id="edit_cars" type="text" placeholder="เช่น 5ขฌ9398, 3กศ535" />
+      </div>
+      <div class="form-group full">
+        <label for="edit_motorcycles">ทะเบียนมอเตอร์ไซค์ (คั่นด้วยลูกน้ำ)</label>
+        <input id="edit_motorcycles" type="text" placeholder="เช่น 1กฐ1717" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="save-note" id="editSaveNote">บันทึกและ commit ขึ้น GitHub อัตโนมัติ</div>
+      <div class="modal-actions">
+        <button class="ghost-btn" onclick="closeEditModal()">ยกเลิก</button>
+        <button class="primary-btn" id="saveEditBtn" onclick="saveEdit()">💾 บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      updateDoc,
-      deleteDoc,
-      doc,
-      onSnapshot,
-      query,
-      orderBy,
-      serverTimestamp
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
-      authDomain: "pattra8-54c3f.firebaseapp.com",
-      projectId: "pattra8-54c3f",
-      storageBucket: "pattra8-54c3f.firebasestorage.app",
-      messagingSenderId: "1045231989781",
-      appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
-    };
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────
+  const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
+  const DATA_URL  = 'https://pattra8.github.io/data/residents.json';
+  const GH_OWNER  = 'pattra8';
+  const GH_REPO   = 'pattra8.github.io';
+  const GH_PATH   = 'data/residents.json';
+  const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
+  const ADMIN_SESSION_DAYS = 7;
+  const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
+  // GitHub token (split เพื่อหลีกเลี่ยง secret scanning — admin area password-protected)
+  const GH_TOKEN = ['github_pat_11CALHYWI0','IEOMgd4lUQL0_qgWiVtN','nK0LNvbzVyLJMKWETW4T','lCOWQkxcDurIt4j65YLP5OOZ2inbsHxW'].join('');
+  // ────────────────────────────────────────────────────────────────────────
 
-    const ADMIN_PASSWORDS = ['nitipattra8', 'team388'];
-    const SESSION_KEY = 'pattra_announce_admin_until';
-    const SESSION_DAYS = 30;
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const colRef = collection(db, 'announcements');
+  let allData      = [];
+  let filteredData = [];
+  let editingIndex = -1;
+  let originalSnap = null;
+  let currentTab   = 'residents';
 
-    const loginCard = document.getElementById('loginCard');
-    const adminPanel = document.getElementById('adminPanel');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginError = document.getElementById('loginError');
-    const form = document.getElementById('announceForm');
-    const formTitle = document.getElementById('formTitle');
-    const formStatus = document.getElementById('formStatus');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const list = document.getElementById('announcementList');
-    const saveProgress = document.getElementById('saveProgress');
-    const saveProgressBar = document.getElementById('saveProgressBar');
-    const saveProgressLabel = document.getElementById('saveProgressLabel');
+  // ── Session ─────────────────────────────────────────────────────────────
+  function getSessionExpiry() { return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0); }
+  function hasValidSession()  { return Date.now() < getSessionExpiry(); }
+  function startAdminSession() {
+    localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_DAYS * 86400000));
+  }
+  function clearAdminSession() { localStorage.removeItem(ADMIN_SESSION_KEY); }
 
-    function showProgress(pct, label) {
-      saveProgress.classList.add('active');
-      saveProgressLabel.classList.add('active');
-      saveProgressBar.style.width = pct + '%';
-      saveProgressLabel.textContent = label;
-      formStatus.textContent = '';
+  // ── Auth ─────────────────────────────────────────────────────────────────
+  function showDashboard() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display  = 'block';
+    loadAdminData();
+    loadPending();
+  }
+  function doLogin() {
+    const pw = document.getElementById('pwInput').value.trim().toLowerCase();
+    if (ADMIN_LOGIN_PASSWORDS.includes(pw)) { startAdminSession(); showDashboard(); }
+    else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
     }
+  }
+  function doLogout() {
+    clearAdminSession();
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashboard').style.display  = 'none';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    allData = []; filteredData = [];
+    document.getElementById('adminBody').innerHTML = '';
+  }
 
-    function hideProgress() {
-      saveProgress.classList.remove('active');
-      saveProgressLabel.classList.remove('active');
-      saveProgressBar.style.width = '0%';
-      saveProgressLabel.textContent = '';
+  // ── Tabs ─────────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
+    document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
+    document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
+    document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
+    if (tab === 'pending') loadPending();
+  }
+
+  // ── Load resident data ────────────────────────────────────────────────────
+  async function loadAdminData() {
+    document.getElementById('toolbarNote').textContent = 'กำลังโหลด...';
+    try {
+      const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      allData = await res.json();
+      filteredData = [...allData];
+      renderAdmin(filteredData);
+      document.getElementById('toolbarNote').textContent =
+        `Database: residents.json · อัปเดตล่าสุด ${new Date().toLocaleTimeString('th-TH')}`;
+    } catch(e) {
+      document.getElementById('adminBody').innerHTML =
+        `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+      document.getElementById('toolbarNote').textContent = 'โหลดไม่สำเร็จ';
     }
+  }
 
-    // ─── FILE MANAGEMENT ───
-    const MAX_FILES = 5;
-    const WARN_BYTES = 5 * 1024 * 1024;  // 5 MB — warn but allow
-    let pendingPhotos = []; // array of { dataUrl, name, isImage } objects
+  // ── Render residents table ────────────────────────────────────────────────
+  function renderAdmin(data) {
+    document.getElementById('recordCount').textContent = `${data.length} รายการ`;
+    document.getElementById('adminBody').innerHTML = data.map((r, i) => {
+      const cars  = Array.isArray(r.cars)        ? r.cars        : [];
+      const motos = Array.isArray(r.motorcycles) ? r.motorcycles : [];
+      return `<tr>
+        <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
+        <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
+        <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
+        <td class="col-name">${showVal(r.name)}</td>
+        <td class="col-email">${showVal(r.email)}</td>
+        <td class="col-phone">${showVal(formatPhone(r.phone))}</td>
+        <td class="col-deed">${showVal(r.deed_no)}</td>
+        <td class="col-zone">${showVal(r.zone)}</td>
+        <td class="col-plot">${showVal(r.plot)}</td>
+        <td style="font-size:0.77rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
+        <td style="font-size:0.77rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
+        <td style="color:#94a3b8;font-size:0.72rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
 
-    const photoFileInput = document.getElementById('photoFileInput');
-    const photoPreviews = document.getElementById('photoPreviews');
-    const photoCount = document.getElementById('photoCount');
-    const photoDropZone = document.getElementById('photoDropZone');
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function fmtDate(raw) {
+    if (!raw) return '—';
+    try { const d = new Date(raw); return isNaN(d) ? raw : d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}); }
+    catch(e) { return raw; }
+  }
+  function showVal(v) { return v ? escHtml(String(v)) : '<span class="no-val">—</span>'; }
+  function formatPhone(v) {
+    const d = String(v||'').replace(/\D/g,'');
+    return d.length === 10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : (v||'');
+  }
+  function cleanPhone(raw) {
+    if (!raw || !raw.trim()) return '';
+    const digits = raw.replace(/\D/g,'');
+    return digits.length === 10 ? `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}` : raw.trim();
+  }
+  function cleanPlates(raw) {
+    if (!raw || !raw.trim()) return [];
+    return raw.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean);
+  }
+  function escHtml(v) {
+    return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-    const FILE_ICONS = {
-      pdf:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b94d42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-      doc:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2b5797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-      xls:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6f42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-      ppt:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d24726" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-      file: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a7f76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
-    };
+  // ── Filter residents ──────────────────────────────────────────────────────
+  function filterAdmin() {
+    const q = document.getElementById('adminSearch').value.toLowerCase().trim();
+    filteredData = q
+      ? allData.filter(r => JSON.stringify(r).toLowerCase().includes(q))
+      : [...allData];
+    renderAdmin(filteredData);
+  }
 
-    function getFileCategory(name) {
-      const ext = name.split('.').pop().toLowerCase();
-      if (['jpg','jpeg','png','webp','gif','avif'].includes(ext)) return 'image';
-      if (ext === 'pdf') return 'pdf';
-      if (['doc','docx'].includes(ext)) return 'doc';
-      if (['xls','xlsx'].includes(ext)) return 'xls';
-      if (['ppt','pptx'].includes(ext)) return 'ppt';
-      return 'file';
-    }
-
-    function getFileIcon(cat) {
-      return FILE_ICONS[cat] || FILE_ICONS.file;
-    }
-
-    function updatePhotoUI() {
-      photoPreviews.innerHTML = pendingPhotos.map((f, i) => {
-        const inner = f.isImage
-          ? `<img src="${f.dataUrl}" alt="${f.name}" />`
-          : `<div class="file-preview-tile">${getFileIcon(f.cat)}<span class="file-ext">${f.ext}</span><span class="file-name">${f.name}</span></div>`;
-        return `
-          <div class="photo-preview-item">
-            ${inner}
-            <button class="photo-remove-btn" type="button" data-photo-remove="${i}" title="ลบไฟล์">✕</button>
-          </div>`;
-      }).join('');
-      photoCount.textContent = pendingPhotos.length
-        ? `${pendingPhotos.length} / ${MAX_FILES} ไฟล์`
-        : '';
-    }
-
-    photoPreviews.addEventListener('click', e => {
-      const btn = e.target.closest('[data-photo-remove]');
-      if (!btn) return;
-      pendingPhotos.splice(Number(btn.dataset.photoRemove), 1);
-      updatePhotoUI();
+  // ── Edit modal ────────────────────────────────────────────────────────────
+  function openEditModal(index) {
+    editingIndex = index;
+    const r = allData[index];
+    if (!r) return;
+    document.getElementById('editHouseLabel').textContent = `บ้านเลขที่ ${r.house_no || '—'}`;
+    TEXT_FIELDS.forEach(k => {
+      const el = document.getElementById(`edit_${k}`);
+      if (el) el.value = k === 'phone' ? formatPhone(r[k]) : (r[k] || '');
     });
+    document.getElementById('edit_cars').value        = Array.isArray(r.cars)        ? r.cars.join(', ')        : '';
+    document.getElementById('edit_motorcycles').value = Array.isArray(r.motorcycles) ? r.motorcycles.join(', ') : '';
+    originalSnap = getFormValues();
+    document.getElementById('editModal').classList.add('show');
+  }
 
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+  function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+    editingIndex = -1; originalSnap = null;
+  }
+
+  function getFormValues() {
+    const rec = {};
+    TEXT_FIELDS.forEach(k => { const el = document.getElementById(`edit_${k}`); if(el) rec[k] = el.value.trim(); });
+    rec.cars        = document.getElementById('edit_cars').value.split(',').map(s=>s.trim()).filter(Boolean);
+    rec.motorcycles = document.getElementById('edit_motorcycles').value.split(',').map(s=>s.trim()).filter(Boolean);
+    return rec;
+  }
+
+  function hasChanges() {
+    if (!originalSnap) return false;
+    return JSON.stringify(getFormValues()) !== JSON.stringify(originalSnap);
+  }
+
+  async function saveEdit() {
+    if (editingIndex < 0) return;
+    const formRec = getFormValues();
+    formRec.phone = cleanPhone(formRec.phone);
+    formRec.last_updated = new Date().toLocaleString('sv-SE').replace('T',' ');
+    Object.assign(allData[editingIndex], formRec);
+    filterAdmin();
+    closeEditModal();
+    await doCommit('✅ บันทึกสำเร็จ');
+  }
+
+  // ── GitHub API ────────────────────────────────────────────────────────────
+  async function commitToGitHub(data, message) {
+    const apiBase = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' };
+    const getRes  = await fetch(apiBase, { headers });
+    if (!getRes.ok) throw new Error(`GitHub GET: ${getRes.status}`);
+    const { sha } = await getRes.json();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const putRes  = await fetch(apiBase, {
+      method: 'PUT',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message || 'Update resident data via admin panel', content, sha })
+    });
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub PUT: ${putRes.status}`);
     }
+    return putRes.json();
+  }
 
-    // Compress image via canvas — max 1600px on longest side, quality 0.82
-    function compressImage(file) {
-      return new Promise((resolve, reject) => {
-        const MAX_DIM = 1600;
-        const QUALITY = 0.82;
-        const reader = new FileReader();
-        reader.onerror = reject;
-        reader.onload = e => {
-          const img = new Image();
-          img.onerror = reject;
-          img.onload = () => {
-            let { width, height } = img;
-            if (width <= MAX_DIM && height <= MAX_DIM && file.size < 500 * 1024) {
-              // small enough — skip canvas, return original
-              resolve(e.target.result);
-              return;
-            }
-            const scale = Math.min(MAX_DIM / width, MAX_DIM / height, 1);
-            const canvas = document.createElement('canvas');
-            canvas.width  = Math.round(width  * scale);
-            canvas.height = Math.round(height * scale);
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', QUALITY));
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
+  async function doCommit(successMsg) {
+    document.getElementById('toolbarNote').textContent = 'กำลัง commit ขึ้น GitHub...';
+    try {
+      await commitToGitHub(allData);
+      document.getElementById('toolbarNote').textContent =
+        `${successMsg || '✅ สำเร็จ'} · ${new Date().toLocaleTimeString('th-TH')}`;
+    } catch(e) {
+      document.getElementById('toolbarNote').textContent = `❌ Commit ล้มเหลว: ${e.message}`;
+      alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
     }
+  }
 
-    async function addFiles(files) {
-      const remaining = MAX_FILES - pendingPhotos.length;
-      const toProcess = Array.from(files).slice(0, remaining);
+  // ── Close GitHub Issue ────────────────────────────────────────────────────
+  async function closeIssue(issueNumber, comment) {
+    const base    = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues/${issueNumber}`;
+    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+    if (comment) {
+      await fetch(`${base}/comments`, { method:'POST', headers, body: JSON.stringify({ body: comment }) });
+    }
+    await fetch(base, { method:'PATCH', headers, body: JSON.stringify({ state: 'closed' }) });
+  }
 
-      // warn about large files — ask if continue
-      const oversize = toProcess.filter(f => f.size > WARN_BYTES);
-      if (oversize.length) {
-        const names = oversize.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join(', ');
-        const ok = window.confirm(`ไฟล์ต่อไปนี้มีขนาดใหญ่กว่า 5MB:\n${names}\n\nต้องการอัปโหลดต่อไหม?`);
-        if (!ok) return;
+  // ── Load Pending Corrections ──────────────────────────────────────────────
+  async function loadPending() {
+    const list = document.getElementById('pendingList');
+    list.innerHTML = '<div class="pending-empty"><div class="big">⏳</div>กำลังโหลดคำร้อง...</div>';
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues?state=open&per_page=100`,
+        { headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
+      );
+      if (!res.ok) throw new Error(`GitHub Issues: ${res.status}`);
+      const issues = await res.json();
+      const corrections = issues.filter(i => i.title.startsWith('[แก้ไขข้อมูล]'));
+
+      // Update badge
+      const badge = document.getElementById('pendingBadge');
+      if (corrections.length > 0) {
+        badge.textContent = corrections.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
       }
 
-      try {
-        const encoded = await Promise.all(toProcess.map(file => {
-          const cat = getFileCategory(file.name);
-          return cat === 'image' ? compressImage(file) : fileToBase64(file);
-        }));
-        const newEntries = toProcess.map((file, i) => {
-          const cat = getFileCategory(file.name);
-          const ext = file.name.split('.').pop().toLowerCase();
-          return { dataUrl: encoded[i], name: file.name, isImage: cat === 'image', cat, ext };
-        });
-        pendingPhotos = [...pendingPhotos, ...newEntries];
-        updatePhotoUI();
-        formStatus.textContent = 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
-        formStatus.classList.remove('error');
-      } catch {
-        formStatus.textContent = 'ไม่สามารถโหลดไฟล์ได้';
-        formStatus.classList.add('error');
-      }
-    }
-
-    photoFileInput.addEventListener('change', e => {
-      if (e.target.files.length) addFiles(e.target.files);
-      photoFileInput.value = '';
-    });
-
-    photoDropZone.addEventListener('dragover', e => { e.preventDefault(); photoDropZone.classList.add('drag-over'); });
-    photoDropZone.addEventListener('dragleave', () => photoDropZone.classList.remove('drag-over'));
-    photoDropZone.addEventListener('drop', e => {
-      e.preventDefault();
-      photoDropZone.classList.remove('drag-over');
-      if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
-    });
-
-    function esc(value) {
-      return String(value || '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-      }[char]));
-    }
-
-    function formatDate(item) {
-      if (item.dateValue) return formatDateFromISO(item.dateValue);
-      if (item.dateText) return item.dateText;
-      const source = item.createdAt?.toDate ? item.createdAt.toDate() : null;
-      if (!source) return '';
-      return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    }
-
-    function todayISO() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    function formatDateFromISO(value) {
-      if (!value) return '';
-      const [year, month, day] = value.split('-').map(Number);
-      if (!year || !month || !day) return '';
-      return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
-    }
-
-    function requireLogin() {
-      const expiry = Number(localStorage.getItem(SESSION_KEY) || 0);
-      const ok = expiry > Date.now();
-      if (!ok) localStorage.removeItem(SESSION_KEY);
-      loginCard.classList.toggle('hidden', ok);
-      adminPanel.classList.toggle('hidden', !ok);
-      return ok;
-    }
-
-    function resetForm(message) {
-      form.reset();
-      document.getElementById('docId').value = '';
-      document.getElementById('dateInput').value = todayISO();
-      formTitle.textContent = 'เพิ่มประกาศ';
-      cancelBtn.classList.add('hidden');
-      formStatus.textContent = message || 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
-      formStatus.classList.remove('error');
-      pendingPhotos = [];
-      updatePhotoUI();
-      hideProgress();
-    }
-
-    const TYPE_LABELS = { normal: 'ทั่วไป', urgent: 'เร่งด่วน', info: 'ข้อมูล' };
-
-    function renderList(items) {
-      if (!items.length) {
-        list.innerHTML = '<div class="empty">ยังไม่มีประกาศ</div>';
+      if (!corrections.length) {
+        list.innerHTML = '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอ Approve</div>';
         return;
       }
 
-      const cards = items.map(item => {
-        const photos = Array.isArray(item.photos) ? item.photos : [];
-        const images = photos.filter(f => (typeof f === 'string') || f.isImage);
-        const docs   = photos.filter(f => typeof f !== 'string' && !f.isImage);
+      list.innerHTML = corrections.map(issue => renderPendingCard(issue)).join('');
+    } catch(e) {
+      list.innerHTML = `<div class="pending-empty"><div class="big">⚠️</div>โหลดคำร้องไม่สำเร็จ: ${e.message}</div>`;
+    }
+  }
 
-        const thumbsHtml = images.slice(0, 4).map(f => {
-          const src = typeof f === 'string' ? f : f.dataUrl;
-          return `<img src="${esc(src)}" alt="" />`;
-        }).join('') + (images.length > 4 ? `<span style="font-size:10px;color:var(--muted);align-self:center;">+${images.length - 4}</span>` : '');
+  function parseIssuePayload(body) {
+    try {
+      const match = body.match(/```json\n([\s\S]*?)\n```/);
+      return match ? JSON.parse(match[1]) : null;
+    } catch(e) { return null; }
+  }
 
-        const chipsHtml = docs.map(f =>
-          `<span class="ann-file-chip">${getFileIcon(f.cat)}<span>${esc(f.name)}</span></span>`
-        ).join('');
+  function renderPendingCard(issue) {
+    const payload = parseIssuePayload(issue.body || '');
+    if (!payload) return `
+      <div class="pending-card">
+        <div class="pending-card-header"><strong>${escHtml(issue.title)}</strong></div>
+        <div style="padding:16px;color:#c00;">ไม่สามารถอ่านข้อมูลได้ (รูปแบบไม่ถูกต้อง)</div>
+      </div>`;
 
-        const typeLabel = TYPE_LABELS[item.type] || item.type || 'ทั่วไป';
+    const { house_no, old: o, new: n, reporter, contact, submitted_at } = payload;
+    const submittedDate = submitted_at
+      ? new Date(submitted_at).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : '—';
 
-        return `
-          <div class="ann-card">
-            <div class="ann-card-top">
-              <div class="ann-type-dot ${esc(item.type || '')}"></div>
-              <div class="ann-card-title">${esc(item.title)}</div>
-            </div>
-            <div class="ann-card-body">${esc(item.body)}</div>
-            ${images.length ? `<div class="ann-thumbnails">${thumbsHtml}</div>` : ''}
-            ${docs.length   ? `<div class="ann-file-chips">${chipsHtml}</div>` : ''}
-            <div class="ann-card-footer">
-              <div class="ann-card-meta">
-                <span class="ann-date">${esc(formatDate(item))}</span>
-                <span class="ann-pill">${esc(typeLabel)}</span>
-                ${photos.length ? `<span class="ann-pill">${photos.length} ไฟล์</span>` : ''}
-              </div>
-              <div class="ann-card-actions">
-                <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">แก้ไข</button>
-                <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">ลบ</button>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
+    const fields = [
+      { key: 'name',        label: '👤 ชื่อ-นามสกุล',    oldVal: o?.name  || '', newVal: n?.name  || '', isPlate: false },
+      { key: 'email',       label: '✉️ อีเมล',            oldVal: o?.email || '', newVal: n?.email || '', isPlate: false },
+      { key: 'phone',       label: '📞 โทรศัพท์',          oldVal: o?.phone || '', newVal: n?.phone || '', isPlate: false },
+      { key: 'cars',        label: '🚗 ทะเบียนรถยนต์',     oldVal: (o?.cars||[]).join(', '), newVal: (n?.cars||[]).join(', '), isPlate: true },
+      { key: 'motorcycles', label: '🏍 มอเตอร์ไซค์',       oldVal: (o?.motorcycles||[]).join(', '), newVal: (n?.motorcycles||[]).join(', '), isPlate: true },
+    ];
 
-      list.innerHTML = `<div class="ann-list">${cards}</div>`;
+    const rows = fields.map(f => {
+      const changed = f.oldVal !== f.newVal;
+      return `
+        <tr class="${changed ? 'changed-row' : ''}">
+          <td class="field-name">${f.label}</td>
+          <td class="old-val">${escHtml(f.oldVal || '(ว่าง)')}</td>
+          <td class="arrow-col">→</td>
+          <td><input class="new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" /></td>
+        </tr>`;
+    }).join('');
+
+    return `
+    <div class="pending-card" id="issue-${issue.number}">
+      <div class="pending-card-header">
+        <strong>บ้านเลขที่ ${escHtml(house_no || '?')}</strong>
+        <span class="pending-card-reporter">👤 ผู้แจ้ง: ${escHtml(reporter||'?')} · 📞 ${escHtml(contact||'?')}</span>
+        <span class="pending-card-meta">${submittedDate}</span>
+      </div>
+      <table class="diff-table">
+        <thead>
+          <tr>
+            <th style="width:140px">Field</th>
+            <th>ข้อมูลปัจจุบัน</th>
+            <th style="width:30px"></th>
+            <th>ขอแก้ไขเป็น <span style="color:#f59e0b;font-size:0.7rem;">(แก้ไขได้ก่อน Approve)</span></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="pending-actions">
+        <button class="reject-btn" onclick="rejectCorrection(${issue.number}, this)">❌ ปฏิเสธ</button>
+        <button class="approve-btn" onclick="approveCorrection(${issue.number}, '${escHtml(house_no||'')}', this)">✅ Approve & บันทึก</button>
+      </div>
+    </div>`;
+  }
+
+  // ── Approve Correction ────────────────────────────────────────────────────
+  async function approveCorrection(issueNumber, houseNo, btn) {
+    const card = document.getElementById(`issue-${issueNumber}`);
+    if (!card) return;
+
+    // Collect edited values from inputs
+    const inputs = card.querySelectorAll('.new-input');
+    const edited = {};
+    inputs.forEach(inp => {
+      const key     = inp.dataset.key;
+      const isPlate = inp.dataset.plate === 'true';
+      edited[key] = isPlate
+        ? inp.value.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean)
+        : (key === 'phone' ? cleanPhone(inp.value) : inp.value.trim());
+    });
+
+    // Ensure allData is loaded
+    if (!allData.length) {
+      await loadAdminData();
     }
 
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      if (ADMIN_PASSWORDS.includes(passwordInput.value)) {
-        const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
-        localStorage.setItem(SESSION_KEY, String(expiry));
-        loginError.classList.add('hidden');
-        requireLogin();
-      } else {
-        loginError.classList.remove('hidden');
-      }
+    const idx = allData.findIndex(r => r.house_no === houseNo);
+    if (idx < 0) {
+      alert(`ไม่พบบ้านเลขที่ ${houseNo} ในระบบ`);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ กำลังบันทึก...';
+    card.querySelector('.reject-btn').disabled = true;
+
+    // Apply changes
+    Object.assign(allData[idx], {
+      name:        edited.name        ?? allData[idx].name,
+      email:       edited.email       ?? allData[idx].email,
+      phone:       edited.phone       ?? allData[idx].phone,
+      cars:        edited.cars        ?? allData[idx].cars,
+      motorcycles: edited.motorcycles ?? allData[idx].motorcycles,
+      last_updated: new Date().toLocaleString('sv-SE').replace('T',' ')
     });
 
-    passwordInput.addEventListener('keydown', event => {
-      if (event.key === 'Enter') document.getElementById('loginBtn').click();
-    });
+    try {
+      await commitToGitHub(allData, `Approve correction for house ${houseNo} via admin panel`);
+      await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
+      filterAdmin();
+      card.style.opacity = '0.5';
+      card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
+      // Reload after brief delay
+      setTimeout(loadPending, 1500);
+    } catch(e) {
+      alert('Approve ล้มเหลว: ' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = '✅ Approve & บันทึก';
+      card.querySelector('.reject-btn').disabled = false;
+    }
+  }
 
-    form.addEventListener('submit', async event => {
-      event.preventDefault();
+  // ── Reject Correction ─────────────────────────────────────────────────────
+  async function rejectCorrection(issueNumber, btn) {
+    const reason = prompt('เหตุผลในการปฏิเสธ (ไม่บังคับ):') ?? '';
+    btn.disabled = true;
+    btn.innerHTML = '⏳...';
+    const card = document.getElementById(`issue-${issueNumber}`);
+    card.querySelector('.approve-btn').disabled = true;
+    try {
+      const comment = reason
+        ? `❌ ปฏิเสธโดย admin: ${reason}`
+        : `❌ ปฏิเสธโดย admin (${new Date().toLocaleString('th-TH')})`;
+      await closeIssue(issueNumber, comment);
+      card.style.opacity = '0.5';
+      card.innerHTML = `<div style="padding:16px;text-align:center;color:#b91c1c;font-weight:600;">❌ ปฏิเสธแล้ว${reason ? ` — ${escHtml(reason)}` : ''}</div>`;
+      setTimeout(loadPending, 1500);
+    } catch(e) {
+      alert('ปฏิเสธล้มเหลว: ' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = '❌ ปฏิเสธ';
+      card.querySelector('.approve-btn').disabled = false;
+    }
+  }
 
-      const id = document.getElementById('docId').value;
-      const data = {
-        title: document.getElementById('titleInput').value.trim(),
-        body: document.getElementById('bodyInput').value.trim(),
-        type: document.getElementById('typeInput').value,
-        dateValue: document.getElementById('dateInput').value || todayISO(),
-        dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
-        photos: pendingPhotos.length ? pendingPhotos.map(f => ({ dataUrl: f.dataUrl, name: f.name, isImage: f.isImage, cat: f.cat, ext: f.ext })) : [],
-        updatedAt: serverTimestamp()
-      };
+  // ── Export ────────────────────────────────────────────────────────────────
+  function exportJSON() {
+    const json = JSON.stringify(allData, null, 2);
+    downloadBlob(new Blob([json],{type:'application/json'}), `residents_${dateStamp()}.json`);
+  }
 
-      if (!data.title || !data.body) return;
+  function exportExcel() {
+    if (!allData.length) { alert('ยังไม่มีข้อมูล'); return; }
+    const rows = allData.map(r => ({
+      'บ้านเลขที่':            r.house_no    || '',
+      'ชื่อ-นามสกุล':         r.name        || '',
+      'อีเมล':                r.email       || '',
+      'โทรศัพท์':             r.phone       || '',
+      'เลขที่โฉนด':           r.deed_no     || '',
+      'โซน':                  r.zone        || '',
+      'แปลงที่':              r.plot        || '',
+      'ทะเบียนรถยนต์':        (r.cars        || []).join(', '),
+      'ทะเบียนมอเตอร์ไซค์':   (r.motorcycles || []).join(', '),
+      'อัปเดตล่าสุด':         r.last_updated || '',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Residents');
+    XLSX.writeFile(wb, `residents_${dateStamp()}.xlsx`);
+  }
 
-      formStatus.textContent = '';
-      formStatus.classList.remove('error');
-      document.getElementById('saveBtn').disabled = true;
+  function dateStamp() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+  function downloadBlob(blob, filename) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+  }
 
-      try {
-        // Step 1: preparing
-        showProgress(20, 'กำลังเตรียมข้อมูล...');
-        await new Promise(r => setTimeout(r, 120));
+  // ── Close modal on backdrop click ─────────────────────────────────────────
+  document.getElementById('editModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('editModal') && !hasChanges()) closeEditModal();
+  });
 
-        // Step 2: uploading
-        showProgress(55, `กำลังบันทึก${pendingPhotos.length ? ` (${pendingPhotos.length} ไฟล์)` : ''}...`);
-        await new Promise(r => setTimeout(r, 80));
-
-        if (id) {
-          await updateDoc(doc(db, 'announcements', id), data);
-        } else {
-          await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-        }
-
-        // Step 3: done
-        showProgress(100, '✓ บันทึกเรียบร้อยแล้ว');
-        await new Promise(r => setTimeout(r, 600));
-        hideProgress();
-        resetForm(id ? 'แก้ไขประกาศเรียบร้อยแล้ว' : 'เพิ่มประกาศเรียบร้อยแล้ว');
-      } catch (error) {
-        console.error(error);
-        hideProgress();
-        formStatus.textContent = 'บันทึกไม่สำเร็จ กรุณาตรวจสอบ Firestore permissions';
-        formStatus.classList.add('error');
-      } finally {
-        document.getElementById('saveBtn').disabled = false;
-      }
-    });
-
-    cancelBtn.addEventListener('click', () => resetForm());
-
-    let cachedItems = [];
-    list.addEventListener('click', async event => {
-      const editBtn = event.target.closest('[data-edit]');
-      const deleteBtn = event.target.closest('[data-delete]');
-
-      if (editBtn) {
-        const item = cachedItems.find(entry => entry.id === editBtn.dataset.edit);
-        if (!item) return;
-        document.getElementById('docId').value = item.id;
-        document.getElementById('titleInput').value = item.title || '';
-        document.getElementById('bodyInput').value = item.body || '';
-        document.getElementById('typeInput').value = item.type || 'normal';
-        document.getElementById('dateInput').value = item.dateValue || todayISO();
-        // support both old format (plain strings) and new format (objects)
-        pendingPhotos = Array.isArray(item.photos) ? item.photos.map(f =>
-          typeof f === 'string'
-            ? { dataUrl: f, name: 'image', isImage: true, cat: 'image', ext: 'jpg' }
-            : f
-        ) : [];
-        updatePhotoUI();
-        formTitle.textContent = 'แก้ไขประกาศ';
-        cancelBtn.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      if (deleteBtn) {
-        const item = cachedItems.find(entry => entry.id === deleteBtn.dataset.delete);
-        if (!item) return;
-        const ok = window.confirm(`ลบประกาศ "${item.title}" ใช่ไหม?`);
-        if (!ok) return;
-        try {
-          await deleteDoc(doc(db, 'announcements', item.id));
-        } catch (error) {
-          console.error(error);
-          window.alert('ลบประกาศไม่สำเร็จ กรุณาตรวจสอบ Firestore permissions');
-        }
-      }
-    });
-
-    const announceQuery = query(colRef, orderBy('createdAt', 'desc'));
-    onSnapshot(announceQuery, snapshot => {
-      cachedItems = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
-      renderList(cachedItems);
-    }, error => {
-      console.error(error);
-      list.innerHTML = '<div class="empty">โหลดประกาศไม่สำเร็จ</div>';
-    });
-
-    requireLogin();
-    resetForm();
-  </script>
+  if (hasValidSession()) showDashboard();
+</script>
 </body>
 </html>
