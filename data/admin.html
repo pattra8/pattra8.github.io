@@ -354,7 +354,8 @@
           <th>เลขที่โฉนด</th>
           <th>โซน</th>
           <th>แปลงที่</th>
-          <th>ทะเบียนรถ</th>
+          <th>🚗 รถยนต์</th>
+          <th>🏍 มอเตอร์ไซค์</th>
           <th style="color:#94a3b8;font-weight:500;font-size:0.75rem;">Last Updated</th>
           <th>จัดการ</th>
         </tr>
@@ -519,7 +520,7 @@
         `Database: residents.json บน GitHub Pages · อัปเดตล่าสุด ${new Date().toLocaleTimeString('th-TH')}`;
     } catch (e) {
       document.getElementById('adminBody').innerHTML =
-        `<tr><td colspan="11" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+        `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
       document.getElementById('toolbarNote').textContent = 'โหลดไม่สำเร็จ';
     }
   }
@@ -543,7 +544,8 @@
         <td class="col-deed">${showVal(r.deed_no)}</td>
         <td class="col-zone">${showVal(r.zone)}</td>
         <td class="col-plot">${showVal(r.plot)}</td>
-        <td style="font-size:0.78rem;color:#334;">${vInfo}</td>
+        <td style="font-size:0.78rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
+        <td style="font-size:0.78rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
         <td style="color:#94a3b8;font-size:0.75rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
         <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
       </tr>`;
