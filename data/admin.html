@@ -831,7 +831,11 @@
     if (comment) {
       await fetch(`${base}/comments`, { method:'POST', headers, body: JSON.stringify({ body: comment }) });
     }
-    await fetch(base, { method:'PATCH', headers, body: JSON.stringify({ state: 'closed' }) });
+    const res = await fetch(base, { method:'PATCH', headers, body: JSON.stringify({ state: 'closed' }) });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`ปิด Issue ไม่สำเร็จ (${res.status}): ${err.message || 'unknown'}`);
+    }
   }
 
   // ── Load Pending Corrections ──────────────────────────────────────────────
@@ -1029,12 +1033,14 @@
   // ── Reject Correction ─────────────────────────────────────────────────────
   async function rejectCorrection(issueNumber, btn) {
     const reason = prompt('เหตุผลในการปฏิเสธ (ไม่บังคับ):') ?? '';
+    const card = document.getElementById(`issue-${issueNumber}`);
+    if (!card) return;
     // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
     processedIssues.add(issueNumber);
     btn.disabled = true;
     btn.innerHTML = '⏳...';
-    const card = document.getElementById(`issue-${issueNumber}`);
-    card.querySelector('.approve-btn').disabled = true;
+    const approveBtnEl = card.querySelector('.approve-btn');
+    if (approveBtnEl) approveBtnEl.disabled = true;
     try {
       const comment = reason
         ? `❌ ปฏิเสธโดย admin: ${reason}`
@@ -1079,7 +1085,7 @@
       alert('ปฏิเสธล้มเหลว: ' + e.message);
       btn.disabled = false;
       btn.innerHTML = '❌ ปฏิเสธ';
-      card.querySelector('.approve-btn').disabled = false;
+      if (approveBtnEl) approveBtnEl.disabled = false;
     }
   }
 
