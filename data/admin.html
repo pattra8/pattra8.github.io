@@ -462,8 +462,22 @@
     <h1>Admin Access</h1>
     <p>กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
     <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" autofocus />
+
+    <!-- GitHub Token (เก็บใน localStorage — ไม่ต้องกรอกทุกครั้ง) -->
+    <div id="tokenSection" style="margin-bottom:14px; text-align:left;">
+      <div id="tokenSaved" style="display:none; font-size:0.82rem; color:#15803d; margin-bottom:6px;">
+        ✅ GitHub Token บันทึกแล้ว &nbsp;<a href="#" onclick="showTokenInput(); return false;" style="color:#1a3a5c; font-size:0.8rem;">เปลี่ยน</a>
+      </div>
+      <div id="tokenInputWrap">
+        <label style="font-size:0.82rem; color:#555; display:block; margin-bottom:4px;">GitHub Token (กรอกครั้งเดียว จำอัตโนมัติ)</label>
+        <input type="password" id="tokenInput" placeholder="github_pat_..." autocomplete="off"
+          style="width:100%; padding:9px 12px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem; font-family:monospace; letter-spacing:1px;" />
+      </div>
+    </div>
+
     <button onclick="doLogin()">เข้าสู่ระบบ</button>
     <div class="login-error" id="loginError">รหัสผ่านไม่ถูกต้อง</div>
+    <div class="login-error" id="tokenError" style="color:#c00;">กรุณากรอก GitHub Token</div>
   </div>
 </div>
 
@@ -610,8 +624,8 @@
   const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
-  // GitHub token (split เพื่อหลีกเลี่ยง secret scanning — admin area password-protected)
-  const GH_TOKEN = ['github_pat_11CALHYWI0','sqjUsoUgcJXD_btPWk','SrqSKUAKNIqdanJjZd','uoPQsYFA2hyHLGI6JqJJA7IDBDGByzb3Abjy'].join('');
+  // GitHub token — โหลดจาก localStorage (ไม่ฝังใน source code)
+  let GH_TOKEN = localStorage.getItem('gh_admin_token') || '';
   // ────────────────────────────────────────────────────────────────────────
 
   let allData      = [];
@@ -637,14 +651,45 @@
     loadAdminData();
     loadPending();
   }
+  function showTokenInput() {
+    document.getElementById('tokenSaved').style.display = 'none';
+    document.getElementById('tokenInputWrap').style.display = 'block';
+    document.getElementById('tokenInput').value = '';
+    document.getElementById('tokenInput').focus();
+  }
+  function initTokenUI() {
+    if (GH_TOKEN) {
+      document.getElementById('tokenSaved').style.display = 'block';
+      document.getElementById('tokenInputWrap').style.display = 'none';
+    } else {
+      document.getElementById('tokenSaved').style.display = 'none';
+      document.getElementById('tokenInputWrap').style.display = 'block';
+    }
+  }
   function doLogin() {
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('tokenError').style.display = 'none';
+
     const pw = document.getElementById('pwInput').value.trim().toLowerCase();
-    if (ADMIN_LOGIN_PASSWORDS.includes(pw)) { startAdminSession(); showDashboard(); }
-    else {
+    // รับ token จาก input (ถ้ากรอกใหม่) หรือจาก localStorage
+    const tokenInputEl = document.getElementById('tokenInput');
+    const tokenVal = (tokenInputEl.offsetParent !== null ? tokenInputEl.value.trim() : '') || GH_TOKEN;
+
+    if (!tokenVal) {
+      document.getElementById('tokenError').style.display = 'block';
+      return;
+    }
+    if (!ADMIN_LOGIN_PASSWORDS.includes(pw)) {
       document.getElementById('loginError').style.display = 'block';
       document.getElementById('pwInput').value = '';
       document.getElementById('pwInput').focus();
+      return;
     }
+    // บันทึก token ลง localStorage และ update runtime variable
+    GH_TOKEN = tokenVal;
+    localStorage.setItem('gh_admin_token', GH_TOKEN);
+    startAdminSession();
+    showDashboard();
   }
   function doLogout() {
     clearAdminSession();
@@ -652,8 +697,10 @@
     document.getElementById('dashboard').style.display  = 'none';
     document.getElementById('pwInput').value = '';
     document.getElementById('loginError').style.display = 'none';
+    document.getElementById('tokenError').style.display = 'none';
     allData = []; filteredData = [];
     document.getElementById('adminBody').innerHTML = '';
+    initTokenUI(); // refresh token UI (token ยังอยู่ใน localStorage — ไม่ต้องกรอกใหม่)
   }
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
@@ -1125,7 +1172,9 @@
     if (e.target === document.getElementById('editModal') && !hasChanges()) closeEditModal();
   });
 
-  if (hasValidSession()) showDashboard();
+  // Init token UI และ session check
+  initTokenUI();
+  if (hasValidSession() && GH_TOKEN) showDashboard();
 </script>
 </body>
 </html>
