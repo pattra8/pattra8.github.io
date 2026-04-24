@@ -616,6 +616,8 @@
 
   let allData      = [];
   let filteredData = [];
+  // Track issues ที่ approve/reject แล้วในระหว่าง session — กัน card โผล่กลับก่อน GitHub ปิด
+  const processedIssues = new Set();
   let editingIndex = -1;
   let originalSnap = null;
   let currentTab   = 'residents';
@@ -843,7 +845,8 @@
       );
       if (!res.ok) throw new Error(`GitHub Issues: ${res.status}`);
       const issues = await res.json();
-      const corrections = issues.filter(i => i.title.startsWith('[แก้ไขข้อมูล]'));
+      // กรอง issue ที่ approve/reject แล้วใน session นี้ออก (กัน card โผล่กลับก่อน GitHub ปิด)
+      const corrections = issues.filter(i => i.title.startsWith('[แก้ไขข้อมูล]') && !processedIssues.has(i.number));
 
       // Update badge
       const badge = document.getElementById('pendingBadge');
@@ -956,6 +959,9 @@
       return;
     }
 
+    // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
+    processedIssues.add(issueNumber);
+
     btn.disabled = true;
     btn.innerHTML = '⏳ กำลังบันทึก...';
     card.querySelector('.reject-btn').disabled = true;
@@ -1012,6 +1018,7 @@
       // Background sync หลัง 5 วิ เผื่อ GitHub ปิด issue เสร็จแล้ว
       setTimeout(loadPending, 5000);
     } catch(e) {
+      processedIssues.delete(issueNumber); // rollback — ให้ card โผล่กลับมาได้ถ้า approve ล้มเหลว
       alert('Approve ล้มเหลว: ' + e.message);
       btn.disabled = false;
       btn.innerHTML = '✅ Approve & บันทึก';
@@ -1022,6 +1029,8 @@
   // ── Reject Correction ─────────────────────────────────────────────────────
   async function rejectCorrection(issueNumber, btn) {
     const reason = prompt('เหตุผลในการปฏิเสธ (ไม่บังคับ):') ?? '';
+    // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
+    processedIssues.add(issueNumber);
     btn.disabled = true;
     btn.innerHTML = '⏳...';
     const card = document.getElementById(`issue-${issueNumber}`);
@@ -1066,6 +1075,7 @@
       }, 1200);
       setTimeout(loadPending, 5000);
     } catch(e) {
+      processedIssues.delete(issueNumber); // rollback
       alert('ปฏิเสธล้มเหลว: ' + e.message);
       btn.disabled = false;
       btn.innerHTML = '❌ ปฏิเสธ';
