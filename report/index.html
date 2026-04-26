@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บอร์ดแจ้งปัญหา — ภัทราวิลล่า 8</title>
+<title>Pattra Report — ภัทราวิลล่า 8</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f5f3ef;--surface:#fff;--border:#e8e4dd;--text:#1c1a17;--muted:#7a7570;--accent:#2d6a4f;--accent2:#e07b39;--todo-c:#3b82f6;--doing-c:#f59e0b;--done-c:#22c55e;--todo-bg:#eff6ff;--doing-bg:#fffbeb;--done-bg:#f0fdf4;--priv:#7c3aed;--priv-bg:#f5f3ff;--priv-border:#c4b5fd;--shadow:0 2px 12px rgba(28,26,23,.08);--shadow-lg:0 8px 32px rgba(28,26,23,.18);--r:14px;
@@ -187,17 +187,19 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
 .det-sec{font-size:.82rem;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:5px}
 .det-replies{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
 .rep-bubble{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 12px}
-.rep-bubble p{font-size:.86rem;line-height:1.6}
+.rep-bubble p{font-size:.86rem;line-height:1.6;white-space:pre-wrap;word-wrap:break-word}
 .rep-meta{font-size:.7rem;color:var(--muted);margin-top:4px;display:flex;align-items:center;justify-content:space-between}
 .rep-del{background:none;border:none;color:#e11d48;cursor:pointer;font-size:.7rem;font-weight:700}
 .rep-input{display:flex;flex-direction:column;gap:7px;margin-top:4px}
-.rep-input-row{display:flex;gap:6px;align-items:center}
-.rep-input input{flex:1;padding:8px 10px;border:1.5px solid #86efac;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:.83rem;outline:none;background:white}
-.rep-input input:focus{border-color:#22c55e}
-.rep-send{background:var(--accent);color:white;border:none;padding:8px 13px;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.rep-input-row{display:flex;flex-direction:column;gap:7px}
+.rep-input-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.rep-input input,.rep-input textarea{width:100%;padding:11px 13px;border:1.5px solid #86efac;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.9rem;outline:none;background:white;box-sizing:border-box;color:var(--text)}
+.rep-input textarea{min-height:96px;max-height:300px;resize:vertical;line-height:1.6;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;display:block}
+.rep-input input:focus,.rep-input textarea:focus{border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+.rep-send{background:var(--accent);color:white;border:none;padding:9px 18px;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.02em}
 .rep-send:hover{background:#1b4d36}
 /* Admin reply file attach */
-.rep-attach-btn{background:#f0fdf4;border:1.5px solid #86efac;color:var(--accent);border-radius:7px;padding:7px 10px;font-size:.85rem;cursor:pointer;line-height:1;flex-shrink:0;transition:background .15s}
+.rep-attach-btn{background:#f0fdf4;border:1.5px solid #86efac;color:var(--accent);border-radius:8px;padding:8px 12px;font-size:.95rem;cursor:pointer;line-height:1;flex-shrink:0;transition:background .15s}
 .rep-attach-btn:hover{background:#dcfce7}
 .rep-file-input{display:none}
 .rep-attach-preview{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
@@ -310,14 +312,14 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
     <div class="hbrand">
       <div class="hlogo">🏡</div>
       <div>
-        <div class="htitle">บอร์ดแจ้งปัญหา — ภัทราวิลล่า 8</div>
-        <div class="hsub">หากลูกบ้านมีปัญหา แจ้งเรื่องร้องเรียน เสนอแนะ แก้ไข สามารถพิมพ์แจ้งนิติบุคคลได้เลย</div>
+        <div class="htitle">Pattra Report — ภัทราวิลล่า 8</div>
+        <div class="hsub">รายงานปัญหา ร้องเรียน เสนอแนะ หรือติดตามงานกับนิติบุคคลได้ที่นี่</div>
       </div>
     </div>
     <div class="hbtns">
       <button class="hbtn btn-ghost" id="adminToggle" onclick="openAdminLogin()">🔑 Admin</button>
       <button class="hbtn btn-purple" onclick="openPrivateModal()">🔒 แจ้งแบบส่วนตัว</button>
-      <button class="hbtn btn-orange" onclick="openModal()">➕ แจ้งปัญหา</button>
+      <button class="hbtn btn-orange" onclick="openModal()">➕ รายงานปัญหา</button>
     </div>
   </div>
 </header>
@@ -1197,13 +1199,15 @@ function openDetail(id,priv){
     if(isAdmin){
       repH+=`<div class="rep-input">
         <div class="rep-input-row">
-          <input id="rep-inp-${id}" type="text" placeholder="ตอบกลับลูกบ้าน..." onkeydown="if(event.key==='Enter')addReply('${id}',${!!priv})"/>
-          <button class="rep-attach-btn" onclick="document.getElementById('rep-file-${id}').click()" title="แนบรูปหรือ PDF">📎</button>
-          <input type="file" id="rep-file-${id}" class="rep-file-input" accept="image/*,.pdf,application/pdf" multiple onchange="handleReplyFiles('${id}',this.files)"/>
-          <button class="rep-send" onclick="addReply('${id}',${!!priv})">ส่ง</button>
+          <textarea id="rep-inp-${id}" rows="4" placeholder="ตอบกลับลูกบ้าน...&#10;(กด Enter เพื่อขึ้นบรรทัดใหม่ · กด Ctrl/Cmd+Enter เพื่อส่ง)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();addReply('${id}',${!!priv})}"></textarea>
+          <div class="rep-input-actions">
+            <button class="rep-attach-btn" onclick="document.getElementById('rep-file-${id}').click()" title="แนบรูปหรือ PDF">📎 แนบไฟล์</button>
+            <input type="file" id="rep-file-${id}" class="rep-file-input" accept="image/*,.pdf,application/pdf" multiple onchange="handleReplyFiles('${id}',this.files)"/>
+            <button class="rep-send" onclick="addReply('${id}',${!!priv})">ส่ง ➤</button>
+          </div>
         </div>
         <div class="rep-attach-preview" id="rep-prev-${id}"></div>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:2px">📎 แนบรูปภาพหรือ PDF ได้สูงสุด 5 ไฟล์ · PDF ≤ 1.5MB · กด Enter หรือ ส่ง</p>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:2px">📎 แนบรูปภาพหรือ PDF ได้สูงสุด 5 ไฟล์ · PDF ≤ 1.5MB · Enter ขึ้นบรรทัดใหม่ · Ctrl/Cmd+Enter หรือกด ส่ง</p>
       </div>`;
     }
   }
