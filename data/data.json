@@ -708,10 +708,10 @@
     "zone": "C1",
     "plot": "27",
     "vehicles": {
-      "cars": [
-        "ภอ6286"
+      "cars": [],
+      "motorcycles": [
+        "2ขท1242"
       ],
-      "motorcycles": [],
       "last_updated": "4/29/2026 13:02:29"
     }
   },
@@ -870,9 +870,11 @@
     "zone": "C10",
     "plot": "18",
     "vehicles": {
-      "cars": [],
+      "cars": [
+        "ภอ6286"
+      ],
       "motorcycles": [],
-      "last_updated": null
+      "last_updated": "4/29/2026 13:02:29"
     }
   },
   {
@@ -952,9 +954,11 @@
     "zone": "C15",
     "plot": "13",
     "vehicles": {
-      "cars": [],
+      "cars": [
+        "วท9289"
+      ],
       "motorcycles": [],
-      "last_updated": null
+      "last_updated": "4/29/2026 13:02:29"
     }
   },
   {

@@ -109,12 +109,9 @@
     "deed_no": "14830",
     "zone": "E2",
     "plot": "61",
-    "cars": [
-      "5กถ4411",
-      "1กร4111"
-    ],
+    "cars": [],
     "motorcycles": [],
-    "last_updated": "2026-04-24 11:18:25"
+    "last_updated": ""
   },
   {
     "house_no": "38/9",
@@ -445,8 +442,10 @@
       "ฌห1212",
       "6ขบ7880"
     ],
-    "motorcycles": [],
-    "last_updated": "4/17/2026 17:08:56"
+    "motorcycles": [
+      "2กง8753"
+    ],
+    "last_updated": "4/29/2026 13:02:29"
   },
   {
     "house_no": "38/31",
@@ -502,8 +501,10 @@
     "zone": "D8",
     "plot": "35",
     "cars": [],
-    "motorcycles": [],
-    "last_updated": ""
+    "motorcycles": [
+      "วธบ7"
+    ],
+    "last_updated": "4/29/2026 13:02:29"
   },
   {
     "house_no": "38/35",
@@ -623,8 +624,10 @@
     "zone": "C1",
     "plot": "27",
     "cars": [],
-    "motorcycles": [],
-    "last_updated": ""
+    "motorcycles": [
+      "2ขท1242"
+    ],
+    "last_updated": "4/29/2026 13:02:29"
   },
   {
     "house_no": "38/43",
@@ -762,9 +765,11 @@
     "deed_no": "14787",
     "zone": "C10",
     "plot": "18",
-    "cars": [],
+    "cars": [
+      "ภอ6286"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "4/29/2026 13:02:29"
   },
   {
     "house_no": "38/52",
@@ -834,9 +839,11 @@
     "deed_no": "14782",
     "zone": "C15",
     "plot": "13",
-    "cars": [],
+    "cars": [
+      "วท9289"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "4/29/2026 13:02:29"
   },
   {
     "house_no": "38/57",
@@ -866,8 +873,10 @@
       "ภฮ9926",
       "3ขพ9942"
     ],
-    "motorcycles": [],
-    "last_updated": "4/17/2026 15:49:12"
+    "motorcycles": [
+      "ปคน2"
+    ],
+    "last_updated": "4/29/2026 13:02:29"
   },
   {
     "house_no": "38/59",
