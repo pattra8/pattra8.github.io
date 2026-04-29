@@ -109,9 +109,12 @@
     "deed_no": "14830",
     "zone": "E2",
     "plot": "61",
-    "cars": [],
+    "cars": [
+      "1กร4111",
+      "5กถ4411"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-04-29 14:14:47"
   },
   {
     "house_no": "38/9",
