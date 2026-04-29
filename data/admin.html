@@ -490,6 +490,7 @@
     <div style="display:flex; align-items:center; gap:12px;">
       <span class="badge">ADMIN</span>
       <button class="main-page-btn" onclick="window.location.href='./'">หน้าข้อมูลหลัก</button>
+      <button class="logout-btn" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
       <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
     </div>
   </header>
@@ -690,6 +691,15 @@
     localStorage.setItem('gh_admin_token', GH_TOKEN);
     startAdminSession();
     showDashboard();
+  }
+  function promptUpdateToken() {
+    const t = prompt('วาง GitHub Token ใหม่ที่นี่:');
+    if (!t || !t.trim()) return;
+    GH_TOKEN = t.trim();
+    localStorage.setItem('gh_admin_token', GH_TOKEN);
+    alert('✅ บันทึก Token แล้ว — โหลดข้อมูลใหม่');
+    loadAdminData();
+    loadPending();
   }
   function doLogout() {
     clearAdminSession();
