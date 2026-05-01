@@ -589,9 +589,11 @@
     "deed_no": "14799",
     "zone": "D3",
     "plot": "30",
-    "cars": [],
+    "cars": [
+      "สช4624ภล8964"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-05-01 11:53:41"
   },
   {
     "house_no": "38/40",
