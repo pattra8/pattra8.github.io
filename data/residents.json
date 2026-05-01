@@ -306,9 +306,11 @@
     "deed_no": "14817",
     "zone": "E15",
     "plot": "48",
-    "cars": [],
+    "cars": [
+      "ชฮ9516"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-05-01 11:49:55"
   },
   {
     "house_no": "38/22",
