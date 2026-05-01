@@ -695,9 +695,11 @@
     "deed_no": "14792",
     "zone": "C5",
     "plot": "23",
-    "cars": [],
+    "cars": [
+      "1กฬ234"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-05-01 11:51:08"
   },
   {
     "house_no": "38/47",
