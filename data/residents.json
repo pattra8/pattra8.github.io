@@ -367,9 +367,11 @@
     "deed_no": "14813",
     "zone": "E19",
     "plot": "44",
-    "cars": [],
+    "cars": [
+      "ฆผ2512"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-05-01 11:50:24"
   },
   {
     "house_no": "38/26",
