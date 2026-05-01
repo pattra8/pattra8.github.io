@@ -176,9 +176,11 @@
     "deed_no": "14825",
     "zone": "E7",
     "plot": "56",
-    "cars": [],
+    "cars": [
+      "1กณ7676"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-05-01 11:50:43"
   },
   {
     "house_no": "38/14",
