@@ -649,6 +649,7 @@
   // ── Config ──────────────────────────────────────────────────────────────
   const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
   const DATA_URL  = 'https://pattra8.github.io/data/residents.json';
+  const LPR_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprPlateSync';
   const GH_OWNER  = 'pattra8';
   const GH_REPO   = 'pattra8.github.io';
   const GH_PATH   = 'data/residents.json';
@@ -854,6 +855,44 @@
   function escHtml(v) {
     return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+  function getAllCarPlates(data = allData) {
+    return [...new Set(data.flatMap(r => normalizePlateArray(r.cars)))];
+  }
+  function diffPlates(oldCars, newCars) {
+    const oldSet = new Set(normalizePlateArray(oldCars));
+    const newSet = new Set(normalizePlateArray(newCars));
+    return {
+      added: [...newSet].filter(p => !oldSet.has(p)),
+      removed: [...oldSet].filter(p => !newSet.has(p)),
+    };
+  }
+  async function syncLprCars({ houseNo, oldCars, newCars }) {
+    const diff = diffPlates(oldCars, newCars);
+    if (!diff.added.length && !diff.removed.length) {
+      return { ok: true, skipped: true };
+    }
+    setToolbarNote(`กำลัง sync LPR บ้าน ${houseNo || '—'}...`, 'saving');
+    const res = await fetch(LPR_SYNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        githubToken: GH_TOKEN,
+        houseNo,
+        oldCars: normalizePlateArray(oldCars),
+        newCars: normalizePlateArray(newCars),
+        allCars: getAllCarPlates(),
+      })
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok && res.status !== 207) {
+      throw new Error(result.error || `LPR sync failed (${res.status})`);
+    }
+    if (result.ok === false) {
+      const errors = (result.results || []).flatMap(r => r.errors || []);
+      throw new Error(errors.map(e => `${e.action} ${e.plate}: ${e.error}`).join('\n') || 'LPR sync partially failed');
+    }
+    return result;
+  }
 
   // ── Filter residents ──────────────────────────────────────────────────────
   function filterAdmin() {
@@ -905,13 +944,29 @@
       btn.disabled = true;
       btn.textContent = 'กำลังบันทึก...';
     }
+    const previousCars = normalizePlateArray(allData[editingIndex]?.cars);
     const formRec = getFormValues();
     formRec.phone = cleanPhone(formRec.phone);
     formRec.last_updated = new Date().toLocaleString('sv-SE').replace('T',' ');
     Object.assign(allData[editingIndex], formRec);
     filterAdmin();
     closeEditModal();
-    await doCommit('✅ บันทึกสำเร็จ');
+    const committed = await doCommit('✅ บันทึกสำเร็จ');
+    if (committed) {
+      try {
+        const syncResult = await syncLprCars({
+          houseNo: formRec.house_no,
+          oldCars: previousCars,
+          newCars: formRec.cars,
+        });
+        if (!syncResult.skipped) {
+          setToolbarNote(`✅ บันทึกและ sync LPR สำเร็จ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
+        }
+      } catch(e) {
+        setToolbarNote(`⚠️ บันทึกแล้ว แต่ sync LPR ไม่สำเร็จ: ${e.message}`, 'error');
+        alert('บันทึกข้อมูลแล้ว แต่ sync ทะเบียนเข้า LPR ไม่สำเร็จ\n\n' + e.message);
+      }
+    }
     if (btn) {
       btn.disabled = false;
       btn.textContent = '💾 บันทึก';
@@ -947,10 +1002,12 @@
       const shortSha = result?.commit?.sha ? result.commit.sha.slice(0, 7) : '';
       const suffix = shortSha ? ` · commit ${shortSha}` : '';
       setToolbarNote(`${successMsg || '✅ บันทึกสำเร็จ'}${suffix} · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
+      return true;
     } catch(e) {
       await loadAdminData().catch(() => {});
       setToolbarNote(`❌ บันทึกขึ้น GitHub ไม่สำเร็จ: ${e.message}`, 'error');
       alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
+      return false;
     }
   }
 
@@ -1092,6 +1149,7 @@
       alert(`ไม่พบบ้านเลขที่ ${houseNo} ในระบบ`);
       return;
     }
+    const previousCars = normalizePlateArray(allData[idx].cars);
 
     // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
     processedIssues.add(issueNumber);
@@ -1112,6 +1170,15 @@
 
     try {
       await commitToGitHub(allData, `Approve correction for house ${houseNo} via admin panel`);
+      try {
+        await syncLprCars({
+          houseNo,
+          oldCars: previousCars,
+          newCars: allData[idx].cars,
+        });
+      } catch(syncError) {
+        alert('Approve และบันทึก GitHub แล้ว แต่ sync ทะเบียนเข้า LPR ไม่สำเร็จ\n\n' + syncError.message);
+      }
       await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
       card.style.transition = 'opacity 0.4s';
       card.style.opacity = '0.5';
