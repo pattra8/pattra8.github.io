@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PATTRA VILLA 8 - Parking System</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0f1a;--surface:#111827;--border:rgba(255,255,255,0.08);--text:#f1f5f9;--muted:rgba(255,255,255,0.45);--accent:#38bdf8;--amber:#f59e0b;--map-w:600;--map-h:677;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"IBM Plex Sans Thai",sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0d1f35,#0c1a2e);padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;transition:background .4s;}
+.hdr.admin-on{background:linear-gradient(135deg,#2d1f00,#1f1500);border-bottom-color:rgba(245,158,11,0.35);}
+.logo{font-family:"Prompt",sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;}
+.admin-crown{display:none;font-size:14px;}
+.hdr.admin-on .admin-crown{display:inline;}
+.live{background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;padding:3px 9px;border-radius:20px;font-size:11px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;background:#ef4444;border-radius:50%;animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-btns{display:flex;gap:7px;align-items:center;}
+.hbtn{background:rgba(255,255,255,0.07);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;transition:all .2s;font-family:"IBM Plex Sans Thai",sans-serif;}
+.hbtn:hover{background:rgba(255,255,255,0.12);color:var(--text);}
+.hbtn.home-link{color:rgba(255,255,255,0.78);}
+.hbtn:disabled{opacity:.5;cursor:not-allowed;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.32);}
+.hbtn.active{background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5);color:#fcd34d;}
+.hbtn.admin-key{background:rgba(255,255,255,0.07);transition:all .3s;}
+.hdr.admin-on .hbtn.admin-key{background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5);color:#fcd34d;}
+.sync-chip{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:rgba(255,255,255,0.7);padding:4px 10px;border-radius:20px;font-size:10px;white-space:nowrap;}
+/* Add slot btn — only visible when admin */
+.hbtn-add{background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:white;padding:5px 13px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:"IBM Plex Sans Thai",sans-serif;display:none;align-items:center;gap:5px;transition:opacity .2s;}
+.hbtn-add:hover{opacity:.85;}
+.hdr.admin-on .hbtn-add{display:flex;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;overflow:hidden;}
+.map-outer{flex:1;overflow:auto;background:#060b12;display:flex;align-items:flex-start;justify-content:center;padding:14px;}
+.map-frame{position:relative;width:calc(var(--map-w) * 1px);aspect-ratio:var(--map-w) / var(--map-h);flex-shrink:0;}
+.map-container{position:absolute;top:0;left:0;width:calc(var(--map-w) * 1px);height:calc(var(--map-h) * 1px);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);transform-origin:top left;}
+.map-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.map-badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(8,14,26,0.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 18px;font-family:"Prompt",sans-serif;font-size:16px;font-weight:800;color:white;white-space:nowrap;z-index:5;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,0.28);}
+.edit-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(245,158,11,0.92);color:#0a0f1a;padding:4px 14px;border-radius:20px;font-size:10px;font-weight:700;font-family:"Prompt",sans-serif;z-index:20;display:none;white-space:nowrap;pointer-events:none;}
+body.edit-mode .edit-hint{display:block;}
+
+/* ── SLOT ── */
+.slot{position:absolute;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.55);border:1.5px solid rgba(255,255,255,0.18);transition:filter .15s,transform .1s;}
+.slot::before{content:"";position:absolute;inset:0;border-radius:6px;background:linear-gradient(to bottom,rgba(255,255,255,0.2),rgba(255,255,255,0));pointer-events:none;}
+.slot:hover{filter:brightness(1.22);}
+.slot-label{font-family:"Prompt",sans-serif;font-size:12px;font-weight:800;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.5);line-height:1;position:relative;z-index:1;}
+.slot-sub{font-size:8px;color:rgba(255,255,255,0.8);margin-top:1px;position:relative;z-index:1;}
+
+.free   {background:linear-gradient(135deg,#4ade80,#16a34a);}
+.rented {background:linear-gradient(135deg,#f87171,#b91c1c);}
+.visitor{background:linear-gradient(135deg,#60a5fa,#1d4ed8);}
+.pending{background:linear-gradient(135deg,#fbbf24,#b45309);}
+.closed {background:linear-gradient(135deg,#6b7280,#374151);}
+
+body.edit-mode .slot{cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,0.55),0 0 0 2px rgba(245,158,11,0.6);}
+body.edit-mode .slot:active{cursor:grabbing;transform:scale(1.08);filter:brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.5));z-index:50;}
+
+/* New slot animation */
+.slot.new-slot{animation:popIn .35s cubic-bezier(.17,.67,.35,1.4) forwards,newglow 2s 0.35s infinite;}
+@keyframes popIn{from{transform:scale(0.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes newglow{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,0.55),0 0 0 2px rgba(245,158,11,0.6),0 0 14px rgba(56,189,248,0.5)}50%{box-shadow:0 2px 8px rgba(0,0,0,0.55),0 0 0 2px rgba(245,158,11,0.6),0 0 22px rgba(56,189,248,0.8)}}
+
+/* Delete btn on slot in edit mode */
+.slot .del-btn{position:absolute;top:-7px;right:-7px;width:16px;height:16px;background:#ef4444;border:1.5px solid white;border-radius:50%;font-size:10px;color:white;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:30;font-weight:900;line-height:1;}
+body.edit-mode .slot .del-btn{display:flex;}
+.slot .del-btn:hover{background:#b91c1c;transform:scale(1.2);}
+
+/* Edit (rename) btn on slot in edit mode */
+.slot .edit-btn{position:absolute;top:-7px;left:-7px;width:16px;height:16px;background:#38bdf8;border:1.5px solid white;border-radius:50%;font-size:9px;color:white;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:30;font-weight:900;line-height:1;}
+body.edit-mode .slot .edit-btn{display:flex;}
+.slot .edit-btn:hover{background:#0284c7;transform:scale(1.2);}
+
+/* ── DECORATIVE ── */
+.entrance{position:absolute;z-index:10;pointer-events:none;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:228px;background:var(--surface);border-left:1px solid var(--border);padding:12px 11px;display:none;flex-direction:column;gap:9px;overflow-y:auto;flex-shrink:0;}
+.sc{background:#1a2332;border:1px solid var(--border);border-radius:9px;padding:11px;}
+.sc h3{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;font-weight:600;}
+.sr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;}
+.sr:last-child{border:none;}
+.sl{color:rgba(255,255,255,0.65);}
+.sv{font-weight:700;font-size:13px;}
+.leg{display:flex;flex-direction:column;gap:5px;}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.6);}
+.ls{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.bmain{width:100%;padding:9px;border:none;border-radius:8px;font-family:"IBM Plex Sans Thai",sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:white;transition:opacity .2s;margin-bottom:6px;}
+.bmain:last-child{margin-bottom:0;}
+.bmain:hover{opacity:.85;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:#1a2332;border:1px solid var(--border);border-radius:14px;padding:22px;width:320px;transform:translateY(20px);transition:transform .25s;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.modal-overlay.show .modal{transform:translateY(0);}
+.modal h2{font-family:"Prompt",sans-serif;font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;}
+.field label{font-size:11px;color:var(--muted);font-weight:600;}
+.field input,.field select{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--text);font-family:"IBM Plex Sans Thai",sans-serif;font-size:13px;transition:border-color .2s;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.field select option{background:#1a2332;}
+.modal-actions{display:flex;gap:8px;margin-top:6px;}
+.btn-cancel{flex:1;padding:9px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:"IBM Plex Sans Thai",sans-serif;}
+.btn-confirm{flex:1;padding:9px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:8px;color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:"IBM Plex Sans Thai",sans-serif;}
+.btn-confirm:hover{opacity:.88;}
+
+/* Admin password modal */
+.pin-row{display:flex;justify-content:center;margin:12px 0;}
+.pin-d{width:100%;height:48px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:0 14px;font-size:18px;font-weight:700;color:var(--text);font-family:"Prompt",sans-serif;transition:border-color .2s;}
+.pin-d:focus{outline:none;border-color:var(--amber);}
+.pin-err{font-size:12px;color:#fca5a5;text-align:center;display:none;margin-top:-6px;}
+
+/* ── TOOLTIP ── */
+.tt{position:fixed;background:rgba(6,11,20,0.97);color:white;padding:10px 14px;border-radius:10px;font-size:12px;pointer-events:none;display:none;min-width:155px;border:1px solid rgba(56,189,248,0.35);line-height:1.9;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
+.tt.on{display:block;}
+.tt-name{font-family:"Prompt",sans-serif;font-weight:700;font-size:13px;color:#38bdf8;margin-bottom:2px;}
+
+/* ── NOTIF ── */
+.notif{position:fixed;bottom:14px;left:50%;transform:translateX(-50%) translateY(70px);background:#1a2332;border:1px solid rgba(34,197,94,0.4);border-radius:10px;padding:9px 16px;font-size:12px;z-index:1000;transition:transform .3s;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.notif.on{transform:translateX(-50%) translateY(0);}
+.notif.err{border-color:rgba(239,68,68,0.4);}
+
+/* ── GRID OVERLAY (edit mode) ── */
+body.edit-mode .map-container::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.10) 1px, transparent 1px);
+  background-size: 8px 8px;
+  z-index:6; pointer-events:none;
+}
+/* Alignment guide lines (drawn by JS) */
+.guide{position:absolute;background:#38bdf8;z-index:60;pointer-events:none;
+       box-shadow:0 0 8px rgba(56,189,248,0.7);transition:opacity .12s;}
+.guide.h{height:1px;left:0;right:0;}
+.guide.v{width:1px;top:0;bottom:0;}
+
+@media (max-width: 768px){
+  body{overflow:auto;}
+  .hdr{height:auto;padding:10px 12px;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .logo{font-size:11px;line-height:1.25;max-width:100%;}
+  .hdr-btns{width:100%;justify-content:flex-end;flex-wrap:wrap;}
+  .hbtn,.hbtn-add,.live{font-size:10px;}
+  .main{overflow:auto;}
+  .map-outer{padding:8px;justify-content:center;}
+  .map-frame{width:min(calc(100vw - 16px), calc(var(--map-w) * 1px));}
+  .map-badge{font-size:12px;padding:7px 14px;max-width:calc(100% - 24px);text-align:center;line-height:1.25;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="hdr" id="hdr">
+  <div class="logo">
+    <span>🅿️</span>
+    <span>PATTRA VILLA 8 - Parking System</span>
+    <span class="admin-crown">👑</span>
+  </div>
+  <div class="hdr-btns">
+    <button class="hbtn home-link" onclick="window.location.href='/'">บริการทั้งหมด</button>
+    <div class="live"><div class="dot"></div> LIVE</div>
+    <div class="sync-chip" id="syncLabel">Updated --:--</div>
+    <button class="hbtn" id="editBtn"  onclick="toggleEdit()" style="display:none">✏️ แก้ตำแหน่ง</button>
+    <button class="hbtn" id="alignBtn" onclick="autoAlignAll()" style="display:none">📐 Auto Align</button>
+    <button class="hbtn" id="saveBtn"  onclick="savePositions()" style="display:none">💾 บันทึก</button>
+    <button class="hbtn" id="resetBtn" onclick="resetPositions()" style="display:none">↺ Reset</button>
+    <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()" style="display:none">⬇ Backup</button>
+    <button class="hbtn-add" id="addBtn" onclick="openAddModal()">＋ เพิ่มช่องจอด</button>
+    <button class="hbtn admin-key" id="adminBtn" onclick="openPinModal()">🔑 Admin</button>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+<div class="map-outer">
+  <div class="map-frame" id="mapFrame">
+  <div class="map-container" id="mapContainer">
+    <img class="map-bg" src="bg.jpg" alt="Villa aerial"/>
+    <div class="map-badge" id="mapBadge">UPDATE สถานะที่จอดรถ</div>
+
+    <!-- Entrance -->
+    <div class="entrance" style="left:18px;bottom:54px;">
+      <svg width="80" height="24"><polygon points="0,12 16,2 16,7 68,7 68,17 16,17 16,22" fill="#ef4444" opacity=".9"/><text x="78" y="16" text-anchor="end" fill="#fca5a5" font-size="11" font-weight="700" font-family="Prompt,sans-serif">ทางเข้า</text></svg>
+    </div>
+
+    <!-- ══ DEFAULT SLOTS ══ -->
+    <div class="slot free"    data-id="C"        data-status="ว่าง"         data-house=""       data-note=""                       style="left:34px; top:152px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">C</span><span class="slot-sub">ว่าง</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/8"        data-status="เช่าประจำ"   data-house="8244"   data-note="เช่าตั้งแต่ ก.ย. 2566"  style="left:92px; top:152px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/8</span><span class="slot-sub">เช่าอยู่</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/20"       data-status="เช่าประจำ"   data-house="8244"   data-note="เช่าตั้งแต่ ก.ย. 2566"  style="left:150px;top:152px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/20</span><span class="slot-sub">เช่าอยู่</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/15"       data-status="เช่าประจำ"   data-house="1335"   data-note="22 พ.ย. 68–22 เม.ย. 69" style="left:299px;top:213px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/15</span><span class="slot-sub">เช่าอยู่</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot free"    data-id="A"        data-status="ว่าง"         data-house=""       data-note=""                       style="left:299px;top:255px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">A</span><span class="slot-sub">ว่าง</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/3"        data-status="เช่าประจำ"   data-house="3"      data-note=""                       style="left:299px;top:297px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/3</span><span class="slot-sub">เช่าอยู่</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/35"       data-status="เช่าชั่วคราว" data-house="35"     data-note=""                       style="left:299px;top:339px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/35</span><span class="slot-sub">เช่าชั่วคราว</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/43"       data-status="เช่าประจำ"   data-house="43"     data-note=""                       style="left:299px;top:381px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/43</span><span class="slot-sub">เช่าประจำ</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot free"    data-id="B"        data-status="ว่าง"         data-house=""       data-note=""                       style="left:299px;top:423px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">B</span><span class="slot-sub">ว่าง</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot visitor" data-id="V1"        data-status="ว่าง"         data-house=""       data-note=""                       style="left:34px; top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label" style="font-size:11px">V1</span><span class="slot-sub">ว่าง</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot visitor" data-id="V2"        data-status="ว่าง"         data-house=""       data-note=""                       style="left:86px; top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label" style="font-size:11px">V2</span><span class="slot-sub">ว่าง</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/21"       data-status="เช่าประจำ"   data-house="21"     data-note=""                       style="left:138px;top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/21</span><span class="slot-sub">เช่าอยู่</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/45"       data-status="เช่าประจำ"   data-house="45"     data-note=""                       style="left:395px;top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/45</span><span class="slot-sub">เช่าประจำ</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+    <div class="slot rented"  data-id="/67"       data-status="เช่าประจำ"   data-house="67"     data-note=""                       style="left:453px;top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/67</span><span class="slot-sub">เช่าประจำ</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
+
+    <div class="edit-hint">✏️ โหมดแก้ไข — ลาก slot / กด ✕ เพื่อลบ · กด Shift = ปิด snap</div>
+
+    <!-- Alignment guides (shown while dragging) -->
+    <div class="guide h" id="gH" style="display:none"></div>
+    <div class="guide v" id="gV" style="display:none"></div>
+  </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sc">
+    <h3>📊 สรุปวันนี้</h3>
+    <div class="sr"><span class="sl">ว่าง</span><span class="sv" style="color:#22c55e" id="cnt-free">3</span></div>
+    <div class="sr"><span class="sl">เช่าประจำ</span><span class="sv" style="color:#ef4444" id="cnt-rented">9</span></div>
+    <div class="sr"><span class="sl">Visitor ว่าง</span><span class="sv" style="color:#3b82f6" id="cnt-visitor">1</span></div>
+    <div class="sr"><span class="sl">รอ Confirm</span><span class="sv" style="color:#f59e0b" id="cnt-pending">1</span></div>
+    <div class="sr"><span class="sl">ปิด</span><span class="sv" style="color:#6b7280" id="cnt-closed">4</span></div>
+  </div>
+  <div class="sc">
+    <h3 id="monthLabel">💰 เดือนปัจจุบัน</h3>
+    <div class="sr"><span class="sl">รายได้เช่า</span><span class="sv" style="color:#38bdf8;font-size:12px">฿4,500</span></div>
+    <div class="sr"><span class="sl">Visitor เดือนนี้</span><span class="sv" style="color:#38bdf8;font-size:12px">8 ครั้ง</span></div>
+  </div>
+  <div class="sc" id="admin-guide" style="display:none">
+    <h3 style="color:#fcd34d">👑 Admin Mode</h3>
+    <div style="font-size:11px;color:var(--muted);line-height:1.8">
+      <div>• กด <strong style="color:#86efac">＋ เพิ่มช่องจอด</strong></div>
+      <div>• กด <strong style="color:#fcd34d">✏️ แก้ตำแหน่ง</strong> แล้วลาก</div>
+      <div>• กด <strong style="color:#fca5a5">✕</strong> บน slot เพื่อลบ</div>
+      <div>• กด <strong style="color:#86efac">💾 บันทึก</strong></div>
+    </div>
+  </div>
+  <div class="sc">
+    <h3>💡 Legend</h3>
+    <div class="leg">
+      <div class="li"><div class="ls" style="background:#22c55e"></div>ว่าง</div>
+      <div class="li"><div class="ls" style="background:#ef4444"></div>เช่าประจำ</div>
+      <div class="li"><div class="ls" style="background:#3b82f6"></div>Visitor ว่าง</div>
+      <div class="li"><div class="ls" style="background:#f59e0b"></div>รอ confirm</div>
+      <div class="li"><div class="ls" style="background:#6b7280"></div>ปิด</div>
+    </div>
+  </div>
+  <button class="bmain" style="background:linear-gradient(135deg,#3b82f6,#2563eb)" onclick="showNotif('ok','🚗 เปิดหน้าจอง Visitor')">🚗 จอง Visitor รายวัน</button>
+  <button class="bmain" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="showNotif('ok','⏳ V2 รอยืนยัน 1 รายการ')">⏳ Pending: 1 รายการ</button>
+  <div class="sc" style="font-size:10px;color:var(--muted);line-height:1.9">
+    <h3>💳 ชำระเงิน</h3>
+    <div>SCB 093-2-43819-1</div>
+    <div>ภัทราวิลล่า 8</div>
+    <div style="margin-top:3px;opacity:.5">3ชม ฿50 · 5ชม ฿100 · ค้างคืน ฿150</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ PIN MODAL ══ -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal">
+    <h2>🔐 Admin Login</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">กรอกรหัสผ่านผู้ดูแล</p>
+    <div class="pin-row">
+      <input class="pin-d" type="password" id="admin-pass" placeholder="Password" onkeydown="if(event.key==='Enter') chkpin()"/>
+    </div>
+    <div class="pin-err" id="pin-err">PIN ไม่ถูกต้อง ลองอีกครั้ง</div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Admin password only</div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn-confirm" onclick="chkpin()">เข้าสู่ระบบ</button>
+      <button class="btn-cancel" onclick="closePinModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADD SLOT MODAL ══ -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2>＋ เพิ่มช่องจอดรถ</h2>
+    <div class="field">
+      <label>ชื่อช่อง *</label>
+      <input type="text" id="new-id" placeholder="เช่น /55, วนจอด D, V4"/>
+    </div>
+    <div class="field">
+      <label>ประเภท *</label>
+      <select id="new-type">
+        <option value="free">🟢 ว่าง</option>
+        <option value="rented">🔴 เช่าประจำ</option>
+        <option value="visitor">🔵 Visitor</option>
+        <option value="pending">🟡 รอ Confirm</option>
+        <option value="closed">⬛ ปิด</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>บ้านเลขที่ (ถ้ามี)</label>
+      <input type="text" id="new-house" placeholder="เช่น 55"/>
+    </div>
+    <div class="field">
+      <label>หมายเหตุ</label>
+      <input type="text" id="new-note" placeholder="เช่น เช่าตั้งแต่ พ.ค. 69"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="addSlot()">＋ เพิ่มช่องจอด</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT SLOT MODAL ══ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>✎ แก้ไขช่องจอด <span id="edit-orig" style="color:#94a3b8;font-weight:500;font-size:13px"></span></h2>
+    <div class="field">
+      <label>ชื่อช่อง *</label>
+      <input type="text" id="edit-id" placeholder="เช่น /55, วนจอด D, V4"/>
+    </div>
+    <div class="field">
+      <label>ประเภท *</label>
+      <select id="edit-type">
+        <option value="free">🟢 ว่าง</option>
+        <option value="rented">🔴 เช่าประจำ</option>
+        <option value="visitor">🔵 Visitor</option>
+        <option value="pending">🟡 รอ Confirm</option>
+        <option value="closed">⬛ ปิด</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>สถานะที่แสดง (เช่น ว่าง, เช่าอยู่, รอ confirm)</label>
+      <input type="text" id="edit-sub" placeholder="เว้นว่าง = ใช้ตามประเภท"/>
+    </div>
+    <div class="field">
+      <label>บ้านเลขที่</label>
+      <input type="text" id="edit-house" placeholder="เช่น 55"/>
+    </div>
+    <div class="field">
+      <label>หมายเหตุ</label>
+      <input type="text" id="edit-note" placeholder="เช่น เช่าตั้งแต่ พ.ค. 69"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="saveEdit()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tt" id="tt"><div class="tt-name" id="ttn"></div><div id="tts"></div><div id="tth"></div><div id="ttd"></div></div>
+<div class="notif" id="ntf"><span id="ntfm"></span></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { doc, getFirestore, onSnapshot, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
+  authDomain: "pattra8-54c3f.firebaseapp.com",
+  projectId: "pattra8-54c3f",
+  storageBucket: "pattra8-54c3f.firebasestorage.app",
+  messagingSenderId: "1045231989781",
+  appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+const layoutDocRef = doc(db, 'parking', 'layout');
+
+// ── STATE ──
+let isAdmin = false, editMode = false;
+let dragging = null, startX, startY, origLeft, origTop, clickSX, clickSY;
+let slotSeq = 0;
+let mapScale = 1;
+let lastRemoteLayout = [];
+let defaultLayout = [];
+let editSnapshot = null;
+let remoteLayoutReady = false;
+let hasUnsavedChanges = false;
+let isSaving = false;
+let lastUpdatedAt = null;
+const LAYOUT_SCHEMA_VERSION = 1;
+const ADMIN_SESSION_KEY = 'pv8_admin_session_v1';
+const ADMIN_SESSION_MS = 30 * 24 * 60 * 60 * 1000;
+const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+function getThaiMonthYear(date = new Date()) {
+  return `${THAI_MONTHS[date.getMonth()]} ${date.getFullYear() + 543}`;
+}
+
+function updateDynamicLabels() {
+  const monthYear = getThaiMonthYear();
+  const badge = document.getElementById('mapBadge');
+  const monthLabel = document.getElementById('monthLabel');
+  if (badge) badge.textContent = `UPDATE สถานะที่จอดรถ · ${monthYear}`;
+  if (monthLabel) monthLabel.textContent = `💰 ${monthYear}`;
+}
+
+function formatUpdatedAt(value) {
+  if (!value) return 'Updated --:--';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Updated --:--';
+  return `Updated ${date.toLocaleString('th-TH', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  })}`;
+}
+
+function updateSyncLabel() {
+  const label = document.getElementById('syncLabel');
+  if (!label) return;
+  if (isSaving) {
+    label.textContent = 'Saving...';
+    return;
+  }
+  if (editMode && hasUnsavedChanges) {
+    label.textContent = 'Draft ยังไม่บันทึก';
+    return;
+  }
+  label.textContent = formatUpdatedAt(lastUpdatedAt);
+}
+
+function updateSaveButton() {
+  const saveBtn = document.getElementById('saveBtn');
+  if (!saveBtn) return;
+  saveBtn.disabled = !editMode || !hasUnsavedChanges || isSaving;
+  saveBtn.textContent = isSaving ? '⏳ กำลังบันทึก' : '💾 บันทึก';
+}
+
+function setDirty(next = true) {
+  hasUnsavedChanges = next;
+  updateSaveButton();
+  updateSyncLabel();
+}
+
+function confirmDiscardDraft() {
+  if (!editMode || !hasUnsavedChanges) return true;
+  return confirm('มีการแก้ไขที่ยังไม่บันทึก ต้องการทิ้งการเปลี่ยนแปลงนี้ใช่ไหม?');
+}
+
+function writeAdminSession() {
+  try {
+    localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({
+      expiresAt: Date.now() + ADMIN_SESSION_MS
+    }));
+  } catch (error) {
+    console.warn('Unable to persist admin session:', error);
+  }
+}
+
+function clearAdminSession() {
+  try {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+  } catch (error) {
+    console.warn('Unable to clear admin session:', error);
+  }
+}
+
+function hasValidAdminSession() {
+  try {
+    const raw = localStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.expiresAt || parsed.expiresAt <= Date.now()) {
+      clearAdminSession();
+      return false;
+    }
+    return true;
+  } catch (error) {
+    clearAdminSession();
+    return false;
+  }
+}
+
+function updateMapScale() {
+  const frame = document.getElementById('mapFrame');
+  const container = document.getElementById('mapContainer');
+  if (!frame || !container) return;
+  mapScale = frame.clientWidth / 600 || 1;
+  container.style.transform = `scale(${mapScale})`;
+}
+
+function nextSlotKey() {
+  slotSeq += 1;
+  return 'dyn:' + Date.now().toString(36) + ':' + slotSeq;
+}
+
+function ensureSlotIdentity(el) {
+  if (!el.dataset.slotKey) {
+    el.dataset.slotKey = 'static:' + (el.dataset.id || ('slot-' + (++slotSeq)));
+  }
+  if (!el.dataset.dynamic) {
+    el.dataset.dynamic = '0';
+  }
+}
+
+function collectSlotRecord(el) {
+  ensureSlotIdentity(el);
+  return {
+    key: el.dataset.slotKey,
+    id: el.dataset.id,
+    type: el.dataset.type || el.classList[1] || 'free',
+    status: el.dataset.status || '',
+    house: el.dataset.house || '',
+    note: el.dataset.note || '',
+    left: el.style.left,
+    top: el.style.top,
+    dynamic: el.dataset.dynamic === '1'
+  };
+}
+
+function cloneLayout(records) {
+  return records.map(record => ({ ...record }));
+}
+
+function captureCurrentLayout() {
+  return [...document.querySelectorAll('.slot')].map(collectSlotRecord);
+}
+
+function normalizeSlotRecord(record) {
+  return {
+    key: record.key || `slot:${record.id}`,
+    id: record.id || '',
+    type: record.type || 'free',
+    status: record.status || '',
+    house: record.house || '',
+    note: record.note || '',
+    left: record.left || '0px',
+    top: record.top || '0px',
+    dynamic: Boolean(record.dynamic)
+  };
+}
+
+function applySlotState(el, record) {
+  ensureSlotIdentity(el);
+  el.dataset.slotKey = record.key || el.dataset.slotKey;
+  el.dataset.id = record.id;
+  el.dataset.type = record.type;
+  el.dataset.status = record.status || '';
+  el.dataset.house = record.house || '';
+  el.dataset.note = record.note || '';
+  el.dataset.dynamic = record.dynamic ? '1' : '0';
+  el.className = 'slot ' + record.type;
+  el.style.left = record.left;
+  el.style.top = record.top;
+  el.style.width = SLOT_W + 'px';
+  el.style.height = SLOT_H + 'px';
+
+  const labelSize = record.id.length > 4 ? '8px' : '12px';
+  const labelEl = el.querySelector('.slot-label');
+  if (labelEl) {
+    labelEl.textContent = record.id;
+    labelEl.style.fontSize = labelSize;
+  }
+  const subEl = el.querySelector('.slot-sub');
+  if (subEl) {
+    subEl.textContent = record.status || TYPE_STATUS[record.type] || '';
+  }
+}
+
+function applyLayout(records) {
+  const normalized = records.map(normalizeSlotRecord);
+  document.querySelectorAll('.slot').forEach(ensureSlotIdentity);
+  const incoming = new Set(normalized.map(record => record.key));
+  document.querySelectorAll('.slot').forEach(el => {
+    if (!incoming.has(el.dataset.slotKey)) el.remove();
+  });
+  const existing = new Map(
+    [...document.querySelectorAll('.slot')].map(el => [el.dataset.slotKey, el])
+  );
+  normalized.forEach(record => {
+    const found = existing.get(record.key);
+    if (found) applySlotState(found, record);
+    else createSlotEl(record, false);
+  });
+  injectEditButtons();
+  updateCounts();
+}
+
+function subscribeLayout() {
+  onSnapshot(layoutDocRef, async snap => {
+    const data = snap.exists() ? (snap.data() || {}) : null;
+    if (!snap.exists() || data.schemaVersion !== LAYOUT_SCHEMA_VERSION) {
+      const seed = cloneLayout(defaultLayout.length ? defaultLayout : captureCurrentLayout());
+      lastRemoteLayout = cloneLayout(seed);
+      remoteLayoutReady = true;
+      lastUpdatedAt = new Date();
+      try {
+        await setDoc(layoutDocRef, {
+          schemaVersion: LAYOUT_SCHEMA_VERSION,
+          slots: seed,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch (error) {
+        console.warn('Unable to seed parking layout:', error);
+      }
+      if (!editMode) applyLayout(lastRemoteLayout);
+      updateSyncLabel();
+      return;
+    }
+    const slots = Array.isArray(data?.slots) && data.slots.length
+      ? data.slots.map(normalizeSlotRecord)
+      : cloneLayout(defaultLayout.length ? defaultLayout : captureCurrentLayout());
+    lastRemoteLayout = cloneLayout(slots);
+    remoteLayoutReady = true;
+    lastUpdatedAt = data?.updatedAt?.toDate ? data.updatedAt.toDate() : null;
+    if (!editMode) applyLayout(lastRemoteLayout);
+    updateSyncLabel();
+  }, error => {
+    console.error('Parking layout listener failed:', error);
+    showNotif('err', '❌ โหลด parking layout online ไม่สำเร็จ');
+    updateSyncLabel();
+  });
+}
+
+async function savePositions() {
+  if (!editMode || !hasUnsavedChanges || isSaving) return;
+  const slots = captureCurrentLayout();
+  isSaving = true;
+  updateSaveButton();
+  updateSyncLabel();
+  try {
+    await setDoc(layoutDocRef, {
+      schemaVersion: LAYOUT_SCHEMA_VERSION,
+      slots,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    lastRemoteLayout = cloneLayout(slots);
+    hasUnsavedChanges = false;
+    setEditMode(false, { restore: false });
+    showNotif('ok', '✅ บันทึก parking layout online แล้ว');
+  } catch (error) {
+    console.error('Unable to save parking layout:', error);
+    showNotif('err', '❌ บันทึก parking layout online ไม่สำเร็จ');
+  } finally {
+    isSaving = false;
+    updateSaveButton();
+    updateSyncLabel();
+  }
+}
+
+function resetPositions() {
+  if (!confirmDiscardDraft()) return;
+  if (!confirm('Reset กลับไปตาม layout ล่าสุดบนระบบ?')) return;
+  if (!remoteLayoutReady) {
+    showNotif('err', '❌ ยังไม่มี layout online ให้ reset');
+    return;
+  }
+  applyLayout(lastRemoteLayout);
+  setDirty(false);
+  showNotif('ok', '↺ กลับไปตาม layout ล่าสุดแล้ว');
+}
+
+function exportLayoutBackup() {
+  const sourceLayout = editMode ? captureCurrentLayout() : (lastRemoteLayout.length ? lastRemoteLayout : captureCurrentLayout());
+  const payload = {
+    schemaVersion: LAYOUT_SCHEMA_VERSION,
+    exportedAt: new Date().toISOString(),
+    updatedAt: lastUpdatedAt ? lastUpdatedAt.toISOString() : null,
+    slots: cloneLayout(sourceLayout)
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  a.href = url;
+  a.download = `pattra-parking-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+  showNotif('ok', '⬇️ ดาวน์โหลด backup layout แล้ว');
+}
+
+// ── ADMIN LOGIN ──
+function openPinModal() {
+  if (isAdmin) { adminLogout(); return; }
+  document.getElementById('pinModal').classList.add('show');
+  setTimeout(() => document.getElementById('admin-pass').focus(), 200);
+}
+function closePinModal() {
+  document.getElementById('pinModal').classList.remove('show');
+  document.getElementById('admin-pass').value = '';
+  document.getElementById('pin-err').style.display = 'none';
+}
+function chkpin() {
+  const pass = document.getElementById('admin-pass').value.trim();
+  if (!pass) return;
+  if (pass === 'team388' || pass === 'nitipattra8') {
+    closePinModal();
+    adminUnlock();
+  } else {
+    document.getElementById('pin-err').style.display = 'block';
+    document.getElementById('admin-pass').value = '';
+    document.getElementById('admin-pass').focus();
+    setTimeout(() => document.getElementById('pin-err').style.display = 'none', 2000);
+  }
+}
+function adminUnlock() {
+  isAdmin = true;
+  writeAdminSession();
+  document.getElementById('hdr').classList.add('admin-on');
+  document.getElementById('adminBtn').textContent = '🔓 ออกจากระบบ';
+  document.getElementById('editBtn').style.display = 'block';
+  document.getElementById('alignBtn').style.display = 'block';
+  document.getElementById('resetBtn').style.display = 'block';
+  document.getElementById('backupBtn').style.display = 'block';
+  showNotif('ok', '👑 Admin เข้าสู่ระบบแล้ว');
+}
+function adminLogout() {
+  if (!confirmDiscardDraft()) return;
+  if (editMode) setEditMode(false);
+  isAdmin = false;
+  clearAdminSession();
+  document.getElementById('hdr').classList.remove('admin-on');
+  document.getElementById('adminBtn').textContent = '🔑 Admin';
+  document.getElementById('editBtn').style.display = 'none';
+  document.getElementById('alignBtn').style.display = 'none';
+  document.getElementById('saveBtn').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('backupBtn').style.display = 'none';
+  showNotif('ok', '🔒 ออกจากระบบแล้ว');
+}
+
+// ── EDIT MODE ──
+function setEditMode(next, options = {}) {
+  const { restore = true } = options;
+  if (!isAdmin && next) return;
+  if (editMode === next) return;
+  if (!next && restore && !confirmDiscardDraft()) return;
+  if (next) {
+    const baseLayout = lastRemoteLayout.length ? cloneLayout(lastRemoteLayout) : cloneLayout(captureCurrentLayout());
+    applyLayout(baseLayout);
+    editSnapshot = cloneLayout(baseLayout);
+    hasUnsavedChanges = false;
+  } else if (restore && editSnapshot) {
+    applyLayout(editSnapshot);
+  }
+  editMode = next;
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('editBtn').textContent = editMode ? '❌ ยกเลิก' : '✏️ แก้ตำแหน่ง';
+  document.getElementById('editBtn').classList.toggle('active', editMode);
+  document.getElementById('saveBtn').style.display = editMode ? 'block' : 'none';
+  if (!editMode) {
+    dragging = null;
+    hideGuides();
+    closeAddModal();
+    closeEditModal();
+    editSnapshot = null;
+    hasUnsavedChanges = false;
+  }
+  updateSaveButton();
+  updateSyncLabel();
+}
+
+function toggleEdit() {
+  setEditMode(!editMode);
+}
+
+// ── ADD SLOT MODAL ──
+function openAddModal() {
+  if (!isAdmin) return;
+  if (!editMode) setEditMode(true);
+  document.getElementById('addModal').classList.add('show');
+  document.getElementById('new-id').value = '';
+  document.getElementById('new-type').value = 'free';
+  document.getElementById('new-house').value = '';
+  document.getElementById('new-note').value = '';
+  setTimeout(() => document.getElementById('new-id').focus(), 200);
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+
+const TYPE_STATUS = {
+  free: 'ว่าง', rented: 'เช่าประจำ', visitor: 'Visitor ว่าง', pending: 'รอยืนยัน', closed: 'ปิด'
+};
+const TYPE_LABEL_SIZE = { free: '8px', rented: '12px', visitor: '12px', pending: '12px', closed: '12px' };
+const TYPE_LABEL_TEXT = { free: 'วนจอด', visitor: 'Visitor', closed: '✕' };
+
+function addSlot() {
+  const id    = document.getElementById('new-id').value.trim();
+  const type  = document.getElementById('new-type').value;
+  const house = document.getElementById('new-house').value.trim();
+  const note  = document.getElementById('new-note').value.trim();
+  if (!id) { showNotif('err', '❌ กรุณาใส่ชื่อช่อง'); return; }
+  // Check duplicate
+  if (document.querySelector(`.slot[data-id="${id}"]`)) {
+    showNotif('err', '❌ ชื่อช่องซ้ำกัน'); return;
+  }
+  createSlotEl({ id, type, status: TYPE_STATUS[type], house, note }, true);
+  closeAddModal();
+  updateCounts();
+  setDirty(true);
+  showNotif('ok', `✅ เพิ่มช่อง "${id}" แล้ว — ลากไปวางตำแหน่ง`);
+}
+
+function createSlotEl(data, isNew) {
+  const { id, type, status, house, note } = data;
+  const el = document.createElement('div');
+  el.className = `slot ${type}${isNew ? ' new-slot' : ''}`;
+  el.dataset.slotKey = data.key || data.slotKey || nextSlotKey();
+  el.dataset.id = id;
+  el.dataset.type = type;
+  el.dataset.status = status;
+  el.dataset.house = house || '';
+  el.dataset.note = note || '';
+  el.dataset.dynamic = '1';
+
+  const labelSize = id.length > 4 ? '8px' : '12px';
+  el.innerHTML = `<span class="slot-label" style="font-size:${labelSize}">${id}</span><span class="slot-sub">${status}</span><div class="edit-btn" onclick="openEditModal(event,this)">✎</div><div class="del-btn" onclick="delSlot(event,this)">✕</div>`;
+
+  // Center of map
+  const left = data.left || '274px';
+  const top  = data.top  || '310px';
+  el.style.cssText = `left:${left};top:${top};width:${SLOT_W}px;height:${SLOT_H}px;`;
+  el.setAttribute('onclick', 'hc(event,this)');
+  el.addEventListener('click', e => hc(e, el));
+
+  // Drag
+  el.addEventListener('mousedown', e => {
+    clickSX = e.clientX; clickSY = e.clientY;
+    if (!editMode) return;
+    e.preventDefault();
+    dragging = el;
+    startX = e.clientX; startY = e.clientY;
+    origLeft = parseFloat(el.style.left) || 0;
+    origTop = parseFloat(el.style.top) || 0;
+    el.style.zIndex = 50; el.style.transition = 'none';
+  });
+
+  el.addEventListener('touchstart', e => {
+    if (!editMode) return;
+    const t = e.touches[0];
+    clickSX = t.clientX; clickSY = t.clientY;
+    dragging = el; startX = t.clientX; startY = t.clientY;
+    origLeft = parseFloat(el.style.left) || 0;
+    origTop = parseFloat(el.style.top) || 0;
+    el.style.zIndex = 50; el.style.transition = 'none';
+  }, { passive: true });
+
+  document.getElementById('mapContainer').appendChild(el);
+
+  // Remove new-slot class after animation
+  if (isNew) setTimeout(() => el.classList.remove('new-slot'), 400);
+}
+
+// ── EDIT SLOT MODAL ──
+let editingSlot = null;
+function openEditModal(e, btn) {
+  e.stopPropagation();
+  if (!editMode) return;
+  const slot = btn.closest('.slot');
+  editingSlot = slot;
+  document.getElementById('edit-orig').textContent  = `(เดิม: ${slot.dataset.id})`;
+  document.getElementById('edit-id').value          = slot.dataset.id  || '';
+  document.getElementById('edit-type').value        = slot.dataset.type
+                                                      || slot.classList[1] || 'free';
+  document.getElementById('edit-sub').value         = slot.querySelector('.slot-sub')?.textContent || '';
+  document.getElementById('edit-house').value       = slot.dataset.house || '';
+  document.getElementById('edit-note').value        = slot.dataset.note  || '';
+  document.getElementById('editModal').classList.add('show');
+  setTimeout(() => document.getElementById('edit-id').focus(), 200);
+}
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+  editingSlot = null;
+}
+function saveEdit() {
+  if (!editingSlot) return;
+  const slot  = editingSlot;
+  const newId = document.getElementById('edit-id').value.trim();
+  const type  = document.getElementById('edit-type').value;
+  const sub   = document.getElementById('edit-sub').value.trim();
+  const house = document.getElementById('edit-house').value.trim();
+  const note  = document.getElementById('edit-note').value.trim();
+  if (!newId) { showNotif('err', '❌ ใส่ชื่อช่อง'); return; }
+  // Check duplicate id (skip self)
+  const dup = document.querySelector(`.slot[data-id="${newId}"]`);
+  if (dup && dup !== slot) { showNotif('err', '❌ ชื่อช่องซ้ำ'); return; }
+
+  // Update class (type) — keep "slot" + new type, preserve "new-slot" if present
+  const wasNew = slot.classList.contains('new-slot');
+  slot.className = 'slot ' + type + (wasNew ? ' new-slot' : '');
+  // Update data attrs
+  slot.dataset.id     = newId;
+  slot.dataset.type   = type;
+  slot.dataset.status = sub || TYPE_STATUS[type];
+  slot.dataset.house  = house;
+  slot.dataset.note   = note;
+  // Update visible label
+  const labelSize = newId.length > 4 ? '8px' : '12px';
+  const labelEl = slot.querySelector('.slot-label');
+  if (labelEl) { labelEl.textContent = newId; labelEl.style.fontSize = labelSize; }
+  const subEl = slot.querySelector('.slot-sub');
+  if (subEl) subEl.textContent = sub || TYPE_STATUS[type];
+
+  closeEditModal();
+  updateCounts();
+  setDirty(true);
+  showNotif('ok', `✅ อัปเดตช่อง "${newId}"`);
+}
+
+// Inject ✎ button into static (HTML-defined) slots that don't have one yet
+function injectEditButtons() {
+  document.querySelectorAll('.slot').forEach(slot => {
+    if (slot.querySelector('.edit-btn')) return;
+    const btn = document.createElement('div');
+    btn.className = 'edit-btn';
+    btn.textContent = '✎';
+    btn.setAttribute('onclick', 'openEditModal(event,this)');
+    slot.appendChild(btn);
+  });
+}
+
+// ── DELETE SLOT ──
+function delSlot(e, btn) {
+  e.stopPropagation();
+  if (!editMode) return;
+  const slot = btn.closest('.slot');
+  const id = slot.dataset.id;
+  if (!confirm(`ลบช่อง "${id}" ใช่ไหม?`)) return;
+  slot.remove();
+  updateCounts();
+  setDirty(true);
+  showNotif('ok', `🗑️ ลบช่อง "${id}" แล้ว`);
+}
+
+// ── DRAG ──
+document.querySelectorAll('.slot').forEach(el => {
+  el.addEventListener('mousedown', e => {
+    clickSX = e.clientX; clickSY = e.clientY;
+    if (!editMode) return;
+    e.preventDefault();
+    dragging = el;
+    startX = e.clientX; startY = e.clientY;
+    origLeft = parseFloat(el.style.left) || 0;
+    origTop = parseFloat(el.style.top) || 0;
+    el.style.zIndex = 50; el.style.transition = 'none';
+  });
+  el.addEventListener('touchstart', e => {
+    if (!editMode) return;
+    const t = e.touches[0];
+    clickSX = t.clientX; clickSY = t.clientY;
+    dragging = el; startX = t.clientX; startY = t.clientY;
+    origLeft = parseFloat(el.style.left) || 0;
+    origTop = parseFloat(el.style.top) || 0;
+    el.style.zIndex = 50; el.style.transition = 'none';
+  }, { passive: true });
+});
+// ── SNAP HELPERS ──
+const GRID = 4;          // px — slot positions snap to multiples of this
+const SNAP_DIST = 6;     // px — proximity to other slot edges that triggers alignment snap
+const ROW_TOL = 24;      // px — max delta for grouping slots into the same row
+const COL_TOL = 28;      // px — max delta for grouping slots into the same column
+const SLOT_W = 46;       // px — unified slot width
+const SLOT_H = 36;       // px — unified slot height
+let snapDisabled = false; // hold Shift to temporarily disable snap
+
+function snapToGrid(v) {
+  return Math.round(v / GRID) * GRID;
+}
+
+function median(nums) {
+  if (!nums.length) return 0;
+  const sorted = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function collectSlotMetrics() {
+  return [...document.querySelectorAll('.slot')].map(el => ({
+    el,
+    left: parseFloat(el.style.left) || 0,
+    top: parseFloat(el.style.top) || 0,
+    width: el.offsetWidth,
+    height: el.offsetHeight,
+    centerX: (parseFloat(el.style.left) || 0) + el.offsetWidth / 2,
+    centerY: (parseFloat(el.style.top) || 0) + el.offsetHeight / 2
+  }));
+}
+
+function refreshMetricCenters(metrics) {
+  metrics.forEach(item => {
+    item.centerX = item.left + item.width / 2;
+    item.centerY = item.top + item.height / 2;
+  });
+}
+
+function groupByAxis(items, axis, tol) {
+  const centerKey = axis === 'row' ? 'centerY' : 'centerX';
+  const sorted = [...items].sort((a, b) => a[centerKey] - b[centerKey]);
+  const groups = [];
+  sorted.forEach(item => {
+    const last = groups[groups.length - 1];
+    if (!last || Math.abs(item[centerKey] - last.anchor) > tol) {
+      groups.push({ anchor: item[centerKey], items: [item] });
+      return;
+    }
+    last.items.push(item);
+    last.anchor = median(last.items.map(entry => entry[centerKey]));
+  });
+  return groups.map(group => group.items);
+}
+
+function applySnap(el, rawLeft, rawTop) {
+  // 1) snap to grid
+  let left = snapToGrid(rawLeft);
+  let top  = snapToGrid(rawTop);
+  let guideX = null, guideY = null;
+  let bestX = SNAP_DIST + 1;
+  let bestY = SNAP_DIST + 1;
+
+  // 2) snap to other slots' edges / centers
+  const myW = el.offsetWidth, myH = el.offsetHeight;
+  document.querySelectorAll('.slot').forEach(o => {
+    if (o === el) return;
+    const oL = parseFloat(o.style.left) || 0;
+    const oT = parseFloat(o.style.top)  || 0;
+    const oW = o.offsetWidth, oH = o.offsetHeight;
+    const xCandidates = [
+      { diff: Math.abs(left - oL), value: oL, guide: oL },
+      { diff: Math.abs((left + myW) - (oL + oW)), value: oL + oW - myW, guide: oL + oW },
+      { diff: Math.abs((left + myW / 2) - (oL + oW / 2)), value: oL + oW / 2 - myW / 2, guide: oL + oW / 2 }
+    ];
+    xCandidates.forEach(candidate => {
+      if (candidate.diff <= SNAP_DIST && candidate.diff < bestX) {
+        bestX = candidate.diff;
+        left = candidate.value;
+        guideX = candidate.guide;
+      }
+    });
+
+    const yCandidates = [
+      { diff: Math.abs(top - oT), value: oT, guide: oT },
+      { diff: Math.abs((top + myH) - (oT + oH)), value: oT + oH - myH, guide: oT + oH },
+      { diff: Math.abs((top + myH / 2) - (oT + oH / 2)), value: oT + oH / 2 - myH / 2, guide: oT + oH / 2 }
+    ];
+    yCandidates.forEach(candidate => {
+      if (candidate.diff <= SNAP_DIST && candidate.diff < bestY) {
+        bestY = candidate.diff;
+        top = candidate.value;
+        guideY = candidate.guide;
+      }
+    });
+  });
+
+  // 3) clamp inside the map
+  const cont = document.getElementById('mapContainer');
+  left = Math.max(0, Math.min(cont.clientWidth  - myW, left));
+  top  = Math.max(0, Math.min(cont.clientHeight - myH, top));
+
+  // 4) draw alignment guides
+  showGuides(guideX, guideY);
+  return [left, top];
+}
+
+function showGuides(x, y) {
+  const gH = document.getElementById('gH'), gV = document.getElementById('gV');
+  if (y != null) { gH.style.display = 'block'; gH.style.top = y + 'px'; }
+  else gH.style.display = 'none';
+  if (x != null) { gV.style.display = 'block'; gV.style.left = x + 'px'; }
+  else gV.style.display = 'none';
+}
+function hideGuides() {
+  document.getElementById('gH').style.display = 'none';
+  document.getElementById('gV').style.display = 'none';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Shift') snapDisabled = true; });
+document.addEventListener('keyup',   e => { if (e.key === 'Shift') snapDisabled = false; });
+
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const rawL = origLeft + (e.clientX - startX) / mapScale;
+  const rawT = origTop  + (e.clientY - startY) / mapScale;
+  if (snapDisabled) {
+    dragging.style.left = rawL + 'px';
+    dragging.style.top  = rawT + 'px';
+    hideGuides();
+  } else {
+    const [l, t] = applySnap(dragging, rawL, rawT);
+    dragging.style.left = l + 'px';
+    dragging.style.top  = t + 'px';
+  }
+});
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  const t = e.touches[0];
+  const rawL = origLeft + (t.clientX - startX) / mapScale;
+  const rawT = origTop  + (t.clientY - startY) / mapScale;
+  const [l, tp] = applySnap(dragging, rawL, rawT);
+  dragging.style.left = l + 'px';
+  dragging.style.top  = tp + 'px';
+}, { passive: true });
+document.addEventListener('mouseup', () => {
+  if (dragging) {
+    dragging.style.zIndex = 10;
+    dragging.style.transition = 'filter .15s,transform .1s';
+    const moved = (Math.abs((parseFloat(dragging.style.left) || 0) - origLeft) > 0.1) ||
+      (Math.abs((parseFloat(dragging.style.top) || 0) - origTop) > 0.1);
+    if (moved) setDirty(true);
+    dragging = null;
+    hideGuides();
+  }
+});
+document.addEventListener('touchend', () => {
+  if (dragging) {
+    dragging.style.zIndex = 10;
+    dragging.style.transition = 'filter .15s,transform .1s';
+    const moved = (Math.abs((parseFloat(dragging.style.left) || 0) - origLeft) > 0.1) ||
+      (Math.abs((parseFloat(dragging.style.top) || 0) - origTop) > 0.1);
+    if (moved) setDirty(true);
+    dragging = null;
+    hideGuides();
+  }
+});
+
+function normalizeRow(row) {
+  if (row.length < 2) return;
+  row.sort((a, b) => a.left - b.left);
+  const anchorTop = snapToGrid(median(row.map(item => item.top)));
+  const currentLeft = Math.min(...row.map(item => item.left));
+  const currentRight = Math.max(...row.map(item => item.left + item.width));
+  const totalSlotWidth = row.reduce((sum, item) => sum + item.width, 0);
+  const usableSpan = Math.max(totalSlotWidth, currentRight - currentLeft);
+  const rawGap = row.length > 1 ? (usableSpan - totalSlotWidth) / (row.length - 1) : 0;
+  const gap = snapToGrid(Math.max(0, rawGap));
+  let cursor = snapToGrid(currentLeft);
+  row.forEach(item => {
+    item.left = cursor;
+    item.top = anchorTop;
+    cursor += item.width + gap;
+  });
+}
+
+function normalizeColumn(col) {
+  if (col.length < 3) return;
+  col.sort((a, b) => a.top - b.top);
+  const anchorLeft = snapToGrid(median(col.map(item => item.left)));
+  const gaps = [];
+  for (let i = 1; i < col.length; i++) {
+    gaps.push(col[i].top - (col[i - 1].top + col[i - 1].height));
+  }
+  const gap = snapToGrid(Math.max(0, median(gaps)));
+  const totalHeight = col.reduce((sum, item) => sum + item.height, 0) + gap * (col.length - 1);
+  const currentTop = Math.min(...col.map(item => item.top));
+  const currentBottom = Math.max(...col.map(item => item.top + item.height));
+  let cursor = snapToGrid(((currentTop + currentBottom) / 2) - totalHeight / 2);
+  col.forEach(item => {
+    item.left = anchorLeft;
+    item.top = cursor;
+    cursor += item.height + gap;
+  });
+}
+
+function applyMetrics(metrics) {
+  const cont = document.getElementById('mapContainer');
+  metrics.forEach(item => {
+    const left = Math.max(0, Math.min(cont.clientWidth - item.width, snapToGrid(item.left)));
+    const top = Math.max(0, Math.min(cont.clientHeight - item.height, snapToGrid(item.top)));
+    item.el.style.left = left + 'px';
+    item.el.style.top = top + 'px';
+  });
+}
+
+// ── AUTO ALIGN ALL ──
+// Straighten rows and major columns while preserving the user's current layout footprint.
+function autoAlignAll() {
+  if (!isAdmin) return;
+  if (!editMode) toggleEdit();
+  const metrics = collectSlotMetrics().map(item => ({
+    ...item,
+    left: snapToGrid(item.left),
+    top: snapToGrid(item.top)
+  }));
+
+  refreshMetricCenters(metrics);
+  groupByAxis(metrics, 'row', ROW_TOL).forEach(normalizeRow);
+  refreshMetricCenters(metrics);
+  groupByAxis(metrics, 'col', COL_TOL).forEach(normalizeColumn);
+  refreshMetricCenters(metrics);
+  applyMetrics(metrics);
+  setDirty(true);
+  showNotif('ok', '📐 จัดแนว slot ให้สมดุลขึ้นแล้ว');
+}
+
+// ── CLICK TOOLTIP ──
+function hc(e, el) {
+  if (Math.abs(e.clientX - clickSX) > 6 || Math.abs(e.clientY - clickSY) > 6) return;
+  if (editMode) return;
+  const tt = document.getElementById('tt');
+  document.getElementById('ttn').textContent = '🅿️ ช่อง ' + el.dataset.id;
+  document.getElementById('tts').textContent = el.dataset.status ? '📌 ' + el.dataset.status : '';
+  document.getElementById('tth').textContent = el.dataset.house  ? '🏠 บ้าน ' + el.dataset.house : '';
+  document.getElementById('ttd').textContent = el.dataset.note   ? '📝 ' + el.dataset.note : '';
+  tt.style.left = (e.clientX + 14) + 'px';
+  tt.style.top  = (e.clientY - 10) + 'px';
+  tt.classList.add('on');
+  clearTimeout(tt._t); tt._t = setTimeout(() => tt.classList.remove('on'), 3500);
+}
+document.addEventListener('mousemove', e => {
+  const tt = document.getElementById('tt');
+  if (tt.classList.contains('on')) { tt.style.left = (e.clientX + 14) + 'px'; tt.style.top = (e.clientY - 10) + 'px'; }
+});
+
+// ── COUNT ──
+function updateCounts() {
+  const counts = { free:0, rented:0, visitor:0, pending:0, closed:0 };
+  document.querySelectorAll('.slot').forEach(el => {
+    const c = el.classList[1];
+    if (counts[c] !== undefined) counts[c]++;
+  });
+  document.getElementById('cnt-free').textContent    = counts.free;
+  document.getElementById('cnt-rented').textContent  = counts.rented;
+  document.getElementById('cnt-visitor').textContent = counts.visitor;
+  document.getElementById('cnt-pending').textContent = counts.pending;
+  document.getElementById('cnt-closed').textContent  = counts.closed;
+}
+
+// ── NOTIF ──
+function showNotif(type, msg) {
+  const n = document.getElementById('ntf');
+  document.getElementById('ntfm').textContent = msg;
+  n.className = 'notif on' + (type === 'err' ? ' err' : '');
+  clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('on'), 3000);
+}
+
+// ── CLOSE modals on overlay click ──
+document.getElementById('pinModal').addEventListener('click', e => { if (e.target === e.currentTarget) closePinModal(); });
+document.getElementById('addModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddModal(); });
+document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditModal(); });
+
+// ── INIT ──
+updateDynamicLabels();
+updateMapScale();
+window.addEventListener('resize', updateMapScale);
+document.querySelectorAll('.slot').forEach(ensureSlotIdentity);
+injectEditButtons();
+defaultLayout = cloneLayout(captureCurrentLayout());
+lastRemoteLayout = cloneLayout(defaultLayout);
+updateCounts();
+updateSaveButton();
+updateSyncLabel();
+subscribeLayout();
+if (hasValidAdminSession()) {
+  adminUnlock();
+}
+
+Object.assign(window, {
+  toggleEdit,
+  autoAlignAll,
+  savePositions,
+  resetPositions,
+  exportLayoutBackup,
+  openAddModal,
+  closeAddModal,
+  addSlot,
+  openPinModal,
+  closePinModal,
+  chkpin,
+  delSlot,
+  openEditModal,
+  closeEditModal,
+  saveEdit,
+  hc
+});
+</script>
+</body>
+</html>
