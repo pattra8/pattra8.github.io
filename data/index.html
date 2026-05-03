@@ -961,6 +961,8 @@
   let currentRecord = {};
   let dataFingerprint = '';
   let pollHandle = null;
+  let modalInitialState = null;
+  let isSubmitting = false;
 
   /* ── censor helpers ── */
   function censorPhone(p) {
@@ -1052,6 +1054,23 @@
       const hasHidden = motoFields.some(el => el.classList.contains('vehicle-hidden'));
       addMotoBtn.style.display = hasHidden ? 'block' : 'none';
     }
+  }
+
+  function buildModalState() {
+    return {
+      name: document.getElementById('f_name').value.trim(),
+      email: document.getElementById('f_email').value.trim(),
+      phone: cleanPhone(document.getElementById('f_phone').value),
+      cars: collectVehicleInputs('car', 3),
+      motorcycles: collectVehicleInputs('moto', 4),
+      reporter: document.getElementById('f_reporter').value.trim(),
+      contact: document.getElementById('f_contact').value.trim()
+    };
+  }
+
+  function hasUnsavedModalChanges() {
+    if (!modalInitialState) return false;
+    return JSON.stringify(buildModalState()) !== JSON.stringify(modalInitialState);
   }
 
   /* ── load data ── */
@@ -1291,11 +1310,20 @@
     document.getElementById('successView').style.display = 'none';
     document.getElementById('submitBtn').disabled = false;
     document.getElementById('submitBtn').innerHTML = '<span>📨</span> ส่งคำร้อง';
+    isSubmitting = false;
     document.getElementById('modalOverlay').classList.add('active');
+    modalInitialState = buildModalState();
   }
 
-  function closeModal() {
+  function closeModal(force = false) {
+    if (isSubmitting && !force) return;
+    if (!force && hasUnsavedModalChanges()) {
+      const ok = window.confirm('มีข้อมูลที่กรอกหรือแก้ไขค้างอยู่\nหากปิดตอนนี้ ข้อมูลที่ยังไม่ได้ส่งจะหายไป\n\nต้องการปิดหน้าต่างนี้หรือไม่?');
+      if (!ok) return;
+    }
     document.getElementById('modalOverlay').classList.remove('active');
+    modalInitialState = null;
+    isSubmitting = false;
   }
 
   /* ── submit → GitHub Issue ── */
@@ -1330,6 +1358,7 @@
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<span>⏳</span> กำลังส่ง...';
+    isSubmitting = true;
 
     // Build structured payload (stored in issue body as JSON)
     const payload = {
@@ -1377,13 +1406,16 @@
       if (res.ok) {
         document.getElementById('formView').style.display    = 'none';
         document.getElementById('successView').style.display = 'block';
-        setTimeout(closeModal, 3200);
+        modalInitialState = null;
+        isSubmitting = false;
+        setTimeout(() => closeModal(true), 3200);
       } else {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `GitHub API: ${res.status}`);
       }
     } catch(err) {
       alert('ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่\n(' + err.message + ')');
+      isSubmitting = false;
       btn.disabled = false;
       btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
     }
