@@ -619,6 +619,7 @@
     }
     .form-group label .req { color: #dc2626; margin-left: 2px; }
     .form-group input,
+    .vehicle-inputs input,
     .form-group textarea,
     .form-group select {
       width: 100%;
@@ -632,6 +633,7 @@
       transition: all 0.2s;
     }
     .form-group input:focus,
+    .vehicle-inputs input:focus,
     .form-group textarea:focus,
     .form-group select:focus {
       outline: none;
@@ -640,6 +642,41 @@
     }
     .form-group textarea { resize: vertical; min-height: 64px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .vehicle-group {
+      display: grid;
+      gap: 12px;
+    }
+    .vehicle-box {
+      display: grid;
+      gap: 10px;
+    }
+    .vehicle-note {
+      font-size: 0.84rem;
+      color: #64748b;
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+    .vehicle-inputs {
+      display: grid;
+      gap: 10px;
+    }
+    .vehicle-hidden {
+      display: none;
+    }
+    .add-vehicle-btn {
+      appearance: none;
+      border: 1px dashed #93c5fd;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+    }
+    .add-vehicle-btn:hover {
+      background: #dbeafe;
+    }
     .multi-fields { display: none; }
     .multi-fields.show { display: block; }
 
@@ -812,14 +849,27 @@
           <label>📞 โทรศัพท์</label>
           <input type="tel" id="f_phone" placeholder="เช่น 081-234-5678" />
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>🚗 ทะเบียนรถยนต์</label>
-            <input type="text" id="f_cars" placeholder="คั่นด้วยลูกน้ำ" />
+        <div class="vehicle-group">
+          <div class="vehicle-box">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>🚗 ทะเบียนรถยนต์</label>
+              <div class="vehicle-note">ปกติลงทะเบียนได้ 2 คัน</div>
+            </div>
+            <div class="vehicle-inputs" id="carInputs">
+              <input type="text" id="f_car_1" placeholder="รถยนต์คันที่ 1" />
+              <input type="text" id="f_car_2" placeholder="รถยนต์คันที่ 2" />
+              <input type="text" id="f_car_3" class="vehicle-hidden" placeholder="รถยนต์คันที่ 3 (ที่จอดพิเศษ)" />
+            </div>
+            <button type="button" class="add-vehicle-btn" id="addCarBtn" onclick="showOptionalVehicleField('car')">มีที่จอดพิเศษ? เพิ่มรถยนต์คันที่ 3</button>
           </div>
-          <div class="form-group">
-            <label>🏍 มอเตอร์ไซค์</label>
-            <input type="text" id="f_motos" placeholder="คั่นด้วยลูกน้ำ" />
+          <div class="vehicle-box">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>🏍 มอเตอร์ไซค์</label>
+              <div class="vehicle-note">กรอกเฉพาะคันที่ใช้งานประจำ ไม่ต้องคั่นด้วยลูกน้ำ</div>
+            </div>
+            <div class="vehicle-inputs" id="motoInputs">
+              <input type="text" id="f_moto_1" placeholder="มอเตอร์ไซค์" />
+            </div>
           </div>
         </div>
 
@@ -895,11 +945,66 @@
     return raw.trim(); // คืนค่าเดิมถ้าไม่ใช่ 10 หลัก
   }
 
-  function cleanPlates(raw) {
-    if (!raw || !raw.trim()) return [];
-    return raw.split(/[,;\n]+/)
-      .map(p => p.replace(/[\s\-]/g, '').trim()) // ลบช่องว่างและขีด ภายในป้าย
-      .filter(Boolean);
+  function cleanPlateValue(raw) {
+    if (!raw || !raw.trim()) return '';
+    return raw.replace(/[\s\-]/g, '').trim();
+  }
+
+  function collectVehicleInputs(prefix, count) {
+    const values = [];
+    for (let i = 1; i <= count; i++) {
+      const el = document.getElementById(`f_${prefix}_${i}`);
+      if (!el) continue;
+      const value = cleanPlateValue(el.value);
+      if (value) values.push(value);
+    }
+    return values;
+  }
+
+  function collectSingleVehicleInput(id) {
+    const el = document.getElementById(id);
+    if (!el) return '';
+    return cleanPlateValue(el.value);
+  }
+
+  function setVehicleInputs(prefix, count, values = []) {
+    for (let i = 1; i <= count; i++) {
+      const el = document.getElementById(`f_${prefix}_${i}`);
+      if (!el) continue;
+      el.value = values[i - 1] || '';
+    }
+  }
+
+  function showOptionalVehicleField(prefix) {
+    const max = prefix === 'car' ? 3 : 1;
+    for (let i = 1; i <= max; i++) {
+      const el = document.getElementById(`f_${prefix}_${i}`);
+      if (el && el.classList.contains('vehicle-hidden')) {
+        el.classList.remove('vehicle-hidden');
+        el.focus();
+        updateVehicleButtons();
+        return;
+      }
+    }
+    updateVehicleButtons();
+  }
+
+  function revealVehicleFieldsForValues(prefix, count, values = []) {
+    for (let i = 1; i <= count; i++) {
+      const el = document.getElementById(`f_${prefix}_${i}`);
+      if (!el) continue;
+      if (i <= values.length || i <= (prefix === 'car' ? 2 : 1)) {
+        el.classList.remove('vehicle-hidden');
+      } else {
+        el.classList.add('vehicle-hidden');
+      }
+    }
+  }
+
+  function updateVehicleButtons() {
+    const car3 = document.getElementById('f_car_3');
+    const addCarBtn = document.getElementById('addCarBtn');
+    if (car3 && addCarBtn) addCarBtn.style.display = car3.classList.contains('vehicle-hidden') ? 'block' : 'none';
   }
 
   /* ── load data ── */
@@ -1082,8 +1187,11 @@
     document.getElementById('f_name').value    = name;
     document.getElementById('f_email').value   = email;
     document.getElementById('f_phone').value   = phone;
-    document.getElementById('f_cars').value    = cars.join(', ');
-    document.getElementById('f_motos').value   = motos.join(', ');
+    revealVehicleFieldsForValues('car', 3, cars);
+    revealVehicleFieldsForValues('moto', 1, motos);
+    setVehicleInputs('car', 3, cars);
+    setVehicleInputs('moto', 1, motos);
+    updateVehicleButtons();
     document.getElementById('f_reporter').value = '';
     document.getElementById('f_contact').value  = '';
 
@@ -1111,8 +1219,13 @@
     const newName  = document.getElementById('f_name').value.trim();
     const newEmail = document.getElementById('f_email').value.trim();
     const newPhone = cleanPhone(document.getElementById('f_phone').value);
-    const newCars  = cleanPlates(document.getElementById('f_cars').value);
-    const newMotos = cleanPlates(document.getElementById('f_motos').value);
+    const newCars  = collectVehicleInputs('car', 3);
+    const currentMotoDisplay = currentRecord.motorcycles[0] || '';
+    const newMotoValue = collectSingleVehicleInput('f_moto_1');
+    const motoTouched = newMotoValue !== currentMotoDisplay;
+    const newMotos = motoTouched
+      ? (newMotoValue ? [newMotoValue] : [])
+      : currentRecord.motorcycles;
 
     // Check if anything actually changed
     const hasChange =
