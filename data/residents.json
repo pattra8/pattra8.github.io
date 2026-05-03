@@ -138,9 +138,13 @@
     "deed_no": "14828",
     "zone": "E4",
     "plot": "59",
-    "cars": [],
+    "cars": [
+      "ฎส79001",
+      "ขฬ7904",
+      "ขฬ790"
+    ],
     "motorcycles": [],
-    "last_updated": ""
+    "last_updated": "2026-05-03 13:07:50"
   },
   {
     "house_no": "38/11",
