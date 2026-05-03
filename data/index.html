@@ -764,7 +764,7 @@
     <div class="header-logo">🏘️</div>
     <div class="header-text">
       <h1>หมู่บ้านภัทราวิลล่า 8</h1>
-      <p>ระบบตรวจสอบข้อมูลผู้พักอาศัย</p>
+      <p>ตรวจสอบและแจ้งแก้ไขข้อมูลลูกบ้าน รวมถึงทะเบียนรถเข้าออก</p>
     </div>
     <div class="header-badge">Resident Portal</div>
     <button class="admin-btn" onclick="window.location.href='admin.html'">Admin</button>
@@ -786,8 +786,8 @@
   <!-- HERO SEARCH -->
   <div class="hero-search" id="heroSearch">
     <div class="hero-icon">🏘️</div>
-    <div class="hero-title">ตรวจสอบข้อมูลของท่าน</div>
-    <div class="hero-subtitle">พิมพ์บ้านเลขที่ของท่าน เพื่อดูข้อมูลเฉพาะของบ้านท่านเท่านั้น</div>
+    <div class="hero-title">ตรวจสอบและอัปเดตข้อมูลลูกบ้าน</div>
+    <div class="hero-subtitle">พิมพ์บ้านเลขที่ของท่าน เพื่อตรวจสอบข้อมูลบ้าน และแจ้งแก้ไขชื่อ เบอร์ อีเมล หรือทะเบียนรถเข้าออกได้ในจุดเดียว</div>
     <div class="hero-input-wrap">
       <span class="hero-search-icon">🔍</span>
       <input
@@ -800,7 +800,7 @@
         inputmode="text"
       />
     </div>
-    <div class="hero-hint">🔒 ระบบแสดงเฉพาะข้อมูลของบ้านที่ค้นหาเท่านั้น</div>
+    <div class="hero-hint">🔒 ระบบแสดงเฉพาะข้อมูลของบ้านที่ค้นหา และส่งคำร้องแก้ไขได้ทันที</div>
   </div>
 
   <!-- RESULT BAR (hidden until search) -->
@@ -865,11 +865,15 @@
           <div class="vehicle-box">
             <div class="form-group" style="margin-bottom:0;">
               <label>🏍 มอเตอร์ไซค์</label>
-              <div class="vehicle-note">กรอกเฉพาะคันที่ใช้งานประจำ ไม่ต้องคั่นด้วยลูกน้ำ</div>
+              <div class="vehicle-note">กรอกแยกคันได้เลย ไม่ต้องคั่นด้วยลูกน้ำ</div>
             </div>
             <div class="vehicle-inputs" id="motoInputs">
-              <input type="text" id="f_moto_1" placeholder="มอเตอร์ไซค์" />
+              <input type="text" id="f_moto_1" placeholder="มอเตอร์ไซค์คันที่ 1" />
+              <input type="text" id="f_moto_2" class="vehicle-hidden" placeholder="มอเตอร์ไซค์คันที่ 2" />
+              <input type="text" id="f_moto_3" class="vehicle-hidden" placeholder="มอเตอร์ไซค์คันที่ 3" />
+              <input type="text" id="f_moto_4" class="vehicle-hidden" placeholder="มอเตอร์ไซค์คันที่ 4" />
             </div>
+            <button type="button" class="add-vehicle-btn" id="addMotoBtn" onclick="showOptionalVehicleField('moto')">+ เพิ่มมอเตอร์ไซค์อีก 1 คัน</button>
           </div>
         </div>
 
@@ -976,7 +980,7 @@
   }
 
   function showOptionalVehicleField(prefix) {
-    const max = prefix === 'car' ? 3 : 1;
+    const max = prefix === 'car' ? 3 : 4;
     for (let i = 1; i <= max; i++) {
       const el = document.getElementById(`f_${prefix}_${i}`);
       if (el && el.classList.contains('vehicle-hidden')) {
@@ -1005,6 +1009,13 @@
     const car3 = document.getElementById('f_car_3');
     const addCarBtn = document.getElementById('addCarBtn');
     if (car3 && addCarBtn) addCarBtn.style.display = car3.classList.contains('vehicle-hidden') ? 'block' : 'none';
+
+    const motoFields = [2, 3, 4].map(i => document.getElementById(`f_moto_${i}`)).filter(Boolean);
+    const addMotoBtn = document.getElementById('addMotoBtn');
+    if (addMotoBtn) {
+      const hasHidden = motoFields.some(el => el.classList.contains('vehicle-hidden'));
+      addMotoBtn.style.display = hasHidden ? 'block' : 'none';
+    }
   }
 
   /* ── load data ── */
@@ -1188,9 +1199,9 @@
     document.getElementById('f_email').value   = email;
     document.getElementById('f_phone').value   = phone;
     revealVehicleFieldsForValues('car', 3, cars);
-    revealVehicleFieldsForValues('moto', 1, motos);
+    revealVehicleFieldsForValues('moto', 4, motos);
     setVehicleInputs('car', 3, cars);
-    setVehicleInputs('moto', 1, motos);
+    setVehicleInputs('moto', 4, motos);
     updateVehicleButtons();
     document.getElementById('f_reporter').value = '';
     document.getElementById('f_contact').value  = '';
@@ -1220,12 +1231,7 @@
     const newEmail = document.getElementById('f_email').value.trim();
     const newPhone = cleanPhone(document.getElementById('f_phone').value);
     const newCars  = collectVehicleInputs('car', 3);
-    const currentMotoDisplay = currentRecord.motorcycles[0] || '';
-    const newMotoValue = collectSingleVehicleInput('f_moto_1');
-    const motoTouched = newMotoValue !== currentMotoDisplay;
-    const newMotos = motoTouched
-      ? (newMotoValue ? [newMotoValue] : [])
-      : currentRecord.motorcycles;
+    const newMotos = collectVehicleInputs('moto', 4);
 
     // Check if anything actually changed
     const hasChange =
