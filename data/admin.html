@@ -389,6 +389,29 @@
     .diff-table .field-name { font-weight: 600; color: #374151; min-width: 120px; }
     .diff-table .old-val { color: #6b7280; }
     .diff-table .arrow-col { color: #94a3b8; font-size: 1rem; padding: 0 6px; width: 24px; }
+    .plate-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .plate-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border: 1px solid #fbbf24;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: #92400e;
+      font-size: 0.82rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .plate-empty {
+      color: #94a3b8;
+      font-size: 0.82rem;
+    }
     .diff-table .new-input {
       width: 100%;
       padding: 6px 10px;
@@ -752,8 +775,8 @@
   function renderAdmin(data) {
     document.getElementById('recordCount').textContent = `${data.length} รายการ`;
     document.getElementById('adminBody').innerHTML = data.map((r, i) => {
-      const cars  = Array.isArray(r.cars)        ? r.cars        : [];
-      const motos = Array.isArray(r.motorcycles) ? r.motorcycles : [];
+      const cars  = normalizePlateArray(r.cars);
+      const motos = normalizePlateArray(r.motorcycles);
       return `<tr>
         <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
         <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
@@ -791,6 +814,30 @@
     if (!raw || !raw.trim()) return [];
     return raw.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean);
   }
+  function normalizePlateArray(value) {
+    if (Array.isArray(value)) return value.map(v => String(v || '').replace(/[\s\-]/g,'').trim()).filter(Boolean);
+    if (typeof value === 'string') return cleanPlates(value);
+    return [];
+  }
+  function plateDisplayValue(value) {
+    return normalizePlateArray(value).join(', ');
+  }
+  function renderPlateStack(value) {
+    const plates = normalizePlateArray(value);
+    if (!plates.length) return '<span class="plate-empty">(ว่าง)</span>';
+    return `<div class="plate-stack">${plates.map(p => `<span class="plate-chip">${escHtml(p)}</span>`).join('')}</div>`;
+  }
+  function normalizeIssuePayload(payload) {
+    if (!payload || typeof payload !== 'object') return payload;
+    const clone = JSON.parse(JSON.stringify(payload));
+    ['old', 'new'].forEach(section => {
+      if (!clone[section]) clone[section] = {};
+      clone[section].cars = normalizePlateArray(clone[section].cars);
+      clone[section].motorcycles = normalizePlateArray(clone[section].motorcycles);
+      clone[section].phone = cleanPhone(clone[section].phone || '');
+    });
+    return clone;
+  }
   function escHtml(v) {
     return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -814,8 +861,8 @@
       const el = document.getElementById(`edit_${k}`);
       if (el) el.value = k === 'phone' ? formatPhone(r[k]) : (r[k] || '');
     });
-    document.getElementById('edit_cars').value        = Array.isArray(r.cars)        ? r.cars.join(', ')        : '';
-    document.getElementById('edit_motorcycles').value = Array.isArray(r.motorcycles) ? r.motorcycles.join(', ') : '';
+    document.getElementById('edit_cars').value        = plateDisplayValue(r.cars);
+    document.getElementById('edit_motorcycles').value = plateDisplayValue(r.motorcycles);
     originalSnap = getFormValues();
     document.getElementById('editModal').classList.add('show');
   }
@@ -828,8 +875,8 @@
   function getFormValues() {
     const rec = {};
     TEXT_FIELDS.forEach(k => { const el = document.getElementById(`edit_${k}`); if(el) rec[k] = el.value.trim(); });
-    rec.cars        = document.getElementById('edit_cars').value.split(',').map(s=>s.trim()).filter(Boolean);
-    rec.motorcycles = document.getElementById('edit_motorcycles').value.split(',').map(s=>s.trim()).filter(Boolean);
+    rec.cars        = cleanPlates(document.getElementById('edit_cars').value);
+    rec.motorcycles = cleanPlates(document.getElementById('edit_motorcycles').value);
     return rec;
   }
 
@@ -937,7 +984,7 @@
   }
 
   function renderPendingCard(issue) {
-    const payload = parseIssuePayload(issue.body || '');
+    const payload = normalizeIssuePayload(parseIssuePayload(issue.body || ''));
     if (!payload) return `
       <div class="pending-card">
         <div class="pending-card-header"><strong>${escHtml(issue.title)}</strong></div>
@@ -952,9 +999,9 @@
     const fields = [
       { key: 'name',        label: '👤 ชื่อ-นามสกุล',    oldVal: o?.name  || '', newVal: n?.name  || '', isPlate: false },
       { key: 'email',       label: '✉️ อีเมล',            oldVal: o?.email || '', newVal: n?.email || '', isPlate: false },
-      { key: 'phone',       label: '📞 โทรศัพท์',          oldVal: o?.phone || '', newVal: n?.phone || '', isPlate: false },
-      { key: 'cars',        label: '🚗 ทะเบียนรถยนต์',     oldVal: (o?.cars||[]).join(', '), newVal: (n?.cars||[]).join(', '), isPlate: true },
-      { key: 'motorcycles', label: '🏍 มอเตอร์ไซค์',       oldVal: (o?.motorcycles||[]).join(', '), newVal: (n?.motorcycles||[]).join(', '), isPlate: true },
+      { key: 'phone',       label: '📞 โทรศัพท์',          oldVal: cleanPhone(o?.phone || ''), newVal: cleanPhone(n?.phone || ''), isPlate: false },
+      { key: 'cars',        label: '🚗 ทะเบียนรถยนต์',     oldVal: plateDisplayValue(o?.cars), newVal: plateDisplayValue(n?.cars), oldHtml: renderPlateStack(o?.cars), isPlate: true },
+      { key: 'motorcycles', label: '🏍 มอเตอร์ไซค์',       oldVal: plateDisplayValue(o?.motorcycles), newVal: plateDisplayValue(n?.motorcycles), oldHtml: renderPlateStack(o?.motorcycles), isPlate: true },
     ];
 
     const rows = fields.map(f => {
@@ -962,7 +1009,7 @@
       return `
         <tr class="${changed ? 'changed-row' : ''}">
           <td class="field-name">${f.label}</td>
-          <td class="old-val">${escHtml(f.oldVal || '(ว่าง)')}</td>
+          <td class="old-val">${f.oldHtml || escHtml(f.oldVal || '(ว่าง)')}</td>
           <td class="arrow-col">→</td>
           <td><input class="new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" /></td>
         </tr>`;
@@ -1005,7 +1052,7 @@
       const key     = inp.dataset.key;
       const isPlate = inp.dataset.plate === 'true';
       edited[key] = isPlate
-        ? inp.value.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean)
+        ? cleanPlates(inp.value)
         : (key === 'phone' ? cleanPhone(inp.value) : inp.value.trim());
     });
 
