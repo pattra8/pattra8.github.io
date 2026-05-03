@@ -806,6 +806,7 @@
   <!-- RESULT BAR (hidden until search) -->
   <div class="result-bar" id="resultBar" style="display:none">
     <div class="result-count" id="resultCount">— รายการ</div>
+    <div class="result-count" id="syncStatus">อัปเดตล่าสุด —</div>
   </div>
 
   <div class="card-grid" id="cardGrid">
@@ -917,6 +918,7 @@
   // ── Config ──────────────────────────────────────────────────────────────
   // raw.githubusercontent.com มี cache สั้นกว่า GitHub Pages (~1 min vs ~10 min)
   const DATA_URL      = 'https://raw.githubusercontent.com/pattra8/pattra8.github.io/main/data/residents.json';
+  const POLL_INTERVAL_MS = 5000;
   const GH_OWNER      = 'pattra8';
   const GH_REPO       = 'pattra8.github.io';
   // Token สำหรับสร้าง GitHub Issue (split เพื่อหลีกเลี่ยง secret scanning)
@@ -925,6 +927,8 @@
 
   let allData = [];
   let currentRecord = {};
+  let dataFingerprint = '';
+  let pollHandle = null;
 
   /* ── censor helpers ── */
   function censorPhone(p) {
@@ -1024,7 +1028,7 @@
       const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      allData = data.map(r => ({
+      const normalizedData = data.map(r => ({
         ...r,
         vehicles: {
           cars:        Array.isArray(r.cars)        ? r.cars        : [],
@@ -1032,10 +1036,38 @@
           last_updated: r.last_updated || null
         }
       }));
+      const nextFingerprint = JSON.stringify(normalizedData);
+      const changed = nextFingerprint !== dataFingerprint;
+      allData = normalizedData;
+      dataFingerprint = nextFingerprint;
+      updateSyncStatus();
+      if (changed || document.getElementById('cardGrid').innerHTML === '') filterCards();
     } catch(e) {
       document.getElementById('cardGrid').innerHTML =
         '<div class="no-result"><div class="big">⚠️</div>ไม่สามารถโหลดข้อมูลได้</div>';
+      const syncEl = document.getElementById('syncStatus');
+      if (syncEl) syncEl.textContent = 'อัปเดตล่าสุด ไม่สำเร็จ';
     }
+  }
+
+  function updateSyncStatus() {
+    const syncEl = document.getElementById('syncStatus');
+    if (!syncEl) return;
+    const now = new Date();
+    const time = now.toLocaleTimeString('th-TH', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    syncEl.textContent = `อัปเดตล่าสุด ${time}`;
+  }
+
+  function startAutoRefresh() {
+    if (pollHandle) clearInterval(pollHandle);
+    pollHandle = setInterval(() => {
+      if (document.hidden) return;
+      loadData();
+    }, POLL_INTERVAL_MS);
   }
 
   /* ── render cards ── */
@@ -1312,8 +1344,17 @@
     if (e.target === document.getElementById('modalOverlay')) closeModal();
   });
 
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) loadData();
+  });
+
+  window.addEventListener('focus', () => {
+    loadData();
+  });
+
   document.getElementById('searchInput').value = '38/';
   loadData();
+  startAutoRefresh();
 </script>
 </body>
 </html>
