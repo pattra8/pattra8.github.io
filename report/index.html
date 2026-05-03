@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattra Report — ภัทราวิลล่า 8</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f3ef;--surface:#fff;--border:#e8e4dd;--text:#1c1a17;--muted:#7a7570;--accent:#2d6a4f;--accent2:#e07b39;--todo-c:#3b82f6;--doing-c:#f59e0b;--done-c:#22c55e;--todo-bg:#eff6ff;--doing-bg:#fffbeb;--done-bg:#f0fdf4;--priv:#7c3aed;--priv-bg:#f5f3ff;--priv-border:#c4b5fd;--shadow:0 2px 12px rgba(28,26,23,.08);--shadow-lg:0 8px 32px rgba(28,26,23,.18);--r:14px;
+/* Priority colors */
+--p-urgent:#dc2626;--p-urgent-bg:#fff1f2;--p-high:#ea580c;--p-high-bg:#fff7ed;--p-normal:#6b7280;--p-normal-bg:#f9fafb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);color:white;box-shadow:0 4px 24px rgba(27,58,45,.35);position:sticky;top:0;z-index:50}
+.hdr{padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.hbrand{display:flex;align-items:center;gap:13px}
+.hlogo{width:50px;height:50px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.25);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.htitle{font-family:'Prompt',sans-serif;font-size:1.2rem;font-weight:700;letter-spacing:-.02em}
+.hsub{font-size:.8rem;opacity:.75;margin-top:2px}
+.hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hbtn{padding:9px 15px;border-radius:9px;font-family:'Sarabun',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;transition:transform .15s,box-shadow .15s,background .15s;white-space:nowrap}
+.hbtn:hover{transform:translateY(-1px)}
+.btn-orange{background:var(--accent2);color:white;box-shadow:0 3px 10px rgba(224,123,57,.4)}
+.btn-orange:hover{box-shadow:0 5px 16px rgba(224,123,57,.5)}
+.btn-purple{background:rgba(124,58,237,.3);color:white;border:1.5px solid rgba(196,181,253,.5)!important}
+.btn-purple:hover{background:rgba(124,58,237,.5)!important}
+.btn-ghost{background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.3)!important}
+.btn-ghost:hover{background:rgba(255,255,255,.25)!important}
+.admin-on{background:rgba(255,215,0,.25)!important;border-color:gold!important;color:gold!important}
+
+/* ── STATS ── */
+.stats{display:flex;gap:9px;padding:13px 22px 0;overflow-x:auto}
+.schip{background:white;border-radius:30px;padding:6px 13px;font-size:.8rem;font-weight:600;white-space:nowrap;box-shadow:var(--shadow);display:flex;align-items:center;gap:5px;flex-shrink:0}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── PRIVATE BANNER ── */
+.priv-banner{display:none;align-items:center;gap:12px;margin:12px 22px 0;padding:12px 16px;background:var(--priv-bg);border:2px solid var(--priv-border);border-radius:12px;cursor:pointer;transition:box-shadow .15s}
+.priv-banner:hover{box-shadow:0 4px 16px rgba(124,58,237,.2)}
+.priv-banner.show{display:flex}
+.pb-icon{font-size:1.5rem}
+.pb-info{flex:1}
+.pb-title{font-family:'Prompt',sans-serif;font-size:.92rem;font-weight:700;color:var(--priv)}
+.pb-sub{font-size:.75rem;color:#6d28d9;margin-top:1px}
+.pb-badge{background:var(--priv);color:white;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:20px}
+
+/* ── SEARCH & FILTER BAR ── */
+.filter-bar{display:flex;flex-wrap:wrap;gap:9px;padding:13px 22px 0;align-items:center}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--border);border-radius:30px;font-family:'Sarabun',sans-serif;font-size:.88rem;background:white;outline:none;transition:border-color .15s,box-shadow .15s;color:var(--text)}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,106,79,.1)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.95rem;pointer-events:none;opacity:.5}
+.filter-selects{display:flex;gap:7px;flex-wrap:wrap}
+.fsel{padding:8px 12px;border:1.5px solid var(--border);border-radius:30px;font-family:'Sarabun',sans-serif;font-size:.82rem;background:white;color:var(--text);cursor:pointer;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7570'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.fsel:focus{border-color:var(--accent)}
+.fsel.active{border-color:var(--accent);background-color:#f0fdf4;color:var(--accent);font-weight:700}
+.clear-filter-btn{padding:8px 14px;border:1.5px solid #fca5a5;border-radius:30px;background:#fff1f2;color:#dc2626;font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:5px;transition:background .15s}
+.clear-filter-btn.show{display:flex}
+.clear-filter-btn:hover{background:#fee2e2}
+.filter-result-info{padding:4px 22px 0;font-size:.78rem;color:var(--muted);display:none}
+.filter-result-info.show{display:block}
+
+/* ── BOARD ── */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:13px 22px 32px}
+@media(max-width:800px){.board{grid-template-columns:1fr}}
+.col{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;max-height:calc(100vh - 230px);min-height:0;overflow:visible;border:1.5px solid var(--border);transition:max-height .3s ease}
+.col.collapsed{max-height:54px!important}
+.col.collapsed .col-body{display:none}
+.col-toggle{background:none;border:none;cursor:pointer;font-size:.85rem;color:var(--muted);padding:2px 4px;border-radius:6px;transition:transform .25s;line-height:1}
+.col.collapsed .col-toggle{transform:rotate(-90deg)}
+.col-stripe{height:5px;border-radius:var(--r) var(--r) 0 0}
+.cs-todo{background:var(--todo-c)}.cs-doing{background:var(--doing-c)}.cs-done{background:var(--done-c)}
+.col-hd{padding:13px 15px 11px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;border-radius:0}
+.col-hl{display:flex;align-items:center;gap:8px}
+.col-lbl{font-family:'Prompt',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-.01em}
+.cbadge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px}
+.cb-todo{background:var(--todo-bg);color:var(--todo-c)}.cb-doing{background:var(--doing-bg);color:#b45309}.cb-done{background:var(--done-bg);color:#15803d}
+.col-body{flex:1;overflow-y:auto;overflow-x:clip;padding:11px 11px 24px;display:flex;flex-direction:column;gap:9px;min-height:200px}
+.col-body::-webkit-scrollbar{width:4px}
+.col-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── CARDS ── */
+.card{background:#fafaf8;border:1.5px solid var(--border);border-radius:10px;overflow:visible;animation:slideUp .25s ease;transition:box-shadow .15s,transform .15s;cursor:pointer}
+.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-body{padding:13px 14px}
+.card-top-row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
+.ctag{display:inline-block;font-size:.67rem;font-weight:700;padding:2px 9px;border-radius:20px;flex-shrink:0}
+.card-title{font-size:.92rem;font-weight:700;line-height:1.5;margin-bottom:6px;word-break:break-word;white-space:normal}
+.card-meta-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.card-actions{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap}
+.vbtn{display:flex;align-items:center;gap:4px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:20px;padding:4px 10px;font-family:'Sarabun',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;flex-shrink:0}
+.vbtn:hover{background:var(--border);color:var(--text)}
+.vbtn.voted{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.mvbtns{display:flex;gap:5px;flex:1;flex-wrap:wrap}
+.mvb{flex:1;min-width:48px;padding:5px 3px;border:none;border-radius:6px;font-family:'Sarabun',sans-serif;font-size:.68rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.mvb:hover{opacity:.75}
+.mvb-todo{background:var(--todo-bg);color:var(--todo-c)}.mvb-doing{background:var(--doing-bg);color:#b45309}.mvb-done{background:var(--done-bg);color:#15803d}.mvb-del{background:#fff1f2;color:#e11d48}
+.reply-strip{padding:8px 14px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:0 0 10px 10px;display:block}
+.rs-label{font-size:.69rem;font-weight:700;color:#15803d;margin-bottom:3px}
+.rs-text{font-size:.78rem;color:var(--text);line-height:1.5;word-break:break-word;white-space:normal;min-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.empty-col{text-align:center;padding:32px 14px;color:var(--muted);font-size:.83rem}
+.empty-col .ei{font-size:2rem;margin-bottom:7px}
+
+/* ── PRIORITY BADGES ── */
+.pri-badge{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.pri-urgent{background:var(--p-urgent-bg);color:var(--p-urgent);border:1px solid #fca5a5}
+.pri-high{background:var(--p-high-bg);color:var(--p-high);border:1px solid #fdba74}
+.pri-normal{background:var(--p-normal-bg);color:var(--p-normal);border:1px solid #d1d5db}
+.card.urgent-card{border-left:3px solid var(--p-urgent)!important}
+.card.high-card{border-left:3px solid var(--p-high)!important}
+
+/* ── OVERLAYS & MODALS ── */
+.overlay{position:fixed;inset:0;background:rgba(28,26,23,.55);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;animation:fadeIn .2s}
+.overlay.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:white;border-radius:20px;padding:26px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:popUp .25s ease}
+.modal::-webkit-scrollbar{width:5px}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+@keyframes popUp{from{transform:scale(.95) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal h2{font-family:'Prompt',sans-serif;font-size:1.12rem;margin-bottom:4px}
+.modal-sub{font-size:.81rem;color:var(--muted);margin-bottom:20px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.82rem;font-weight:700;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.88rem;color:var(--text);background:#fafaf8;outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);background:white}
+.fg textarea{resize:vertical;min-height:78px}
+.fg select:disabled,.fg input:disabled{opacity:.4;cursor:not-allowed}
+.field-note{font-size:.72rem;color:var(--muted);margin-top:4px;font-style:italic}
+.opt-lbl{font-weight:400;color:var(--muted);font-size:.78rem}
+.anon-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;cursor:pointer;user-select:none;margin-top:7px}
+.anon-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent2);flex-shrink:0}
+.anon-row span{font-size:.83rem;font-weight:700;color:#92400e}
+.anon-row small{font-size:.73rem;color:#b45309;margin-left:auto;opacity:.85}
+
+/* Priority selector in form */
+.pri-selector{display:flex;gap:7px;margin-top:4px;flex-wrap:wrap}
+.pri-opt{flex:1;min-width:80px;padding:8px 6px;border-radius:9px;font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid transparent;text-align:center;transition:all .15s}
+.pri-opt input[type=radio]{display:none}
+.pri-opt.sel-urgent{background:var(--p-urgent-bg);border-color:var(--p-urgent);color:var(--p-urgent)}
+.pri-opt.sel-high{background:var(--p-high-bg);border-color:var(--p-high);color:var(--p-high)}
+.pri-opt.sel-normal{background:var(--p-normal-bg);border-color:var(--p-normal);color:var(--p-normal)}
+.pri-opt.unsel{background:#f9fafb;border-color:var(--border);color:var(--muted)}
+.pri-opt.unsel:hover{border-color:#9ca3af}
+
+.priv-callout{background:var(--priv-bg);border:1.5px solid var(--priv-border);border-radius:11px;padding:13px 15px;margin-bottom:18px}
+.priv-callout-title{font-family:'Prompt',sans-serif;font-size:.92rem;font-weight:700;color:var(--priv);margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.priv-callout p{font-size:.8rem;color:#5b21b6;line-height:1.6}
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:#fafaf8}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:#f0fdf4}
+.upload-zone .uz-icon{font-size:1.8rem;margin-bottom:5px}
+.upload-zone p{font-size:.8rem;color:var(--muted)}
+.upload-zone strong{color:var(--accent)}
+.upload-zone input[type=file]{display:none}
+.prev-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.prev-item{position:relative}
+.prev-item img,.prev-item video{width:66px;height:66px;object-fit:cover;border-radius:7px;border:2px solid var(--border);display:block}
+.prev-rm{position:absolute;top:-5px;right:-5px;width:17px;height:17px;background:#e11d48;color:white;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-weight:700}
+.mbtns{display:flex;gap:9px;margin-top:20px}
+.btn-cancel{flex:1;padding:10px;border:1.5px solid var(--border);border-radius:8px;background:white;color:var(--muted);font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer}
+.btn-cancel:hover{background:var(--bg)}
+.btn-submit{flex:2;padding:10px;border:none;border-radius:8px;background:linear-gradient(135deg,#1b3a2d,#2d6a4f);color:white;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .15s;box-shadow:0 3px 10px rgba(45,106,79,.35)}
+.btn-submit:hover{opacity:.9;transform:translateY(-1px)}
+.btn-submit-priv{background:linear-gradient(135deg,#4c1d95,#7c3aed)!important;box-shadow:0 3px 10px rgba(124,58,237,.35)!important}
+
+/* ── DETAIL MODAL ── */
+.detail-modal{max-width:560px}
+.det-toprow{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px;gap:8px}
+.det-badges{display:flex;flex-direction:column;gap:5px}
+.det-sbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700}
+.dsb-todo{background:var(--todo-bg);color:var(--todo-c)}.dsb-doing{background:var(--doing-bg);color:#b45309}.dsb-done{background:var(--done-bg);color:#15803d}
+.dsb-priv{background:var(--priv-bg);color:var(--priv);border:1px solid var(--priv-border)}
+.det-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1;padding:0}
+.det-title{font-family:'Prompt',sans-serif;font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:9px}
+.det-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.dchip{font-size:.77rem;border-radius:20px;padding:3px 10px;font-weight:600;border:1px solid var(--border);background:var(--bg);color:var(--muted)}
+.dchip.house{color:var(--accent);border-color:#86efac;background:#f0fdf4}
+.dchip.votes{color:#c2410c;border-color:#fed7aa;background:#fff7ed}
+.dchip.contact{color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff}
+.det-desc{font-size:.88rem;line-height:1.75;color:var(--text);margin-bottom:14px;white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:11px 13px}
+.det-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.det-media img,.det-media video{width:100%;height:160px;object-fit:cover;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:transform .15s,box-shadow .15s;display:block}
+.det-media img:hover,.det-media video:hover{transform:scale(1.02);box-shadow:var(--shadow-lg)}
+.det-media.single-media img,.det-media.single-media video{height:260px;border-radius:12px}
+.det-div{height:1px;background:var(--border);margin:16px 0}
+.det-sec{font-size:.82rem;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.det-replies{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.rep-bubble{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 12px}
+.rep-bubble p{font-size:.86rem;line-height:1.6;white-space:pre-wrap;word-wrap:break-word}
+.rep-meta{font-size:.7rem;color:var(--muted);margin-top:4px;display:flex;align-items:center;justify-content:space-between}
+.rep-del{background:none;border:none;color:#e11d48;cursor:pointer;font-size:.7rem;font-weight:700}
+.rep-input{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.rep-input-row{display:flex;flex-direction:column;gap:7px}
+.rep-input-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.rep-input input,.rep-input textarea{width:100%;padding:11px 13px;border:1.5px solid #86efac;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.9rem;outline:none;background:white;box-sizing:border-box;color:var(--text)}
+.rep-input textarea{min-height:96px;max-height:300px;resize:vertical;line-height:1.6;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;display:block}
+.rep-input input:focus,.rep-input textarea:focus{border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+.rep-send{background:var(--accent);color:white;border:none;padding:9px 18px;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.02em}
+.rep-send:hover{background:#1b4d36}
+/* Admin reply file attach */
+.rep-attach-btn{background:#f0fdf4;border:1.5px solid #86efac;color:var(--accent);border-radius:8px;padding:8px 12px;font-size:.95rem;cursor:pointer;line-height:1;flex-shrink:0;transition:background .15s}
+.rep-attach-btn:hover{background:#dcfce7}
+.rep-file-input{display:none}
+.rep-attach-preview{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
+.rap-item{position:relative;display:flex;align-items:center;gap:5px}
+.rap-item img{width:52px;height:52px;object-fit:cover;border-radius:6px;border:2px solid #86efac}
+.rap-pdf{background:#fff1f2;border:2px solid #fca5a5;border-radius:6px;padding:5px 9px;font-size:.72rem;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rap-rm{position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:#e11d48;color:white;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-weight:700}
+/* Reply media display inside bubble */
+.rep-media{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.rep-media img{width:80px;height:80px;object-fit:cover;border-radius:7px;border:2px solid #86efac;cursor:pointer;transition:transform .15s}
+.rep-media img:hover{transform:scale(1.05)}
+.rep-pdf-link{display:inline-flex;align-items:center;gap:5px;background:#fff1f2;border:1.5px solid #fca5a5;border-radius:7px;padding:5px 10px;font-size:.75rem;font-weight:700;color:#dc2626;cursor:pointer;text-decoration:none;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rep-pdf-link:hover{background:#fee2e2}
+.det-admin-btns{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+.dab{flex:1;min-width:75px;padding:8px 5px;border:none;border-radius:7px;font-family:'Sarabun',sans-serif;font-size:.79rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.dab:hover{opacity:.8}
+.dab-todo{background:var(--todo-bg);color:var(--todo-c)}.dab-doing{background:var(--doing-bg);color:#b45309}.dab-done{background:var(--done-bg);color:#15803d}.dab-del{background:#fff1f2;color:#e11d48}
+
+/* edit issue btn */
+.edit-issue-btn{display:flex;align-items:center;gap:5px;background:#eff6ff;border:1.5px solid #bfdbfe;color:#1d4ed8;border-radius:20px;padding:5px 12px;font-family:'Sarabun',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .15s;margin-bottom:2px}
+.edit-issue-btn:hover{background:#dbeafe}
+
+/* ── INBOX ── */
+.inbox-modal{max-width:580px}
+.inbox-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.inbox-notice{font-size:.79rem;color:#5b21b6;margin-bottom:18px;padding:8px 12px;background:var(--priv-bg);border-radius:8px;border:1px solid var(--priv-border);font-style:italic}
+.inbox-list{display:flex;flex-direction:column;gap:11px}
+.icard{background:var(--priv-bg);border:1.5px solid var(--priv-border);border-radius:12px;padding:14px 15px;cursor:pointer;transition:box-shadow .15s,transform .12s}
+.icard:hover{box-shadow:0 4px 16px rgba(124,58,237,.15);transform:translateY(-1px)}
+.icard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.icard-title{font-weight:700;font-size:.9rem;flex:1}
+.icard-date{font-size:.7rem;color:var(--muted);white-space:nowrap;margin-top:2px}
+.icard-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.ichip{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid}
+.ic-house{background:#f0fdf4;color:var(--accent);border-color:#86efac}
+.ic-contact{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.ic-cat{background:var(--priv-bg);color:var(--priv);border-color:var(--priv-border)}
+.ic-todo{background:var(--todo-bg);color:var(--todo-c);border-color:#93c5fd}
+.ic-doing{background:var(--doing-bg);color:#b45309;border-color:#fcd34d}
+.ic-done{background:var(--done-bg);color:#15803d;border-color:#86efac}
+.icard-desc{font-size:.78rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.icard-reply{font-size:.75rem;color:#15803d;background:#f0fdf4;border-radius:6px;padding:6px 9px;margin-top:7px;border-left:3px solid #22c55e;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45;word-break:break-word}
+.inbox-empty{text-align:center;padding:36px;color:var(--muted)}
+.inbox-empty .ei{font-size:2.5rem;margin-bottom:10px}
+
+/* ── ADMIN MODAL ── */
+.admin-modal{max-width:380px}
+.admin-modal h2{color:var(--accent)}
+
+/* ── EDIT CODE ── */
+.edit-code-box{background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:18px 20px;margin-top:18px;text-align:center}
+.edit-code-box .ecb-title{font-family:'Prompt',sans-serif;font-size:.95rem;font-weight:700;color:#15803d;margin-bottom:8px}
+.edit-code-box .ecb-sub{font-size:.78rem;color:#166534;margin-bottom:12px;line-height:1.5}
+.edit-code-display{display:flex;align-items:center;justify-content:center;gap:10px}
+.edit-code-num{font-family:monospace;font-size:2rem;font-weight:700;letter-spacing:.25em;color:#15803d;background:white;border:2px solid #86efac;border-radius:10px;padding:8px 18px}
+.copy-code-btn{background:var(--accent);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s}
+.copy-code-btn:hover{background:#1b4d36}
+.ecb-warn{font-size:.73rem;color:#b45309;margin-top:10px;background:#fffbeb;border-radius:6px;padding:5px 10px}
+.edit-verify-modal{max-width:420px}
+
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;display:flex;align-items:center;justify-content:center}
+.lightbox.hidden{display:none}
+.lightbox img,.lightbox video{max-width:92vw;max-height:88vh;border-radius:10px}
+.lb-close{position:absolute;top:18px;right:20px;color:white;font-size:2rem;cursor:pointer;background:none;border:none;line-height:1}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1c1a17;color:white;padding:10px 20px;border-radius:30px;font-size:.83rem;font-weight:600;z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* ── DRAG & DROP ── */
+.card.dragging{opacity:.4;transform:scale(.98);cursor:grabbing}
+.col-body.drag-over{outline:2.5px dashed var(--accent);outline-offset:-4px;background-color:rgba(45,106,79,.06)}
+.col-body.drag-over-todo{outline-color:var(--todo-c);background-color:rgba(59,130,246,.06)}
+.col-body.drag-over-doing{outline-color:var(--doing-c);background-color:rgba(245,158,11,.06)}
+.col-body.drag-over-done{outline-color:var(--done-c);background-color:rgba(34,197,94,.06)}
+#col-todo{background:#f0f7ff}
+#col-doing{background:#fffbf0}
+#col-done{background:#f0fdf4}
+
+/* ── CATEGORY TAG COLORS ── */
+.tag-ไฟ{background:#fef3c7;color:#92400e}.tag-น้ำ{background:#dbeafe;color:#1e40af}.tag-ส่วนกลาง{background:#d1fae5;color:#065f46}.tag-ความปลอดภัย{background:#fee2e2;color:#991b1b}.tag-อื่นๆ{background:#f3f4f6;color:#374151}.tag-สัญญาณ{background:#fce7f3;color:#9d174d}.tag-ขยะ{background:#fef9c3;color:#713f12}.tag-จอดรถ{background:#e0f2fe;color:#0369a1}.tag-ถนน{background:#ede9fe;color:#5b21b6}.tag-ประตู{background:#ecfeff;color:#155e75}.tag-เพื่อนบ้าน{background:#fff1f2;color:#9f1239}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:600px){
+  .hdr{padding:10px 14px}
+  .htitle{font-size:1rem}
+  .hsub{display:none}
+  .hbtn{padding:7px 11px;font-size:.78rem}
+  .filter-bar{padding:10px 14px 0;gap:7px}
+  .stats{padding:10px 14px 0}
+  .board{padding:10px 14px 24px;gap:10px}
+  .col{max-height:none}
+  .modal{padding:18px 16px}
+  .fsel{font-size:.78rem;padding:7px 28px 7px 10px}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingOverlay" style="position:fixed;inset:0;background:rgba(245,243,239,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px">
+  <div style="width:44px;height:44px;border:4px solid #e8e4dd;border-top-color:#2d6a4f;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <div style="font-size:.9rem;color:#7a7570;font-weight:600">กำลังโหลดข้อมูล...</div>
+</div>
+
+<header>
+  <div class="hdr">
+    <div class="hbrand">
+      <div class="hlogo">🏡</div>
+      <div>
+        <div class="htitle">Pattra Report — ภัทราวิลล่า 8</div>
+        <div class="hsub">รายงานปัญหา ร้องเรียน เสนอแนะ หรือติดตามงานกับนิติบุคคลได้ที่นี่</div>
+      </div>
+    </div>
+    <div class="hbtns">
+      <button class="hbtn btn-ghost" onclick="location.href='/'">🏠 บริการทั้งหมด</button>
+      <button class="hbtn btn-ghost" id="adminToggle" onclick="openAdminLogin()">🔑 Admin</button>
+      <button class="hbtn btn-purple" onclick="openPrivateModal()">🔒 แจ้งแบบส่วนตัว</button>
+      <button class="hbtn btn-orange" onclick="openModal()">➕ รายงานปัญหา</button>
+    </div>
+  </div>
+</header>
+
+<!-- Stats -->
+<div class="stats" id="statsBar"></div>
+
+<!-- Private banner (admin only) -->
+<div class="priv-banner" id="privBanner" onclick="openInbox()">
+  <div class="pb-icon">📬</div>
+  <div class="pb-info">
+    <div class="pb-title">กล่องรับปัญหาส่วนตัว (Admin Only)</div>
+    <div class="pb-sub">ลูกบ้านส่งปัญหามาแบบส่วนตัว — คลิกเพื่อดูและตอบกลับ</div>
+  </div>
+  <span class="pb-badge" id="privCount">0</span>
+</div>
+
+<!-- ── SEARCH & FILTER BAR ── -->
+<div class="filter-bar" id="filterBar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="ค้นหาปัญหา..." oninput="applyFilters()" autocomplete="off"/>
+  </div>
+  <div class="filter-selects">
+    <select class="fsel" id="filterCat" onchange="applyFilters()">
+      <option value="">หมวดหมู่ทั้งหมด</option>
+      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
+      <option value="น้ำ">💧 น้ำ / ท่อ</option>
+      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
+      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
+      <option value="ประตู">🚪 ประตู / รั้ว</option>
+      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
+      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
+      <option value="จอดรถ">🚗 ที่จอดรถ</option>
+      <option value="สัญญาณ">📡 สัญญาณ / อินเทอร์เน็ต</option>
+      <option value="เพื่อนบ้าน">🤝 เรื่องเพื่อนบ้าน</option>
+      <option value="อื่นๆ">📌 อื่นๆ</option>
+    </select>
+    <select class="fsel" id="filterStatus" onchange="applyFilters()">
+      <option value="">สถานะทั้งหมด</option>
+      <option value="todo">📋 รอดำเนินการ</option>
+      <option value="doing">🔧 กำลังดำเนินการ</option>
+      <option value="done">✅ เสร็จแล้ว</option>
+    </select>
+    <select class="fsel" id="filterPri" onchange="applyFilters()">
+      <option value="">ความเร่งด่วนทั้งหมด</option>
+      <option value="urgent">🚨 ด่วนมาก</option>
+      <option value="high">⚠️ ด่วน</option>
+      <option value="normal">📌 ปกติ</option>
+    </select>
+  </div>
+  <button class="clear-filter-btn" id="clearFilterBtn" onclick="clearFilters()">✕ ล้างตัวกรอง</button>
+</div>
+<div class="filter-result-info" id="filterResultInfo"></div>
+
+<!-- Board -->
+<div class="board">
+  <div class="col">
+    <div class="col-stripe cs-todo"></div>
+    <div class="col-hd" onclick="toggleCol('todo')" style="cursor:pointer">
+      <div class="col-hl"><span>📋</span><span class="col-lbl" style="color:var(--todo-c)">รอดำเนินการ</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-todo" id="cnt-todo">0</span><button class="col-toggle" id="toggle-todo">▾</button></div>
+    </div>
+    <div class="col-body" id="col-todo" ondragover="onDragOver(event,'todo')" ondragleave="onDragLeave(event,'todo')" ondrop="onDrop(event,'todo')"></div>
+  </div>
+  <div class="col">
+    <div class="col-stripe cs-doing"></div>
+    <div class="col-hd" onclick="toggleCol('doing')" style="cursor:pointer">
+      <div class="col-hl"><span>🔧</span><span class="col-lbl" style="color:#b45309">กำลังดำเนินการ</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-doing" id="cnt-doing">0</span><button class="col-toggle" id="toggle-doing">▾</button></div>
+    </div>
+    <div class="col-body" id="col-doing" ondragover="onDragOver(event,'doing')" ondragleave="onDragLeave(event,'doing')" ondrop="onDrop(event,'doing')"></div>
+  </div>
+  <div class="col">
+    <div class="col-stripe cs-done"></div>
+    <div class="col-hd" onclick="toggleCol('done')" style="cursor:pointer">
+      <div class="col-hl"><span>✅</span><span class="col-lbl" style="color:#15803d">เสร็จแล้ว</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-done" id="cnt-done">0</span><button class="col-toggle" id="toggle-done">▾</button></div>
+    </div>
+    <div class="col-body" id="col-done" ondragover="onDragOver(event,'done')" ondragleave="onDragLeave(event,'done')" ondrop="onDrop(event,'done')"></div>
+  </div>
+</div>
+
+<!-- PUBLIC REPORT MODAL -->
+<div class="overlay hidden" id="reportOverlay">
+<div class="modal">
+  <h2>📝 แจ้งปัญหาใหม่</h2>
+  <p class="modal-sub">ปัญหาจะแสดงในบอร์ดกลางให้ลูกบ้านทุกคนเห็น</p>
+  <div class="fg">
+    <label>🏠 บ้านเลขที่ *</label>
+    <select id="inp-house"></select>
+    <div class="anon-row" onclick="toggleAnon('anonCheck','inp-house')"><input type="checkbox" id="anonCheck" onclick="event.stopPropagation();toggleAnon('anonCheck','inp-house')"/><span>🙈 ไม่ประสงค์ออกนาม</span><small>ซ่อนเลขบ้าน</small></div>
+  </div>
+  <div class="fg">
+    <label>🏷️ หมวดหมู่ *</label>
+    <select id="inp-cat">
+      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
+      <option value="น้ำ">💧 น้ำ / ท่อ</option>
+      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
+      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
+      <option value="ประตู">🚪 ประตู / รั้ว</option>
+      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
+      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
+      <option value="จอดรถ">🚗 ที่จอดรถ</option>
+      <option value="สัญญาณ">📡 สัญญาณ / อินเทอร์เน็ต</option>
+      <option value="อื่นๆ">📌 อื่นๆ</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>🚦 ความเร่งด่วน</label>
+    <div class="pri-selector" id="priSelector">
+      <label class="pri-opt sel-urgent" id="pri-urgent"><input type="radio" name="priority" value="urgent"/> 🚨 ด่วนมาก</label>
+      <label class="pri-opt sel-high" id="pri-high"><input type="radio" name="priority" value="high"/> ⚠️ ด่วน</label>
+      <label class="pri-opt sel-normal unsel" id="pri-normal"><input type="radio" name="priority" value="normal" checked/> 📌 ปกติ</label>
+    </div>
+    <p class="field-note">เลือก "ด่วนมาก" สำหรับปัญหาที่กระทบความปลอดภัยหรือต้องการแก้ไขทันที</p>
+  </div>
+  <div class="fg">
+    <label>📌 ปัญหา *</label>
+    <input id="inp-title" type="text" placeholder="เช่น ไฟทางเดินดับ, น้ำประปาไหลอ่อน"/>
+  </div>
+  <div class="fg">
+    <label>📄 รายละเอียดเพิ่มเติม</label>
+    <textarea id="inp-desc" placeholder="อธิบายเพิ่มเติม เช่น ตำแหน่ง อาการ..."></textarea>
+  </div>
+  <div class="fg">
+    <label>📞 เบอร์โทร / อีเมล <span class="opt-lbl">(ไม่บังคับ)</span></label>
+    <input id="inp-contact" type="text" placeholder="เช่น 081-234-5678 หรือ you@email.com"/>
+    <p class="field-note">🔒 เห็นเฉพาะ Admin เท่านั้น — ลูกบ้านคนอื่นไม่เห็น</p>
+  </div>
+  <div class="fg">
+    <label>📷 รูปภาพ / วิดีโอ <span class="opt-lbl">(ไม่บังคับ — สูงสุด 5 ไฟล์)</span></label>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('mediaInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave()" ondrop="dropFiles(event)">
+      <input type="file" id="mediaInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files)"/>
+      <div class="uz-icon">📎</div><p><strong>คลิกเพื่อเลือก</strong> หรือลากมาวาง</p><p>JPG · PNG · HEIC · MP4</p>
+    </div>
+    <div class="prev-grid" id="previewGrid"></div>
+  </div>
+  <div class="mbtns">
+    <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+    <button class="btn-submit" id="submitBtn" onclick="submitReport()">📩 ส่งแจ้งปัญหา</button>
+  </div>
+</div>
+</div>
+
+<!-- PRIVATE REPORT MODAL -->
+<div class="overlay hidden" id="privateOverlay">
+<div class="modal">
+  <h2>🔒 แจ้งปัญหาแบบส่วนตัว</h2>
+  <p class="modal-sub">ส่งตรงถึงนิติฯ โดยตรง — ไม่แสดงในบอร์ดกลาง</p>
+  <div class="priv-callout">
+    <div class="priv-callout-title">🔐 ความเป็นส่วนตัวของคุณ</div>
+    <p>ปัญหานี้จะเห็นได้เฉพาะนิติฯ เท่านั้น เหมาะสำหรับเรื่องที่เป็นความลับ หรือปัญหาที่เกี่ยวกับเพื่อนบ้านโดยตรง</p>
+  </div>
+  <div class="fg">
+    <label>🏠 บ้านเลขที่ *</label>
+    <select id="priv-house"></select>
+    <div class="anon-row" onclick="toggleAnon('privAnonCheck','priv-house')"><input type="checkbox" id="privAnonCheck" onclick="event.stopPropagation();toggleAnon('privAnonCheck','priv-house')"/><span>🙈 ไม่ระบุเลขบ้าน</span><small>แม้นิติฯ ก็ไม่เห็น</small></div>
+  </div>
+  <div class="fg">
+    <label>🏷️ หมวดหมู่ *</label>
+    <select id="priv-cat">
+      <option value="เพื่อนบ้าน">🤝 เรื่องเพื่อนบ้าน</option>
+      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
+      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
+      <option value="น้ำ">💧 น้ำ / ท่อ</option>
+      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
+      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
+      <option value="ประตู">🚪 ประตู / รั้ว</option>
+      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
+      <option value="จอดรถ">🚗 ที่จอดรถ</option>
+      <option value="อื่นๆ">📌 อื่นๆ</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>📌 ปัญหา *</label>
+    <input id="priv-title" type="text" placeholder="เช่น เพื่อนบ้านเปิดเสียงดัง, รถจอดขวาง"/>
+  </div>
+  <div class="fg">
+    <label>📄 รายละเอียด</label>
+    <textarea id="priv-desc" placeholder="อธิบายให้นิติฯ ทราบ..."></textarea>
+  </div>
+  <div class="fg">
+    <label>📞 เบอร์โทร / อีเมล <span class="opt-lbl">(ไม่บังคับ)</span></label>
+    <input id="priv-contact" type="text" placeholder="เช่น 081-234-5678 หรือ you@email.com"/>
+  </div>
+  <div class="fg">
+    <label>📷 รูปภาพ / วิดีโอ <span class="opt-lbl">(ไม่บังคับ)</span></label>
+    <div class="upload-zone" onclick="document.getElementById('privMediaInput').click()" ondragover="dragOver(event,true)" ondragleave="dragLeave()" ondrop="dropFiles(event,true)">
+      <input type="file" id="privMediaInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files,true)"/>
+      <div class="uz-icon">📎</div><p><strong>คลิกเพื่อเลือก</strong> หรือลากมาวาง</p>
+    </div>
+    <div class="prev-grid" id="privPreviewGrid"></div>
+  </div>
+  <div class="mbtns">
+    <button class="btn-cancel" onclick="closePrivateModal()">ยกเลิก</button>
+    <button class="btn-submit btn-submit-priv" onclick="submitPrivate()">🔒 ส่งถึงนิติฯ (ส่วนตัว)</button>
+  </div>
+</div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay hidden" id="detailOverlay">
+  <div class="modal detail-modal" id="detailModal"></div>
+</div>
+
+<!-- PRIVATE INBOX MODAL -->
+<div class="overlay hidden" id="inboxOverlay">
+<div class="modal inbox-modal">
+  <div class="inbox-hd">
+    <h2 style="color:var(--priv)">📬 กล่องรับปัญหาส่วนตัว</h2>
+    <button class="det-close" onclick="closeInbox()">✕</button>
+  </div>
+  <p class="inbox-notice">🔐 เห็นเฉพาะ Admin เท่านั้น — คลิกที่รายการเพื่อดูรายละเอียดและตอบกลับ</p>
+  <div class="inbox-list" id="inboxList"></div>
+</div>
+</div>
+
+<!-- EDIT CODE VERIFY MODAL -->
+<div class="overlay hidden" id="editVerifyOverlay">
+<div class="modal edit-verify-modal">
+  <h2>✏️ แก้ไขปัญหา</h2>
+  <p class="modal-sub">ใส่รหัส 4 หลักที่ได้รับตอนส่งปัญหา เพื่อยืนยันตัวตน</p>
+  <div class="fg">
+    <label>🔑 รหัสแก้ไข (Edit Code)</label>
+    <input id="verifyCode" type="text" maxlength="4" placeholder="เช่น 4829" style="font-size:1.4rem;letter-spacing:.2em;text-align:center;font-family:monospace;font-weight:700" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')verifyEditCode()"/>
+  </div>
+  <div class="mbtns">
+    <button class="btn-cancel" onclick="closeEditVerify()">ยกเลิก</button>
+    <button class="btn-submit" onclick="verifyEditCode()">✅ ยืนยัน</button>
+  </div>
+</div>
+</div>
+
+<!-- EDIT FORM MODAL -->
+<div class="overlay hidden" id="editFormOverlay">
+<div class="modal">
+  <h2>✏️ แก้ไขปัญหา</h2>
+  <p class="modal-sub">แก้ไขข้อมูล แล้วกดบันทึก</p>
+  <input type="hidden" id="edit-id"/>
+  <div class="fg">
+    <label>🏠 บ้านเลขที่</label>
+    <select id="edit-house"></select>
+    <div class="anon-row" onclick="toggleAnon('editAnonCheck','edit-house')">
+      <input type="checkbox" id="editAnonCheck" onclick="event.stopPropagation();toggleAnon('editAnonCheck','edit-house')"/>
+      <span>🙈 ไม่ประสงค์ออกนาม</span><small>ซ่อนเลขบ้าน</small>
+    </div>
+  </div>
+  <div class="fg">
+    <label>🏷️ หมวดหมู่</label>
+    <select id="edit-cat">
+      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
+      <option value="น้ำ">💧 น้ำ / ท่อ</option>
+      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
+      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
+      <option value="ประตู">🚪 ประตู / รั้ว</option>
+      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
+      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
+      <option value="จอดรถ">🚗 ที่จอดรถ</option>
+      <option value="สัญญาณ">📡 สัญญาณ / อินเทอร์เน็ต</option>
+      <option value="อื่นๆ">📌 อื่นๆ</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>🚦 ความเร่งด่วน</label>
+    <select id="edit-priority">
+      <option value="urgent">🚨 ด่วนมาก</option>
+      <option value="high">⚠️ ด่วน</option>
+      <option value="normal" selected>📌 ปกติ</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>📌 ปัญหา *</label>
+    <input id="edit-title" type="text"/>
+  </div>
+  <div class="fg">
+    <label>📄 รายละเอียด</label>
+    <textarea id="edit-desc"></textarea>
+  </div>
+  <div class="fg">
+    <label>📞 เบอร์โทร / อีเมล <span class="opt-lbl">(ไม่บังคับ)</span></label>
+    <input id="edit-contact" type="text"/>
+    <p class="field-note">🔒 เห็นเฉพาะ Admin เท่านั้น</p>
+  </div>
+  <div class="fg">
+    <label>📷 รูปภาพ / วิดีโอ ปัจจุบัน</label>
+    <div class="prev-grid" id="editCurrentMedia"></div>
+  </div>
+  <div class="fg">
+    <label>➕ เพิ่มรูป / วิดีโอใหม่ <span class="opt-lbl">(รวมสูงสุด 5 ไฟล์)</span></label>
+    <div class="upload-zone" onclick="document.getElementById('editMediaInput').click()" ondragover="dragOver(event,'edit')" ondragleave="dragLeave()" ondrop="dropFiles(event,'edit')">
+      <input type="file" id="editMediaInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files,'edit')"/>
+      <div class="uz-icon">📎</div><p><strong>คลิกเพื่อเลือก</strong> หรือลากมาวาง</p>
+    </div>
+    <div class="prev-grid" id="editNewMedia"></div>
+  </div>
+  <div class="mbtns">
+    <button class="btn-cancel" onclick="closeEditForm()">ยกเลิก</button>
+    <button class="btn-submit" onclick="saveEdit()">💾 บันทึก</button>
+  </div>
+</div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="overlay hidden" id="adminOverlay">
+<div class="modal admin-modal">
+  <h2>🔑 เข้าสู่ระบบ Admin</h2>
+  <p class="modal-sub">สำหรับนิติบุคคลภัทราวิลล่า 8 เท่านั้น</p>
+  <div class="fg">
+    <label>รหัสผ่าน</label>
+    <input id="adminPw" type="password" placeholder="ใส่รหัสผ่าน" onkeydown="if(event.key==='Enter')loginAdmin()"/>
+  </div>
+  <div class="mbtns">
+    <button class="btn-cancel" onclick="closeAdminModal()">ยกเลิก</button>
+    <button class="btn-submit" onclick="loginAdmin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close">✕</button>
+  <img id="lbImg" src="" style="display:none"/>
+  <video id="lbVid" controls style="display:none"></video>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── EMAILJS — for admin email notifications ── -->
+<!-- Step 1: Sign up free at https://www.emailjs.com -->
+<!-- Step 2: Create a service (Gmail), template, get your keys -->
+<!-- Step 3: Fill in YOUR_PUBLIC_KEY, YOUR_SERVICE_ID, YOUR_TEMPLATE_ID below -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+// ── EMAIL CONFIG — fill these in after setting up EmailJS ──
+const EMAIL_CFG = {
+  publicKey:  'nWHoOf02K6bRVpsfV',
+  serviceId:  'service_ktvu6dn',
+  templateId: 'template_2cj5b2l',
+  adminEmails: ['athaoon@gmail.com', 'mrteam388@gmail.com']
+};
+// Initialize EmailJS
+if(EMAIL_CFG.publicKey){
+  emailjs.init({ publicKey: EMAIL_CFG.publicKey });
+}
+// Called after a new issue is submitted
+window.notifyAdminByEmail = function(params){
+  if(!EMAIL_CFG.publicKey || !EMAIL_CFG.serviceId || !EMAIL_CFG.templateId) return;
+  const baseParams = {
+    reply_to: EMAIL_CFG.adminEmails[0],
+    issue_type: params.isPrivate ? 'แจ้งปัญหาแบบส่วนตัว' : 'แจ้งปัญหาสาธารณะ',
+    house: params.house || '(ไม่ระบุ)',
+    category: params.cat || '—',
+    title: params.title || '—',
+    description: params.desc || '(ไม่มีรายละเอียด)',
+    priority: params.priority === 'urgent' ? 'ด่วนมาก' : params.priority === 'high' ? 'ด่วน' : 'ปกติ',
+    date: params.date || new Date().toLocaleString('th-TH'),
+    board_url: 'https://pattra8.com/report/'
+  };
+  Promise.allSettled(
+    EMAIL_CFG.adminEmails.map(email =>
+      emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
+        ...baseParams,
+        email
+      })
+    )
+  ).then(results => {
+    results.forEach((result, index) => {
+      if(result.status === 'rejected'){
+        console.warn(`EmailJS error for ${EMAIL_CFG.adminEmails[index]}:`, result.reason);
+      }
+    });
+  });
+};
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
+  authDomain: "pattra8-54c3f.firebaseapp.com",
+  projectId: "pattra8-54c3f",
+  storageBucket: "pattra8-54c3f.firebasestorage.app",
+  messagingSenderId: "1045231989781",
+  appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const ADMIN_PASSWORDS = ['nitipattra8', 'team388'];
+
+let isAdmin = false;
+let pendingFiles = [], pendingPrivFiles = [];
+let curId = null, curPriv = false;
+let publicIssues = [], privateIssues = [];
+let pendingEditFiles = [], editingId = null, editRemovedMedia = [];
+let editVerifyingId = null;
+
+// ── HOUSE NUMBERS ──
+const HOUSES = [];
+for(let i=1;i<=68;i++){if(i!==57)HOUSES.push('38/'+i);}
+function buildHouseSelect(selId){
+  const sel=document.getElementById(selId);if(!sel)return;
+  sel.innerHTML='<option value="">— เลือกบ้านเลขที่ —</option>';
+  HOUSES.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o);});
+}
+['inp-house','priv-house','edit-house'].forEach(buildHouseSelect);
+
+// ── PRIORITY HELPERS ──
+const PRI_LABEL = {urgent:'🚨 ด่วนมาก', high:'⚠️ ด่วน', normal:'📌 ปกติ'};
+const PRI_CLASS = {urgent:'pri-urgent', high:'pri-high', normal:'pri-normal'};
+const PRI_CARD  = {urgent:'urgent-card', high:'high-card', normal:''};
+
+function getPriority(){
+  const r = document.querySelector('input[name="priority"]:checked');
+  return r ? r.value : 'normal';
+}
+function setPriorityUI(val){
+  ['urgent','high','normal'].forEach(p=>{
+    const lbl=document.getElementById('pri-'+p);
+    if(!lbl)return;
+    const isSelected=(p===val);
+    lbl.classList.remove('unsel');
+    if(!isSelected)lbl.classList.add('unsel');
+    else lbl.classList.remove('unsel');
+  });
+  const radio=document.querySelector(`input[name="priority"][value="${val}"]`);
+  if(radio)radio.checked=true;
+}
+// Make priority labels clickable visual selection
+document.querySelectorAll('.pri-opt').forEach(lbl=>{
+  lbl.addEventListener('click',()=>{
+    const val=lbl.querySelector('input').value;
+    setPriorityUI(val);
+  });
+});
+
+// ── FIRESTORE LISTENERS ──
+const pubQ = query(collection(db,'issues'), orderBy('createdAt','desc'));
+onSnapshot(pubQ, snap=>{
+  publicIssues = snap.docs.map(d=>({...d.data(),id:d.id}));
+  renderBoard();
+  if(curId && !curPriv) openDetail(curId,false);
+  document.getElementById('loadingOverlay').style.display='none';
+}, err=>{console.error(err);document.getElementById('loadingOverlay').style.display='none';});
+setTimeout(()=>{const el=document.getElementById('loadingOverlay');if(el)el.style.display='none';},3000);
+
+const privQ = query(collection(db,'private_issues'), orderBy('createdAt','desc'));
+onSnapshot(privQ, snap=>{
+  privateIssues = snap.docs.map(d=>({...d.data(),id:d.id}));
+  updateBanner();
+  if(curId && curPriv) openDetail(curId,true);
+});
+
+// ── FILTER STATE & LOGIC ──
+let filterState = {search:'', cat:'', status:'', priority:''};
+
+function applyFilters(){
+  filterState.search = document.getElementById('searchInput').value.trim().toLowerCase();
+  filterState.cat    = document.getElementById('filterCat').value;
+  filterState.status = document.getElementById('filterStatus').value;
+  filterState.priority = document.getElementById('filterPri').value;
+  const hasFilter = filterState.search||filterState.cat||filterState.status||filterState.priority;
+  const clearBtn = document.getElementById('clearFilterBtn');
+  clearBtn.classList.toggle('show', !!hasFilter);
+  // update active state on selects
+  ['filterCat','filterStatus','filterPri'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.classList.toggle('active', !!el.value);
+  });
+  renderBoard();
+}
+function clearFilters(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('filterCat').value='';
+  document.getElementById('filterStatus').value='';
+  document.getElementById('filterPri').value='';
+  filterState={search:'',cat:'',status:'',priority:''};
+  document.getElementById('clearFilterBtn').classList.remove('show');
+  ['filterCat','filterStatus','filterPri'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  renderBoard();
+}
+function matchesFilter(item){
+  if(filterState.cat && item.cat!==filterState.cat) return false;
+  if(filterState.status && item.status!==filterState.status) return false;
+  if(filterState.priority && (item.priority||'normal')!==filterState.priority) return false;
+  if(filterState.search){
+    const q=filterState.search;
+    const hay=(item.title+' '+(item.desc||'')+' '+(item.house||'')+' '+item.cat).toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+// ── UTILS ──
+function ds(){return new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
+function toggleAnon(cbId,selId){const cb=document.getElementById(cbId),sel=document.getElementById(selId);sel.disabled=cb.checked;if(cb.checked)sel.value=''}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function sanitizeMedia(arr){return(arr||[]).map(m=>({dataUrl:String(m.dataUrl||''),type:String(m.type||'image')}))}
+function genCode(){return String(Math.floor(1000+Math.random()*9000))}
+
+// ── MODALS ──
+function openModal(){
+  setPriorityUI('normal');
+  document.getElementById('reportOverlay').classList.remove('hidden');
+}
+function closeModal(){
+  document.getElementById('reportOverlay').classList.add('hidden');
+  ['inp-house','inp-title','inp-desc','inp-contact'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inp-house').disabled=false;
+  document.getElementById('anonCheck').checked=false;
+  setPriorityUI('normal');
+  pendingFiles=[];renderPrev('previewGrid',pendingFiles);
+  document.getElementById('mediaInput').value='';
+  // restore original modal content if it was replaced by success screen
+  const modal=document.getElementById('reportOverlay').querySelector('.modal');
+  if(!modal.querySelector('#submitBtn')){location.reload();}
+}
+document.getElementById('reportOverlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+function openPrivateModal(){document.getElementById('privateOverlay').classList.remove('hidden')}
+function closePrivateModal(){
+  document.getElementById('privateOverlay').classList.add('hidden');
+  ['priv-house','priv-title','priv-desc','priv-contact'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('priv-house').disabled=false;
+  document.getElementById('privAnonCheck').checked=false;
+  pendingPrivFiles=[];renderPrev('privPreviewGrid',pendingPrivFiles);
+  document.getElementById('privMediaInput').value='';
+}
+document.getElementById('privateOverlay').addEventListener('click',function(e){if(e.target===this)closePrivateModal()});
+
+// ── FILE UPLOAD ──
+function dragOver(e,p){e.preventDefault()}
+function dragLeave(){document.querySelectorAll('.upload-zone').forEach(z=>z.classList.remove('drag-over'))}
+function dropFiles(e,p){e.preventDefault();dragLeave();handleFiles(e.dataTransfer.files,p)}
+function compressImage(dataUrl,maxW,maxH,q){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      res(c.toDataURL('image/jpeg',q));
+    };
+    img.src=dataUrl;
+  });
+}
+async function handleFiles(files,p){
+  let buf,gid;
+  if(p==='edit'){buf=pendingEditFiles;gid='editNewMedia'}
+  else if(p){buf=pendingPrivFiles;gid='privPreviewGrid'}
+  else{buf=pendingFiles;gid='previewGrid'}
+  for(const f of Array.from(files)){
+    if(buf.length>=5){toast('⚠️ สูงสุด 5 ไฟล์');break;}
+    if(f.type.startsWith('video')){
+      if(f.size>500*1024){toast('⚠️ วิดีโอใหญ่เกิน 500KB');continue;}
+      const r=new FileReader();
+      await new Promise(res=>{r.onload=ev=>{buf.push({dataUrl:ev.target.result,type:'video'});res();};r.readAsDataURL(f);});
+    }else{
+      const r=new FileReader();
+      const raw=await new Promise(res=>{r.onload=ev=>res(ev.target.result);r.readAsDataURL(f);});
+      const compressed=await compressImage(raw,800,800,0.7);
+      buf.push({dataUrl:compressed,type:'image'});
+    }
+    renderPrev(gid,buf);
+  }
+}
+function renderPrev(gid,buf){
+  const g=document.getElementById(gid);if(!g)return;g.innerHTML='';
+  buf.forEach((f,i)=>{
+    const d=document.createElement('div');d.className='prev-item';
+    d.innerHTML=f.type==='image'?`<img src="${f.dataUrl}"/><button class="prev-rm" onclick="removeFile(${i},'${gid}')">✕</button>`:`<video src="${f.dataUrl}" muted></video><button class="prev-rm" onclick="removeFile(${i},'${gid}')">✕</button>`;
+    g.appendChild(d);
+  });
+}
+function removeFile(i,gid){
+  if(gid==='privPreviewGrid'){pendingPrivFiles.splice(i,1);renderPrev(gid,pendingPrivFiles)}
+  else if(gid==='editNewMedia'){pendingEditFiles.splice(i,1);renderPrev(gid,pendingEditFiles)}
+  else{pendingFiles.splice(i,1);renderPrev(gid,pendingFiles)}
+}
+
+// ── EDIT ──
+function openEditVerify(id){
+  editVerifyingId=id;
+  document.getElementById('verifyCode').value='';
+  document.getElementById('editVerifyOverlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('verifyCode').focus(),100);
+}
+function closeEditVerify(){document.getElementById('editVerifyOverlay').classList.add('hidden');editVerifyingId=null}
+document.getElementById('editVerifyOverlay').addEventListener('click',function(e){if(e.target===this)closeEditVerify()});
+function verifyEditCode(){
+  const entered=document.getElementById('verifyCode').value.trim();
+  const item=publicIssues.find(x=>x.id===editVerifyingId);
+  if(!item){toast('❌ ไม่พบปัญหานี้');return}
+  if(!item.editCode){toast('❌ ปัญหานี้ไม่มีรหัสแก้ไข');return}
+  if(item.editCode!==entered){toast('❌ รหัสไม่ถูกต้อง');return}
+  closeEditVerify();
+  openEditForm(item);
+}
+function openEditForm(item){
+  editingId=item.id;
+  pendingEditFiles=[];editRemovedMedia=[];
+  document.getElementById('edit-id').value=item.id;
+  const houseEl=document.getElementById('edit-house');
+  const anonEl=document.getElementById('editAnonCheck');
+  if(item.anon){anonEl.checked=true;houseEl.disabled=true;houseEl.value=''}
+  else{anonEl.checked=false;houseEl.disabled=false;houseEl.value=item.house||''}
+  document.getElementById('edit-cat').value=item.cat||'อื่นๆ';
+  document.getElementById('edit-priority').value=item.priority||'normal';
+  document.getElementById('edit-title').value=item.title||'';
+  document.getElementById('edit-desc').value=item.desc||'';
+  document.getElementById('edit-contact').value=item.contact||'';
+  renderCurrentMedia(item.media||[]);
+  renderPrev('editNewMedia',pendingEditFiles);
+  document.getElementById('editFormOverlay').classList.remove('hidden');
+}
+function closeEditForm(){document.getElementById('editFormOverlay').classList.add('hidden');editingId=null;pendingEditFiles=[];editRemovedMedia=[];document.getElementById('editMediaInput').value=''}
+document.getElementById('editFormOverlay').addEventListener('click',function(e){if(e.target===this)closeEditForm()});
+function renderCurrentMedia(mediaArr){
+  const g=document.getElementById('editCurrentMedia');g.innerHTML='';
+  if(!mediaArr||!mediaArr.length){g.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ไม่มีรูป/วิดีโอ</p>`;return}
+  mediaArr.forEach((f,i)=>{
+    if(editRemovedMedia.includes(i))return;
+    const d=document.createElement('div');d.className='prev-item';d.id='cur-media-'+i;
+    d.innerHTML=f.type==='image'?`<img src="${f.dataUrl}"/><button class="prev-rm" onclick="removeCurrentMedia(${i})">✕</button>`:`<video src="${f.dataUrl}" muted></video><button class="prev-rm" onclick="removeCurrentMedia(${i})">✕</button>`;
+    g.appendChild(d);
+  });
+  if(!g.children.length)g.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ไม่มีรูป/วิดีโอ</p>`;
+}
+function removeCurrentMedia(i){
+  editRemovedMedia.push(i);
+  const el=document.getElementById('cur-media-'+i);if(el)el.remove();
+  const g=document.getElementById('editCurrentMedia');
+  if(!g.children.length)g.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ไม่มีรูป/วิดีโอ</p>`;
+}
+async function saveEdit(){
+  const title=document.getElementById('edit-title').value.trim();
+  if(!title){toast('⚠️ กรุณาระบุปัญหา');return}
+  const anon=document.getElementById('editAnonCheck').checked;
+  const house=document.getElementById('edit-house').value;
+  if(!anon&&!house){toast('⚠️ เลือกบ้านเลขที่ หรือ ไม่ประสงค์ออกนาม');return}
+  const item=publicIssues.find(x=>x.id===editingId);if(!item)return;
+  const keptMedia=(item.media||[]).filter((_,i)=>!editRemovedMedia.includes(i));
+  const totalMedia=[...keptMedia,...pendingEditFiles];
+  if(totalMedia.length>5){toast('⚠️ รูป/วิดีโอ รวมสูงสุด 5 ไฟล์');return}
+  try{
+    await updateDoc(doc(db,'issues',editingId),{
+      house:anon?'(ไม่ประสงค์ออกนาม)':house,anon,
+      cat:document.getElementById('edit-cat').value,
+      priority:document.getElementById('edit-priority').value,
+      title,desc:document.getElementById('edit-desc').value.trim(),
+      contact:document.getElementById('edit-contact').value.trim(),
+      media:sanitizeMedia(totalMedia),edited:true,editDate:ds()
+    });
+    closeEditForm();
+    if(curId===editingId)openDetail(editingId,false);
+    toast('💾 แก้ไขเรียบร้อยแล้ว!');
+  }catch(e){toast('❌ บันทึกไม่สำเร็จ: '+e.message);console.error(e);}
+}
+
+// ── SUBMIT ──
+async function submitReport(){
+  const anon=document.getElementById('anonCheck').checked,house=document.getElementById('inp-house').value;
+  const title=document.getElementById('inp-title').value.trim();
+  const desc=document.getElementById('inp-desc').value.trim();
+  const cat=document.getElementById('inp-cat').value;
+  const contact=document.getElementById('inp-contact').value.trim();
+  const priority=getPriority();
+  if(!anon&&!house){toast('⚠️ เลือกบ้านเลขที่ หรือ ไม่ประสงค์ออกนาม');return}
+  if(!title){toast('⚠️ กรุณาระบุปัญหา');return}
+  const btn=document.getElementById('submitBtn');if(btn){btn.textContent='⏳ กำลังส่ง...';btn.disabled=true;}
+  const code=genCode();
+  try{
+    await addDoc(collection(db,'issues'),{
+      house:anon?'(ไม่ประสงค์ออกนาม)':house,anon,title,desc,cat,contact,priority,
+      status:'todo',date:ds(),media:sanitizeMedia(pendingFiles),votes:0,replies:[],editCode:code,
+      createdAt:serverTimestamp()
+    });
+    pendingFiles=[];
+    // Notify admin by email
+    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ประสงค์ออกนาม)':house,cat,title,desc,priority,date:ds(),isPrivate:false});
+    const modal=document.getElementById('reportOverlay').querySelector('.modal');
+    modal.innerHTML=`
+      <h2>✅ แจ้งปัญหาเรียบร้อยแล้ว!</h2>
+      <p class="modal-sub">ขอบคุณค่ะ ปัญหาของคุณถูกบันทึกในบอร์ดแล้ว</p>
+      <div class="edit-code-box">
+        <div class="ecb-title">🔑 รหัสแก้ไขของคุณ</div>
+        <div class="ecb-sub">เก็บรหัสนี้ไว้ เผื่อต้องการแก้ไขข้อมูลหรือเพิ่มรูปภายหลัง</div>
+        <div class="edit-code-display"><span class="edit-code-num">${code}</span><button class="copy-code-btn" onclick="copyCode('${code}')">📋 Copy</button></div>
+        <div class="ecb-warn">⚠️ กรุณา screenshot หรือ copy รหัสนี้เก็บไว้</div>
+      </div>
+      <div class="mbtns" style="margin-top:18px"><button class="btn-submit" onclick="location.reload()">ปิด</button></div>`;
+  }catch(e){toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่');console.error(e);if(btn){btn.textContent='📩 ส่งแจ้งปัญหา';btn.disabled=false;}}
+}
+function copyCode(code){
+  navigator.clipboard.writeText(code).then(()=>toast('📋 Copy รหัสแล้ว!')).catch(()=>{
+    const t=document.createElement('textarea');t.value=code;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);toast('📋 Copy รหัสแล้ว!');
+  });
+}
+async function submitPrivate(){
+  const anon=document.getElementById('privAnonCheck').checked,house=document.getElementById('priv-house').value;
+  const title=document.getElementById('priv-title').value.trim();
+  const desc=document.getElementById('priv-desc').value.trim();
+  const cat=document.getElementById('priv-cat').value;
+  const contact=document.getElementById('priv-contact').value.trim();
+  if(!anon&&!house){toast('⚠️ เลือกบ้านเลขที่ หรือ ไม่ระบุเลขบ้าน');return}
+  if(!title){toast('⚠️ กรุณาระบุปัญหา');return}
+  try{
+    await addDoc(collection(db,'private_issues'),{
+      house:anon?'(ไม่ระบุ)':house,anon,title,desc,cat,contact,
+      status:'todo',date:ds(),media:sanitizeMedia(pendingPrivFiles),replies:[],createdAt:serverTimestamp()
+    });
+    closePrivateModal();
+    toast('🔒 ส่งถึงนิติฯ เรียบร้อยแล้ว — เห็นเฉพาะ Admin ค่ะ');
+    // Notify admin by email
+    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ระบุ)':house,cat,title,desc,priority:'normal',date:ds(),isPrivate:true});
+  }catch(e){toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่');console.error(e);}
+}
+
+// ── ADMIN ──
+function openAdminLogin(){if(isAdmin){logoutAdmin();return}document.getElementById('adminOverlay').classList.remove('hidden');setTimeout(()=>document.getElementById('adminPw').focus(),100)}
+function closeAdminModal(){document.getElementById('adminOverlay').classList.add('hidden');document.getElementById('adminPw').value=''}
+function setAdminUI(on){
+  document.getElementById('adminToggle').textContent=on?'🟢 Admin Mode':'🔑 Admin';
+  document.getElementById('adminToggle').classList.toggle('admin-on',on);
+}
+function checkAdminSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem('admin_session'));
+    if(s&&Date.now()-s.ts<24*60*60*1000){isAdmin=true;setAdminUI(true);}
+    else localStorage.removeItem('admin_session');
+  }catch(e){}
+}
+function loginAdmin(){
+  if(ADMIN_PASSWORDS.includes(document.getElementById('adminPw').value)){
+    isAdmin=true;
+    localStorage.setItem('admin_session',JSON.stringify({ts:Date.now()}));
+    closeAdminModal();setAdminUI(true);
+    renderBoard();updateBanner();toast('🔑 เข้าสู่ระบบ Admin แล้ว');
+  }else{toast('❌ รหัสผ่านไม่ถูกต้อง');document.getElementById('adminPw').value=''}
+}
+function logoutAdmin(){
+  isAdmin=false;localStorage.removeItem('admin_session');
+  setAdminUI(false);closeInbox();if(curId!==null)closeDetail();renderBoard();updateBanner();toast('👋 ออกจาก Admin Mode แล้ว');
+}
+document.getElementById('adminOverlay').addEventListener('click',function(e){if(e.target===this)closeAdminModal()});
+function updateBanner(){
+  const b=document.getElementById('privBanner'),cnt=privateIssues.length;
+  document.getElementById('privCount').textContent=cnt;
+  if(isAdmin)b.classList.add('show');else b.classList.remove('show');
+}
+
+// ── ACTIONS ──
+async function moveCard(id,status,fromDetail,priv){
+  const col=priv?'private_issues':'issues';
+  try{
+    await updateDoc(doc(db,col,id),{status});
+    const lbl={todo:'📋 รอดำเนินการ',doing:'🔧 กำลังดำเนินการ',done:'✅ เสร็จแล้ว'};
+    toast(`ย้ายไป ${lbl[status]}`);
+    if(fromDetail)openDetail(id,!!priv);
+  }catch(e){toast('❌ อัปเดตไม่สำเร็จ: '+e.message);console.error(e);}
+}
+async function deleteCard(id,fromDetail,priv){
+  if(!confirm('ลบการแจ้งปัญหานี้?'))return;
+  const col=priv?'private_issues':'issues';
+  await deleteDoc(doc(db,col,id));
+  if(fromDetail)closeDetail();
+  toast('🗑️ ลบแล้ว');
+}
+async function upvote(id){
+  const key='voter_'+id;if(sessionStorage.getItem(key)){toast('คุณกดแล้ว 👍');return}
+  const item=publicIssues.find(x=>x.id===id);if(!item)return;
+  await updateDoc(doc(db,'issues',id),{votes:(item.votes||0)+1});
+  sessionStorage.setItem(key,'1');
+  toast('👍 กด +1 แล้ว ขอบคุณ!');
+}
+// ── ADMIN REPLY FILE HANDLING ──
+let replyFiles = {}; // keyed by issueId
+function getReplyFiles(id){ return replyFiles[id]||[]; }
+function setReplyFiles(id,arr){ replyFiles[id]=arr; }
+
+async function handleReplyFiles(id,files){
+  const buf=getReplyFiles(id);
+  for(const f of Array.from(files)){
+    if(buf.length>=5){toast('⚠️ แนบไฟล์ได้สูงสุด 5 ไฟล์');break;}
+    if(f.type==='application/pdf'||f.name.endsWith('.pdf')){
+      if(f.size>1.5*1024*1024){toast('⚠️ PDF ใหญ่เกิน 1.5MB');continue;}
+      const r=new FileReader();
+      await new Promise(res=>{r.onload=ev=>{buf.push({dataUrl:ev.target.result,type:'pdf',name:f.name});res();};r.readAsDataURL(f);});
+    } else if(f.type.startsWith('image/')){
+      const r=new FileReader();
+      const raw=await new Promise(res=>{r.onload=ev=>res(ev.target.result);r.readAsDataURL(f);});
+      const compressed=await compressImage(raw,800,800,0.72);
+      buf.push({dataUrl:compressed,type:'image',name:f.name});
+    } else {
+      toast('⚠️ รองรับเฉพาะรูปภาพและ PDF');continue;
+    }
+  }
+  setReplyFiles(id,buf);
+  renderReplyPreview(id);
+}
+function renderReplyPreview(id){
+  const grid=document.getElementById('rep-prev-'+id);if(!grid)return;
+  const buf=getReplyFiles(id);grid.innerHTML='';
+  buf.forEach((f,i)=>{
+    const d=document.createElement('div');d.className='rap-item';
+    if(f.type==='image') d.innerHTML=`<img src="${f.dataUrl}"/><button class="rap-rm" onclick="removeReplyFile('${id}',${i})">✕</button>`;
+    else d.innerHTML=`<div class="rap-pdf">📄 ${esc(f.name)}</div><button class="rap-rm" onclick="removeReplyFile('${id}',${i})">✕</button>`;
+    grid.appendChild(d);
+  });
+}
+function removeReplyFile(id,i){
+  const buf=getReplyFiles(id);buf.splice(i,1);setReplyFiles(id,buf);renderReplyPreview(id);
+}
+
+async function addReply(id,priv){
+  const inp=document.getElementById('rep-inp-'+id);
+  const text=inp?inp.value.trim():'';
+  const media=getReplyFiles(id);
+  if(!text&&!media.length){toast('⚠️ ใส่ข้อความ หรือแนบไฟล์');return;}
+  const items=priv?privateIssues:publicIssues;
+  const item=items.find(x=>x.id===id);if(!item)return;
+  const newReply={text,date:ds()};
+  if(media.length) newReply.media=sanitizeMedia(media);
+  const replies=[...(item.replies||[]),newReply];
+  const col=priv?'private_issues':'issues';
+  try{
+    await updateDoc(doc(db,col,id),{replies});
+    if(inp)inp.value='';
+    setReplyFiles(id,[]);renderReplyPreview(id);
+    toast('💬 ตอบกลับแล้ว');
+  }catch(e){toast('❌ ส่งไม่สำเร็จ: '+e.message);console.error(e);}
+}
+async function deleteReply(issueId,ri,priv){
+  const items=priv?privateIssues:publicIssues;
+  const item=items.find(x=>x.id===issueId);if(!item)return;
+  const replies=(item.replies||[]).filter((_,i)=>i!==ri);
+  const col=priv?'private_issues':'issues';
+  await updateDoc(doc(db,col,issueId),{replies});
+}
+
+// ── DETAIL MODAL ──
+const CI={ไฟ:'💡',น้ำ:'💧',ส่วนกลาง:'🏢',ความปลอดภัย:'🔒',ขยะ:'🗑️',จอดรถ:'🚗',สัญญาณ:'📡',อื่นๆ:'📌',ถนน:'🛣️',ประตู:'🚪',เพื่อนบ้าน:'🤝'};
+const SL={todo:'📋 รอดำเนินการ',doing:'🔧 กำลังดำเนินการ',done:'✅ เสร็จแล้ว'};
+
+function openDetail(id,priv){
+  const items=priv?privateIssues:publicIssues;
+  const item=items.find(x=>x.id===id);if(!item)return;
+  curId=id;curPriv=!!priv;
+  const pri=item.priority||'normal';
+  const mediaH=item.media&&item.media.length?`<div class="det-media${item.media.length===1?' single-media':''}">${item.media.map(m=>m.type==='image'?`<img src="${m.dataUrl}" onclick="openLB('${m.dataUrl}','image')" title="คลิกดูรูปเต็ม"/>`:`<video src="${m.dataUrl}" onclick="openLB('${m.dataUrl}','video')" muted title="คลิกดูวิดีโอ"></video>`).join('')}</div>`:'';
+  const votes=item.votes||0,voted=sessionStorage.getItem('voter_'+id);
+  let repH='';
+  if((item.replies&&item.replies.length)||isAdmin){
+    repH=`<div class="det-div"></div><div class="det-sec" style="color:#15803d">🏡 ตอบกลับจากนิติฯ</div>`;
+    if(item.replies&&item.replies.length){
+      repH+=`<div class="det-replies">${item.replies.map((r,ri)=>{
+        // render media inside reply bubble
+        let rMediaH='';
+        if(r.media&&r.media.length){
+          rMediaH='<div class="rep-media">';
+          r.media.forEach(m=>{
+            if(m.type==='image') rMediaH+=`<img src="${m.dataUrl}" onclick="openLB('${m.dataUrl}','image')" title="คลิกดูรูปเต็ม"/>`;
+            else rMediaH+=`<a class="rep-pdf-link" href="${m.dataUrl}" download="${esc(m.name||'file.pdf')}" onclick="event.stopPropagation()">📄 ${esc(m.name||'ไฟล์แนบ')}</a>`;
+          });
+          rMediaH+='</div>';
+        }
+        return `<div class="rep-bubble">${r.text?`<p>${esc(r.text)}</p>`:''}${rMediaH}<div class="rep-meta"><span>🏡 นิติฯ · ${r.date}</span>${isAdmin?`<button class="rep-del" onclick="deleteReply('${id}',${ri},${!!priv})">ลบ</button>`:''}</div></div>`;
+      }).join('')}</div>`;
+    } else {
+      repH+=`<p style="font-size:.82rem;color:var(--muted);margin-bottom:10px">ยังไม่มีการตอบกลับ</p>`;
+    }
+    if(isAdmin){
+      repH+=`<div class="rep-input">
+        <div class="rep-input-row">
+          <textarea id="rep-inp-${id}" rows="4" placeholder="ตอบกลับลูกบ้าน...&#10;(กด Enter เพื่อขึ้นบรรทัดใหม่ · กด Ctrl/Cmd+Enter เพื่อส่ง)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();addReply('${id}',${!!priv})}"></textarea>
+          <div class="rep-input-actions">
+            <button class="rep-attach-btn" onclick="document.getElementById('rep-file-${id}').click()" title="แนบรูปหรือ PDF">📎 แนบไฟล์</button>
+            <input type="file" id="rep-file-${id}" class="rep-file-input" accept="image/*,.pdf,application/pdf" multiple onchange="handleReplyFiles('${id}',this.files)"/>
+            <button class="rep-send" onclick="addReply('${id}',${!!priv})">ส่ง ➤</button>
+          </div>
+        </div>
+        <div class="rep-attach-preview" id="rep-prev-${id}"></div>
+        <p style="font-size:.68rem;color:var(--muted);margin-top:2px">📎 แนบรูปภาพหรือ PDF ได้สูงสุด 5 ไฟล์ · PDF ≤ 1.5MB · Enter ขึ้นบรรทัดใหม่ · Ctrl/Cmd+Enter หรือกด ส่ง</p>
+      </div>`;
+    }
+  }
+  let adminH='';
+  if(isAdmin){
+    adminH=`<div class="det-div"></div><div class="det-sec" style="color:var(--muted)">⚙️ จัดการ (Admin)</div><div class="det-admin-btns">`;
+    if(item.status!=='todo')adminH+=`<button class="dab dab-todo" onclick="moveCard('${id}','todo',true,${!!priv})">📋 รอ</button>`;
+    if(item.status!=='doing')adminH+=`<button class="dab dab-doing" onclick="moveCard('${id}','doing',true,${!!priv})">🔧 ดำเนิน</button>`;
+    if(item.status!=='done')adminH+=`<button class="dab dab-done" onclick="moveCard('${id}','done',true,${!!priv})">✅ เสร็จ</button>`;
+    adminH+=`<button class="dab dab-del" onclick="deleteCard('${id}',true,${!!priv})">🗑️ ลบ</button></div>`;
+  }
+  const contactChip=isAdmin&&item.contact?`<span class="dchip contact">📞 ${esc(item.contact)}</span>`:'';
+  const priChip=pri!=='normal'?`<span class="dchip" style="background:${pri==='urgent'?'var(--p-urgent-bg)':'var(--p-high-bg)'};color:${pri==='urgent'?'var(--p-urgent)':'var(--p-high)'};border-color:${pri==='urgent'?'#fca5a5':'#fdba74'}">${PRI_LABEL[pri]}</span>`:'';
+  document.getElementById('detailModal').innerHTML=`
+    <div class="det-toprow">
+      <div class="det-badges">
+        ${priv?`<span class="det-sbadge dsb-priv">🔒 ปัญหาส่วนตัว</span>`:''}
+        <span class="det-sbadge dsb-${item.status}">${SL[item.status]}</span>
+      </div>
+      <button class="det-close" onclick="closeDetail()">✕</button>
+    </div>
+    <span class="ctag tag-${item.cat}" style="margin-bottom:9px;display:inline-block">${CI[item.cat]||'📌'} ${item.cat}</span>
+    <div class="det-title">${esc(item.title)}</div>
+    <div class="det-chips">
+      <span class="dchip house">🏠 ${esc(item.house)}</span>
+      <span class="dchip">📅 ${item.date}</span>
+      ${priChip}
+      ${contactChip}
+      ${!priv&&votes>0?`<span class="dchip votes">👍 ${votes} คนเจอเหมือนกัน</span>`:''}
+    </div>
+    ${item.desc?`<div class="det-desc">${esc(item.desc)}</div>`:`<p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">— ไม่มีรายละเอียดเพิ่มเติม —</p>`}
+    ${mediaH}
+    ${!priv?`<button class="vbtn ${voted?'voted':''}" onclick="upvote('${id}')" style="margin-bottom:6px">${voted?'✅ คุณกดแล้ว':'👍 เจอเหมือนกัน'}${votes>0?' +'+votes:''}</button>
+    <button class="edit-issue-btn" onclick="openEditVerify('${id}')">✏️ แก้ไขปัญหานี้ (ต้องใช้รหัส)</button>`:''}
+    ${item.edited?`<p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">📝 แก้ไขล่าสุด: ${item.editDate}</p>`:''}
+    ${repH}${adminH}`;
+  document.getElementById('detailOverlay').classList.remove('hidden');
+}
+function closeDetail(){curId=null;document.getElementById('detailOverlay').classList.add('hidden')}
+document.getElementById('detailOverlay').addEventListener('click',function(e){if(e.target===this)closeDetail()});
+
+// ── INBOX ──
+function openInbox(){if(!isAdmin)return;renderInbox();document.getElementById('inboxOverlay').classList.remove('hidden')}
+function closeInbox(){document.getElementById('inboxOverlay').classList.add('hidden')}
+document.getElementById('inboxOverlay').addEventListener('click',function(e){if(e.target===this)closeInbox()});
+function renderInbox(){
+  const list=document.getElementById('inboxList');
+  if(!privateIssues.length){list.innerHTML=`<div class="inbox-empty"><div class="ei">📭</div>ยังไม่มีปัญหาส่วนตัวที่ส่งเข้ามา</div>`;return}
+  list.innerHTML='';
+  privateIssues.forEach(item=>{
+    const div=document.createElement('div');div.className='icard';div.onclick=()=>openDetail(item.id,true);
+    const sc={todo:'ic-todo',doing:'ic-doing',done:'ic-done'}[item.status]||'ic-todo';
+    const rp=item.replies&&item.replies.length?`<div class="icard-reply">🏡 ${esc(item.replies[item.replies.length-1].text)}</div>`:'';
+    div.innerHTML=`<div class="icard-top"><div class="icard-title">${esc(item.title)}</div><div class="icard-date">${item.date}</div></div>
+      <div class="icard-chips"><span class="ichip ic-house">🏠 ${esc(item.house)}</span><span class="ichip ic-cat">${CI[item.cat]||'📌'} ${item.cat}</span>${item.contact?`<span class="ichip ic-contact">📞 ${esc(item.contact)}</span>`:''}<span class="ichip ${sc}">${SL[item.status]}</span></div>
+      ${item.desc?`<div class="icard-desc">${esc(item.desc)}</div>`:''}${rp}`;
+    list.appendChild(div);
+  });
+}
+
+// ── LIGHTBOX ──
+function openLB(src,type){
+  const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),vid=document.getElementById('lbVid');
+  lb.classList.remove('hidden');
+  if(type==='video'){img.style.display='none';vid.style.display='block';vid.src=src}
+  else{vid.style.display='none';img.style.display='block';img.src=src}
+}
+function closeLightbox(){document.getElementById('lightbox').classList.add('hidden');document.getElementById('lbVid').pause()}
+
+// ── RENDER BOARD ──
+function makeCard(item){
+  const div=document.createElement('div');
+  const pri=item.priority||'normal';
+  div.className=`card${PRI_CARD[pri]?' '+PRI_CARD[pri]:''}`;
+  div.onclick=()=>openDetail(item.id,false);
+  if(isAdmin){
+    div.setAttribute('draggable','true');
+    div.setAttribute('data-id',item.id);
+    div.addEventListener('dragstart',e=>{
+      e.dataTransfer.setData('text/plain',item.id);
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(()=>div.classList.add('dragging'),0);
+    });
+    div.addEventListener('dragend',()=>{
+      div.classList.remove('dragging');
+      document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done'));
+    });
+  }
+  const voted=sessionStorage.getItem('voter_'+item.id),votes=item.votes||0;
+  const hasMedia=item.media&&item.media.length>0;
+  let mvH='';
+  if(isAdmin){
+    mvH=`<div class="mvbtns" onclick="event.stopPropagation()">`;
+    if(item.status!=='todo')mvH+=`<button class="mvb mvb-todo" onclick="moveCard('${item.id}','todo')">📋</button>`;
+    if(item.status!=='doing')mvH+=`<button class="mvb mvb-doing" onclick="moveCard('${item.id}','doing')">🔧</button>`;
+    if(item.status!=='done')mvH+=`<button class="mvb mvb-done" onclick="moveCard('${item.id}','done')">✅</button>`;
+    mvH+=`<button class="mvb mvb-del" onclick="deleteCard('${item.id}')">🗑️</button></div>`;
+  }
+  const lastReply=item.replies&&item.replies.length?item.replies[item.replies.length-1]:null;
+  const rpS=lastReply&&lastReply.text?`<div class="reply-strip"><div class="rs-label">🏡 นิติฯ ตอบ:</div><div class="rs-text">${esc(lastReply.text)}</div></div>`:'\n';
+  const houseLabel=item.anon?'ไม่ระบุ':esc(item.house);
+  const mediaIcon=hasMedia?` <span style="font-size:.65rem;opacity:.5">📎</span>`:'';
+  const priTag=pri!=='normal'?`<span class="pri-badge ${PRI_CLASS[pri]}">${PRI_LABEL[pri]}</span>`:'';
+  div.innerHTML=`<div class="card-body">
+    <div class="card-top-row">
+      <span class="ctag tag-${item.cat}">${CI[item.cat]||'📌'} ${item.cat}</span>
+      <span style="font-size:.72rem;font-weight:700;color:var(--accent)">🏠 ${houseLabel}${mediaIcon}</span>
+    </div>
+    ${priTag?`<div style="margin-bottom:5px">${priTag}</div>`:''}
+    <div class="card-title">${esc(item.title)}</div>
+    <div class="card-actions">
+      <button class="vbtn ${voted?'voted':''}" onclick="event.stopPropagation();upvote('${item.id}')">${voted?'✅':'👍'}${votes>0?' +'+votes:''}</button>
+      ${mvH}
+    </div>
+  </div>${rpS}`;
+  return div;
+}
+
+function toggleCol(st){
+  const colEl=document.getElementById('col-'+st).closest('.col');
+  if(!colEl)return;
+  colEl.classList.toggle('collapsed');
+}
+
+function onDragOver(e,st){if(!isAdmin)return;e.preventDefault();e.dataTransfer.dropEffect='move';const col=document.getElementById('col-'+st);col.classList.add('drag-over','drag-over-'+st);}
+function onDragLeave(e,st){const col=document.getElementById('col-'+st);col.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done');}
+async function onDrop(e,newStatus){
+  if(!isAdmin)return;e.preventDefault();
+  const id=e.dataTransfer.getData('text/plain');if(!id)return;
+  const item=publicIssues.find(x=>x.id===id);
+  if(!item||item.status===newStatus)return;
+  document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done'));
+  await moveCard(id,newStatus,false,false);
+}
+
+function renderBoard(){
+  const hasFilter=filterState.search||filterState.cat||filterState.status||filterState.priority;
+  const filtered=hasFilter?publicIssues.filter(matchesFilter):publicIssues;
+  const cols={todo:[],doing:[],done:[]};
+  filtered.forEach(item=>(cols[item.status]||cols.todo).push(item));
+  ['todo','doing','done'].forEach(st=>{
+    const col=document.getElementById('col-'+st),cnt=document.getElementById('cnt-'+st);
+    col.innerHTML='';cnt.textContent=cols[st].length;
+    if(!cols[st].length){
+      const allInSt=publicIssues.filter(x=>x.status===st||(!x.status&&st==='todo')).length;
+      const msg=hasFilter&&allInSt>0?`<p style="font-size:.78rem">ไม่มีผลลัพธ์ที่ตรงกัน</p>`:
+        {todo:'📭 ยังไม่มีปัญหาที่รอดำเนินการ',doing:'🔧 ยังไม่มีงานที่กำลังทำ',done:'🎉 ยังไม่มีงานที่เสร็จ'}[st];
+      col.innerHTML=`<div class="empty-col"><div class="ei">${st==='done'?'🎉':st==='doing'?'🔧':'📭'}</div>${msg}</div>`;
+    }else cols[st].forEach(item=>col.appendChild(makeCard(item)));
+  });
+
+  // stats bar
+  const total=publicIssues.length;
+  const privTotal=privateIssues.length;
+  const privChip=isAdmin&&privTotal>0?`<div class="schip"><span class="sdot" style="background:var(--priv)"></span>ส่วนตัว <strong>${privTotal}</strong></div>`:'';
+  const urgentCount=publicIssues.filter(x=>(x.priority||'normal')==='urgent'&&x.status!=='done').length;
+  const urgChip=urgentCount>0?`<div class="schip"><span class="sdot" style="background:var(--p-urgent)"></span>ด่วนมาก <strong>${urgentCount}</strong></div>`:'';
+  document.getElementById('statsBar').innerHTML=`
+    <div class="schip"><span class="sdot" style="background:var(--todo-c)"></span>รอดำเนินการ <strong>${publicIssues.filter(x=>x.status==='todo'||!x.status).length}</strong></div>
+    <div class="schip"><span class="sdot" style="background:var(--doing-c)"></span>กำลังดำเนินการ <strong>${publicIssues.filter(x=>x.status==='doing').length}</strong></div>
+    <div class="schip"><span class="sdot" style="background:var(--done-c)"></span>เสร็จแล้ว <strong>${publicIssues.filter(x=>x.status==='done').length}</strong></div>
+    <div class="schip">📊 ทั้งหมด <strong>${total}</strong> รายการ</div>
+    ${urgChip}${privChip}`;
+
+  // filter result info
+  const info=document.getElementById('filterResultInfo');
+  if(hasFilter){
+    const totalFiltered=filtered.length;
+    info.textContent=`🔍 แสดง ${totalFiltered} รายการ (จากทั้งหมด ${total})`;
+    info.classList.add('show');
+  }else{info.classList.remove('show');}
+}
+
+// ── INIT ──
+checkAdminSession();
+updateBanner();
+
+// ── GLOBAL EXPOSE ──
+window.toggleCol=toggleCol;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
+window.openModal=openModal;window.closeModal=closeModal;window.openPrivateModal=openPrivateModal;window.closePrivateModal=closePrivateModal;
+window.openAdminLogin=openAdminLogin;window.closeAdminModal=closeAdminModal;window.loginAdmin=loginAdmin;
+window.openEditVerify=openEditVerify;window.closeEditVerify=closeEditVerify;window.verifyEditCode=verifyEditCode;
+window.closeEditForm=closeEditForm;window.saveEdit=saveEdit;window.openInbox=openInbox;window.closeInbox=closeInbox;
+window.closeDetail=closeDetail;window.openDetail=openDetail;window.upvote=upvote;window.moveCard=moveCard;
+window.deleteCard=deleteCard;window.addReply=addReply;window.deleteReply=deleteReply;window.removeFile=removeFile;
+window.removeCurrentMedia=removeCurrentMedia;window.handleFiles=handleFiles;window.toggleAnon=toggleAnon;
+window.openLB=openLB;window.closeLightbox=closeLightbox;window.copyCode=copyCode;
+window.submitReport=submitReport;window.submitPrivate=submitPrivate;window.applyFilters=applyFilters;window.clearFilters=clearFilters;
+window.handleReplyFiles=handleReplyFiles;window.removeReplyFile=removeReplyFile;
+</script>
+</body>
+</html>
