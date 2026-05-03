@@ -95,11 +95,9 @@
       padding: 5px 12px;
       border-radius: 20px;
     }
+    .home-btn,
     .admin-btn {
       margin-left: 12px;
-      background: #fff7df;
-      border: 2px solid var(--gold2);
-      color: var(--navy);
       font-size: 0.86rem;
       font-weight: 700;
       cursor: pointer;
@@ -111,6 +109,22 @@
       box-shadow: 0 8px 22px rgba(0,0,0,0.18), 0 0 0 4px rgba(240,208,128,0.12);
       min-width: 92px;
       text-align: center;
+    }
+    .home-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.86);
+      box-shadow: none;
+    }
+    .admin-btn {
+      background: #fff7df;
+      border: 2px solid var(--gold2);
+      color: var(--navy);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18), 0 0 0 4px rgba(240,208,128,0.12);
+    }
+    .home-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.14);
     }
     .admin-btn:hover {
       transform: translateY(-1px);
@@ -740,7 +754,24 @@
     @media (max-width: 540px) {
       .card-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
+      .header-inner {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .header-text {
+        flex: 1;
+        min-width: 0;
+      }
       .header-badge { display: none; }
+      .home-btn {
+        margin-left: 0;
+      }
+      .home-btn,
+      .admin-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 9px 12px;
+      }
       .modal-overlay {
         align-items: flex-start;
         padding: 10px;
@@ -767,6 +798,7 @@
       <p>ตรวจสอบและแจ้งแก้ไขข้อมูลลูกบ้าน รวมถึงทะเบียนรถเข้าออก</p>
     </div>
     <div class="header-badge">Resident Portal</div>
+    <button class="home-btn" onclick="window.location.href='https://pattra8.github.io/'">บริการทั้งหมด</button>
     <button class="admin-btn" onclick="window.location.href='admin.html'">Admin</button>
   </div>
 </header>
