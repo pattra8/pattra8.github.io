@@ -916,8 +916,8 @@
 
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
-  // raw.githubusercontent.com มี cache สั้นกว่า GitHub Pages (~1 min vs ~10 min)
   const DATA_URL      = 'https://raw.githubusercontent.com/pattra8/pattra8.github.io/main/data/residents.json';
+  const GH_DATA_URL   = 'https://api.github.com/repos/pattra8/pattra8.github.io/contents/data/residents.json?ref=main';
   const POLL_INTERVAL_MS = 5000;
   const GH_OWNER      = 'pattra8';
   const GH_REPO       = 'pattra8.github.io';
@@ -1023,11 +1023,28 @@
   }
 
   /* ── load data ── */
+  async function fetchResidentsData() {
+    const apiRes = await fetch(`${GH_DATA_URL}&t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        Authorization: `token ${GH_ISSUES_TOKEN}`,
+        Accept: 'application/vnd.github.v3+json'
+      }
+    });
+    if (apiRes.ok) {
+      const meta = await apiRes.json();
+      const json = decodeURIComponent(escape(atob((meta.content || '').replace(/\n/g, ''))));
+      return JSON.parse(json);
+    }
+
+    const rawRes = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!rawRes.ok) throw new Error(`HTTP ${rawRes.status}`);
+    return rawRes.json();
+  }
+
   async function loadData() {
     try {
-      const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await fetchResidentsData();
       const normalizedData = data.map(r => ({
         ...r,
         vehicles: {

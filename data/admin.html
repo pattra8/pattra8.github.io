@@ -135,6 +135,9 @@
       font-size: 0.8rem;
       color: #666;
     }
+    .toolbar-note.saving { color: #92400e; }
+    .toolbar-note.success { color: #15803d; font-weight: 600; }
+    .toolbar-note.error { color: #b91c1c; font-weight: 600; }
 
     .table-wrap {
       max-width: 1200px;
@@ -280,6 +283,10 @@
     }
     .ghost-btn:hover { background: #e2e8f0; }
     .primary-btn:hover { background: #14304d; }
+    .primary-btn:disabled, .ghost-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
 
     /* ── TABS ── */
     .tabs {
@@ -660,6 +667,13 @@
   let originalSnap = null;
   let currentTab   = 'residents';
 
+  function setToolbarNote(message, state = '') {
+    const el = document.getElementById('toolbarNote');
+    if (!el) return;
+    el.textContent = message;
+    el.className = `toolbar-note${state ? ` ${state}` : ''}`;
+  }
+
   // ── Session ─────────────────────────────────────────────────────────────
   function getSessionExpiry() { return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0); }
   function hasValidSession()  { return Date.now() < getSessionExpiry(); }
@@ -748,7 +762,7 @@
 
   // ── Load resident data (ดึงตรงจาก GitHub API — ไม่มี CDN cache) ──────────
   async function loadAdminData() {
-    document.getElementById('toolbarNote').textContent = 'กำลังโหลด...';
+    setToolbarNote('กำลังโหลด...');
     try {
       // ใช้ GitHub Contents API แทน GitHub Pages — real-time, ไม่มี CDN delay
       const res = await fetch(
@@ -762,12 +776,11 @@
       allData = JSON.parse(json);
       filteredData = [...allData];
       renderAdmin(filteredData);
-      document.getElementById('toolbarNote').textContent =
-        `✅ Real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`;
+      setToolbarNote(`✅ Real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
     } catch(e) {
       document.getElementById('adminBody').innerHTML =
         `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
-      document.getElementById('toolbarNote').textContent = 'โหลดไม่สำเร็จ';
+      setToolbarNote('โหลดไม่สำเร็จ', 'error');
     }
   }
 
@@ -887,6 +900,11 @@
 
   async function saveEdit() {
     if (editingIndex < 0) return;
+    const btn = document.getElementById('saveEditBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก...';
+    }
     const formRec = getFormValues();
     formRec.phone = cleanPhone(formRec.phone);
     formRec.last_updated = new Date().toLocaleString('sv-SE').replace('T',' ');
@@ -894,6 +912,10 @@
     filterAdmin();
     closeEditModal();
     await doCommit('✅ บันทึกสำเร็จ');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '💾 บันทึก';
+    }
   }
 
   // ── GitHub API ────────────────────────────────────────────────────────────
@@ -917,13 +939,17 @@
   }
 
   async function doCommit(successMsg) {
-    document.getElementById('toolbarNote').textContent = 'กำลัง commit ขึ้น GitHub...';
+    setToolbarNote('กำลังบันทึกขึ้น GitHub...', 'saving');
     try {
-      await commitToGitHub(allData);
+      const result = await commitToGitHub(allData);
       // Reload จาก GitHub API ทันทีหลัง commit — ไม่ต้องรอ CDN
       await loadAdminData();
+      const shortSha = result?.commit?.sha ? result.commit.sha.slice(0, 7) : '';
+      const suffix = shortSha ? ` · commit ${shortSha}` : '';
+      setToolbarNote(`${successMsg || '✅ บันทึกสำเร็จ'}${suffix} · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
     } catch(e) {
-      document.getElementById('toolbarNote').textContent = `❌ Commit ล้มเหลว: ${e.message}`;
+      await loadAdminData().catch(() => {});
+      setToolbarNote(`❌ บันทึกขึ้น GitHub ไม่สำเร็จ: ${e.message}`, 'error');
       alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
     }
   }
