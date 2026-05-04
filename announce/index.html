@@ -351,7 +351,53 @@
       font-weight: 500;
     }
 
-    /* ─── ATTACHMENTS ─── */
+    /* ─── PHOTO GALLERY (large images per announcement) ─── */
+    .announce-gallery {
+      display: grid;
+      gap: 8px;
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .announce-gallery .g-img {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-soft);
+      position: relative;
+      transition: transform 0.18s, box-shadow 0.18s;
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--border);
+    }
+    .announce-gallery .g-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .announce-gallery .g-img:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+      border-color: var(--accent);
+    }
+    .announce-gallery.g-count-1 { grid-template-columns: 1fr; }
+    .announce-gallery.g-count-1 .g-img { aspect-ratio: 16 / 10; }
+    .announce-gallery.g-count-2 { grid-template-columns: 1fr 1fr; }
+    .announce-gallery.g-count-3 { grid-template-columns: 1fr 1fr; }
+    .announce-gallery.g-count-3 .g-img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+    .announce-gallery.g-count-4 { grid-template-columns: 1fr 1fr; }
+    .announce-gallery.g-count-many { grid-template-columns: 1fr 1fr; }
+    .announce-gallery.g-count-many .g-img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+
+    /* doc-only tile strip */
+    .announce-docs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    /* legacy attachments — kept for backwards compat */
     .announce-attachments {
       display: flex;
       gap: 12px;
@@ -717,6 +763,26 @@
       .announce-attachments { gap: 10px; padding-top: 18px; margin-top: 18px; }
       .announce-tile, .announce-more-tile { width: 84px; height: 84px; }
 
+      /* gallery — single column on mobile */
+      .announce-gallery,
+      .announce-gallery.g-count-1,
+      .announce-gallery.g-count-2,
+      .announce-gallery.g-count-3,
+      .announce-gallery.g-count-4,
+      .announce-gallery.g-count-many {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 18px;
+        padding-top: 18px;
+      }
+      .announce-gallery .g-img,
+      .announce-gallery.g-count-1 .g-img,
+      .announce-gallery.g-count-3 .g-img:first-child,
+      .announce-gallery.g-count-many .g-img:first-child {
+        aspect-ratio: 4 / 3;
+        grid-column: auto;
+      }
+
       footer { padding: 36px 20px; }
       .footer-links { gap: 18px; }
     }
@@ -923,36 +989,46 @@ function buildPhotoStrip(photos) {
   const { images, docs } = normaliseFiles(photos);
   if (!images.length && !docs.length) return '';
 
-  const MAX_SHOW_IMG = 4;
+  // Choose gallery layout based on image count
+  let countClass = '';
+  if (images.length === 1) countClass = 'g-count-1';
+  else if (images.length === 2) countClass = 'g-count-2';
+  else if (images.length === 3) countClass = 'g-count-3';
+  else if (images.length === 4) countClass = 'g-count-4';
+  else if (images.length >= 5) countClass = 'g-count-many';
 
-  const imgTiles = images.slice(0, MAX_SHOW_IMG).map((f, i) => `
-    <div class="announce-tile" data-img-idx="${i}">
-      <img class="announce-photo-thumb" src="${esc(f.url)}" alt="รูปภาพ ${i + 1}" loading="lazy" />
-    </div>`).join('');
+  const allImageUrls = images.map(f => f.url);
 
-  const extraImgs = images.length - MAX_SHOW_IMG;
-  const moreTile = extraImgs > 0
-    ? `<div class="announce-more-tile" data-more-start="${MAX_SHOW_IMG}">+${extraImgs}</div>`
-    : '';
-
-  const docTiles = docs.map(f => {
-    const icon = FILE_EXT_ICONS[f.ext] || '📎';
-    const shortName = f.name.length > 16 ? f.name.slice(0, 13) + '…' : f.name;
-    return `
-      <div class="announce-tile"
-           title="${esc(f.name)}"
-           data-file-dataurl="${esc(f.url)}"
-           data-file-name="${esc(f.name)}"
-           data-file-ext="${esc(f.ext || 'file')}">
-        <div class="announce-file-tile">
-          <div class="announce-file-tile-icon">${icon}</div>
-          <div class="announce-file-tile-ext">${esc(f.ext || 'file')}</div>
-          <div class="announce-file-tile-name">${esc(shortName)}</div>
+  const galleryHtml = images.length ? `
+    <div class="announce-gallery ${countClass}" data-all-images='${esc(JSON.stringify(allImageUrls))}'>
+      ${images.map((f, i) => `
+        <div class="g-img" data-img-idx="${i}">
+          <img src="${esc(f.url)}" alt="รูปภาพ ${i + 1}" loading="lazy" />
         </div>
-      </div>`;
-  }).join('');
+      `).join('')}
+    </div>` : '';
 
-  return `<div class="announce-attachments" data-all-images="${esc(JSON.stringify(images.map(f => f.url)))}">${imgTiles}${moreTile}${docTiles}</div>`;
+  const docHtml = docs.length ? `
+    <div class="announce-docs">
+      ${docs.map(f => {
+        const icon = FILE_EXT_ICONS[f.ext] || '📎';
+        const shortName = f.name && f.name.length > 16 ? f.name.slice(0, 13) + '…' : (f.name || '');
+        return `
+          <div class="announce-tile"
+               title="${esc(f.name)}"
+               data-file-dataurl="${esc(f.url)}"
+               data-file-name="${esc(f.name)}"
+               data-file-ext="${esc(f.ext || 'file')}">
+            <div class="announce-file-tile">
+              <div class="announce-file-tile-icon">${icon}</div>
+              <div class="announce-file-tile-ext">${esc(f.ext || 'file')}</div>
+              <div class="announce-file-tile-name">${esc(shortName)}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>` : '';
+
+  return galleryHtml + docHtml;
 }
 
 function esc(value) {
@@ -1002,28 +1078,21 @@ function renderAnnouncements() {
     `;
   }).join('');
 
-  grid.querySelectorAll('.announce-attachments').forEach(strip => {
-    const allImages = JSON.parse(strip.dataset.allImages || '[]');
-
-    strip.querySelectorAll('[data-img-idx]').forEach(tile => {
+  // Gallery image clicks → lightbox
+  grid.querySelectorAll('.announce-gallery').forEach(gallery => {
+    const allImages = JSON.parse(gallery.dataset.allImages || '[]');
+    gallery.querySelectorAll('.g-img').forEach(tile => {
       tile.addEventListener('click', () => {
         const idx = Number(tile.dataset.imgIdx);
         openLightbox(allImages[idx], `รูปภาพ ${idx + 1}`);
       });
     });
+  });
 
-    const moreTile = strip.querySelector('.announce-more-tile');
-    if (moreTile) {
-      moreTile.addEventListener('click', () => {
-        const start = Number(moreTile.dataset.moreStart) || 4;
-        openLightbox(allImages[start], `รูปภาพ ${start + 1}`);
-      });
-    }
-
-    strip.querySelectorAll('[data-file-dataurl]').forEach(tile => {
-      tile.addEventListener('click', () => {
-        openFilePreview(tile.dataset.fileDataurl, tile.dataset.fileName, tile.dataset.fileExt);
-      });
+  // Doc tile clicks → file preview
+  grid.querySelectorAll('[data-file-dataurl]').forEach(tile => {
+    tile.addEventListener('click', () => {
+      openFilePreview(tile.dataset.fileDataurl, tile.dataset.fileName, tile.dataset.fileExt);
     });
   });
 
