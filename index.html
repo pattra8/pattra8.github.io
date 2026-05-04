@@ -649,8 +649,23 @@
     }
 
     /* Smart layouts based on count */
+    /* Single image: show full image, no crop (natural aspect, capped height) */
     .announce-gallery.g-count-1 { grid-template-columns: 1fr; }
-    .announce-gallery.g-count-1 .g-img { aspect-ratio: 16 / 10; }
+    .announce-gallery.g-count-1 .g-img {
+      aspect-ratio: auto;
+      max-height: 620px;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg2);
+    }
+    .announce-gallery.g-count-1 .g-img img {
+      width: 100%;
+      height: auto;
+      max-height: 620px;
+      object-fit: contain;
+    }
 
     .announce-gallery.g-count-2 { grid-template-columns: 1fr 1fr; }
 
@@ -1068,11 +1083,18 @@
         gap: 10px;
       }
       .announce-gallery .g-img,
-      .announce-gallery.g-count-1 .g-img,
       .announce-gallery.g-count-3 .g-img:first-child,
       .announce-gallery.g-count-many .g-img:first-child {
         aspect-ratio: 4 / 3;
         grid-column: auto;
+      }
+      /* Single image keeps natural aspect — full visible on mobile too */
+      .announce-gallery.g-count-1 .g-img {
+        aspect-ratio: auto;
+        max-height: 70vh;
+      }
+      .announce-gallery.g-count-1 .g-img img {
+        max-height: 70vh;
       }
     }
   </style>
