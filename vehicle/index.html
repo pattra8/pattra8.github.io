@@ -7,6 +7,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <script>
+    // Run BEFORE first paint → eliminate landing flash when house context exists
+    (function() {
+      try {
+        const u = new URLSearchParams(location.search).get('house');
+        const s = sessionStorage.getItem('pattra_current_house');
+        const h = u || s;
+        if (h) {
+          if (u) sessionStorage.setItem('pattra_current_house', u);
+          document.documentElement.dataset.ctx = h;
+        }
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
       --bg:           #f9f3e9;
@@ -127,6 +141,24 @@
       animation: slideDown 0.25s ease;
     }
     .context-bar[hidden] { display: none; }
+
+    /* When context exists (set by inline boot script): hide landing, show bar + result skeleton */
+    html[data-ctx] #landingSection { display: none !important; }
+    html[data-ctx] #contextBar { display: block !important; }
+    html[data-ctx] #contextBar[hidden] { display: block !important; }
+    html[data-ctx] #resultSection { display: block !important; }
+    html[data-ctx] #resultSection:empty::before {
+      content: 'กำลังโหลด...';
+      display: block;
+      padding: 56px 24px;
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 15px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-top: 4px;
+    }
     .context-bar-inner {
       max-width: 740px;
       margin: 0 auto;
@@ -827,18 +859,29 @@
 
       .landing-title { font-size: 30px; }
       .landing-intro { font-size: 15px; }
-      .search-box { flex-direction: column; gap: 10px; padding: 12px; }
-      .search-box .search-icon {
-        display: flex;
-        width: auto;
-        height: auto;
-        background: transparent;
-        border-radius: 0;
-        justify-content: flex-start;
-        padding: 0 2px;
+      /* Mobile search: keep icon+input together as a clear search field, button below */
+      .search-box {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px;
       }
-      .search-input { padding: 8px 2px; font-size: 18px; text-align: left; width: 100%; }
-      .search-btn { width: 100%; }
+      .search-box .search-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+      .search-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 9px 4px;
+        font-size: 15px;
+        text-align: left;
+      }
+      .search-btn {
+        width: 100%;
+        padding: 12px 22px;
+      }
 
       .owner-bar { padding: 14px 16px; gap: 12px; flex-wrap: wrap; }
       .owner-actions { width: 100%; padding-top: 10px; border-top: 1px solid var(--border-soft); margin-top: 4px; }
@@ -894,7 +937,7 @@
   <section class="landing" id="landingSection">
     <div class="landing-eyebrow">Vehicle Access</div>
     <h1 class="landing-title">จัดการทะเบียนรถของคุณ</h1>
-    <p class="landing-intro">เพิ่ม / แก้ไขทะเบียนรถ สำหรับระบบอ่านป้ายอัตโนมัติ (LPR) ของโครงการ</p>
+    <p class="landing-intro">เพิ่ม / แก้ไขทะเบียนรถ สำหรับระบบอ่านป้ายอัตโนมัติ (LPR) ของโครงการ</p>
 
     <form class="search-box" id="searchForm" autocomplete="off">
       <div class="search-icon" aria-hidden="true">🔍</div>
@@ -1485,13 +1528,19 @@
       primeSearchInput();
       return;
     }
+    // Show stub context bar IMMEDIATELY (house visible, name fills in after fetch)
+    const ctxHouse = document.getElementById('ctxHouse');
+    const bar = document.getElementById('contextBar');
+    if (ctxHouse) ctxHouse.textContent = h;
+    if (bar) bar.hidden = false;
+    primeSearchInput(h);
+
     const found = await performSearch(h);
     if (!found) {
       clearStoredHouse();
       hideContextBar();
+      delete document.documentElement.dataset.ctx;
       primeSearchInput();
-    } else {
-      primeSearchInput(h);
     }
   })();
 
