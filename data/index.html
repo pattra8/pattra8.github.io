@@ -803,7 +803,7 @@
     <div class="header-logo">🏘️</div>
     <div class="header-text">
       <h1>หมู่บ้านภัทราวิลล่า 8</h1>
-      <p>ตรวจสอบและแจ้งแก้ไขข้อมูลลูกบ้าน รวมถึงทะเบียนรถเข้าออก</p>
+      <p>ตรวจสอบและแจ้งแก้ไขข้อมูลลูกบ้าน</p>
     </div>
     <div class="header-badge">Resident Portal</div>
     <button class="home-btn" onclick="window.location.href='https://pattra8.github.io/'">บริการทั้งหมด</button>
@@ -827,7 +827,7 @@
   <div class="hero-search" id="heroSearch">
     <div class="hero-icon">🏘️</div>
     <div class="hero-title">กรอกบ้านเลขที่ของท่าน</div>
-    <div class="hero-description">เพื่อตรวจสอบข้อมูลและแจ้งแก้ไขชื่อ เบอร์โทร อีเมล หรือทะเบียนรถ</div>
+    <div class="hero-description">เพื่อตรวจสอบข้อมูลและแจ้งแก้ไขชื่อ เบอร์โทร หรืออีเมล</div>
     <div class="hero-input-wrap">
       <span class="hero-search-icon">🔍</span>
       <input
@@ -875,7 +875,7 @@
         <!-- Instruction hint -->
         <div class="form-hint-box">
           <span>📝</span>
-          <span>แก้ไขข้อมูลที่ต้องการเปลี่ยน แล้วกดส่ง — ไม่ต้องแก้ข้อมูลที่ถูกต้องอยู่แล้ว</span>
+          <span>แก้ไขข้อมูลลูกบ้านที่ต้องการเปลี่ยน แล้วกดส่ง — ทะเบียนรถจัดการแยกที่หน้า Vehicle Access</span>
         </div>
 
         <div class="form-group">
@@ -893,28 +893,11 @@
         <div class="vehicle-group">
           <div class="vehicle-box">
             <div class="form-group" style="margin-bottom:0;">
-              <label>🚗 ทะเบียนรถยนต์</label>
-              <div class="vehicle-note">ปกติลงทะเบียนได้ 2 คัน</div>
+              <label>🚗 ทะเบียนรถเข้า-ออก</label>
+              <div class="vehicle-note">หน้านี้แสดงทะเบียนเพื่ออ้างอิงเท่านั้น การเพิ่ม/แก้ไข/ลบทะเบียนรถให้ไปที่หน้า Vehicle Access</div>
             </div>
-            <div class="vehicle-inputs" id="carInputs">
-              <input type="text" id="f_car_1" placeholder="รถยนต์คันที่ 1" />
-              <input type="text" id="f_car_2" placeholder="รถยนต์คันที่ 2" />
-              <input type="text" id="f_car_3" class="vehicle-hidden" placeholder="รถยนต์คันที่ 3 (ที่จอดพิเศษ)" />
-            </div>
-            <button type="button" class="add-vehicle-btn" id="addCarBtn" onclick="showOptionalVehicleField('car')">มีที่จอดพิเศษ? เพิ่มรถยนต์คันที่ 3</button>
-          </div>
-          <div class="vehicle-box">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>🏍 มอเตอร์ไซค์</label>
-              <div class="vehicle-note">กรอกแยกคันได้เลย ไม่ต้องคั่นด้วยลูกน้ำ</div>
-            </div>
-            <div class="vehicle-inputs" id="motoInputs">
-              <input type="text" id="f_moto_1" placeholder="มอเตอร์ไซค์คันที่ 1" />
-              <input type="text" id="f_moto_2" class="vehicle-hidden" placeholder="มอเตอร์ไซค์คันที่ 2" />
-              <input type="text" id="f_moto_3" class="vehicle-hidden" placeholder="มอเตอร์ไซค์คันที่ 3" />
-              <input type="text" id="f_moto_4" class="vehicle-hidden" placeholder="มอเตอร์ไซค์คันที่ 4" />
-            </div>
-            <button type="button" class="add-vehicle-btn" id="addMotoBtn" onclick="showOptionalVehicleField('moto')">+ เพิ่มมอเตอร์ไซค์อีก 1 คัน</button>
+            <div id="modalVehicleSummary"></div>
+            <button type="button" class="add-vehicle-btn" onclick="window.location.href='https://pattra8.com/vehicle/'">ไปหน้า Vehicle Access</button>
           </div>
         </div>
 
@@ -1306,6 +1289,26 @@
     document.getElementById('f_name').value    = name;
     document.getElementById('f_email').value   = email;
     document.getElementById('f_phone').value   = phone;
+    const modalVehicleSummary = document.getElementById('modalVehicleSummary');
+    if (modalVehicleSummary) {
+      const carText = cars.length ? cars.join(', ') : 'ยังไม่มีทะเบียนรถยนต์';
+      const motoText = motos.length ? motos.join(', ') : 'ยังไม่มีทะเบียนมอเตอร์ไซค์';
+      modalVehicleSummary.innerHTML = `
+        <div class="field-row">
+          <div class="field-icon car-icon">🚗</div>
+          <div class="field-content">
+            <div class="field-label">รถยนต์</div>
+            <div class="field-value">${escHtml(carText)}</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-icon moto-icon">🏍</div>
+          <div class="field-content">
+            <div class="field-label">มอเตอร์ไซค์</div>
+            <div class="field-value">${escHtml(motoText)}</div>
+          </div>
+        </div>`;
+    }
     revealVehicleFieldsForValues('car', 3, cars);
     revealVehicleFieldsForValues('moto', 4, motos);
     setVehicleInputs('car', 3, cars);
@@ -1347,16 +1350,14 @@
     const newName  = document.getElementById('f_name').value.trim();
     const newEmail = document.getElementById('f_email').value.trim();
     const newPhone = cleanPhone(document.getElementById('f_phone').value);
-    const newCars  = collectVehicleInputs('car', 3);
-    const newMotos = collectVehicleInputs('moto', 4);
+    const newCars  = currentRecord.cars || [];
+    const newMotos = currentRecord.motorcycles || [];
 
     // Check if anything actually changed
     const hasChange =
       newName  !== currentRecord.name  ||
       newEmail !== currentRecord.email ||
-      newPhone !== currentRecord.phone ||
-      JSON.stringify(newCars)  !== JSON.stringify(currentRecord.cars) ||
-      JSON.stringify(newMotos) !== JSON.stringify(currentRecord.motorcycles);
+      newPhone !== currentRecord.phone;
 
     if (!hasChange) {
       alert('ไม่มีการเปลี่ยนแปลงข้อมูล\nกรุณาแก้ไขข้อมูลที่ต้องการเปลี่ยนก่อนกดส่ง');

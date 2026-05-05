@@ -852,6 +852,21 @@
     });
     return clone;
   }
+  function isVehicleIssue(issue) {
+    const title = issue?.title || '';
+    const labels = Array.isArray(issue?.labels) ? issue.labels.map(l => l.name || l) : [];
+    return labels.includes('vehicle') || /^\[(เพิ่ม|แก้ไข|ลบ)ทะเบียน/.test(title);
+  }
+  function isPendingCorrectionIssue(issue) {
+    return !processedIssues.has(issue.number) && (
+      (issue.title || '').startsWith('[แก้ไขข้อมูล]') ||
+      isVehicleIssue(issue)
+    );
+  }
+  function getIssueKind(issue, payload) {
+    if (payload?.source === '/vehicle/' || isVehicleIssue(issue)) return 'vehicle';
+    return 'profile';
+  }
   function escHtml(v) {
     return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -1037,7 +1052,7 @@
       if (!res.ok) throw new Error(`GitHub Issues: ${res.status}`);
       const issues = await res.json();
       // กรอง issue ที่ approve/reject แล้วใน session นี้ออก (กัน card โผล่กลับก่อน GitHub ปิด)
-      const corrections = issues.filter(i => i.title.startsWith('[แก้ไขข้อมูล]') && !processedIssues.has(i.number));
+      const corrections = issues.filter(isPendingCorrectionIssue);
 
       // Update badge
       const badge = document.getElementById('pendingBadge');
@@ -1075,17 +1090,21 @@
       </div>`;
 
     const { house_no, old: o, new: n, reporter, contact, submitted_at } = payload;
+    const kind = getIssueKind(issue, payload);
     const submittedDate = submitted_at
       ? new Date(submitted_at).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'})
       : '—';
 
-    const fields = [
+    const profileFields = [
       { key: 'name',        label: '👤 ชื่อ-นามสกุล',    oldVal: o?.name  || '', newVal: n?.name  || '', isPlate: false },
       { key: 'email',       label: '✉️ อีเมล',            oldVal: o?.email || '', newVal: n?.email || '', isPlate: false },
       { key: 'phone',       label: '📞 โทรศัพท์',          oldVal: cleanPhone(o?.phone || ''), newVal: cleanPhone(n?.phone || ''), isPlate: false },
+    ];
+    const vehicleFields = [
       { key: 'cars',        label: '🚗 ทะเบียนรถยนต์',     oldVal: plateDisplayValue(o?.cars), newVal: plateDisplayValue(n?.cars), oldHtml: renderPlateStack(o?.cars), isPlate: true },
       { key: 'motorcycles', label: '🏍 มอเตอร์ไซค์',       oldVal: plateDisplayValue(o?.motorcycles), newVal: plateDisplayValue(n?.motorcycles), oldHtml: renderPlateStack(o?.motorcycles), isPlate: true },
     ];
+    const fields = kind === 'vehicle' ? vehicleFields : [...profileFields, ...vehicleFields];
 
     const rows = fields.map(f => {
       const changed = f.oldVal !== f.newVal;
@@ -1102,6 +1121,7 @@
     <div class="pending-card" id="issue-${issue.number}">
       <div class="pending-card-header">
         <strong>บ้านเลขที่ ${escHtml(house_no || '?')}</strong>
+        <span class="pending-card-reporter">${kind === 'vehicle' ? '🚗 คำร้องทะเบียนรถ' : '👤 คำร้องข้อมูลลูกบ้าน'}</span>
         <span class="pending-card-reporter">👤 ผู้แจ้ง: ${escHtml(reporter||'?')} · 📞 ${escHtml(contact||'?')}</span>
         <span class="pending-card-meta">${submittedDate}</span>
       </div>
