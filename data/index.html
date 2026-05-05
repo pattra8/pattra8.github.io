@@ -269,10 +269,12 @@
       outline: none;
       background: transparent;
       font-family: inherit;
-      font-size: 15px;
+      font-size: 16px;
+      font-weight: 500;
       color: var(--text);
-      padding: 6px 4px;
+      padding: 8px 4px;
       min-width: 0;
+      text-align: left;
     }
     .search-input::placeholder { color: var(--text-muted); }
     .search-btn {
@@ -814,9 +816,17 @@
 
       .landing-title { font-size: 30px; }
       .landing-intro { font-size: 15px; }
-      .search-box { flex-direction: column; gap: 8px; padding: 10px; }
-      .search-box .search-icon { display: none; }
-      .search-input { padding: 10px 6px; font-size: 15px; text-align: center; width: 100%; }
+      .search-box { flex-direction: column; gap: 10px; padding: 12px; }
+      .search-box .search-icon {
+        display: flex;
+        width: auto;
+        height: auto;
+        background: transparent;
+        border-radius: 0;
+        justify-content: flex-start;
+        padding: 0 2px;
+      }
+      .search-input { padding: 8px 2px; font-size: 18px; text-align: left; width: 100%; }
       .search-btn { width: 100%; }
 
       .owner-bar { padding: 14px 16px; gap: 12px; flex-wrap: wrap; }
@@ -876,7 +886,7 @@
 
     <form class="search-box" id="searchForm" autocomplete="off">
       <div class="search-icon" aria-hidden="true">🔍</div>
-      <input class="search-input" id="searchInput" type="text" placeholder="กรุณาใส่บ้านเลขที่ของท่าน เช่น 38/5" inputmode="text" />
+      <input class="search-input" id="searchInput" type="text" placeholder="ต่อเลขบ้าน หรือใส่เบอร์โทร" inputmode="text" />
       <button type="submit" class="search-btn">ค้นหา</button>
     </form>
 
@@ -982,6 +992,7 @@
   const GH_OWNER    = 'pattra8';
   const GH_REPO     = 'pattra8.github.io';
   const GH_ISSUES_TOKEN = ['ghp_vd52kl8z15Ou','ynnC1dJNULJoL3IY','bB0MPGAZ'].join('');
+  const DEFAULT_HOUSE_PREFIX = '38/';
 
   let allData = [];
   let currentRecord = {};
@@ -1051,6 +1062,7 @@
     if (exitBtn) exitBtn.addEventListener('click', () => {
       clearStoredHouse();
       hideContextBar();
+      primeSearchInput();
     });
   });
 
@@ -1121,6 +1133,20 @@
     if (!q) return null;
     return allData.find(r => (r.house_no || '').toLowerCase() === q)
         || allData.find(r => (r.house_no || '').toLowerCase().startsWith(q));
+  }
+
+  function primeSearchInput(value = '') {
+    const inp = document.getElementById('searchInput');
+    if (!inp) return;
+    const nextValue = value || DEFAULT_HOUSE_PREFIX;
+    inp.value = nextValue;
+    try {
+      inp.setSelectionRange(nextValue.length, nextValue.length);
+    } catch (_) {}
+  }
+
+  function isBareHousePrefix(q) {
+    return (q || '').trim() === DEFAULT_HOUSE_PREFIX;
   }
 
   function renderResult(r) {
@@ -1395,7 +1421,10 @@
   document.getElementById('searchForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const q = document.getElementById('searchInput').value.trim();
-    if (!q) return;
+    if (!q || isBareHousePrefix(q)) {
+      primeSearchInput(q);
+      return;
+    }
     performSearch(q);
   });
 
@@ -1403,16 +1432,19 @@
   (async function autoLoadFromContext() {
     const h = getStoredHouse();
     updateNavLinks(h);
-    if (!h) return;
+    if (!h) {
+      primeSearchInput();
+      return;
+    }
     const found = await performSearch(h);
     if (!found) {
       // Stale session — clear and let user search fresh
       clearStoredHouse();
       hideContextBar();
+      primeSearchInput();
     } else {
       // Pre-fill search input so user can change house easily
-      const inp = document.getElementById('searchInput');
-      if (inp) inp.value = h;
+      primeSearchInput(h);
     }
   })();
 
