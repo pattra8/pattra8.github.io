@@ -402,6 +402,28 @@
     .status.ok       { background: var(--status-ok-bg);      color: var(--status-ok); }
     .status.pending  { background: var(--status-pending-bg); color: var(--status-pending); }
     .status.error    { background: var(--status-error-bg);   color: var(--status-error); }
+    .status.saved    { background: #efe8d6; color: #6b5d4a; } /* neutral — for moto, no LPR claim */
+
+    /* LPR-not-supported note (shown only when motorcycle present) */
+    .lpr-note {
+      background: #fdf6e9;
+      border: 1px solid #ecdcb8;
+      border-radius: 11px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #6b5d4a;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .lpr-note .lpr-note-icon {
+      flex-shrink: 0;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .lpr-note strong { color: #855015; font-weight: 600; }
 
     .v-meta {
       font-size: 12px;
@@ -765,7 +787,7 @@
     </div>
   </a>
   <div class="header-actions">
-    <a href="/data/" class="header-btn">ข้อมูลครัวเรือน</a>
+    <a href="/data/" class="header-btn">ข้อมูลลูกบ้าน</a>
     <a href="/" class="header-btn">← กลับหน้าแรก</a>
   </div>
 </header>
@@ -776,7 +798,7 @@
   <section class="landing" id="landingSection">
     <div class="landing-eyebrow">Vehicle Access</div>
     <h1 class="landing-title">จัดการทะเบียนรถของคุณ</h1>
-    <p class="landing-intro">เพิ่ม แก้ไข หรือดูสถานะการเชื่อมต่อระบบอ่านป้ายทะเบียนอัตโนมัติ (LPR) ของรถในบ้านคุณ</p>
+    <p class="landing-intro">เพิ่ม / แก้ไขทะเบียนรถ สำหรับระบบอ่านป้ายอัตโนมัติ (LPR) ของโครงการ</p>
 
     <form class="search-box" id="searchForm" autocomplete="off">
       <div class="search-icon" aria-hidden="true">🔍</div>
@@ -801,7 +823,7 @@
   <div class="footer-tagline">Resident Services</div>
   <div class="footer-links">
     <a href="/">หน้าแรก</a>
-    <a href="/data/">ข้อมูลครัวเรือน</a>
+    <a href="/data/">ข้อมูลลูกบ้าน</a>
     <a href="/announce/">ประกาศ</a>
     <a href="/report/">แจ้งปัญหา</a>
   </div>
@@ -884,9 +906,13 @@
     return `<div class="plate ${isMoto ? 'moto' : ''}">${esc(plate)}</div>`;
   }
 
-  // For Phase 1: status is heuristic — "synced" if last_updated is set; new entries = "pending"
-  // Real LPR sync state would come from a separate field in future phases.
-  function plateStatus(_plate) {
+  // For Phase 1: status is heuristic.
+  // - Cars: synced if last_updated set, else pending
+  // - Motorcycles: LPR system doesn't support motos yet → always "บันทึกแล้ว" (neutral, no LPR claim)
+  function plateStatus(_plate, isMoto) {
+    if (isMoto) {
+      return { cls: 'saved', label: 'บันทึกแล้ว' };
+    }
     if (currentRecord && currentRecord.last_updated) {
       return { cls: 'ok', label: 'LPR Synced' };
     }
@@ -914,7 +940,7 @@
           <div class="owner-meta">บ้านเลขที่ ${esc(currentRecord.house_no)}${currentRecord.phone ? ' · ' + esc(maskPhone(currentRecord.phone)) : ''}</div>
         </div>
         <div class="owner-actions">
-          <a href="/data/">ดูข้อมูลครัวเรือน →</a>
+          <a href="/data/">ดูข้อมูลลูกบ้าน →</a>
         </div>
       </div>
 
@@ -936,7 +962,7 @@
       `;
     } else {
       const carsHtml = cars.map((p, i) => {
-        const st = plateStatus(p);
+        const st = plateStatus(p, false);
         return `
           <div class="v-card">
             ${plateMarkup(p, false)}
@@ -956,7 +982,7 @@
         `;
       }).join('');
       const motosHtml = motos.map((p, i) => {
-        const st = plateStatus(p);
+        const st = plateStatus(p, true);
         return `
           <div class="v-card">
             ${plateMarkup(p, true)}
@@ -966,7 +992,7 @@
                 <span class="v-type">มอเตอร์ไซค์</span>
                 <span class="status ${st.cls}">${st.label}</span>
               </div>
-              <div class="v-meta">${currentRecord.last_updated ? 'อัปเดตล่าสุด ' + esc(currentRecord.last_updated) : 'ยังไม่ได้อัปเดต'}</div>
+              <div class="v-meta">เก็บข้อมูลไว้ในระบบ ยังไม่เข้าระบบ LPR</div>
             </div>
             <div class="v-actions">
               <button class="v-edit" data-action="edit" data-type="moto" data-idx="${i}">แก้ไข</button>
@@ -975,7 +1001,15 @@
           </div>
         `;
       }).join('');
-      listHtml = `<div class="vehicle-list">${carsHtml}${motosHtml}</div>`;
+
+      // Show LPR note above motorcycle section when there are motorcycles
+      const motoNoteHtml = motos.length > 0 ? `
+        <div class="lpr-note">
+          <span class="lpr-note-icon">ℹ️</span>
+          <div><strong>ระบบ LPR ปัจจุบันรองรับเฉพาะรถยนต์</strong> — ทะเบียนมอเตอร์ไซค์เก็บไว้สำหรับใช้งานในอนาคตเมื่อระบบรองรับ</div>
+        </div>` : '';
+
+      listHtml = `<div class="vehicle-list">${carsHtml}${motoNoteHtml}${motosHtml}</div>`;
     }
 
     sec.innerHTML = ownerHtml + listHtml;
