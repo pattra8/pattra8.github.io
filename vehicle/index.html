@@ -1013,6 +1013,9 @@
     history.replaceState(null, '', url);
     updateNavLinks(null);
   }
+  function clearContextState() {
+    delete document.documentElement.dataset.ctx;
+  }
   function updateNavLinks(houseNo) {
     const navData = document.getElementById('navData');
     if (navData) {
@@ -1021,6 +1024,7 @@
   }
   function showContextBar(record) {
     const bar = document.getElementById('contextBar');
+    document.documentElement.dataset.ctx = record.house_no || '1';
     document.getElementById('ctxHouse').textContent = record.house_no || '—';
     document.getElementById('ctxName').textContent = record.name || '';
     const link = document.getElementById('ctxOtherLink');
@@ -1033,6 +1037,7 @@
     if (landing) landing.style.display = 'none';
   }
   function hideContextBar() {
+    clearContextState();
     const bar = document.getElementById('contextBar');
     if (bar) bar.hidden = true;
     const landing = document.getElementById('landingSection');

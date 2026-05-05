@@ -1078,6 +1078,9 @@
     history.replaceState(null, '', url);
     updateNavLinks(null);
   }
+  function clearContextState() {
+    delete document.documentElement.dataset.ctx;
+  }
   function updateNavLinks(houseNo) {
     // Inject ?house=X into cross-page nav links so context follows the user
     const navVehicle = document.getElementById('navVehicle');
@@ -1087,6 +1090,7 @@
   }
   function showContextBar(record) {
     const bar = document.getElementById('contextBar');
+    document.documentElement.dataset.ctx = record.house_no || '1';
     document.getElementById('ctxHouse').textContent = record.house_no || '—';
     document.getElementById('ctxName').textContent = record.name || '';
     const link = document.getElementById('ctxOtherLink');
@@ -1099,6 +1103,7 @@
     if (landing) landing.style.display = 'none';
   }
   function hideContextBar() {
+    clearContextState();
     const bar = document.getElementById('contextBar');
     if (bar) bar.hidden = true;
     const landing = document.getElementById('landingSection');
@@ -1108,6 +1113,7 @@
       result.style.display = 'none';
       result.innerHTML = '';
     }
+    currentRecord = {};
   }
   document.addEventListener('DOMContentLoaded', () => {
     const exitBtn = document.getElementById('ctxExit');
