@@ -265,35 +265,41 @@
       color: var(--text-body);
       font-size: 17px;
       line-height: 1.7;
-      max-width: 520px;
+      max-width: 620px;
       margin: 0 auto 32px;
     }
 
     .search-box {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .search-field {
+      min-height: 56px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 8px;
+      padding: 0 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       box-shadow: 0 2px 12px rgba(60,40,20,0.05);
-      max-width: 520px;
-      margin: 0 auto;
       transition: border-color 0.18s, box-shadow 0.18s;
     }
-    .search-box:focus-within {
+    .search-field:focus-within {
       border-color: var(--accent);
       box-shadow: 0 4px 20px rgba(196,122,44,0.12);
     }
     .search-icon {
-      width: 38px; height: 38px;
-      background: var(--accent-pale);
+      width: 20px; height: 20px;
       color: var(--accent-deep);
-      border-radius: 9px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
       flex-shrink: 0;
+      opacity: 0.75;
     }
     .search-input {
       flex: 1;
@@ -304,7 +310,7 @@
       font-size: 16px;
       font-weight: 500;
       color: var(--text);
-      padding: 8px 4px;
+      padding: 0;
       min-width: 0;
       text-align: left;
     }
@@ -313,8 +319,9 @@
       background: var(--accent);
       color: #fff;
       border: none;
-      padding: 11px 22px;
-      border-radius: 9px;
+      min-height: 56px;
+      padding: 0 22px;
+      border-radius: 14px;
       font-size: 14px;
       font-weight: 600;
       font-family: inherit;
@@ -553,6 +560,13 @@
     .vehicle-summary-meta {
       font-size: 13px;
       color: var(--text-soft);
+      line-height: 1.5;
+    }
+    .vehicle-summary-hint {
+      font-size: 12px;
+      color: var(--accent-text);
+      margin-top: 4px;
+      font-weight: 500;
     }
     .vehicle-summary-arrow {
       color: var(--accent);
@@ -728,7 +742,7 @@
     .vehicle-link-icon { font-size: 22px; flex-shrink: 0; }
     .vehicle-link-body { flex: 1; }
     .vehicle-link-title { font-size: 14px; font-weight: 600; color: var(--text); }
-    .vehicle-link-meta { font-size: 12px; color: var(--text-soft); margin-top: 1px; }
+    .vehicle-link-meta { font-size: 12px; color: var(--text-soft); margin-top: 2px; line-height: 1.45; }
     .vehicle-link-arrow { color: var(--accent); font-size: 16px; font-weight: 500; }
 
     .modal-footer {
@@ -848,28 +862,21 @@
 
       .landing-title { font-size: 30px; }
       .landing-intro { font-size: 15px; }
-      /* Mobile search: keep icon+input together as a clear search field, button below */
       .search-box {
-        flex-wrap: wrap;
+        grid-template-columns: 1fr;
         gap: 8px;
-        padding: 8px;
       }
-      .search-box .search-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 15px;
-        flex-shrink: 0;
+      .search-field {
+        min-height: 54px;
+        padding: 0 14px;
       }
+      .search-box .search-icon { font-size: 17px; }
       .search-input {
-        flex: 1 1 auto;
-        min-width: 0;
-        padding: 9px 4px;
-        font-size: 15px;
-        text-align: left;
+        font-size: 18px;
       }
       .search-btn {
         width: 100%;
-        padding: 12px 22px;
+        min-height: 52px;
       }
 
       .owner-bar { padding: 14px 16px; gap: 12px; flex-wrap: wrap; }
@@ -928,8 +935,10 @@
     <p class="landing-intro">ตรวจสอบและแจ้งแก้ไขชื่อ อีเมล หรือเบอร์โทร</p>
 
     <form class="search-box" id="searchForm" autocomplete="off">
-      <div class="search-icon" aria-hidden="true">🔍</div>
-      <input class="search-input" id="searchInput" type="text" placeholder="ต่อเลขบ้าน หรือใส่เบอร์โทร" inputmode="text" />
+      <label class="search-field" for="searchInput">
+        <div class="search-icon" aria-hidden="true">🔍</div>
+        <input class="search-input" id="searchInput" type="text" placeholder="ต่อเลขบ้าน หรือใส่เบอร์โทร" inputmode="text" />
+      </label>
       <button type="submit" class="search-btn">ค้นหา</button>
     </form>
 
@@ -983,7 +992,7 @@
         <div class="vehicle-link-icon">🚗</div>
         <div class="vehicle-link-body">
           <div class="vehicle-link-title">จัดการทะเบียนรถ</div>
-          <div class="vehicle-link-meta">เพิ่ม/แก้ไข/ลบทะเบียนรถ ทำที่หน้า Vehicle Access</div>
+          <div class="vehicle-link-meta">เพิ่ม แก้ไข หรือลบทะเบียนรถที่หน้า ทะเบียนรถ</div>
         </div>
         <div class="vehicle-link-arrow">→</div>
       </a>
@@ -1272,6 +1281,7 @@
         <div class="vehicle-summary-body">
           <div class="vehicle-summary-title">ทะเบียนรถ ${totalVeh > 0 ? `(${totalVeh} คัน)` : ''}</div>
           <div class="vehicle-summary-meta">${vehMeta}</div>
+          <div class="vehicle-summary-hint">เปิดหน้าทะเบียนรถ</div>
         </div>
         <div class="vehicle-summary-arrow">→</div>
       </a>
