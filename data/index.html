@@ -114,6 +114,80 @@
       color: #fff;
     }
 
+    /* ─── CONTEXT BAR (cross-page session) ─── */
+    .context-bar {
+      background: var(--accent-pale);
+      border-bottom: 1px solid var(--accent-soft);
+      padding: 10px 24px;
+      position: sticky;
+      top: 72px;
+      z-index: 99;
+      animation: slideDown 0.25s ease;
+    }
+    .context-bar[hidden] { display: none; }
+    .context-bar-inner {
+      max-width: 740px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .context-bar-pin {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .context-bar-info {
+      flex: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+    .context-bar-house { color: var(--accent-deep); font-weight: 500; }
+    .context-bar-house strong { font-weight: 700; }
+    .context-bar-name { color: var(--text-soft); font-size: 13px; }
+    .context-bar-link {
+      font-size: 12px;
+      color: var(--accent-deep);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.6);
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .context-bar-link:hover { background: #fff; }
+    .context-bar-exit {
+      background: transparent;
+      border: 1.5px solid var(--accent-soft);
+      color: var(--accent-deep);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .context-bar-exit:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
     /* ─── MAIN ─── */
     .main {
       max-width: 740px;
@@ -774,11 +848,23 @@
     </div>
   </a>
   <div class="header-actions">
-    <a href="/vehicle/" class="header-btn">ทะเบียนรถ</a>
+    <a href="/vehicle/" class="header-btn" id="navVehicle">ทะเบียนรถ</a>
     <a href="admin.html" class="header-btn">Admin</a>
     <a href="/" class="header-btn">← หน้าแรก</a>
   </div>
 </header>
+
+<div class="context-bar" id="contextBar" hidden>
+  <div class="context-bar-inner">
+    <div class="context-bar-pin">📍</div>
+    <div class="context-bar-info">
+      <span class="context-bar-house">บ้าน <strong id="ctxHouse">—</strong></span>
+      <span class="context-bar-name" id="ctxName"></span>
+    </div>
+    <a class="context-bar-link" id="ctxOtherLink" href="/vehicle/">→ ทะเบียนรถ</a>
+    <button class="context-bar-exit" id="ctxExit" type="button">ออก</button>
+  </div>
+</div>
 
 <main class="main">
 
@@ -901,6 +987,72 @@
   let currentRecord = {};
   let modalInitialState = null;
   let isSubmitting = false;
+
+  // ── Cross-page session context (Level 1+2+3) ──
+  const SESSION_KEY = 'pattra_current_house';
+
+  function getStoredHouse() {
+    const url = new URLSearchParams(location.search);
+    const fromUrl = url.get('house');
+    if (fromUrl) {
+      sessionStorage.setItem(SESSION_KEY, fromUrl);
+      return fromUrl;
+    }
+    return sessionStorage.getItem(SESSION_KEY);
+  }
+  function setStoredHouse(houseNo) {
+    if (!houseNo) return;
+    sessionStorage.setItem(SESSION_KEY, houseNo);
+    const url = new URL(location.href);
+    url.searchParams.set('house', houseNo);
+    history.replaceState(null, '', url);
+    updateNavLinks(houseNo);
+  }
+  function clearStoredHouse() {
+    sessionStorage.removeItem(SESSION_KEY);
+    const url = new URL(location.href);
+    url.searchParams.delete('house');
+    history.replaceState(null, '', url);
+    updateNavLinks(null);
+  }
+  function updateNavLinks(houseNo) {
+    // Inject ?house=X into cross-page nav links so context follows the user
+    const navVehicle = document.getElementById('navVehicle');
+    if (navVehicle) {
+      navVehicle.href = houseNo ? `/vehicle/?house=${encodeURIComponent(houseNo)}` : '/vehicle/';
+    }
+  }
+  function showContextBar(record) {
+    const bar = document.getElementById('contextBar');
+    document.getElementById('ctxHouse').textContent = record.house_no || '—';
+    document.getElementById('ctxName').textContent = record.name || '';
+    const link = document.getElementById('ctxOtherLink');
+    if (link) {
+      link.href = `/vehicle/?house=${encodeURIComponent(record.house_no)}`;
+      link.textContent = '→ ทะเบียนรถ';
+    }
+    bar.hidden = false;
+    const landing = document.getElementById('landingSection');
+    if (landing) landing.style.display = 'none';
+  }
+  function hideContextBar() {
+    const bar = document.getElementById('contextBar');
+    if (bar) bar.hidden = true;
+    const landing = document.getElementById('landingSection');
+    if (landing) landing.style.display = '';
+    const result = document.getElementById('resultSection');
+    if (result) {
+      result.style.display = 'none';
+      result.innerHTML = '';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const exitBtn = document.getElementById('ctxExit');
+    if (exitBtn) exitBtn.addEventListener('click', () => {
+      clearStoredHouse();
+      hideContextBar();
+    });
+  });
 
   // ── Censoring helpers (preserve original) ──
   function censorPhone(p) {
@@ -1046,7 +1198,7 @@
         </div>
       </div>
 
-      <a href="/vehicle/" class="vehicle-summary">
+      <a href="/vehicle/?house=${encodeURIComponent(r.house_no)}" class="vehicle-summary">
         <div class="vehicle-summary-icon">🚗</div>
         <div class="vehicle-summary-body">
           <div class="vehicle-summary-title">ทะเบียนรถ ${totalVeh > 0 ? `(${totalVeh} คัน)` : ''}</div>
@@ -1215,12 +1367,7 @@
     }
   }
 
-  // ── Init ──
-  document.getElementById('searchForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const q = document.getElementById('searchInput').value.trim();
-    if (!q) return;
-
+  async function performSearch(q) {
     if (allData.length === 0) {
       const ok = await loadData();
       if (!ok) {
@@ -1232,12 +1379,42 @@
             <div class="empty-title">ไม่สามารถโหลดข้อมูลได้</div>
             <div class="empty-desc">ลองรีเฟรชหน้าหรือ <a href="/report/">ติดต่อนิติบุคคล</a></div>
           </div>`;
-        return;
+        return null;
       }
     }
+    const found = findRecord(q);
+    renderResult(found);
+    if (found) {
+      setStoredHouse(found.house_no);
+      showContextBar(found);
+    }
+    return found;
+  }
 
-    renderResult(findRecord(q));
+  // ── Init ──
+  document.getElementById('searchForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    performSearch(q);
   });
+
+  // Auto-load from URL/session context on page open
+  (async function autoLoadFromContext() {
+    const h = getStoredHouse();
+    updateNavLinks(h);
+    if (!h) return;
+    const found = await performSearch(h);
+    if (!found) {
+      // Stale session — clear and let user search fresh
+      clearStoredHouse();
+      hideContextBar();
+    } else {
+      // Pre-fill search input so user can change house easily
+      const inp = document.getElementById('searchInput');
+      if (inp) inp.value = h;
+    }
+  })();
 
   // Pre-fetch in background
   if ('requestIdleCallback' in window) {
