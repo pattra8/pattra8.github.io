@@ -1115,11 +1115,11 @@
     document.getElementById('edit_cars').value        = plateDisplayValue(r.cars);
     document.getElementById('edit_motorcycles').value = plateDisplayValue(r.motorcycles);
     originalSnap = getFormValues();
-    document.getElementById('editModal').classList.add('show');
+    document.getElementById('editModal').classList.add('active');
   }
 
   function closeEditModal() {
-    document.getElementById('editModal').classList.remove('show');
+    document.getElementById('editModal').classList.remove('active');
     editingIndex = -1; originalSnap = null;
   }
 
