@@ -1002,14 +1002,14 @@
         `;
       }).join('');
 
-      // Show LPR note above motorcycle section when there are motorcycles
+      // Show LPR note after motorcycle section when there are motorcycles
       const motoNoteHtml = motos.length > 0 ? `
         <div class="lpr-note">
           <span class="lpr-note-icon">ℹ️</span>
           <div><strong>ระบบ LPR ปัจจุบันรองรับเฉพาะรถยนต์</strong> — ทะเบียนมอเตอร์ไซค์เก็บไว้สำหรับใช้งานในอนาคตเมื่อระบบรองรับ</div>
         </div>` : '';
 
-      listHtml = `<div class="vehicle-list">${carsHtml}${motoNoteHtml}${motosHtml}</div>`;
+      listHtml = `<div class="vehicle-list">${carsHtml}${motosHtml}${motoNoteHtml}</div>`;
     }
 
     sec.innerHTML = ownerHtml + listHtml;
