@@ -992,6 +992,29 @@
       gap: 18px;
       opacity: 0.88;
     }
+    .req-cancel-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #999;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .req-cancel-btn:hover {
+      border-color: #e57373;
+      color: #c0392b;
+      background: #fff5f5;
+    }
+    .req-cancel-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
     /* Pending plate — square, thick dashed border, no rounding */
     .req-plate {
@@ -2225,6 +2248,45 @@
     return refreshPendingRequests(houseNo);
   }
 
+  async function cancelPendingRequest(issueNumber, btn) {
+    if (!confirm('ยกเลิกคำร้องนี้ใช่ไหม?\nคำร้องจะถูกปิด และต้องส่งใหม่ถ้าต้องการเปลี่ยนแปลงภายหลัง')) return;
+    btn.disabled = true;
+    btn.textContent = 'กำลังยกเลิก...';
+    try {
+      const base = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues/${issueNumber}`;
+      const headers = {
+        Authorization: `token ${GH_TOKEN}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      };
+      await fetch(`${base}/comments`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ body: '🚫 ยกเลิกคำร้องโดยเจ้าของบ้าน' })
+      });
+      const closeRes = await fetch(base, {
+        method: 'PATCH', headers,
+        body: JSON.stringify({ state: 'closed' })
+      });
+      if (!closeRes.ok) throw new Error('close failed');
+      const card = document.getElementById(`req-card-${issueNumber}`);
+      if (card) {
+        card.style.transition = 'opacity 0.3s, transform 0.3s';
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(12px)';
+        setTimeout(() => {
+          card.remove();
+          // ถ้าไม่มี req-card เหลือ ลบ pending section ทั้งก้อน
+          const section = document.getElementById('pendingSection');
+          if (section && !section.querySelector('.req-card')) section.remove();
+        }, 320);
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'ยกเลิก';
+      alert('ไม่สามารถยกเลิกคำร้องได้: ' + err.message);
+    }
+  }
+
   function _renderPendingInto(pendingEl, houseNo, issues) {
     const openIssues = issues.filter(i => i.state === 'open');
     if (openIssues.length === 0) { pendingEl.remove(); return; }
@@ -2239,8 +2301,9 @@
       } catch (_) {}
       const badgeLabel = action === 'add' ? 'รอเพิ่ม' : action === 'edit' ? 'รอแก้ไข' : 'รอลบ';
       const badgeCls   = action === 'delete' ? 'error' : 'pending';
+      const issueNum = issue.number;
       return `
-        <div class="req-card">
+        <div class="req-card" id="req-card-${issueNum}">
           <div class="req-plate${isMoto ? ' req-moto' : ''}">${plate ? esc(plate) : '—'}</div>
           <div class="req-info">
             <div class="req-info-row">
@@ -2250,6 +2313,7 @@
             </div>
             <div class="req-meta">ส่งเมื่อ ${esc(formatIssueDate(issue.created_at))}</div>
           </div>
+          <button class="req-cancel-btn" onclick="cancelPendingRequest(${issueNum}, this)">ยกเลิก</button>
         </div>`;
     }).join('');
 
