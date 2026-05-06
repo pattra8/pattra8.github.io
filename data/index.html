@@ -704,6 +704,17 @@
       font-size: 12.5px;
       line-height: 1.45;
     }
+    .resident-pin-link {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--accent-text);
+      font: inherit;
+      font-weight: 700;
+      padding: 0;
+      cursor: pointer;
+    }
+    .resident-pin-link:hover { text-decoration: underline; }
     .resident-pin-error {
       display: none;
       background: #fff3f0;
@@ -1336,6 +1347,100 @@
     return data;
   }
 
+  async function resetResidentPin(houseNo, identity, newPin) {
+    const res = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'reset',
+        houseNo: normalizeHouseForAuth(houseNo),
+        name: identity.name,
+        phone: identity.phone,
+        email: identity.email,
+        newPin
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      const err = new Error(data.error || 'Reset failed');
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  function requestResidentPinReset(record, onDone) {
+    const houseNo = normalizeHouseForAuth(record.house_no);
+    const overlay = document.createElement('div');
+    overlay.className = 'resident-pin-overlay';
+    overlay.innerHTML = `
+      <form class="resident-pin-modal" id="residentPinResetForm">
+        <div class="resident-pin-eyebrow">Resident Access</div>
+        <h2>ลืม PIN บ้าน ${esc(houseNo)}</h2>
+        <div class="resident-pin-desc">กรอกข้อมูลให้ตรงอย่างน้อย 2 ช่อง แล้วตั้ง PIN ใหม่ 6 หลัก</div>
+        <input class="resident-pin-house" value="${esc(houseNo)}" readonly />
+        <input class="resident-pin-input" id="resetNameInput" type="text" placeholder="ชื่อ-นามสกุล" autocomplete="name" />
+        <div style="height:10px"></div>
+        <input class="resident-pin-input" id="resetPhoneInput" type="tel" placeholder="เบอร์โทรศัพท์" autocomplete="tel" />
+        <div style="height:10px"></div>
+        <input class="resident-pin-input" id="resetEmailInput" type="email" placeholder="อีเมล" autocomplete="email" />
+        <div style="height:10px"></div>
+        <input class="resident-pin-input" id="resetNewPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="PIN ใหม่ 6 หลัก" />
+        <div style="height:10px"></div>
+        <input class="resident-pin-input" id="resetConfirmPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="ยืนยัน PIN ใหม่" />
+        <div class="resident-pin-error" id="residentPinResetError"></div>
+        <div class="resident-pin-actions">
+          <button class="resident-pin-cancel" type="button" id="residentPinResetCancel">ยกเลิก</button>
+          <button class="resident-pin-submit" type="submit" id="residentPinResetSubmit">ตั้ง PIN ใหม่</button>
+        </div>
+      </form>
+    `;
+    document.body.appendChild(overlay);
+    const errorBox = overlay.querySelector('#residentPinResetError');
+    const submit = overlay.querySelector('#residentPinResetSubmit');
+    const close = () => overlay.remove();
+    overlay.querySelector('#residentPinResetCancel').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    overlay.querySelector('#residentPinResetForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const identity = {
+        name: overlay.querySelector('#resetNameInput').value.trim(),
+        phone: overlay.querySelector('#resetPhoneInput').value.trim(),
+        email: overlay.querySelector('#resetEmailInput').value.trim()
+      };
+      const newPin = overlay.querySelector('#resetNewPinInput').value.trim();
+      const confirmPin = overlay.querySelector('#resetConfirmPinInput').value.trim();
+      if ([identity.name, identity.phone, identity.email].filter(Boolean).length < 2) {
+        errorBox.textContent = 'กรุณากรอกข้อมูลอย่างน้อย 2 ช่อง';
+        errorBox.classList.add('active');
+        return;
+      }
+      if (!/^\d{6}$/.test(newPin) || newPin !== confirmPin) {
+        errorBox.textContent = 'PIN ใหม่ต้องเป็นตัวเลข 6 หลัก และตรงกับช่องยืนยัน';
+        errorBox.classList.add('active');
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = 'กำลังตั้ง PIN...';
+      errorBox.classList.remove('active');
+      try {
+        await resetResidentPin(houseNo, identity, newPin);
+        setResidentUnlock(houseNo);
+        close();
+        if (typeof onDone === 'function') onDone();
+        alert('ตั้ง PIN ใหม่เรียบร้อยแล้ว');
+      } catch (err) {
+        errorBox.textContent = err.status === 403
+          ? 'ข้อมูลไม่ตรง กรุณาตรวจสอบอย่างน้อย 2 ช่อง'
+          : 'ไม่สามารถตั้ง PIN ใหม่ได้ กรุณาลองใหม่';
+        errorBox.classList.add('active');
+        submit.disabled = false;
+        submit.textContent = 'ตั้ง PIN ใหม่';
+      }
+    });
+    setTimeout(() => overlay.querySelector('#resetNameInput')?.focus(), 80);
+  }
+
   function requestResidentPin(record) {
     return new Promise(resolve => {
       const houseNo = normalizeHouseForAuth(record.house_no);
@@ -1349,8 +1454,7 @@
           <input class="resident-pin-house" value="${esc(houseNo)}" readonly />
           <input class="resident-pin-input" id="residentPinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="PIN 6 หลัก" />
           <div class="resident-pin-help">
-            <span>ปลดล็อกบ้านนี้ไว้ 30 วันในเครื่องนี้</span>
-            <span>ลืม PIN? ติดต่อนิติบุคคล</span>
+            <button class="resident-pin-link" type="button" id="residentPinForgot">ลืม PIN?</button>
           </div>
           <div class="resident-pin-error" id="residentPinError"></div>
           <div class="resident-pin-actions">
@@ -1368,6 +1472,10 @@
         resolve(value);
       };
       overlay.querySelector('#residentPinCancel').addEventListener('click', () => close(false));
+      overlay.querySelector('#residentPinForgot').addEventListener('click', () => {
+        overlay.remove();
+        requestResidentPinReset(record, () => resolve(true));
+      });
       overlay.addEventListener('click', e => {
         if (e.target === overlay) close(false);
       });
@@ -1608,6 +1716,34 @@
           <div class="info-body">
             <div class="info-label">เบอร์โทรศัพท์</div>
             ${phoneShown}
+          </div>
+        </div>
+      </div>
+
+      <div class="info-header">
+        <div class="info-title">ข้อมูลที่ดิน</div>
+      </div>
+
+      <div class="info-list">
+        <div class="info-row">
+          <div class="info-icon">📄</div>
+          <div class="info-body">
+            <div class="info-label">เลขที่โฉนด</div>
+            <div class="info-value ${r.deed_no ? '' : 'empty'}">${esc(r.deed_no || 'ไม่มีข้อมูล')}</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">🧭</div>
+          <div class="info-body">
+            <div class="info-label">โซน</div>
+            <div class="info-value ${r.zone ? '' : 'empty'}">${esc(r.zone || 'ไม่มีข้อมูล')}</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon">📍</div>
+          <div class="info-body">
+            <div class="info-label">แปลง</div>
+            <div class="info-value ${r.plot ? '' : 'empty'}">${esc(r.plot || 'ไม่มีข้อมูล')}</div>
           </div>
         </div>
       </div>

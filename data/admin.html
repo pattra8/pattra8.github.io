@@ -899,6 +899,9 @@
       📬 รอ Approve
       <span class="tab-badge hidden" id="pendingBadge">0</span>
     </button>
+    <button class="tab-btn" id="tabPins" onclick="switchTab('pins')">
+      🔑 PIN ลูกบ้าน
+    </button>
   </div>
 
   <!-- Tab: Residents -->
@@ -943,6 +946,28 @@
         <div class="big">⏳</div>
         กำลังโหลดคำร้อง...
       </div>
+    </div>
+  </div>
+
+  <!-- Tab: Resident PIN -->
+  <div id="pinsTab" style="display:none">
+    <div style="max-width:760px;margin:36px auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
+      <h2 style="margin:0 0 8px;font-size:1.7rem;">🔑 Generate PIN ลูกบ้าน</h2>
+      <p style="margin:0 0 22px;color:var(--text-muted);">ใช้กรณีลูกบ้านทัก LINE มาขอ PIN ใหม่ ระบบจะสุ่ม PIN 6 หลักและบันทึกทับ PIN เดิมทันที</p>
+      <label style="display:block;font-weight:700;margin-bottom:8px;">บ้านเลขที่</label>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:12px;">
+        <input id="pinHouseInput" type="text" placeholder="เช่น 38/8" style="padding:14px 16px;border:1px solid var(--border);border-radius:12px;font-size:1.05rem;font-family:inherit;" />
+        <button class="approve-btn" id="pinGenerateBtn" onclick="generateResidentPinForAdmin()">Generate PIN</button>
+      </div>
+      <div id="pinAdminResult" style="display:none;margin-top:18px;padding:18px;border-radius:14px;background:#f7e6cd;color:#855015;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:6px;">PIN ใหม่</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <code id="pinAdminValue" style="font-size:2rem;font-weight:800;letter-spacing:4px;background:#fff;padding:10px 14px;border-radius:10px;color:#2a2218;"></code>
+          <button class="toolbar-btn" onclick="copyGeneratedPin()">Copy</button>
+        </div>
+        <div id="pinAdminHouse" style="margin-top:8px;color:#6b5d4a;"></div>
+      </div>
+      <div id="pinAdminError" style="display:none;margin-top:14px;color:#a33d30;font-weight:700;"></div>
     </div>
   </div>
 
@@ -1015,6 +1040,7 @@
   const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
   const DATA_URL  = 'https://pattra8.github.io/data/residents.json';
   const LPR_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprPlateSync';
+  const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
   const GH_OWNER  = 'pattra8';
   const GH_REPO   = 'pattra8.github.io';
   const GH_PATH   = 'data/residents.json';
@@ -1121,9 +1147,56 @@
     currentTab = tab;
     document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
+    document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
+    document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
     if (tab === 'pending') loadPending();
+  }
+
+  async function generateResidentPinForAdmin() {
+    const houseNo = document.getElementById('pinHouseInput').value.trim();
+    const btn = document.getElementById('pinGenerateBtn');
+    const result = document.getElementById('pinAdminResult');
+    const error = document.getElementById('pinAdminError');
+    result.style.display = 'none';
+    error.style.display = 'none';
+    if (!/^38\/\d{1,2}$/.test(houseNo.replace(/\s+/g, ''))) {
+      error.textContent = 'กรุณาใส่บ้านเลขที่ เช่น 38/8';
+      error.style.display = 'block';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'กำลัง generate...';
+    try {
+      const res = await fetch(RESIDENT_AUTH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'adminReset',
+          houseNo,
+          githubToken: GH_TOKEN
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      document.getElementById('pinAdminValue').textContent = data.pin;
+      document.getElementById('pinAdminHouse').textContent = `บ้าน ${data.houseNo || houseNo} · ส่ง PIN นี้ให้ลูกบ้าน และแนะนำให้เปลี่ยนเองภายหลังได้`;
+      result.style.display = 'block';
+    } catch (err) {
+      error.textContent = 'Generate PIN ไม่สำเร็จ: ' + err.message;
+      error.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate PIN';
+    }
+  }
+
+  async function copyGeneratedPin() {
+    const pin = document.getElementById('pinAdminValue').textContent.trim();
+    if (!pin) return;
+    await navigator.clipboard.writeText(pin);
+    alert('Copy PIN แล้ว');
   }
 
   // ── Load resident data (ดึงตรงจาก GitHub API — ไม่มี CDN cache) ──────────
