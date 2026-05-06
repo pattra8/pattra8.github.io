@@ -522,6 +522,51 @@
       border-radius: 999px;
     }
 
+    /* Land chips — compact read-only row */
+    .land-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      margin-bottom: 0;
+    }
+    .land-chips-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .land-chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-soft);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px 10px;
+    }
+    .land-chip-sub {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .land-chip-sep {
+      color: var(--border);
+      font-size: 14px;
+      user-select: none;
+    }
+
     /* Vehicle summary card (links to /vehicle/) */
     .vehicle-summary {
       margin-top: 18px;
@@ -1720,32 +1765,13 @@
         </div>
       </div>
 
-      <div class="info-header">
-        <div class="info-title">ข้อมูลที่ดิน</div>
-      </div>
-
-      <div class="info-list">
-        <div class="info-row">
-          <div class="info-icon">📄</div>
-          <div class="info-body">
-            <div class="info-label">เลขที่โฉนด</div>
-            <div class="info-value ${r.deed_no ? '' : 'empty'}">${esc(r.deed_no || 'ไม่มีข้อมูล')}</div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-icon">🧭</div>
-          <div class="info-body">
-            <div class="info-label">โซน</div>
-            <div class="info-value ${r.zone ? '' : 'empty'}">${esc(r.zone || 'ไม่มีข้อมูล')}</div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-icon">📍</div>
-          <div class="info-body">
-            <div class="info-label">แปลง</div>
-            <div class="info-value ${r.plot ? '' : 'empty'}">${esc(r.plot || 'ไม่มีข้อมูล')}</div>
-          </div>
-        </div>
+      <div class="land-chips-row">
+        <span class="land-chips-label">ที่ดิน</span>
+        <span class="land-chip"><span class="land-chip-sub">โฉนด</span>${esc(r.deed_no || '—')}</span>
+        <span class="land-chip-sep">·</span>
+        <span class="land-chip"><span class="land-chip-sub">โซน</span>${esc(r.zone || '—')}</span>
+        <span class="land-chip-sep">·</span>
+        <span class="land-chip"><span class="land-chip-sub">แปลง</span>${esc(r.plot || '—')}</span>
       </div>
 
       <a href="/vehicle/?house=${encodeURIComponent(r.house_no)}" class="vehicle-summary">
