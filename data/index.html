@@ -625,6 +625,122 @@
     .modal-overlay.active { display: flex; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+    .resident-pin-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(42,34,24,0.52);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .resident-pin-modal {
+      width: min(420px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(42,34,24,0.22);
+      padding: 24px;
+    }
+    .resident-pin-eyebrow {
+      display: inline-flex;
+      min-height: 28px;
+      padding: 0 12px;
+      align-items: center;
+      border-radius: 999px;
+      background: var(--accent-pale);
+      color: var(--accent-deep);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .resident-pin-modal h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      line-height: 1.2;
+      color: var(--text);
+    }
+    .resident-pin-desc {
+      color: var(--text-soft);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    .resident-pin-house,
+    .resident-pin-input {
+      width: 100%;
+      height: 52px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 0 14px;
+      outline: none;
+    }
+    .resident-pin-house {
+      background: var(--bg-soft);
+      color: var(--accent-deep);
+      margin-bottom: 10px;
+    }
+    .resident-pin-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(196,122,44,0.12);
+    }
+    .resident-pin-help {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 10px 0 16px;
+      color: var(--text-soft);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .resident-pin-error {
+      display: none;
+      background: #fff3f0;
+      border: 1px solid #f0cfc8;
+      color: #a33d30;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+    .resident-pin-error.active { display: block; }
+    .resident-pin-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .resident-pin-actions button {
+      min-height: 48px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .resident-pin-cancel {
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--text-body);
+    }
+    .resident-pin-submit {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+    }
+    .resident-pin-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
     .modal {
       background: var(--card);
       border-radius: 18px;
@@ -922,6 +1038,7 @@
       <span class="context-bar-name" id="ctxName"></span>
     </div>
     <a class="context-bar-link" id="ctxOtherLink" href="/vehicle/">→ ทะเบียนรถ</a>
+    <button class="context-bar-exit" id="ctxChangePin" type="button">เปลี่ยน PIN</button>
     <button class="context-bar-exit" id="ctxExit" type="button">ออก</button>
   </div>
 </div>
@@ -1045,6 +1162,9 @@
   const GH_REPO     = 'pattra8.github.io';
   const GH_ISSUES_TOKEN = ['ghp_vd52kl8z15Ou','ynnC1dJNULJoL3IY','bB0MPGAZ'].join('');
   const DEFAULT_HOUSE_PREFIX = '38/';
+  const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
+  const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
+  const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
   let allData = [];
   let currentRecord = {};
@@ -1122,6 +1242,11 @@
       hideContextBar();
       primeSearchInput();
     });
+    const changePinBtn = document.getElementById('ctxChangePin');
+    if (changePinBtn) changePinBtn.addEventListener('click', () => {
+      const houseNo = currentRecord.house_no || getStoredHouse();
+      requestResidentPinChange(houseNo);
+    });
   });
 
   // ── Censoring helpers (preserve original) ──
@@ -1140,6 +1265,215 @@
 
   function esc(s) {
     return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+
+  function normalizeHouseForAuth(houseNo) {
+    return String(houseNo || '').trim().replace(/\s+/g, '');
+  }
+
+  function getResidentUnlocks() {
+    try {
+      return JSON.parse(localStorage.getItem(RESIDENT_UNLOCK_KEY) || '{}') || {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function setResidentUnlock(houseNo) {
+    const key = normalizeHouseForAuth(houseNo);
+    if (!key) return;
+    const unlocks = getResidentUnlocks();
+    unlocks[key] = Date.now() + RESIDENT_UNLOCK_TTL_MS;
+    localStorage.setItem(RESIDENT_UNLOCK_KEY, JSON.stringify(unlocks));
+  }
+
+  function isResidentUnlocked(houseNo) {
+    const key = normalizeHouseForAuth(houseNo);
+    const unlocks = getResidentUnlocks();
+    const expiresAt = Number(unlocks[key] || 0);
+    if (expiresAt > Date.now()) return true;
+    if (expiresAt) {
+      delete unlocks[key];
+      localStorage.setItem(RESIDENT_UNLOCK_KEY, JSON.stringify(unlocks));
+    }
+    return false;
+  }
+
+  async function verifyResidentPin(houseNo, pin) {
+    const res = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'verify',
+        houseNo: normalizeHouseForAuth(houseNo),
+        pin
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      const err = new Error(data.error || 'Verify failed');
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  async function changeResidentPin(houseNo, oldPin, newPin) {
+    const res = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'change',
+        houseNo: normalizeHouseForAuth(houseNo),
+        oldPin,
+        newPin
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      const err = new Error(data.error || 'Change failed');
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  function requestResidentPin(record) {
+    return new Promise(resolve => {
+      const houseNo = normalizeHouseForAuth(record.house_no);
+      const overlay = document.createElement('div');
+      overlay.className = 'resident-pin-overlay';
+      overlay.innerHTML = `
+        <form class="resident-pin-modal" id="residentPinForm">
+          <div class="resident-pin-eyebrow">Resident Access</div>
+          <h2>ใส่ PIN บ้าน ${esc(houseNo)}</h2>
+          <div class="resident-pin-desc">กรุณาใส่ PIN 6 หลักเพื่อดูข้อมูลเฉพาะของบ้านนี้</div>
+          <input class="resident-pin-house" value="${esc(houseNo)}" readonly />
+          <input class="resident-pin-input" id="residentPinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="PIN 6 หลัก" />
+          <div class="resident-pin-help">
+            <span>ปลดล็อกบ้านนี้ไว้ 30 วันในเครื่องนี้</span>
+            <span>ลืม PIN? ติดต่อนิติบุคคล</span>
+          </div>
+          <div class="resident-pin-error" id="residentPinError"></div>
+          <div class="resident-pin-actions">
+            <button class="resident-pin-cancel" type="button" id="residentPinCancel">ยกเลิก</button>
+            <button class="resident-pin-submit" type="submit" id="residentPinSubmit">เข้าสู่ข้อมูล</button>
+          </div>
+        </form>
+      `;
+      document.body.appendChild(overlay);
+      const input = overlay.querySelector('#residentPinInput');
+      const errorBox = overlay.querySelector('#residentPinError');
+      const submit = overlay.querySelector('#residentPinSubmit');
+      const close = value => {
+        overlay.remove();
+        resolve(value);
+      };
+      overlay.querySelector('#residentPinCancel').addEventListener('click', () => close(false));
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) close(false);
+      });
+      overlay.querySelector('#residentPinForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const pin = input.value.trim();
+        if (!/^\d{6}$/.test(pin)) {
+          errorBox.textContent = 'กรุณาใส่ PIN เป็นตัวเลข 6 หลัก';
+          errorBox.classList.add('active');
+          input.focus();
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = 'กำลังตรวจสอบ...';
+        errorBox.classList.remove('active');
+        try {
+          await verifyResidentPin(houseNo, pin);
+          setResidentUnlock(houseNo);
+          close(true);
+        } catch (err) {
+          errorBox.textContent = err.status === 404
+            ? 'บ้านนี้ยังไม่ได้ตั้ง PIN กรุณาติดต่อนิติบุคคล'
+            : 'PIN ไม่ถูกต้อง กรุณาลองอีกครั้ง';
+          errorBox.classList.add('active');
+          submit.disabled = false;
+          submit.textContent = 'เข้าสู่ข้อมูล';
+          input.select();
+        }
+      });
+      setTimeout(() => input.focus(), 80);
+    });
+  }
+
+  async function ensureResidentUnlocked(record) {
+    if (!record || !record.house_no) return false;
+    if (isResidentUnlocked(record.house_no)) return true;
+    return requestResidentPin(record);
+  }
+
+  function requestResidentPinChange(houseNo) {
+    const cleanHouseNo = normalizeHouseForAuth(houseNo);
+    if (!cleanHouseNo) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'resident-pin-overlay';
+    overlay.innerHTML = `
+      <form class="resident-pin-modal" id="residentPinChangeForm">
+        <div class="resident-pin-eyebrow">Resident Access</div>
+        <h2>เปลี่ยน PIN บ้าน ${esc(cleanHouseNo)}</h2>
+        <div class="resident-pin-desc">ใส่ PIN เดิม และตั้ง PIN ใหม่เป็นตัวเลข 6 หลัก</div>
+        <input class="resident-pin-input" id="oldPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="PIN เดิม" />
+        <div style="height:10px"></div>
+        <input class="resident-pin-input" id="newPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="PIN ใหม่ 6 หลัก" />
+        <div style="height:10px"></div>
+        <input class="resident-pin-input" id="confirmPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="ยืนยัน PIN ใหม่" />
+        <div class="resident-pin-help"><span>ไม่บังคับเปลี่ยน ใช้ PIN เดิมต่อได้</span></div>
+        <div class="resident-pin-error" id="residentPinChangeError"></div>
+        <div class="resident-pin-actions">
+          <button class="resident-pin-cancel" type="button" id="residentPinChangeCancel">ยกเลิก</button>
+          <button class="resident-pin-submit" type="submit" id="residentPinChangeSubmit">บันทึก PIN</button>
+        </div>
+      </form>
+    `;
+    document.body.appendChild(overlay);
+    const oldInput = overlay.querySelector('#oldPinInput');
+    const newInput = overlay.querySelector('#newPinInput');
+    const confirmInput = overlay.querySelector('#confirmPinInput');
+    const errorBox = overlay.querySelector('#residentPinChangeError');
+    const submit = overlay.querySelector('#residentPinChangeSubmit');
+    const close = () => overlay.remove();
+    overlay.querySelector('#residentPinChangeCancel').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    overlay.querySelector('#residentPinChangeForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const oldPin = oldInput.value.trim();
+      const newPin = newInput.value.trim();
+      const confirmPin = confirmInput.value.trim();
+      if (!/^\d{6}$/.test(oldPin) || !/^\d{6}$/.test(newPin)) {
+        errorBox.textContent = 'กรุณาใส่ PIN เป็นตัวเลข 6 หลัก';
+        errorBox.classList.add('active');
+        return;
+      }
+      if (newPin !== confirmPin) {
+        errorBox.textContent = 'PIN ใหม่และช่องยืนยันไม่ตรงกัน';
+        errorBox.classList.add('active');
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = 'กำลังบันทึก...';
+      errorBox.classList.remove('active');
+      try {
+        await changeResidentPin(cleanHouseNo, oldPin, newPin);
+        setResidentUnlock(cleanHouseNo);
+        close();
+        alert('เปลี่ยน PIN เรียบร้อยแล้ว');
+      } catch (err) {
+        errorBox.textContent = err.status === 401
+          ? 'PIN เดิมไม่ถูกต้อง'
+          : 'ไม่สามารถเปลี่ยน PIN ได้ กรุณาลองใหม่';
+        errorBox.classList.add('active');
+        submit.disabled = false;
+        submit.textContent = 'บันทึก PIN';
+      }
+    });
+    setTimeout(() => oldInput.focus(), 80);
   }
 
   // ── Data fetch (preserve original) ──
@@ -1468,11 +1802,15 @@
       }
     }
     const found = findRecord(q);
-    renderResult(found);
-    if (found) {
-      setStoredHouse(found.house_no);
-      showContextBar(found);
+    if (!found) {
+      renderResult(null);
+      return null;
     }
+    const unlocked = await ensureResidentUnlocked(found);
+    if (!unlocked) return null;
+    renderResult(found);
+    setStoredHouse(found.house_no);
+    showContextBar(found);
     return found;
   }
 
