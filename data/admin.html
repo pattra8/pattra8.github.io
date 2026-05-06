@@ -511,35 +511,34 @@
 
     /* ─── PENDING CORRECTIONS ─── */
     .pending-wrap {
-      padding: 12px 20px 24px;
+      padding: 0 28px 28px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
-    /* ── Trello-style compact card ── */
+    /* ── Compact card ── */
     .pending-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-left: 4px solid var(--accent);
       border-radius: 10px;
-      padding: 12px 14px 10px;
+      padding: 14px 16px 12px;
       box-shadow: 0 1px 3px rgba(60,40,20,0.06);
-      max-width: 560px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     /* top row: house + type chip + meta date */
     .pc-top {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .pc-house {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text);
     }
@@ -552,19 +551,33 @@
       color: var(--accent-deep);
     }
     .pc-date {
-      font-size: 10.5px;
+      font-size: 11px;
       color: var(--text-soft);
       margin-left: auto;
     }
 
-    /* change row: FROM pill → editable TO */
+    /* field group: label + change row */
+    .pc-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .pc-field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-soft);
+      letter-spacing: 0.04em;
+      padding-left: 2px;
+    }
+
+    /* change row: FROM → editable TO */
     .pc-change {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: var(--bg-soft);
       border-radius: 7px;
-      padding: 7px 10px;
+      padding: 7px 12px;
     }
     .pc-from {
       font-size: 12px;
@@ -572,19 +585,19 @@
       text-decoration: line-through;
       white-space: nowrap;
       flex-shrink: 0;
-      max-width: 140px;
+      max-width: 180px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .pc-arrow { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+    .pc-arrow { color: var(--text-muted); font-size: 13px; flex-shrink: 0; }
     .pc-to {
       flex: 1;
       border: 1.5px solid var(--accent-pale);
       background: #fffaf0;
       border-radius: 6px;
-      padding: 4px 8px;
+      padding: 5px 10px;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--text);
       outline: none;
@@ -593,17 +606,27 @@
     }
     .pc-to:focus { border-color: var(--accent); }
 
+    /* bottom row: reporter + actions */
+    .pc-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 2px;
+    }
+
     /* reporter row */
     .pc-reporter {
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--text-soft);
     }
 
     /* action buttons row */
     .pc-actions {
       display: flex;
-      gap: 6px;
-      padding-top: 2px;
+      gap: 8px;
+      margin-left: auto;
     }
     .pending-card-header { display: none; } /* legacy — replaced by pc-top */
     .pending-card-meta { display: none; }
@@ -1357,10 +1380,13 @@
     const displayFields = changedFields.length ? changedFields : fields;
 
     const changeRows = displayFields.map(f => `
-      <div class="pc-change">
-        <span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>
-        <span class="pc-arrow">→</span>
-        <input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />
+      <div class="pc-field-group">
+        <div class="pc-field-label">${f.label}</div>
+        <div class="pc-change">
+          <span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>
+          <span class="pc-arrow">→</span>
+          <input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />
+        </div>
       </div>`).join('');
 
     const kindLabel = kind === 'vehicle' ? '🚗 ทะเบียนรถ' : '👤 ข้อมูลลูกบ้าน';
@@ -1373,10 +1399,12 @@
         <span class="pc-date">${submittedDate}</span>
       </div>
       ${changeRows}
-      <div class="pc-reporter">👤 ${escHtml(reporter||'?')} &nbsp;·&nbsp; 📞 ${escHtml(contact||'?')}</div>
-      <div class="pc-actions">
-        <button class="reject-btn" onclick="rejectCorrection(${issue.number}, this)">✕ ปฏิเสธ</button>
-        <button class="approve-btn" onclick="approveCorrection(${issue.number}, '${escHtml(house_no||'')}', this)">✓ Approve</button>
+      <div class="pc-bottom">
+        <div class="pc-reporter">👤 ${escHtml(reporter||'?')} &nbsp;·&nbsp; 📞 ${escHtml(contact||'?')}</div>
+        <div class="pc-actions">
+          <button class="reject-btn" onclick="rejectCorrection(${issue.number}, this)">✕ ปฏิเสธ</button>
+          <button class="approve-btn" onclick="approveCorrection(${issue.number}, '${escHtml(house_no||'')}', this)">✓ Approve</button>
+        </div>
       </div>
     </div>`;
   }
