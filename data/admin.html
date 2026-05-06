@@ -602,6 +602,27 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    .pc-plates-old {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      flex-shrink: 0;
+      max-width: 130px;
+    }
+    .pc-plate-chip-old {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #fff;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-decoration: line-through;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
     .pc-arrow { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
     .pc-to {
       flex: 1;
@@ -1418,15 +1439,25 @@
     const changedFields = fields.filter(f => f.oldVal !== f.newVal);
     const displayFields = changedFields.length ? changedFields : fields;
 
-    const changeRows = displayFields.map(f => `
+    const changeRows = displayFields.map(f => {
+      const fromHtml = f.isPlate
+        ? `<div class="pc-plates-old">${
+            f.oldVal
+              ? f.oldVal.split(',').map(p => p.trim()).filter(Boolean)
+                  .map(p => `<span class="pc-plate-chip-old">${escHtml(p)}</span>`).join('')
+              : '<span class="pc-from">(ว่าง)</span>'
+          }</div>`
+        : `<span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>`;
+      return `
       <div class="pc-field-group">
         <div class="pc-field-label">${f.label}</div>
         <div class="pc-change">
-          <span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>
+          ${fromHtml}
           <span class="pc-arrow">→</span>
           <input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     const kindLabel = kind === 'vehicle' ? '🚗 ทะเบียนรถ' : '👤 ข้อมูลลูกบ้าน';
 
