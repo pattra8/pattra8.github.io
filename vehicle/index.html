@@ -1285,7 +1285,7 @@
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-    }).format(parsed).replace('.', ':');
+    }).format(parsed).replace(/[.֊]/, ':');
 
     return `${dateText} · ${timeText} น.`;
   }
@@ -1706,10 +1706,13 @@
   function formatIssueDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return new Intl.DateTimeFormat('th-TH', {
-      day: 'numeric', month: 'short', year: 'numeric',
+    const datePart = new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    }).format(d);
+    const timePart = new Intl.DateTimeFormat('th-TH', {
       hour: '2-digit', minute: '2-digit', hour12: false
-    }).format(d).replace('.', ':') + ' น.';
+    }).format(d).replace(/[.֊]/, ':');   // fix "17.13" or "17:13" safely
+    return `${datePart} ${timePart} น.`;
   }
 
   async function renderPendingRequests(houseNo) {
