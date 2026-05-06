@@ -1227,13 +1227,10 @@
 
 <script>
   // ── Config (reuses /data/ backend pattern) ──
-  const DATA_URL    = 'https://raw.githubusercontent.com/pattra8/pattra8.github.io/main/data/residents.json';
-  const GH_DATA_URL = 'https://api.github.com/repos/pattra8/pattra8.github.io/contents/data/residents.json?ref=main';
-  const GH_OWNER    = 'pattra8';
-  const GH_REPO     = 'pattra8.github.io';
-  const GH_TOKEN    = ['ghp_vd52kl8z15Ou','ynnC1dJNULJoL3IY','bB0MPGAZ'].join('');
   const DEFAULT_HOUSE_PREFIX = '38/';
-  const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
+  const FUNCTION_BASE     = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net';
+  const RESIDENT_AUTH_URL = `${FUNCTION_BASE}/residentPinAuth`;
+  const PIN_SESSION_KEY   = 'pattra_pin_sessions_v1';
   const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
   const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -1330,24 +1327,19 @@
   });
 
   // ── Data fetch ──
-  async function fetchData() {
-    try {
-      const apiRes = await fetch(`${GH_DATA_URL}&t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          Authorization: `token ${GH_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json'
-        }
-      });
-      if (apiRes.ok) {
-        const meta = await apiRes.json();
-        const json = decodeURIComponent(escape(atob((meta.content || '').replace(/\n/g, ''))));
-        return JSON.parse(json);
-      }
-    } catch (_) {}
-    const rawRes = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: 'no-store' });
-    if (!rawRes.ok) throw new Error(`HTTP ${rawRes.status}`);
-    return rawRes.json();
+  async function fetchResidentData(houseNo, pin) {
+    const res = await fetch(`${FUNCTION_BASE}/getResidentData`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ houseNo, pin })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) {
+      const err = new Error(json.error || `HTTP ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    return json.resident;
   }
 
   function normaliseRecord(r) {
@@ -1425,6 +1417,25 @@
       localStorage.setItem(RESIDENT_UNLOCK_KEY, JSON.stringify(unlocks));
     }
     return false;
+  }
+
+  function storePinSession(houseNo, pin) {
+    const key = normalizeHouseForAuth(houseNo);
+    if (!key || !pin) return;
+    try {
+      const sessions = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
+      sessions[key] = pin;
+      sessionStorage.setItem(PIN_SESSION_KEY, JSON.stringify(sessions));
+    } catch (_) {}
+  }
+
+  function getPinSession(houseNo) {
+    const key = normalizeHouseForAuth(houseNo);
+    if (!key) return null;
+    try {
+      const sessions = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
+      return sessions[key] || null;
+    } catch (_) { return null; }
   }
 
   async function verifyResidentPin(houseNo, pin) {
@@ -1612,6 +1623,7 @@
         errorBox.classList.remove('active');
         try {
           await verifyResidentPin(houseNo, pin);
+          storePinSession(houseNo, pin);
           setResidentUnlock(houseNo);
           close(true);
         } catch (err) {
@@ -1630,7 +1642,8 @@
 
   async function ensureResidentUnlocked(record) {
     if (!record || !record.house_no) return false;
-    if (isResidentUnlocked(record.house_no)) return true;
+    const houseNo = normalizeHouseForAuth(record.house_no);
+    if (isResidentUnlocked(houseNo) && getPinSession(houseNo)) return true;
     return requestResidentPin(record);
   }
 
@@ -2070,21 +2083,26 @@
     ].filter(Boolean).join('\n');
 
     try {
-      const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues`, {
+      const pin = getPinSession(normalizeHouseForAuth(currentRecord.house_no));
+      const res = await fetch(`${FUNCTION_BASE}/submitRequest`, {
         method: 'POST',
-        headers: {
-          Authorization: `token ${GH_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ title: issueTitle, body: issueBody, labels: ['vehicle'] })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          houseNo: currentRecord.house_no,
+          pin: pin || '',
+          title: issueTitle,
+          body: issueBody,
+          labels: ['vehicle']
+        })
       });
 
-      const createdIssue = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const err = createdIssue || {};
-        throw new Error(err.message || `HTTP ${res.status}`);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || `HTTP ${res.status}`);
       }
+      const createdIssue = { number: json.issue_number, html_url: json.issue_url,
+        title: issueTitle, body: issueBody, state: 'open',
+        created_at: new Date().toISOString() };
       optimisticPendingIssues = [
         createdIssue,
         ...optimisticPendingIssues.filter(issue => issue.number !== createdIssue.number)
@@ -2175,31 +2193,16 @@
 
   async function fetchPendingRequests(houseNo) {
     try {
-      const res = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues?labels=vehicle&state=open&per_page=20`,
-        {
-          headers: {
-            Authorization: `token ${GH_TOKEN}`,
-            Accept: 'application/vnd.github.v3+json'
-          }
-        }
-      );
-      if (!res.ok) return [];
-      const issues = await res.json();
-      // Filter only issues belonging to this house_no
-      return issues.filter(issue => {
-        // Title pattern: [...] บ้าน 38/8 — ...
-        if ((issue.title || '').includes(`บ้าน ${houseNo}`)) return true;
-        // Also try to parse body JSON for house_no
-        try {
-          const bodyMatch = (issue.body || '').match(/```json\s*([\s\S]*?)```/);
-          if (bodyMatch) {
-            const data = JSON.parse(bodyMatch[1]);
-            if ((data.house_no || '') === houseNo) return true;
-          }
-        } catch (_) {}
-        return false;
+      const pin = getPinSession(normalizeHouseForAuth(houseNo));
+      if (!pin) return [];
+      const res = await fetch(`${FUNCTION_BASE}/getPendingRequests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ houseNo, pin })
       });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.issues || [];
     } catch (_) {
       return [];
     }
@@ -2253,21 +2256,16 @@
     btn.disabled = true;
     btn.textContent = 'กำลังยกเลิก...';
     try {
-      const base = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues/${issueNumber}`;
-      const headers = {
-        Authorization: `token ${GH_TOKEN}`,
-        Accept: 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      };
-      await fetch(`${base}/comments`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ body: '🚫 ยกเลิกคำร้องโดยเจ้าของบ้าน' })
+      const houseNo = currentRecord ? normalizeHouseForAuth(currentRecord.house_no) : '';
+      const pin = getPinSession(houseNo);
+      if (!pin) throw new Error('session หมดอายุ กรุณา login ใหม่');
+      const res = await fetch(`${FUNCTION_BASE}/cancelRequest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ houseNo, pin, issue_number: issueNumber })
       });
-      const closeRes = await fetch(base, {
-        method: 'PATCH', headers,
-        body: JSON.stringify({ state: 'closed' })
-      });
-      if (!closeRes.ok) throw new Error('close failed');
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) throw new Error(json.error || 'cancel failed');
       const card = document.getElementById(`req-card-${issueNumber}`);
       if (card) {
         card.style.transition = 'opacity 0.3s, transform 0.3s';
@@ -2275,7 +2273,6 @@
         card.style.transform = 'translateX(12px)';
         setTimeout(() => {
           card.remove();
-          // ถ้าไม่มี req-card เหลือ ลบ pending section ทั้งก้อน
           const section = document.getElementById('pendingSection');
           if (section && !section.querySelector('.req-card')) section.remove();
         }, 320);
@@ -2327,26 +2324,39 @@
   }
 
   async function performSearch(q) {
-    if (allData.length === 0) {
-      try { allData = (await fetchData()).map(normaliseRecord); }
-      catch (err) { alert('โหลดข้อมูลไม่สำเร็จ: ' + err.message); return null; }
-    }
-    const found = findRecord(q);
-    if (!found) {
+    const houseNo = normalizeHouseForAuth(q);
+    if (!houseNo) {
       const sec = document.getElementById('resultSection');
       sec.style.display = 'block';
-      sec.innerHTML = `
-        <div class="empty">
-          <div class="empty-icon">🔍</div>
-          <div class="empty-title">ไม่พบข้อมูล</div>
-          <div class="empty-desc">ไม่พบบ้านเลขที่หรือเบอร์โทรที่ตรงกัน — ตรวจสอบการพิมพ์อีกครั้ง หรือ <a href="/report/" style="color:var(--accent-text);">ติดต่อนิติบุคคล</a></div>
-        </div>
-      `;
+      sec.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">ไม่พบข้อมูล</div><div class="empty-desc">กรุณาระบุบ้านเลขที่ให้ถูกต้อง</div></div>`;
       currentRecord = null;
       return null;
     }
-    const unlocked = await ensureResidentUnlocked(found);
+
+    const stubRecord = { house_no: houseNo };
+    const unlocked = await ensureResidentUnlocked(stubRecord);
     if (!unlocked) return null;
+
+    const pin = getPinSession(houseNo);
+    if (!pin) return null;
+
+    let resident;
+    try {
+      resident = await fetchResidentData(houseNo, pin);
+    } catch (err) {
+      const sec = document.getElementById('resultSection');
+      sec.style.display = 'block';
+      if (err.status === 404) {
+        sec.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">ไม่พบข้อมูล</div><div class="empty-desc">ไม่พบบ้านเลขที่ ${esc(houseNo)} — ตรวจสอบการพิมพ์อีกครั้ง หรือ <a href="/report/" style="color:var(--accent-text);">ติดต่อนิติบุคคล</a></div></div>`;
+      } else {
+        sec.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">โหลดข้อมูลไม่สำเร็จ</div><div class="empty-desc">กรุณาลองใหม่อีกครั้ง</div></div>`;
+      }
+      currentRecord = null;
+      return null;
+    }
+
+    const found = normaliseRecord(resident);
+    allData = [found];
     currentRecord = found;
     renderResult();
     setStoredHouse(found.house_no);
