@@ -522,15 +522,15 @@
       border-radius: 999px;
     }
 
-    /* Land chips — compact read-only row */
+    /* Land chips — compact read-only row, grayscale to signal non-editable */
     .land-chips-row {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
       padding: 10px 14px;
-      background: var(--bg-soft);
-      border: 1px solid var(--border-soft);
+      background: #f2f2f2;
+      border: 1px solid #e0e0e0;
       border-radius: 12px;
       margin-bottom: 0;
     }
@@ -539,7 +539,7 @@
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: #aaa;
       margin-right: 4px;
     }
     .land-chip {
@@ -548,9 +548,9 @@
       gap: 4px;
       font-size: 13.5px;
       font-weight: 500;
-      color: var(--text-soft);
-      background: var(--card);
-      border: 1px solid var(--border);
+      color: #666;
+      background: #fafafa;
+      border: 1px solid #ddd;
       border-radius: 8px;
       padding: 3px 10px;
     }
@@ -558,11 +558,11 @@
       font-size: 10.5px;
       font-weight: 600;
       letter-spacing: 0.06em;
-      color: var(--text-muted);
+      color: #bbb;
       text-transform: uppercase;
     }
     .land-chip-sep {
-      color: var(--border);
+      color: #ccc;
       font-size: 14px;
       user-select: none;
     }
