@@ -1135,6 +1135,63 @@
     return `<div class="plate ${isMoto ? 'moto' : ''}">${esc(plate)}</div>`;
   }
 
+  function parseResidentDateTime(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+
+    const isoLike = raw.match(
+      /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/,
+    );
+    if (isoLike) {
+      const [, y, m, d, hh = '0', mm = '0', ss = '0'] = isoLike;
+      return new Date(
+        Number(y),
+        Number(m) - 1,
+        Number(d),
+        Number(hh),
+        Number(mm),
+        Number(ss),
+      );
+    }
+
+    const slashLike = raw.match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/,
+    );
+    if (slashLike) {
+      const [, m, d, y, hh = '0', mm = '0', ss = '0'] = slashLike;
+      return new Date(
+        Number(y),
+        Number(m) - 1,
+        Number(d),
+        Number(hh),
+        Number(mm),
+        Number(ss),
+      );
+    }
+
+    const parsed = new Date(raw);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function formatResidentDateTime(value) {
+    const parsed = parseResidentDateTime(value);
+    if (!parsed) return String(value || '').trim();
+
+    const dateText = new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(parsed);
+
+    const timeText = new Intl.DateTimeFormat('th-TH', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(parsed).replace('.', ':');
+
+    return `${dateText} · ${timeText} น.`;
+  }
+
   // For Phase 1: status is heuristic.
   // - Cars: synced if last_updated set, else pending
   // - Motorcycles: LPR system doesn't support motos yet → always "บันทึกแล้ว" (neutral, no LPR claim)
@@ -1201,7 +1258,7 @@
                 <span class="v-type">รถยนต์</span>
                 <span class="status ${st.cls}">${st.label}</span>
               </div>
-              <div class="v-meta">${currentRecord.last_updated ? 'อัปเดตล่าสุด ' + esc(currentRecord.last_updated) : 'ยังไม่ได้อัปเดต'}</div>
+              <div class="v-meta">${currentRecord.last_updated ? 'อัปเดตล่าสุด ' + esc(formatResidentDateTime(currentRecord.last_updated)) : 'ยังไม่ได้อัปเดต'}</div>
             </div>
             <div class="v-actions">
               <button class="v-edit" data-action="edit" data-type="car" data-idx="${i}">แก้ไข</button>
