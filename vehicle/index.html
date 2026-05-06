@@ -850,24 +850,21 @@
       margin-bottom: 12px;
       line-height: 1.6;
     }
+    /* req-card mirrors v-card layout exactly */
     .req-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin-bottom: 8px;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 10px;
       display: flex;
-      gap: 16px;
       align-items: center;
-      transition: border-color 0.18s;
+      gap: 18px;
+      opacity: 0.88;
     }
-    .req-card:hover { border-color: var(--accent-pale); }
-    .req-card.req-open  { border-left: 3px solid var(--accent); }
-    .req-card.req-closed { border-left: 3px solid var(--status-ok); }
 
-    /* Pending plate — mimics .plate but dashed + muted */
+    /* Pending plate — same size as .plate but dashed + muted amber */
     .req-plate {
-      position: relative;
       width: 92px;
       height: 56px;
       background: #faf6ef;
@@ -877,80 +874,32 @@
       align-items: center;
       justify-content: center;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
-      color: #b08040;
+      color: #a07838;
       letter-spacing: 0.02em;
       flex-shrink: 0;
-      opacity: 0.82;
     }
-    /* small "รอ" badge on top-right corner */
-    .req-plate::after {
-      content: 'รอ';
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: var(--accent);
-      color: #fff;
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 1px 5px;
-      border-radius: 999px;
-      line-height: 1.6;
-    }
-    /* action-specific plate tint */
-    .req-plate.req-delete {
-      background: #fdf0ee;
-      border-color: #d4907a;
-      color: #a04030;
-    }
-    .req-plate.req-delete::after {
-      content: 'ลบ';
-      background: var(--status-error);
-    }
-    .req-plate.req-edit::after {
-      content: 'แก้';
-    }
+    .req-plate.req-moto { width: 70px; height: 50px; font-size: 13px; }
 
-    .req-body { flex: 1; min-width: 0; }
-    .req-top {
+    .req-info { flex: 1; min-width: 0; }
+    .req-info-row {
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-bottom: 4px;
       flex-wrap: wrap;
-      margin-bottom: 3px;
     }
-    .req-action-label {
-      font-size: 13.5px;
+    .req-type-icon { font-size: 16px; line-height: 1; }
+    .req-type-label {
+      font-size: 14px;
       font-weight: 600;
       color: var(--text);
     }
-    .req-plate-tag {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 1px 7px;
-      color: var(--text);
-    }
-    .req-status-badge {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-    .req-status-badge.open   { background: var(--status-pending-bg); color: var(--status-pending); }
-    .req-status-badge.closed { background: var(--status-ok-bg);      color: var(--status-ok); }
+    /* status badge — reuse .status classes from v-card */
     .req-meta {
       font-size: 12px;
       color: var(--text-soft);
-      line-height: 1.5;
     }
     .req-loading, .req-empty-req {
       font-size: 13px;
@@ -1788,17 +1737,25 @@
     const cardsHtml = openIssues.map(issue => {
       const { action, label } = parseActionFromIssue(issue);
       const plate = parsePlateFromIssue(issue);
-      const plateClass = action === 'delete' ? 'req-delete' : action === 'edit' ? 'req-edit' : '';
-      const plateEl = plate
-        ? `<div class="req-plate ${plateClass}">${esc(plate)}</div>`
-        : `<div class="req-plate ${plateClass}">—</div>`;
+      // Detect vehicle type from issue body
+      let isMoto = false;
+      try {
+        const bm = (issue.body || '').match(/```json\s*([\s\S]*?)```/);
+        if (bm) { const d = JSON.parse(bm[1]); isMoto = d.vehicle_type === 'moto'; }
+      } catch (_) {}
+
+      // Badge label per action
+      const badgeLabel = action === 'add' ? 'รอเพิ่ม' : action === 'edit' ? 'รอแก้ไข' : 'รอลบ';
+      const badgeCls   = action === 'delete' ? 'error' : 'pending';
+
       return `
-        <div class="req-card req-open">
-          ${plateEl}
-          <div class="req-body">
-            <div class="req-top">
-              <span class="req-action-label">${esc(label)}</span>
-              <span class="req-status-badge open">รอดำเนินการ</span>
+        <div class="req-card">
+          <div class="req-plate${isMoto ? ' req-moto' : ''}">${plate ? esc(plate) : '—'}</div>
+          <div class="req-info">
+            <div class="req-info-row">
+              <span class="req-type-icon">${isMoto ? '🏍️' : '🚗'}</span>
+              <span class="req-type-label">${isMoto ? 'มอเตอร์ไซค์' : 'รถยนต์'}</span>
+              <span class="status ${badgeCls}">${badgeLabel}</span>
             </div>
             <div class="req-meta">ส่งเมื่อ ${esc(formatIssueDate(issue.created_at))}</div>
           </div>
