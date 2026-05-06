@@ -863,13 +863,13 @@
       opacity: 0.88;
     }
 
-    /* Pending plate — same size as .plate but dashed + muted amber */
+    /* Pending plate — square, thick dashed border, no rounding */
     .req-plate {
       width: 92px;
       height: 56px;
       background: #faf6ef;
-      border: 2px dashed #c4a97a;
-      border-radius: 7px;
+      border: 2.5px dashed #c4a97a;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1655,7 +1655,7 @@
   async function fetchPendingRequests(houseNo) {
     try {
       const res = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues?labels=vehicle&state=all&per_page=50`,
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues?labels=vehicle&state=open&per_page=20`,
         {
           headers: {
             Authorization: `token ${GH_TOKEN}`,
@@ -1716,9 +1716,8 @@
     return `${datePart} ${timePart} น.`;
   }
 
-  async function renderPendingRequests(houseNo) {
+  async function renderPendingRequestsFromPromise(houseNo, issuesPromise) {
     const sec = document.getElementById('resultSection');
-    // Add placeholder
     let pendingEl = document.getElementById('pendingSection');
     if (!pendingEl) {
       pendingEl = document.createElement('div');
@@ -1727,31 +1726,42 @@
       sec.appendChild(pendingEl);
     }
     pendingEl.innerHTML = `<div class="req-loading">กำลังตรวจสอบคำร้อง...</div>`;
+    const issues = await issuesPromise;
+    _renderPendingInto(pendingEl, houseNo, issues);
+  }
 
+  async function renderPendingRequests(houseNo) {
+    const sec = document.getElementById('resultSection');
+    let pendingEl = document.getElementById('pendingSection');
+    if (!pendingEl) {
+      pendingEl = document.createElement('div');
+      pendingEl.id = 'pendingSection';
+      pendingEl.className = 'pending-section';
+      sec.appendChild(pendingEl);
+    }
+    pendingEl.innerHTML = `<div class="req-loading">กำลังตรวจสอบคำร้อง...</div>`;
     const issues = await fetchPendingRequests(houseNo);
 
     // User view: show only OPEN (pending) issues — closed = already done, no need to show
     const openIssues = issues.filter(i => i.state === 'open');
 
-    if (openIssues.length === 0) {
-      pendingEl.remove();
-      return;
-    }
+    _renderPendingInto(pendingEl, houseNo, issues);
+  }
+
+  function _renderPendingInto(pendingEl, houseNo, issues) {
+    const openIssues = issues.filter(i => i.state === 'open');
+    if (openIssues.length === 0) { pendingEl.remove(); return; }
 
     const cardsHtml = openIssues.map(issue => {
-      const { action, label } = parseActionFromIssue(issue);
+      const { action } = parseActionFromIssue(issue);
       const plate = parsePlateFromIssue(issue);
-      // Detect vehicle type from issue body
       let isMoto = false;
       try {
         const bm = (issue.body || '').match(/```json\s*([\s\S]*?)```/);
         if (bm) { const d = JSON.parse(bm[1]); isMoto = d.vehicle_type === 'moto'; }
       } catch (_) {}
-
-      // Badge label per action
       const badgeLabel = action === 'add' ? 'รอเพิ่ม' : action === 'edit' ? 'รอแก้ไข' : 'รอลบ';
       const badgeCls   = action === 'delete' ? 'error' : 'pending';
-
       return `
         <div class="req-card">
           <div class="req-plate${isMoto ? ' req-moto' : ''}">${plate ? esc(plate) : '—'}</div>
@@ -1763,8 +1773,7 @@
             </div>
             <div class="req-meta">ส่งเมื่อ ${esc(formatIssueDate(issue.created_at))}</div>
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
 
     pendingEl.innerHTML = `
@@ -1773,11 +1782,13 @@
         <span class="pending-count-badge">${openIssues.length} รายการ</span>
       </div>
       <div class="pending-info-note">⏳ คำร้องด้านล่างรอ admin อนุมัติ (ปกติภายใน 12–24 ชม.) — ทะเบียนจะถูกอัปเดตเมื่ออนุมัติแล้ว</div>
-      ${cardsHtml}
-    `;
+      ${cardsHtml}`;
   }
 
   async function performSearch(q) {
+    // Fetch resident data + pending issues in parallel for speed
+    const pendingPromise = fetchPendingRequests(q);  // start early, house_no filter happens inside
+
     if (allData.length === 0) {
       try { allData = (await fetchData()).map(normaliseRecord); }
       catch (err) { alert('โหลดข้อมูลไม่สำเร็จ: ' + err.message); return null; }
@@ -1800,7 +1811,8 @@
     renderResult();
     setStoredHouse(found.house_no);
     showContextBar(found);
-    renderPendingRequests(found.house_no);
+    // Render pending with already-in-flight promise (no extra round-trip)
+    renderPendingRequestsFromPromise(found.house_no, pendingPromise);
     return found;
   }
 
