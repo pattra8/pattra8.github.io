@@ -623,24 +623,39 @@
       letter-spacing: 0.02em;
       white-space: nowrap;
     }
-    .pc-plates-new {
+    .pc-plates-new-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
-      flex: 1;
-      min-width: 0;
+      gap: 6px;
+      padding: 8px 10px;
+      background: var(--bg-soft);
+      border-radius: 7px;
     }
     .pc-plate-chip-new {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 4px 12px;
       background: #fff;
       border: 2px solid var(--text);
-      border-radius: 4px;
+      border-radius: 5px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .pc-plates-from-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      padding: 2px 2px;
+    }
+    .pc-from-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.04em;
       white-space: nowrap;
     }
     .pc-arrow { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
@@ -1469,15 +1484,23 @@
           }</div>`
         : `<span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>`;
 
-      const toHtml = f.isPlate
-        ? `<div class="pc-plates-new">${
-            f.newVal
-              ? f.newVal.split(',').map(p => p.trim()).filter(Boolean)
-                  .map(p => `<span class="pc-plate-chip-new">${escHtml(p)}</span>`).join('')
-              : '<span style="color:var(--text-muted);font-style:italic;font-size:11px;">(ว่าง)</span>'
-          }</div>
-          <input class="new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="hidden" value="${escHtml(f.newVal)}" />`
-        : `<input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />`;
+      if (f.isPlate) {
+        const newChips = f.newVal
+          ? f.newVal.split(',').map(p => p.trim()).filter(Boolean)
+              .map(p => `<span class="pc-plate-chip-new">${escHtml(p)}</span>`).join('')
+          : '<span style="color:var(--text-muted);font-style:italic;font-size:11px;">(ว่าง)</span>';
+        const oldChips = f.oldVal
+          ? f.oldVal.split(',').map(p => p.trim()).filter(Boolean)
+              .map(p => `<span class="pc-plate-chip-old">${escHtml(p)}</span>`).join('')
+          : '';
+        return `
+        <div class="pc-field-group">
+          <div class="pc-field-label">${f.label}</div>
+          <div class="pc-plates-new-row">${newChips}</div>
+          ${oldChips ? `<div class="pc-plates-from-row"><span class="pc-from-label">เดิม</span>${oldChips}</div>` : ''}
+          <input class="new-input" data-key="${f.key}" data-plate="true" type="hidden" value="${escHtml(f.newVal)}" />
+        </div>`;
+      }
 
       return `
       <div class="pc-field-group">
@@ -1485,7 +1508,7 @@
         <div class="pc-change">
           ${fromHtml}
           <span class="pc-arrow">→</span>
-          ${toHtml}
+          <input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />
         </div>
       </div>`;
     }).join('');
