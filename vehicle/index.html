@@ -854,24 +854,73 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 16px 18px;
+      padding: 14px 18px;
       margin-bottom: 8px;
       display: flex;
-      gap: 14px;
-      align-items: flex-start;
+      gap: 16px;
+      align-items: center;
       transition: border-color 0.18s;
     }
     .req-card:hover { border-color: var(--accent-pale); }
     .req-card.req-open  { border-left: 3px solid var(--accent); }
     .req-card.req-closed { border-left: 3px solid var(--status-ok); }
-    .req-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Pending plate — mimics .plate but dashed + muted */
+    .req-plate {
+      position: relative;
+      width: 92px;
+      height: 56px;
+      background: #faf6ef;
+      border: 2px dashed #c4a97a;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #b08040;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+      opacity: 0.82;
+    }
+    /* small "รอ" badge on top-right corner */
+    .req-plate::after {
+      content: 'รอ';
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 1px 5px;
+      border-radius: 999px;
+      line-height: 1.6;
+    }
+    /* action-specific plate tint */
+    .req-plate.req-delete {
+      background: #fdf0ee;
+      border-color: #d4907a;
+      color: #a04030;
+    }
+    .req-plate.req-delete::after {
+      content: 'ลบ';
+      background: var(--status-error);
+    }
+    .req-plate.req-edit::after {
+      content: 'แก้';
+    }
+
     .req-body { flex: 1; min-width: 0; }
     .req-top {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .req-action-label {
       font-size: 13.5px;
@@ -1737,15 +1786,18 @@
     }
 
     const cardsHtml = openIssues.map(issue => {
-      const { icon, label } = parseActionFromIssue(issue);
+      const { action, label } = parseActionFromIssue(issue);
       const plate = parsePlateFromIssue(issue);
+      const plateClass = action === 'delete' ? 'req-delete' : action === 'edit' ? 'req-edit' : '';
+      const plateEl = plate
+        ? `<div class="req-plate ${plateClass}">${esc(plate)}</div>`
+        : `<div class="req-plate ${plateClass}">—</div>`;
       return `
         <div class="req-card req-open">
-          <div class="req-icon">${icon}</div>
+          ${plateEl}
           <div class="req-body">
             <div class="req-top">
               <span class="req-action-label">${esc(label)}</span>
-              ${plate ? `<span class="req-plate-tag">${esc(plate)}</span>` : ''}
               <span class="req-status-badge open">รอดำเนินการ</span>
             </div>
             <div class="req-meta">ส่งเมื่อ ${esc(formatIssueDate(issue.created_at))}</div>
