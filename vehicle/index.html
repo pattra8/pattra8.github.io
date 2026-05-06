@@ -1728,44 +1728,38 @@
 
     const issues = await fetchPendingRequests(houseNo);
 
-    if (issues.length === 0) {
+    // User view: show only OPEN (pending) issues — closed = already done, no need to show
+    const openIssues = issues.filter(i => i.state === 'open');
+
+    if (openIssues.length === 0) {
       pendingEl.remove();
       return;
     }
 
-    const openIssues   = issues.filter(i => i.state === 'open');
-    const closedIssues = issues.filter(i => i.state === 'closed');
-
-    const cardsHtml = issues.map(issue => {
+    const cardsHtml = openIssues.map(issue => {
       const { icon, label } = parseActionFromIssue(issue);
       const plate = parsePlateFromIssue(issue);
-      const isOpen = issue.state === 'open';
-      const dateLabel = isOpen
-        ? `ส่งเมื่อ ${formatIssueDate(issue.created_at)}`
-        : `อนุมัติแล้ว ${formatIssueDate(issue.closed_at)}`;
-      const statusLabel = isOpen ? 'รอดำเนินการ' : 'เสร็จสิ้น';
       return `
-        <div class="req-card ${isOpen ? 'req-open' : 'req-closed'}">
+        <div class="req-card req-open">
           <div class="req-icon">${icon}</div>
           <div class="req-body">
             <div class="req-top">
               <span class="req-action-label">${esc(label)}</span>
               ${plate ? `<span class="req-plate-tag">${esc(plate)}</span>` : ''}
-              <span class="req-status-badge ${issue.state}">${statusLabel}</span>
+              <span class="req-status-badge open">รอดำเนินการ</span>
             </div>
-            <div class="req-meta">${esc(dateLabel)}</div>
+            <div class="req-meta">ส่งเมื่อ ${esc(formatIssueDate(issue.created_at))}</div>
           </div>
         </div>
       `;
     }).join('');
 
-    const openCount = openIssues.length;
     pendingEl.innerHTML = `
       <div class="pending-header">
-        <div class="pending-title">คำร้องที่ส่งไว้</div>
-        ${openCount > 0 ? `<span class="pending-count-badge">${openCount} รอดำเนินการ</span>` : ''}
+        <div class="pending-title">คำร้องที่รอดำเนินการ</div>
+        <span class="pending-count-badge">${openIssues.length} รายการ</span>
       </div>
-      ${openCount > 0 ? `<div class="pending-info-note">⏳ คำร้องด้านล่างกำลังรอ admin ดำเนินการ (ปกติภายใน 12–24 ชม.) — ทะเบียนจะถูกอัปเดตในระบบเมื่ออนุมัติแล้ว</div>` : ''}
+      <div class="pending-info-note">⏳ คำร้องด้านล่างรอ admin อนุมัติ (ปกติภายใน 12–24 ชม.) — ทะเบียนจะถูกอัปเดตเมื่ออนุมัติแล้ว</div>
       ${cardsHtml}
     `;
   }
