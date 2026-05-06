@@ -11,12 +11,15 @@
     // Run BEFORE first paint → eliminate landing flash when house context exists
     (function() {
       try {
+        const isValidHouse = value => /^38\/\d{1,2}$/.test(String(value || '').trim());
         const u = new URLSearchParams(location.search).get('house');
         const s = sessionStorage.getItem('pattra_current_house');
-        const h = u || s;
+        const h = isValidHouse(u) ? u.trim() : isValidHouse(s) ? s.trim() : '';
         if (h) {
-          if (u) sessionStorage.setItem('pattra_current_house', u);
+          if (isValidHouse(u)) sessionStorage.setItem('pattra_current_house', h);
           document.documentElement.dataset.ctx = h;
+        } else if (s && !isValidHouse(s)) {
+          sessionStorage.removeItem('pattra_current_house');
         }
       } catch (e) {}
     })();
@@ -1208,14 +1211,22 @@
   // ── Cross-page session context (Level 1+2+3) ──
   const SESSION_KEY = 'pattra_current_house';
 
+  function isValidHouseContext(houseNo) {
+    return /^38\/\d{1,2}$/.test(normalizeHouseForAuth(houseNo));
+  }
+
   function getStoredHouse() {
     const url = new URLSearchParams(location.search);
     const fromUrl = url.get('house');
-    if (fromUrl) {
-      sessionStorage.setItem(SESSION_KEY, fromUrl);
-      return fromUrl;
+    if (isValidHouseContext(fromUrl)) {
+      const houseNo = normalizeHouseForAuth(fromUrl);
+      sessionStorage.setItem(SESSION_KEY, houseNo);
+      return houseNo;
     }
-    return sessionStorage.getItem(SESSION_KEY);
+    const stored = sessionStorage.getItem(SESSION_KEY);
+    if (isValidHouseContext(stored)) return normalizeHouseForAuth(stored);
+    if (stored) sessionStorage.removeItem(SESSION_KEY);
+    return null;
   }
   function setStoredHouse(houseNo) {
     if (!houseNo) return;
@@ -1794,14 +1805,6 @@
         <div class="field-label">ระบุเหตุผล (ไม่บังคับ)</div>
         <input class="text-input" id="reasonInput" placeholder="เช่น ขายรถแล้ว, เปลี่ยนคันใหม่" />
       </div>
-      <div class="field">
-        <div class="field-label">ผู้แจ้ง <span style="color:var(--status-error)">*</span></div>
-        <input class="text-input" id="reporterInput" placeholder="ชื่อของคุณ" required />
-      </div>
-      <div class="field">
-        <div class="field-label">เบอร์ติดต่อกลับ <span style="color:var(--status-error)">*</span></div>
-        <input class="text-input" id="contactInput" placeholder="เบอร์โทร" required />
-      </div>
       <div class="modal-actions">
         <button class="btn-secondary" id="cancelBtn">ยกเลิก</button>
         <button class="btn-primary" id="submitBtn" style="background:var(--status-error)">ยืนยันการลบ</button>
@@ -1843,17 +1846,6 @@
         <div class="plate-hint">ตัวอย่าง: 1กก5678 หรือ 5ขฌ9398 (ไม่ต้องเว้นวรรค)</div>
       </div>
 
-      <div class="reporter-fields">
-        <div class="field" style="margin:0">
-          <div class="field-label">ผู้แจ้ง <span style="color:var(--status-error)">*</span></div>
-          <input class="text-input" id="reporterInput" placeholder="ชื่อของคุณ" required />
-        </div>
-        <div class="field" style="margin:0">
-          <div class="field-label">เบอร์ติดต่อ <span style="color:var(--status-error)">*</span></div>
-          <input class="text-input" id="contactInput" placeholder="เบอร์โทร" required />
-        </div>
-      </div>
-
       <div class="modal-actions">
         <button class="btn-secondary" id="cancelBtn">ยกเลิก</button>
         <button class="btn-primary" id="submitBtn">บันทึก</button>
@@ -1879,12 +1871,8 @@
 
   // ── Submit (creates GitHub Issue) ──
   async function submitChange(action) {
-    const reporter = document.getElementById('reporterInput').value.trim();
-    const contact = document.getElementById('contactInput').value.trim();
-    if (!reporter || !contact) {
-      alert('กรุณากรอกชื่อผู้แจ้งและเบอร์ติดต่อ');
-      return;
-    }
+    const reporter = `เจ้าของบ้าน ${currentRecord.house_no}`;
+    const contact = currentRecord.phone || currentRecord.email || '';
 
     let newCars = [...currentRecord.cars];
     let newMotos = [...currentRecord.motorcycles];
@@ -1932,13 +1920,14 @@
       },
       reporter,
       contact,
+      reporter_source: 'resident_pin_session',
       submitted_at: new Date().toISOString()
     };
 
     const issueTitle = `[${actionTh}ทะเบียน${typeTh}] บ้าน ${currentRecord.house_no} — ${currentRecord.name || '(ไม่มีชื่อ)'}`;
     const issueBody = [
       `**ผู้แจ้ง:** ${reporter}`,
-      `**ติดต่อกลับ:** ${contact}`,
+      `**ติดต่อกลับ:** ${contact || '-'}`,
       `**การเปลี่ยนแปลง:** ${actionTh} ${typeTh} \`${payload.change.plate}\``,
       reason ? `**เหตุผล:** ${reason}` : '',
       ``,
@@ -2120,9 +2109,6 @@
   }
 
   async function performSearch(q) {
-    // Fetch resident data + pending issues in parallel for speed
-    const pendingPromise = fetchPendingRequests(q);  // start early, house_no filter happens inside
-
     if (allData.length === 0) {
       try { allData = (await fetchData()).map(normaliseRecord); }
       catch (err) { alert('โหลดข้อมูลไม่สำเร็จ: ' + err.message); return null; }
@@ -2167,7 +2153,9 @@
   (async function autoLoadFromContext() {
     const h = getStoredHouse();
     updateNavLinks(h);
-    if (!h) {
+    if (!h || !isValidHouseContext(h)) {
+      clearStoredHouse();
+      hideContextBar();
       primeSearchInput();
       return;
     }

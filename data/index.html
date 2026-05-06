@@ -11,12 +11,15 @@
     // Run BEFORE first paint → eliminate landing flash when house context exists
     (function() {
       try {
+        const isValidHouse = value => /^38\/\d{1,2}$/.test(String(value || '').trim());
         const u = new URLSearchParams(location.search).get('house');
         const s = sessionStorage.getItem('pattra_current_house');
-        const h = u || s;
+        const h = isValidHouse(u) ? u.trim() : isValidHouse(s) ? s.trim() : '';
         if (h) {
-          if (u) sessionStorage.setItem('pattra_current_house', u);
+          if (isValidHouse(u)) sessionStorage.setItem('pattra_current_house', h);
           document.documentElement.dataset.ctx = h;
+        } else if (s && !isValidHouse(s)) {
+          sessionStorage.removeItem('pattra_current_house');
         }
       } catch (e) {}
     })();
@@ -1089,7 +1092,7 @@
 
       <div class="form-hint-box">
         <span class="hint-icon">💡</span>
-        <span>แก้ไขข้อมูลที่ต้องการเปลี่ยน แล้วกด "ส่งคำร้อง" — นิติบุคคลจะตรวจสอบและอัปเดตให้ภายใน 24 ชั่วโมง</span>
+        <span>แก้ไขข้อมูลที่ต้องการเปลี่ยน แล้วกด "แจ้งแก้ไขข้อมูล" — นิติบุคคลจะตรวจสอบและอัปเดตให้ภายใน 24 ชั่วโมง</span>
       </div>
 
       <div class="form-group">
@@ -1114,22 +1117,9 @@
         <div class="vehicle-link-arrow">→</div>
       </a>
 
-      <div class="form-divider"></div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="f_reporter">ชื่อผู้แจ้ง <span class="req">*</span></label>
-          <input type="text" id="f_reporter" placeholder="ชื่อของท่าน" />
-        </div>
-        <div class="form-group">
-          <label for="f_contact">ติดต่อกลับ <span class="req">*</span></label>
-          <input type="text" id="f_contact" placeholder="เบอร์ / อีเมล" />
-        </div>
-      </div>
-
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-        <button class="btn-submit" id="submitBtn" onclick="submitForm()"><span>📨</span> ส่งคำร้อง</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()"><span>📨</span> แจ้งแก้ไขข้อมูล</button>
       </div>
     </div>
 
@@ -1174,14 +1164,22 @@
   // ── Cross-page session context (Level 1+2+3) ──
   const SESSION_KEY = 'pattra_current_house';
 
+  function isValidHouseContext(houseNo) {
+    return /^38\/\d{1,2}$/.test(normalizeHouseForAuth(houseNo));
+  }
+
   function getStoredHouse() {
     const url = new URLSearchParams(location.search);
     const fromUrl = url.get('house');
-    if (fromUrl) {
-      sessionStorage.setItem(SESSION_KEY, fromUrl);
-      return fromUrl;
+    if (isValidHouseContext(fromUrl)) {
+      const houseNo = normalizeHouseForAuth(fromUrl);
+      sessionStorage.setItem(SESSION_KEY, houseNo);
+      return houseNo;
     }
-    return sessionStorage.getItem(SESSION_KEY);
+    const stored = sessionStorage.getItem(SESSION_KEY);
+    if (isValidHouseContext(stored)) return normalizeHouseForAuth(stored);
+    if (stored) sessionStorage.removeItem(SESSION_KEY);
+    return null;
   }
   function setStoredHouse(houseNo) {
     if (!houseNo) return;
@@ -1560,11 +1558,11 @@
     const hasPhone = r.phone && r.phone !== 'nan' && r.phone.trim();
 
     const emailShown = hasEmail
-      ? `<div class="info-value censored">${esc(censorEmail(r.email))}</div>`
+      ? `<div class="info-value">${esc(r.email)}</div>`
       : `<div class="info-value empty">ไม่มีข้อมูล</div>`;
 
     const phoneShown = hasPhone
-      ? `<div class="info-value censored">${esc(censorPhone(r.phone))}</div>`
+      ? `<div class="info-value">${esc(r.phone)}</div>`
       : `<div class="info-value empty">ไม่มีข้อมูล</div>`;
 
     const cars = r.vehicles?.cars || [];
@@ -1586,7 +1584,7 @@
       <div class="info-header">
         <div class="info-title">ข้อมูลส่วนตัว</div>
         <button class="edit-btn" onclick="openModal('${esc(r.house_no)}')">
-          <span>✏️</span> แจ้งแก้ไข
+          <span>✏️</span> แจ้งแก้ไขข้อมูล
         </button>
       </div>
 
@@ -1604,7 +1602,6 @@
             <div class="info-label">อีเมล</div>
             ${emailShown}
           </div>
-          ${hasEmail ? '<div class="info-aux">ปิดบัง</div>' : ''}
         </div>
         <div class="info-row">
           <div class="info-icon">📞</div>
@@ -1612,7 +1609,6 @@
             <div class="info-label">เบอร์โทรศัพท์</div>
             ${phoneShown}
           </div>
-          ${hasPhone ? '<div class="info-aux">ปิดบัง</div>' : ''}
         </div>
       </div>
 
@@ -1633,9 +1629,7 @@
     return {
       name: document.getElementById('f_name').value,
       email: document.getElementById('f_email').value,
-      phone: document.getElementById('f_phone').value,
-      reporter: document.getElementById('f_reporter').value,
-      contact: document.getElementById('f_contact').value
+      phone: document.getElementById('f_phone').value
     };
   }
   function hasUnsavedModalChanges() {
@@ -1660,14 +1654,12 @@
     document.getElementById('f_name').value    = name;
     document.getElementById('f_email').value   = email;
     document.getElementById('f_phone').value   = phone;
-    document.getElementById('f_reporter').value = '';
-    document.getElementById('f_contact').value  = '';
 
     document.getElementById('formView').style.display    = 'block';
     document.getElementById('successView').classList.remove('visible');
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<span>📨</span> ส่งคำร้อง';
+    submitBtn.innerHTML = '<span>📨</span> แจ้งแก้ไขข้อมูล';
     isSubmitting = false;
     document.getElementById('modalOverlay').classList.add('active');
     modalInitialState = buildModalState();
@@ -1694,13 +1686,6 @@
 
   // ── Submit (preserve original GitHub Issue creation) ──
   async function submitForm() {
-    const reporter = document.getElementById('f_reporter').value.trim();
-    const contact  = document.getElementById('f_contact').value.trim();
-    if (!reporter || !contact) {
-      alert('กรุณาใส่ชื่อผู้แจ้งและช่องทางติดต่อกลับ');
-      return;
-    }
-
     function cleanPhone(raw) {
       if (!raw || !raw.trim()) return '';
       const digits = raw.replace(/\D/g, '');
@@ -1711,6 +1696,8 @@
     const newName  = document.getElementById('f_name').value.trim();
     const newEmail = document.getElementById('f_email').value.trim();
     const newPhone = cleanPhone(document.getElementById('f_phone').value);
+    const reporter = `เจ้าของบ้าน ${currentRecord.houseNo}`;
+    const contact = newPhone || newEmail || currentRecord.phone || currentRecord.email || '';
 
     const noChange =
       newName === (currentRecord.name || '') &&
@@ -1745,13 +1732,14 @@
       },
       reporter,
       contact,
+      reporter_source: 'resident_pin_session',
       submitted_at: new Date().toISOString()
     };
 
     const issueTitle = `[แก้ไขข้อมูล] บ้านเลขที่ ${currentRecord.houseNo} — ${currentRecord.name || '(ไม่มีชื่อ)'}`;
     const issueBody  = [
       `**ผู้แจ้ง:** ${reporter}`,
-      `**ติดต่อกลับ:** ${contact}`,
+      `**ติดต่อกลับ:** ${contact || '-'}`,
       ``,
       '```json',
       JSON.stringify(payload, null, 2),
@@ -1781,7 +1769,7 @@
     } catch (err) {
       alert('ไม่สามารถส่งคำร้องได้ กรุณาลองใหม่\n(' + err.message + ')');
       btn.disabled = false;
-      btn.innerHTML = '<span>📨</span> ส่งคำร้อง';
+      btn.innerHTML = '<span>📨</span> แจ้งแก้ไขข้อมูล';
       isSubmitting = false;
     }
   }
@@ -1829,7 +1817,9 @@
   (async function autoLoadFromContext() {
     const h = getStoredHouse();
     updateNavLinks(h);
-    if (!h) {
+    if (!h || !isValidHouseContext(h)) {
+      clearStoredHouse();
+      hideContextBar();
       primeSearchInput();
       return;
     }
