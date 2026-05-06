@@ -623,6 +623,26 @@
       letter-spacing: 0.02em;
       white-space: nowrap;
     }
+    .pc-plates-new {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .pc-plate-chip-new {
+      display: inline-block;
+      padding: 3px 10px;
+      background: #fff;
+      border: 2px solid var(--text);
+      border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
     .pc-arrow { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
     .pc-to {
       flex: 1;
@@ -1448,13 +1468,24 @@
               : '<span class="pc-from">(ว่าง)</span>'
           }</div>`
         : `<span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>`;
+
+      const toHtml = f.isPlate
+        ? `<div class="pc-plates-new">${
+            f.newVal
+              ? f.newVal.split(',').map(p => p.trim()).filter(Boolean)
+                  .map(p => `<span class="pc-plate-chip-new">${escHtml(p)}</span>`).join('')
+              : '<span style="color:var(--text-muted);font-style:italic;font-size:11px;">(ว่าง)</span>'
+          }</div>
+          <input class="new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="hidden" value="${escHtml(f.newVal)}" />`
+        : `<input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />`;
+
       return `
       <div class="pc-field-group">
         <div class="pc-field-label">${f.label}</div>
         <div class="pc-change">
           ${fromHtml}
           <span class="pc-arrow">→</span>
-          <input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />
+          ${toHtml}
         </div>
       </div>`;
     }).join('');
