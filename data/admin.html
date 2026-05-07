@@ -973,11 +973,25 @@
       <div id="pinAdminError" style="display:none;margin-top:14px;color:#a33d30;font-weight:700;"></div>
     </div>
 
-    <!-- Vote tab (admin) -->
-    <div id="voteAdminSection" style="display:none;max-width:760px;margin:24px auto;">
+
+    <!-- Bootstrap Firestore residents -->
+    <div style="max-width:760px;margin:24px auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
+      <h2 style="margin:0 0 8px;font-size:1.4rem;">🗄 Bootstrap ข้อมูลลูกบ้าน → Firestore</h2>
+      <p style="margin:0 0 18px;color:var(--text-muted);font-size:0.93rem;">ใช้ครั้งเดียวเพื่อย้ายข้อมูลจาก residents.json ไปยัง Firestore collection <code>residents</code><br>หลังทำสำเร็จแล้วสามารถลบ residents.json ออกจาก public repo ได้</p>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <button class="approve-btn" id="bootstrapBtn" onclick="bootstrapResidentsToFirestore()" style="background:#4f46e5;">Bootstrap ข้อมูล (<span id="bootstrapCount">?</span> records)</button>
+        <span id="bootstrapStatus" style="color:var(--text-muted);font-size:0.9rem;"></span>
+      </div>
+      <div id="bootstrapResult" style="display:none;margin-top:14px;padding:14px;border-radius:12px;font-size:0.92rem;"></div>
+    </div>
+  </div>
+
+  <!-- Tab: Vote / Poll -->
+  <div id="voteTab" style="display:none">
+    <div style="max-width:760px;margin:28px auto;display:flex;flex-direction:column;gap:20px;">
 
       <!-- Create Poll -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);margin-bottom:20px;">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
         <h2 style="margin:0 0 6px;font-size:1.3rem;">➕ สร้าง Poll ใหม่</h2>
         <p style="margin:0 0 20px;color:var(--text-muted);font-size:.9rem;">ลูกบ้านโหวตที่ <strong>pattra8.com/vote/</strong></p>
         <div style="display:grid;gap:12px;">
@@ -1014,14 +1028,14 @@
               </div>
             </div>
             <button onclick="addVoteOption()" style="font-family:inherit;font-size:.85rem;color:var(--accent-text);background:none;border:1px dashed var(--accent-soft);border-radius:8px;padding:7px 14px;cursor:pointer;">+ เพิ่มตัวเลือก</button>
-            <div id="voteMaxChoicesRow" style="display:none;margin-top:12px;">
+            <div id="voteMaxChoicesRow" style="display:none;margin-top:12px;align-items:center;">
               <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);">เลือกได้สูงสุด (กรณี multi)</label>
               <input id="voteMaxChoices" type="number" min="2" max="10" value="2"
                 style="width:80px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-left:10px;font-family:inherit;" />
             </div>
           </div>
         </div>
-        <div style="margin-top:16px;display:flex;gap:12px;align-items:center;">
+        <div style="margin-top:18px;display:flex;gap:12px;align-items:center;">
           <button class="approve-btn" onclick="createPoll()" id="createPollBtn" style="background:var(--accent);">สร้าง Poll</button>
           <span id="createPollStatus" style="font-size:.88rem;color:var(--text-muted);"></span>
         </div>
@@ -1033,28 +1047,19 @@
           <h2 style="margin:0;font-size:1.2rem;">📋 รายการ Polls</h2>
           <button onclick="loadAdminPolls()" style="font-family:inherit;font-size:.82rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">🔄 รีเฟรช</button>
         </div>
-        <div id="adminPollList"><div style="color:var(--text-muted);font-size:.9rem;">กดรีเฟรชเพื่อโหลด</div></div>
+        <div id="adminPollList"><div style="color:var(--text-muted);font-size:.9rem;">กำลังโหลด...</div></div>
       </div>
 
-      <!-- Results modal -->
-      <div id="pollResultsModal" style="display:none;margin-top:20px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow);">
+      <!-- Results panel -->
+      <div id="pollResultsModal" style="display:none;background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow);">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
           <h2 style="margin:0;font-size:1.2rem;" id="pollResultsTitle">ผลโหวต</h2>
-          <button onclick="document.getElementById('pollResultsModal').style.display='none'" style="margin-left:auto;font-family:inherit;font-size:.85rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">ซ่อน</button>
+          <button onclick="document.getElementById('pollResultsModal').style.display='none'"
+            style="margin-left:auto;font-family:inherit;font-size:.85rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">ซ่อน</button>
         </div>
         <div id="pollResultsBody"></div>
       </div>
-    </div>
 
-    <!-- Bootstrap Firestore residents -->
-    <div style="max-width:760px;margin:24px auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
-      <h2 style="margin:0 0 8px;font-size:1.4rem;">🗄 Bootstrap ข้อมูลลูกบ้าน → Firestore</h2>
-      <p style="margin:0 0 18px;color:var(--text-muted);font-size:0.93rem;">ใช้ครั้งเดียวเพื่อย้ายข้อมูลจาก residents.json ไปยัง Firestore collection <code>residents</code><br>หลังทำสำเร็จแล้วสามารถลบ residents.json ออกจาก public repo ได้</p>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <button class="approve-btn" id="bootstrapBtn" onclick="bootstrapResidentsToFirestore()" style="background:#4f46e5;">Bootstrap ข้อมูล (<span id="bootstrapCount">?</span> records)</button>
-        <span id="bootstrapStatus" style="color:var(--text-muted);font-size:0.9rem;"></span>
-      </div>
-      <div id="bootstrapResult" style="display:none;margin-top:14px;padding:14px;border-radius:12px;font-size:0.92rem;"></div>
     </div>
   </div>
 
@@ -1235,7 +1240,7 @@
     document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
     document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
-    document.getElementById('voteAdminSection').style.display = tab === 'vote' ? 'block' : 'none';
+    document.getElementById('voteTab').style.display = tab === 'vote' ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
