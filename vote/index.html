@@ -94,8 +94,30 @@
     .poll-badge.closed { background: #f0f0f0; color: #888; }
     .poll-title { font-size: 1.05rem; font-weight: 700; color: var(--text); flex: 1; }
     .poll-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 12px; }
-    .poll-meta { display: flex; gap: 16px; font-size: .8rem; color: var(--text-muted); flex-wrap: wrap; }
+    .poll-meta { display: flex; gap: 12px; font-size: .8rem; color: var(--text-muted); flex-wrap: wrap; align-items: center; margin-top: 12px; }
     .poll-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* ── Countdown ── */
+    .countdown-bar {
+      margin-top: 14px; padding: 10px 14px;
+      background: var(--accent-pale); border-radius: 10px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .countdown-bar.urgent { background: #fff0ef; }
+    .countdown-label { font-size: .75rem; font-weight: 700; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; }
+    .countdown-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cd-chip {
+      display: flex; flex-direction: column; align-items: center;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px 10px; min-width: 46px;
+    }
+    .countdown-bar.urgent .cd-chip { border-color: #f5c0bc; }
+    .cd-num { font-size: 1.1rem; font-weight: 800; color: var(--accent-deep); line-height: 1; }
+    .countdown-bar.urgent .cd-num { color: #c0392b; }
+    .cd-unit { font-size: .65rem; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+    .countdown-deadline {
+      font-size: .78rem; color: var(--text-soft); margin-left: auto; white-space: nowrap;
+    }
 
     /* ── Empty / loading ── */
     .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
@@ -339,6 +361,46 @@
     });
   }
 
+  function deadlineMs(poll) {
+    if (!poll.deadline) return null;
+    return poll.deadline._seconds
+      ? poll.deadline._seconds * 1000
+      : new Date(poll.deadline).getTime();
+  }
+
+  function buildCountdown(poll, elementId) {
+    const dl = deadlineMs(poll);
+    if (!dl || isPollClosed(poll)) return;
+    const update = () => {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const diff = dl - Date.now();
+      if (diff <= 0) { el.innerHTML = ''; clearInterval(timer); return; }
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000) / 60000);
+      const secs  = Math.floor((diff % 60000) / 1000);
+      const urgent = diff < 86400000; // < 1 day
+      const chips = days > 0
+        ? [['วัน', days], ['ชม.', hours], ['นาที', mins]]
+        : [['ชม.', hours], ['นาที', mins], ['วินาที', secs]];
+      el.className = `countdown-bar${urgent ? ' urgent' : ''}`;
+      el.innerHTML = `
+        <span class="countdown-label">${urgent ? '🔴 ใกล้หมดแล้ว!' : '⏳ เหลือเวลา'}</span>
+        <div class="countdown-chips">
+          ${chips.map(([u,v]) => `
+            <div class="cd-chip">
+              <span class="cd-num">${String(v).padStart(2,'0')}</span>
+              <span class="cd-unit">${u}</span>
+            </div>`).join('')}
+        </div>
+        <span class="countdown-deadline">หมดเขต ${fmtDeadline(poll.deadline)}</span>
+      `;
+    };
+    update();
+    const timer = setInterval(update, 1000);
+  }
+
   function isPollClosed(poll) {
     if (poll.status === 'closed') return true;
     if (!poll.deadline) return false;
@@ -384,6 +446,7 @@
     }
     const cards = polls.map(p => {
       const closed = isPollClosed(p);
+      const cdId = `cd_${p.id}`;
       return `
         <div class="poll-card ${closed ? 'closed' : ''}" onclick="openPoll('${esc(p.id)}')">
           <div class="poll-card-header">
@@ -395,8 +458,9 @@
           ${p.description ? `<div class="poll-desc">${esc(p.description)}</div>` : ''}
           <div class="poll-meta">
             <span>📊 ${typeName(p.type)}</span>
-            ${p.deadline ? `<span>⏰ ${closed ? 'หมดเขต' : 'ถึง'} ${fmtDeadline(p.deadline)}</span>` : ''}
+            ${closed && p.deadline ? `<span>⏰ หมดเขต ${fmtDeadline(p.deadline)}</span>` : ''}
           </div>
+          ${!closed && p.deadline ? `<div id="${cdId}" class="countdown-bar"></div>` : ''}
         </div>
       `;
     }).join('');
@@ -405,6 +469,10 @@
       <div class="page-sub">ร่วมกันตัดสินใจเพื่อหมู่บ้านของเรา — 1 บ้าน 1 เสียง</div>
       ${cards}
     `;
+    // start countdown timers after DOM is ready
+    polls.forEach(p => {
+      if (!isPollClosed(p) && p.deadline) buildCountdown(p, `cd_${p.id}`);
+    });
   }
 
   function openPoll(pollId) {
@@ -527,7 +595,7 @@
         <div class="vote-eyebrow">🗳 โหวต — บ้าน ${esc(currentHouseNo)}</div>
         <div class="vote-title">${esc(poll.title)}</div>
         ${poll.description ? `<div class="vote-desc">${esc(poll.description)}</div>` : ''}
-        ${poll.deadline ? `<div class="vote-deadline">⏰ หมดเขต ${fmtDeadline(poll.deadline)}</div>` : ''}
+        ${poll.deadline ? `<div id="voteFormCd" class="countdown-bar" style="margin-bottom:20px;"></div>` : ''}
         ${optionsHtml()}
         <div class="vote-submit-row">
           <button class="btn-primary" id="voteSubmitBtn" onclick="submitVote()">ยืนยันเสียง</button>
@@ -535,6 +603,8 @@
         </div>
       </div>
     `;
+
+    if (poll.deadline) buildCountdown(poll, 'voteFormCd');
 
     // expose helpers to global
     window.toggleOption = (idx, val, isMulti) => {
