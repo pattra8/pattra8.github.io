@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>โหวต — Pattra Villa 8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:           #f9f3e9;
+      --bg-soft:      #f3ecdd;
+      --card:         #ffffff;
+      --border:       #e6dcc7;
+      --text:         #2a2218;
+      --text-body:    #3a3024;
+      --text-soft:    #6b5d4a;
+      --text-muted:   #8a7960;
+      --accent:       #c47a2c;
+      --accent-text:  #9a5c1f;
+      --accent-soft:  #e8b577;
+      --accent-pale:  #f7e6cd;
+      --accent-deep:  #855015;
+      --radius:       18px;
+      --shadow-card:  0 1px 2px rgba(60,40,20,.04), 0 8px 24px rgba(60,40,20,.06);
+      --shadow-hover: 0 2px 4px rgba(60,40,20,.06), 0 14px 36px rgba(60,40,20,.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'IBM Plex Sans Thai', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(249,243,233,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--accent-deep); letter-spacing: .02em;
+      text-decoration: none;
+    }
+    .logo span { font-weight: 500; color: var(--text-soft); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .header-btn {
+      font-family: inherit; font-size: .85rem; font-weight: 500;
+      color: var(--text-soft); background: none;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 6px 14px; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s;
+    }
+    .header-btn:hover { color: var(--text); border-color: var(--accent-soft); background: var(--accent-pale); }
+
+    /* ── Page layout ── */
+    .page { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 700;
+      color: var(--accent-deep); margin-bottom: 6px;
+    }
+    .page-sub { color: var(--text-muted); font-size: .9rem; margin-bottom: 28px; }
+
+    /* ── Poll cards ── */
+    .poll-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 24px;
+      margin-bottom: 16px; cursor: pointer;
+      box-shadow: var(--shadow-card);
+      transition: all .18s; position: relative; overflow: hidden;
+    }
+    .poll-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+    .poll-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--accent);
+    }
+    .poll-card.closed::before { background: #bbb; }
+    .poll-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+    .poll-badge {
+      font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+      padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .poll-badge.active { background: var(--accent-pale); color: var(--accent-deep); }
+    .poll-badge.closed { background: #f0f0f0; color: #888; }
+    .poll-title { font-size: 1.05rem; font-weight: 700; color: var(--text); flex: 1; }
+    .poll-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 12px; }
+    .poll-meta { display: flex; gap: 16px; font-size: .8rem; color: var(--text-muted); flex-wrap: wrap; }
+    .poll-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* ── Empty / loading ── */
+    .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty .big { font-size: 3rem; margin-bottom: 12px; }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite; margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PIN overlay ── */
+    .pin-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(42,34,24,.55); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      animation: fadeIn .18s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .pin-modal {
+      background: var(--card); border-radius: 20px;
+      padding: 28px 24px 24px; width: 100%; max-width: 380px;
+      box-shadow: 0 20px 60px rgba(42,34,24,.2);
+      animation: slideUp .2s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .pin-eyebrow {
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+      color: var(--accent); margin-bottom: 10px; text-transform: uppercase;
+    }
+    .pin-modal h2 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .pin-modal p { font-size: .88rem; color: var(--text-soft); margin-bottom: 20px; }
+    .pin-house-display {
+      background: var(--accent-pale); border-radius: 12px;
+      padding: 12px 16px; font-size: 1.1rem; font-weight: 700;
+      color: var(--accent-deep); margin-bottom: 14px;
+    }
+    .pin-input {
+      width: 100%; padding: 13px 16px; font-size: 1rem;
+      font-family: inherit; border: 1.5px solid var(--border);
+      border-radius: 12px; background: var(--bg); color: var(--text);
+      outline: none; transition: border-color .15s; margin-bottom: 10px;
+    }
+    .pin-input:focus { border-color: var(--accent); }
+    .pin-error {
+      display: none; background: #fff3f0; border: 1px solid #f0cfc8;
+      color: #a33d30; border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; line-height: 1.45; margin-bottom: 14px;
+    }
+    .pin-error.active { display: block; }
+    .pin-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+    .btn-cancel {
+      font-family: inherit; font-size: .95rem; font-weight: 600;
+      color: var(--text-soft); background: var(--bg-soft);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 13px; cursor: pointer; transition: all .15s;
+    }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-primary {
+      font-family: inherit; font-size: .95rem; font-weight: 700;
+      color: #fff; background: var(--accent);
+      border: none; border-radius: 12px;
+      padding: 13px; cursor: pointer; transition: all .15s;
+    }
+    .btn-primary:hover { background: var(--accent-deep); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Vote form (shown inside the page after PIN) ── */
+    .vote-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .vote-eyebrow {
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+      color: var(--accent); margin-bottom: 10px; text-transform: uppercase;
+    }
+    .vote-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .vote-desc { font-size: .93rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 24px; }
+    .vote-deadline {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-pale); color: var(--accent-deep);
+      font-size: .82rem; font-weight: 600;
+      padding: 5px 12px; border-radius: 20px; margin-bottom: 22px;
+    }
+
+    /* Option cards */
+    .options-label {
+      font-size: .82rem; font-weight: 700; color: var(--text-muted);
+      letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .option-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border: 2px solid var(--border);
+      border-radius: 14px; margin-bottom: 10px; cursor: pointer;
+      transition: all .15s; user-select: none;
+    }
+    .option-card:hover { border-color: var(--accent-soft); background: var(--accent-pale); }
+    .option-card.selected {
+      border-color: var(--accent); background: var(--accent-pale);
+    }
+    .option-mark {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s; font-size: .8rem;
+    }
+    .option-card.selected .option-mark {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .option-card.multi .option-mark { border-radius: 6px; }
+    .option-text { font-size: .97rem; font-weight: 500; color: var(--text); }
+
+    /* Star rating */
+    .stars-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .star-btn {
+      font-size: 2rem; background: none; border: none; cursor: pointer;
+      line-height: 1; padding: 4px; transition: transform .12s;
+      color: #ddd;
+    }
+    .star-btn.lit { color: var(--accent); }
+    .star-btn:hover { transform: scale(1.15); }
+    .star-label {
+      font-size: .85rem; color: var(--text-muted); margin-bottom: 20px;
+    }
+
+    .vote-submit-row { margin-top: 24px; display: flex; gap: 12px; align-items: center; }
+    .vote-error { color: #a33d30; font-size: .88rem; flex: 1; }
+
+    /* ── Results view ── */
+    .results-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .results-title { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .results-sub { font-size: .88rem; color: var(--text-muted); margin-bottom: 22px; }
+    .participation-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #eaf5ea; color: #2e6b2e; font-size: .82rem; font-weight: 700;
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+    }
+    .bar-row { margin-bottom: 16px; }
+    .bar-label {
+      display: flex; justify-content: space-between;
+      font-size: .9rem; font-weight: 600; color: var(--text); margin-bottom: 5px;
+    }
+    .bar-label .bar-pct { color: var(--accent-deep); }
+    .bar-track {
+      height: 12px; background: var(--bg-soft); border-radius: 99px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; background: var(--accent); border-radius: 99px;
+      transition: width .6s ease;
+    }
+    .bar-count { font-size: .78rem; color: var(--text-muted); margin-top: 3px; }
+
+    /* Rating results */
+    .rating-avg {
+      font-size: 2.2rem; font-weight: 800; color: var(--accent-deep);
+      text-align: center; margin-bottom: 4px;
+    }
+    .rating-avg-sub { text-align: center; font-size: .85rem; color: var(--text-muted); margin-bottom: 20px; }
+
+    /* ── Voted confirmation ── */
+    .voted-confirm {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px 24px;
+      box-shadow: var(--shadow-card); text-align: center;
+    }
+    .voted-confirm .big { font-size: 3rem; margin-bottom: 12px; }
+    .voted-confirm h2 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .voted-confirm p { font-size: .9rem; color: var(--text-muted); }
+    .voted-choice-badge {
+      display: inline-block; background: var(--accent-pale);
+      color: var(--accent-deep); font-weight: 700;
+      padding: 6px 16px; border-radius: 20px; margin: 12px 0 4px;
+    }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: inherit; font-size: .9rem; font-weight: 600;
+      color: var(--text-soft); background: none;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 16px; cursor: pointer; margin-bottom: 20px;
+      transition: all .15s;
+    }
+    .back-btn:hover { border-color: var(--accent-soft); background: var(--accent-pale); }
+
+    @media (max-width: 480px) {
+      .page { padding: 20px 14px 60px; }
+      .pin-modal { padding: 22px 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="https://pattra8.com/">Pattra <span>Villa 8</span></a>
+  <div class="header-right">
+    <a class="header-btn" href="https://pattra8.com/">🏠 หน้าหลัก</a>
+  </div>
+</header>
+
+<div class="page" id="app">
+  <div class="spinner" id="initSpinner"></div>
+</div>
+
+<script>
+  const FUNCTION_BASE = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net';
+  const POLL_URL = `${FUNCTION_BASE}/pollAction`;
+  const PIN_SESSION_KEY = 'pattra_pin_sessions_v1';
+
+  // ── PIN session helpers ──────────────────────────────────────────────────
+  function storePinSession(houseNo, pin) {
+    try {
+      const map = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
+      map[houseNo] = pin;
+      sessionStorage.setItem(PIN_SESSION_KEY, JSON.stringify(map));
+    } catch (_) {}
+  }
+  function getPinSession(houseNo) {
+    try {
+      const map = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
+      return map[houseNo] || null;
+    } catch (_) { return null; }
+  }
+
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmtDeadline(ts) {
+    if (!ts) return '';
+    const d = ts._seconds ? new Date(ts._seconds * 1000) : new Date(ts);
+    return d.toLocaleDateString('th-TH', {
+      year:'numeric', month:'long', day:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  }
+
+  function isPollClosed(poll) {
+    if (poll.status === 'closed') return true;
+    if (!poll.deadline) return false;
+    const ms = poll.deadline._seconds
+      ? poll.deadline._seconds * 1000
+      : new Date(poll.deadline).getTime();
+    return Date.now() > ms;
+  }
+
+  function typeName(type) {
+    return {single:'เลือก 1 ข้อ', multi:'เลือกได้หลายข้อ', rating:'ให้คะแนน 1-5'}[type] || type;
+  }
+
+  // ── App state ────────────────────────────────────────────────────────────
+  let polls = [];
+  let currentPoll = null;
+  let currentHouseNo = null;
+  let currentPin = null;
+
+  const app = document.getElementById('app');
+
+  // ── API calls ────────────────────────────────────────────────────────────
+  async function apiCall(payload) {
+    const res = await fetch(POLL_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw Object.assign(new Error(data.error || `HTTP ${res.status}`), {data});
+    return data;
+  }
+
+  // ── Screens ──────────────────────────────────────────────────────────────
+  function renderPollList() {
+    if (!polls.length) {
+      app.innerHTML = `
+        <h1 class="page-title">🗳 โหวต</h1>
+        <div class="page-sub">ร่วมกันตัดสินใจเพื่อหมู่บ้านของเรา</div>
+        <div class="empty"><div class="big">🗳</div>ยังไม่มี poll ในขณะนี้</div>
+      `;
+      return;
+    }
+    const cards = polls.map(p => {
+      const closed = isPollClosed(p);
+      return `
+        <div class="poll-card ${closed ? 'closed' : ''}" onclick="openPoll('${esc(p.id)}')">
+          <div class="poll-card-header">
+            <div class="poll-title">${esc(p.title)}</div>
+            <span class="poll-badge ${closed ? 'closed' : 'active'}">
+              ${closed ? '✅ ปิดแล้ว' : '🗳 กำลังโหวต'}
+            </span>
+          </div>
+          ${p.description ? `<div class="poll-desc">${esc(p.description)}</div>` : ''}
+          <div class="poll-meta">
+            <span>📊 ${typeName(p.type)}</span>
+            ${p.deadline ? `<span>⏰ ${closed ? 'หมดเขต' : 'ถึง'} ${fmtDeadline(p.deadline)}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+    app.innerHTML = `
+      <h1 class="page-title">🗳 โหวต</h1>
+      <div class="page-sub">ร่วมกันตัดสินใจเพื่อหมู่บ้านของเรา — 1 บ้าน 1 เสียง</div>
+      ${cards}
+    `;
+  }
+
+  function openPoll(pollId) {
+    currentPoll = polls.find(p => p.id === pollId);
+    if (!currentPoll) return;
+    if (isPollClosed(currentPoll)) {
+      showResults(pollId);
+      return;
+    }
+    showPinModal(pollId);
+  }
+
+  // ── PIN modal ────────────────────────────────────────────────────────────
+  function showPinModal(pollId) {
+    const overlay = document.createElement('div');
+    overlay.className = 'pin-overlay';
+    overlay.id = 'pinOverlay';
+    overlay.innerHTML = `
+      <div class="pin-modal">
+        <div class="pin-eyebrow">Resident Access</div>
+        <h2>ยืนยันตัวตน</h2>
+        <p>ใส่บ้านเลขที่และ PIN 6 หลักเพื่อโหวต</p>
+        <input class="pin-input" id="pinHouseInput" type="text"
+          placeholder="บ้านเลขที่ เช่น 38/8" autocomplete="off" inputmode="decimal" />
+        <input class="pin-input" id="pinCodeInput" type="password"
+          inputmode="numeric" maxlength="6" placeholder="PIN 6 หลัก" />
+        <div class="pin-error" id="pinError"></div>
+        <div class="pin-actions">
+          <button class="btn-cancel" id="pinCancelBtn">ยกเลิก</button>
+          <button class="btn-primary" id="pinSubmitBtn">ยืนยัน</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const houseInput = overlay.querySelector('#pinHouseInput');
+    const codeInput  = overlay.querySelector('#pinCodeInput');
+    const errorBox   = overlay.querySelector('#pinError');
+    const submitBtn  = overlay.querySelector('#pinSubmitBtn');
+    const cancelBtn  = overlay.querySelector('#pinCancelBtn');
+
+    const close = () => overlay.remove();
+    cancelBtn.onclick = close;
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); }
+    });
+
+    // auto-fill from session
+    const firstSession = Object.keys(JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY)||'{}')).sort()[0];
+    if (firstSession) houseInput.value = firstSession;
+
+    houseInput.focus();
+
+    const submit = async () => {
+      errorBox.className = 'pin-error';
+      const houseNo = houseInput.value.trim().replace(/\s+/g, '');
+      const pin = codeInput.value.trim();
+      if (!houseNo) { errorBox.textContent = 'กรุณาใส่บ้านเลขที่'; errorBox.className = 'pin-error active'; return; }
+      if (!/^\d{6}$/.test(pin)) { errorBox.textContent = 'PIN ต้องเป็นตัวเลข 6 หลัก'; errorBox.className = 'pin-error active'; return; }
+
+      submitBtn.disabled = true; submitBtn.textContent = 'กำลังตรวจสอบ…';
+      try {
+        // check hasVoted first
+        const hv = await apiCall({action:'hasVoted', houseNo, pin, pollId});
+        storePinSession(houseNo, pin);
+        currentHouseNo = houseNo;
+        currentPin = pin;
+        close();
+        if (hv.voted) {
+          showVotedConfirm(currentPoll, hv.choice);
+        } else {
+          showVoteForm(currentPoll);
+        }
+      } catch (err) {
+        errorBox.textContent = err.message === 'Invalid PIN' ? 'PIN ไม่ถูกต้อง' : (err.message || 'เกิดข้อผิดพลาด');
+        errorBox.className = 'pin-error active';
+        submitBtn.disabled = false; submitBtn.textContent = 'ยืนยัน';
+      }
+    };
+
+    submitBtn.onclick = submit;
+    codeInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  }
+
+  // ── Vote form ────────────────────────────────────────────────────────────
+  function showVoteForm(poll) {
+    let selectedChoices = poll.type === 'multi' ? [] : null;
+    let selectedRating = null;
+
+    const optionsHtml = () => {
+      if (poll.type === 'rating') {
+        return `
+          <div class="options-label">ให้คะแนนความพอใจ</div>
+          <div class="stars-row" id="starsRow">
+            ${[1,2,3,4,5].map(i => `<button class="star-btn" data-val="${i}" onclick="setRating(${i})">☆</button>`).join('')}
+          </div>
+          <div class="star-label" id="starLabel">กรุณาเลือกคะแนน 1-5</div>
+        `;
+      }
+      const isMulti = poll.type === 'multi';
+      const label = isMulti
+        ? `เลือกได้สูงสุด ${poll.maxChoices || 2} ข้อ`
+        : 'เลือก 1 ข้อ';
+      return `
+        <div class="options-label">${label}</div>
+        ${poll.options.map((opt, i) => `
+          <div class="option-card ${isMulti ? 'multi' : ''}" id="opt_${i}"
+            onclick="toggleOption(${i}, '${esc(opt)}', ${isMulti})">
+            <div class="option-mark" id="mark_${i}">${isMulti ? '' : ''}</div>
+            <div class="option-text">${esc(opt)}</div>
+          </div>
+        `).join('')}
+      `;
+    };
+
+    app.innerHTML = `
+      <button class="back-btn" onclick="goBack()">← กลับ</button>
+      <div class="vote-wrap">
+        <div class="vote-eyebrow">🗳 โหวต — บ้าน ${esc(currentHouseNo)}</div>
+        <div class="vote-title">${esc(poll.title)}</div>
+        ${poll.description ? `<div class="vote-desc">${esc(poll.description)}</div>` : ''}
+        ${poll.deadline ? `<div class="vote-deadline">⏰ หมดเขต ${fmtDeadline(poll.deadline)}</div>` : ''}
+        ${optionsHtml()}
+        <div class="vote-submit-row">
+          <button class="btn-primary" id="voteSubmitBtn" onclick="submitVote()">ยืนยันเสียง</button>
+          <span class="vote-error" id="voteError"></span>
+        </div>
+      </div>
+    `;
+
+    // expose helpers to global
+    window.toggleOption = (idx, val, isMulti) => {
+      if (isMulti) {
+        const pos = selectedChoices.indexOf(val);
+        if (pos >= 0) {
+          selectedChoices.splice(pos, 1);
+          document.getElementById(`opt_${idx}`).classList.remove('selected');
+          document.getElementById(`mark_${idx}`).textContent = '';
+        } else {
+          if (selectedChoices.length >= (poll.maxChoices || 2)) return;
+          selectedChoices.push(val);
+          document.getElementById(`opt_${idx}`).classList.add('selected');
+          document.getElementById(`mark_${idx}`).textContent = '✓';
+        }
+      } else {
+        poll.options.forEach((_, i) => {
+          document.getElementById(`opt_${i}`)?.classList.remove('selected');
+          const m = document.getElementById(`mark_${i}`);
+          if (m) m.textContent = '';
+        });
+        selectedChoices = val;
+        document.getElementById(`opt_${idx}`).classList.add('selected');
+        document.getElementById(`mark_${idx}`).textContent = '●';
+      }
+    };
+
+    window.setRating = (val) => {
+      selectedRating = val;
+      document.querySelectorAll('.star-btn').forEach(b => {
+        const v = Number(b.dataset.val);
+        b.textContent = v <= val ? '★' : '☆';
+        b.classList.toggle('lit', v <= val);
+      });
+      const labels = ['','แย่มาก','พอใช้','ปานกลาง','ดี','ดีมาก'];
+      document.getElementById('starLabel').textContent = `${val} ดาว — ${labels[val]}`;
+    };
+
+    window.submitVote = async () => {
+      const errEl = document.getElementById('voteError');
+      errEl.textContent = '';
+      let choice;
+      if (poll.type === 'rating') {
+        if (!selectedRating) { errEl.textContent = 'กรุณาเลือกคะแนน'; return; }
+        choice = selectedRating;
+      } else if (poll.type === 'multi') {
+        if (!selectedChoices.length) { errEl.textContent = 'กรุณาเลือกอย่างน้อย 1 ข้อ'; return; }
+        choice = selectedChoices;
+      } else {
+        if (!selectedChoices) { errEl.textContent = 'กรุณาเลือก 1 ข้อ'; return; }
+        choice = selectedChoices;
+      }
+      const btn = document.getElementById('voteSubmitBtn');
+      btn.disabled = true; btn.textContent = 'กำลังส่ง…';
+      try {
+        await apiCall({action:'vote', houseNo:currentHouseNo, pin:currentPin, pollId:poll.id, choice});
+        showVotedConfirm(poll, choice);
+      } catch (err) {
+        errEl.textContent = err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+        btn.disabled = false; btn.textContent = 'ยืนยันเสียง';
+      }
+    };
+  }
+
+  // ── Voted confirm ────────────────────────────────────────────────────────
+  function choiceDisplay(poll, choice) {
+    if (poll.type === 'rating') return `${choice} ดาว`;
+    if (Array.isArray(choice)) return choice.join(', ');
+    return String(choice);
+  }
+
+  function showVotedConfirm(poll, choice) {
+    app.innerHTML = `
+      <button class="back-btn" onclick="goBack()">← กลับรายการ</button>
+      <div class="voted-confirm">
+        <div class="big">✅</div>
+        <h2>โหวตของบ้าน ${esc(currentHouseNo)} ถูกบันทึกแล้ว</h2>
+        <div class="voted-choice-badge">${esc(choiceDisplay(poll, choice))}</div>
+        <p>ขอบคุณที่ร่วมโหวต<br>ผลจะแสดงหลังปิดโหวต</p>
+      </div>
+    `;
+  }
+
+  // ── Results ──────────────────────────────────────────────────────────────
+  async function showResults(pollId) {
+    app.innerHTML = `<div class="spinner"></div>`;
+    try {
+      const data = await apiCall({action:'results', pollId});
+      const {poll, results} = data;
+      const {counts, total, totalHouses, participationPct} = results;
+
+      let barsHtml = '';
+      if (poll.type === 'rating') {
+        const avg = total > 0
+          ? (Object.entries(counts).reduce((s,[k,v]) => s + Number(k)*v, 0) / total).toFixed(2)
+          : '—';
+        barsHtml = `
+          <div class="rating-avg">${avg} ★</div>
+          <div class="rating-avg-sub">คะแนนเฉลี่ยจาก ${total} เสียง</div>
+          ${[1,2,3,4,5].map(i => {
+            const cnt = counts[i] || 0;
+            const pct = total > 0 ? Math.round(cnt/total*100) : 0;
+            return `
+              <div class="bar-row">
+                <div class="bar-label"><span>${i} ดาว</span><span class="bar-pct">${pct}%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+                <div class="bar-count">${cnt} เสียง</div>
+              </div>`;
+          }).join('')}
+        `;
+      } else {
+        const opts = poll.options || Object.keys(counts);
+        barsHtml = opts.map(opt => {
+          const cnt = counts[opt] || 0;
+          const pct = total > 0 ? Math.round(cnt/total*100) : 0;
+          return `
+            <div class="bar-row">
+              <div class="bar-label"><span>${esc(opt)}</span><span class="bar-pct">${pct}%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+              <div class="bar-count">${cnt} เสียง</div>
+            </div>`;
+        }).join('');
+      }
+
+      app.innerHTML = `
+        <button class="back-btn" onclick="goBack()">← กลับรายการ</button>
+        <div class="results-wrap">
+          <div class="vote-eyebrow">📊 ผลโหวต</div>
+          <div class="results-title">${esc(poll.title)}</div>
+          <div class="results-sub">${esc(poll.description || '')}</div>
+          <div class="participation-badge">
+            👥 ${total} / ${totalHouses} หลัง (${participationPct}%)
+          </div>
+          ${barsHtml}
+        </div>
+      `;
+    } catch (err) {
+      if (err.data?.error === 'poll_not_closed') {
+        app.innerHTML = `
+          <button class="back-btn" onclick="goBack()">← กลับรายการ</button>
+          <div class="empty"><div class="big">🔒</div>ผลจะแสดงหลังปิดโหวต</div>
+        `;
+      } else {
+        app.innerHTML = `<div class="empty"><div class="big">⚠️</div>${esc(err.message)}</div>`;
+      }
+    }
+  }
+
+  // ── Navigation ───────────────────────────────────────────────────────────
+  function goBack() {
+    currentPoll = null;
+    renderPollList();
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      const data = await apiCall({action:'list'});
+      polls = data.polls || [];
+      renderPollList();
+    } catch (err) {
+      app.innerHTML = `<div class="empty"><div class="big">⚠️</div>โหลดไม่ได้: ${esc(err.message)}</div>`;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -902,6 +902,9 @@
     <button class="tab-btn" id="tabPins" onclick="switchTab('pins')">
       🔑 PIN ลูกบ้าน
     </button>
+    <button class="tab-btn" id="tabVote" onclick="switchTab('vote')">
+      🗳 โหวต
+    </button>
   </div>
 
   <!-- Tab: Residents -->
@@ -968,6 +971,79 @@
         <div id="pinAdminHouse" style="margin-top:8px;color:#6b5d4a;"></div>
       </div>
       <div id="pinAdminError" style="display:none;margin-top:14px;color:#a33d30;font-weight:700;"></div>
+    </div>
+
+    <!-- Vote tab (admin) -->
+    <div id="voteAdminSection" style="display:none;max-width:760px;margin:24px auto;">
+
+      <!-- Create Poll -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);margin-bottom:20px;">
+        <h2 style="margin:0 0 6px;font-size:1.3rem;">➕ สร้าง Poll ใหม่</h2>
+        <p style="margin:0 0 20px;color:var(--text-muted);font-size:.9rem;">ลูกบ้านโหวตที่ <strong>pattra8.com/vote/</strong></p>
+        <div style="display:grid;gap:12px;">
+          <input id="voteTitle" type="text" placeholder="ชื่อ poll เช่น โครงการติดตั้งกล้อง CCTV เพิ่ม"
+            style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:1rem;font-family:inherit;width:100%;" />
+          <textarea id="voteDesc" rows="2" placeholder="คำอธิบาย (optional)"
+            style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;resize:vertical;"></textarea>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">ประเภท</label>
+              <select id="voteType" onchange="onVoteTypeChange()"
+                style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.95rem;">
+                <option value="single">เลือก 1 ข้อ</option>
+                <option value="multi">เลือกได้หลายข้อ</option>
+                <option value="rating">ให้คะแนน 1-5</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">หมดเขต</label>
+              <input id="voteDeadline" type="datetime-local"
+                style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.95rem;" />
+            </div>
+          </div>
+          <div id="voteOptionsSection">
+            <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:8px;">ตัวเลือก</label>
+            <div id="voteOptionsList">
+              <div class="vote-option-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                <input type="text" placeholder="ตัวเลือกที่ 1" class="vote-opt-input"
+                  style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
+              </div>
+              <div class="vote-option-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                <input type="text" placeholder="ตัวเลือกที่ 2" class="vote-opt-input"
+                  style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
+              </div>
+            </div>
+            <button onclick="addVoteOption()" style="font-family:inherit;font-size:.85rem;color:var(--accent-text);background:none;border:1px dashed var(--accent-soft);border-radius:8px;padding:7px 14px;cursor:pointer;">+ เพิ่มตัวเลือก</button>
+            <div id="voteMaxChoicesRow" style="display:none;margin-top:12px;">
+              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);">เลือกได้สูงสุด (กรณี multi)</label>
+              <input id="voteMaxChoices" type="number" min="2" max="10" value="2"
+                style="width:80px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-left:10px;font-family:inherit;" />
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:12px;align-items:center;">
+          <button class="approve-btn" onclick="createPoll()" id="createPollBtn" style="background:var(--accent);">สร้าง Poll</button>
+          <span id="createPollStatus" style="font-size:.88rem;color:var(--text-muted);"></span>
+        </div>
+      </div>
+
+      <!-- Poll list -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <h2 style="margin:0;font-size:1.2rem;">📋 รายการ Polls</h2>
+          <button onclick="loadAdminPolls()" style="font-family:inherit;font-size:.82rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">🔄 รีเฟรช</button>
+        </div>
+        <div id="adminPollList"><div style="color:var(--text-muted);font-size:.9rem;">กดรีเฟรชเพื่อโหลด</div></div>
+      </div>
+
+      <!-- Results modal -->
+      <div id="pollResultsModal" style="display:none;margin-top:20px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <h2 style="margin:0;font-size:1.2rem;" id="pollResultsTitle">ผลโหวต</h2>
+          <button onclick="document.getElementById('pollResultsModal').style.display='none'" style="margin-left:auto;font-family:inherit;font-size:.85rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">ซ่อน</button>
+        </div>
+        <div id="pollResultsBody"></div>
+      </div>
     </div>
 
     <!-- Bootstrap Firestore residents -->
@@ -1159,10 +1235,13 @@
     document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
     document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
+    document.getElementById('voteAdminSection').style.display = tab === 'vote' ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
+    document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
     if (tab === 'pending') loadPending();
+    if (tab === 'vote') loadAdminPolls();
   }
 
   async function generateResidentPinForAdmin() {
@@ -1251,6 +1330,210 @@
     if (!pin) return;
     await navigator.clipboard.writeText(pin);
     alert('Copy PIN แล้ว');
+  }
+
+  // ── Vote / Poll admin ────────────────────────────────────────────────────
+  const POLL_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/pollAction';
+
+  function onVoteTypeChange() {
+    const type = document.getElementById('voteType').value;
+    document.getElementById('voteOptionsSection').style.display =
+      type === 'rating' ? 'none' : 'block';
+    document.getElementById('voteMaxChoicesRow').style.display =
+      type === 'multi' ? 'flex' : 'none';
+  }
+
+  function addVoteOption() {
+    const list = document.getElementById('voteOptionsList');
+    const count = list.querySelectorAll('.vote-option-row').length + 1;
+    const row = document.createElement('div');
+    row.className = 'vote-option-row';
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+    row.innerHTML = `
+      <input type="text" placeholder="ตัวเลือกที่ ${count}" class="vote-opt-input"
+        style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
+      <button onclick="this.closest('.vote-option-row').remove()"
+        style="font-family:inherit;font-size:.85rem;color:#a33d30;background:none;border:1px solid #f0cfc8;border-radius:8px;padding:6px 10px;cursor:pointer;">✕</button>
+    `;
+    list.appendChild(row);
+  }
+
+  async function createPoll() {
+    const btn = document.getElementById('createPollBtn');
+    const status = document.getElementById('createPollStatus');
+    const type = document.getElementById('voteType').value;
+    const title = document.getElementById('voteTitle').value.trim();
+    const desc = document.getElementById('voteDesc').value.trim();
+    const deadline = document.getElementById('voteDeadline').value;
+    const maxChoices = Number(document.getElementById('voteMaxChoices').value) || 2;
+    let options = null;
+    if (type !== 'rating') {
+      options = [...document.querySelectorAll('.vote-opt-input')]
+        .map(i => i.value.trim()).filter(Boolean);
+      if (options.length < 2) { status.textContent = 'ต้องมีอย่างน้อย 2 ตัวเลือก'; return; }
+    }
+    if (!title) { status.textContent = 'กรุณาใส่ชื่อ poll'; return; }
+    if (!deadline) { status.textContent = 'กรุณาเลือกวันหมดเขต'; return; }
+    btn.disabled = true; status.textContent = 'กำลังสร้าง...';
+    try {
+      const res = await fetch(POLL_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          action: 'create',
+          adminPassword: 'PATTRADATA',
+          poll: {
+            title, description: desc, type, options,
+            maxChoices: type === 'multi' ? maxChoices : null,
+            deadline: new Date(deadline).toISOString(),
+            totalHouses: allData.length || 68
+          }
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      status.textContent = `✅ สร้างแล้ว! Poll ID: ${data.pollId}`;
+      document.getElementById('voteTitle').value = '';
+      document.getElementById('voteDesc').value = '';
+      document.getElementById('voteDeadline').value = '';
+      loadAdminPolls();
+    } catch (err) {
+      status.textContent = 'สร้างไม่สำเร็จ: ' + err.message;
+    } finally { btn.disabled = false; }
+  }
+
+  async function loadAdminPolls() {
+    const el = document.getElementById('adminPollList');
+    if (!el) return;
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.9rem;">กำลังโหลด...</div>';
+    try {
+      const res = await fetch(POLL_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'list'})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) throw new Error(data.error || 'Load failed');
+      const polls = data.polls || [];
+      if (!polls.length) {
+        el.innerHTML = '<div style="color:var(--text-muted);font-size:.9rem;">ยังไม่มี poll</div>';
+        return;
+      }
+      el.innerHTML = polls.map(p => {
+        const closed = p.status === 'closed' ||
+          (p.deadline && (p.deadline._seconds ? p.deadline._seconds*1000 : new Date(p.deadline).getTime()) < Date.now());
+        const dl = p.deadline
+          ? (p.deadline._seconds ? new Date(p.deadline._seconds*1000) : new Date(p.deadline))
+              .toLocaleDateString('th-TH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+          : '—';
+        return `
+          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;background:${closed?'#fafafa':'#fff'};">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:.97rem;">${p.title||'(ไม่มีชื่อ)'}</div>
+                <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px;">
+                  ${closed?'✅ ปิดแล้ว':'🗳 กำลังโหวต'} · ⏰ ${dl}
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button onclick="viewAdminPollResults('${p.id}','${(p.title||'').replace(/'/g,"\\'")}' )"
+                style="font-family:inherit;font-size:.82rem;background:var(--accent-pale);color:var(--accent-deep);border:1px solid var(--accent-soft);border-radius:8px;padding:6px 12px;cursor:pointer;">
+                📊 ดูผล
+              </button>
+              ${!closed ? `
+                <button onclick="closePoll('${p.id}',this)"
+                  style="font-family:inherit;font-size:.82rem;background:#fff0f0;color:#a33d30;border:1px solid #f0cfc8;border-radius:8px;padding:6px 12px;cursor:pointer;">
+                  🔒 ปิด Poll
+                </button>` : ''}
+              <button onclick="navigator.clipboard.writeText('https://pattra8.com/vote/').then(()=>alert('Copy link แล้ว'))"
+                style="font-family:inherit;font-size:.82rem;background:none;color:var(--text-soft);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
+                🔗 Copy Link
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      el.innerHTML = `<div style="color:#a33d30;">${err.message}</div>`;
+    }
+  }
+
+  async function viewAdminPollResults(pollId, title) {
+    const modal = document.getElementById('pollResultsModal');
+    const body = document.getElementById('pollResultsBody');
+    document.getElementById('pollResultsTitle').textContent = 'ผลโหวต — ' + title;
+    modal.style.display = 'block';
+    body.innerHTML = '<div style="color:var(--text-muted);">กำลังโหลด...</div>';
+    try {
+      const res = await fetch(POLL_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action:'results', pollId, adminPassword:'PATTRADATA'})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) throw new Error(data.error || 'Load failed');
+      const {poll, results} = data;
+      const {counts, total, totalHouses, participationPct} = results;
+      let html = `<div style="margin-bottom:12px;font-size:.88rem;color:var(--text-muted);">
+        👥 โหวตแล้ว ${total} / ${totalHouses} หลัง (${participationPct}%)
+      </div>`;
+      if (poll.type === 'rating') {
+        const avg = total > 0
+          ? (Object.entries(counts).reduce((s,[k,v])=>s+Number(k)*v,0)/total).toFixed(2)
+          : '—';
+        html += `<div style="font-size:1.8rem;font-weight:800;color:var(--accent-deep);margin-bottom:4px;">${avg} ★</div>`;
+        [1,2,3,4,5].forEach(i => {
+          const cnt = counts[i]||0;
+          const pct = total>0?Math.round(cnt/total*100):0;
+          html += `<div style="margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:.88rem;font-weight:600;margin-bottom:4px;">
+              <span>${i} ดาว</span><span style="color:var(--accent-deep);">${pct}%</span>
+            </div>
+            <div style="height:10px;background:#f0ebe0;border-radius:99px;overflow:hidden;">
+              <div style="height:100%;background:var(--accent);border-radius:99px;width:${pct}%;"></div>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">${cnt} เสียง</div>
+          </div>`;
+        });
+      } else {
+        (poll.options||Object.keys(counts)).forEach(opt => {
+          const cnt = counts[opt]||0;
+          const pct = total>0?Math.round(cnt/total*100):0;
+          html += `<div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:.88rem;font-weight:600;margin-bottom:4px;">
+              <span>${opt}</span><span style="color:var(--accent-deep);">${pct}%</span>
+            </div>
+            <div style="height:10px;background:#f0ebe0;border-radius:99px;overflow:hidden;">
+              <div style="height:100%;background:var(--accent);border-radius:99px;width:${pct}%;"></div>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">${cnt} เสียง</div>
+          </div>`;
+        });
+      }
+      body.innerHTML = html;
+    } catch (err) {
+      body.innerHTML = `<div style="color:#a33d30;">${err.message}</div>`;
+    }
+    modal.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  async function closePoll(pollId, btn) {
+    if (!confirm('ยืนยันปิด Poll นี้? ลูกบ้านจะเห็นผลโหวตทันที')) return;
+    btn.disabled = true; btn.textContent = 'กำลังปิด...';
+    try {
+      const res = await fetch(POLL_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action:'close', adminPassword:'PATTRADATA', pollId})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) throw new Error(data.error || 'Failed');
+      loadAdminPolls();
+    } catch (err) {
+      alert('ปิดไม่สำเร็จ: ' + err.message);
+      btn.disabled = false; btn.textContent = '🔒 ปิด Poll';
+    }
   }
 
   // ── Load resident data (ดึงตรงจาก GitHub API — ไม่มี CDN cache) ──────────
