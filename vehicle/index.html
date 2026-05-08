@@ -1706,6 +1706,10 @@
   async function ensureResidentUnlocked(record) {
     if (!record || !record.house_no) return false;
     const houseNo = normalizeHouseForAuth(record.house_no);
+    if (getPinSession(houseNo)) {
+      setResidentUnlock(houseNo);
+      return true;
+    }
     if (isResidentUnlocked(houseNo) && getPinSession(houseNo)) return true;
     return requestResidentPin(record);
   }
