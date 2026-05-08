@@ -163,6 +163,35 @@
       outline: none; transition: border-color .15s; margin-bottom: 10px;
     }
     .pin-input:focus { border-color: var(--accent); }
+    .house-input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .house-input-wrap:focus-within { border-color: var(--accent); }
+    .house-prefix {
+      padding: 13px 0 13px 16px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .house-input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: 0;
+      padding: 13px 16px 13px 2px;
+    }
     .pin-error {
       display: none; background: #fff3f0; border: 1px solid #f0cfc8;
       color: #a33d30; border-radius: 10px;
@@ -544,11 +573,14 @@
       <div class="pin-modal">
         <div class="pin-eyebrow">Resident Access</div>
         <h2>ยืนยันตัวตน</h2>
-        <p>ใส่บ้านเลขที่และ PIN 6 หลักเพื่อตรวจสอบสิทธิ์ก่อนลงคะแนน</p>
-        <input class="pin-input" id="pinHouseInput" type="text"
-          placeholder="บ้านเลขที่ เช่น 38/8" autocomplete="off" inputmode="decimal" />
+        <p>ใส่เลขหลังบ้านและ PIN 6 หลักเพื่อตรวจสอบสิทธิ์ก่อนลงคะแนน</p>
+        <div class="house-input-wrap">
+          <span class="house-prefix">38/</span>
+          <input class="house-input" id="pinHouseInput" name="resident-vote-house-suffix" type="text"
+            placeholder="เลขบ้าน เช่น 8" autocomplete="off" inputmode="numeric" pattern="[0-9]*" />
+        </div>
         <input class="pin-input" id="pinCodeInput" type="password"
-          inputmode="numeric" maxlength="6" placeholder="PIN 6 หลัก" />
+          name="resident-vote-pin" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="PIN 6 หลัก" />
         <div class="pin-error" id="pinError"></div>
         <div class="pin-actions">
           <button class="btn-cancel" id="pinCancelBtn">ยกเลิก</button>
@@ -575,14 +607,16 @@
     const sessions = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
     const firstSession = Object.keys(sessions).sort()[0];
     if (firstSession) {
-      houseInput.value = firstSession;
+      houseInput.value = firstSession.replace(/^38\//, '');
       codeInput.value = sessions[firstSession];
     }
     (firstSession ? codeInput : houseInput).focus();
 
     const submit = async () => {
       errorBox.className = 'pin-error';
-      const houseNo = houseInput.value.trim().replace(/\s+/g, '');
+      const rawHouse = houseInput.value.trim().replace(/\s+/g, '');
+      const suffix = rawHouse.replace(/^38\//, '').replace(/\D/g, '');
+      const houseNo = suffix ? `38/${suffix}` : '';
       const pin = codeInput.value.trim();
       if (!houseNo) { errorBox.textContent = 'กรุณาใส่บ้านเลขที่'; errorBox.className = 'pin-error active'; return; }
       if (!/^\d{6}$/.test(pin)) { errorBox.textContent = 'PIN ต้องเป็นตัวเลข 6 หลัก'; errorBox.className = 'pin-error active'; return; }
