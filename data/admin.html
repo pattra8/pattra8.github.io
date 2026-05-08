@@ -1604,8 +1604,31 @@
     if (!houses || !houses.length) {
       return '<div style="font-size:.84rem;color:var(--status-ok);">ครบทุกบ้านแล้ว</div>';
     }
-    return `<div style="display:flex;flex-wrap:wrap;gap:6px;line-height:1;">
-      ${houses.map(h => `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:52px;padding:6px 9px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text-body);font-size:.78rem;font-weight:700;">${escHtml(h)}</span>`).join('')}
+    const grouped = houses
+      .map(h => {
+        const suffix = Number(String(h).split('/')[1]);
+        return {house: h, suffix: Number.isFinite(suffix) ? suffix : 0};
+      })
+      .sort((a, b) => a.suffix - b.suffix)
+      .reduce((rows, item) => {
+        const start = Math.floor((Math.max(item.suffix, 1) - 1) / 10) * 10 + 1;
+        const key = `${start}-${start + 9}`;
+        if (!rows.has(key)) rows.set(key, {start, end: start + 9, houses: []});
+        rows.get(key).houses.push(item.house);
+        return rows;
+      }, new Map());
+    return `<div style="display:flex;flex-direction:column;gap:10px;">
+      ${[...grouped.values()].map(row => `
+        <div style="display:grid;grid-template-columns:104px 1fr;gap:10px;align-items:stretch;padding:8px;border:1px solid var(--border-soft);border-radius:10px;background:var(--bg-soft);">
+          <div style="display:flex;align-items:center;justify-content:center;border-radius:8px;background:#fff;color:var(--accent-deep);font-size:.76rem;font-weight:900;white-space:nowrap;border:1px solid var(--border-soft);">38/${row.start}-38/${row.end}</div>
+          <div style="display:grid;grid-template-columns:repeat(10,minmax(34px,1fr));gap:6px;line-height:1;">
+            ${row.houses.map(h => {
+              const suffix = String(h).split('/')[1] || h;
+              return `<span title="${escHtml(h)}" style="display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-body);font-size:.86rem;font-weight:800;">${escHtml(suffix)}</span>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('')}
     </div>`;
   }
 
