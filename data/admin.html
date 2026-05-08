@@ -1531,8 +1531,8 @@
           const signed = v.signedAt ? 'เซ็นแล้ว' : '—';
           return `<tr>
             <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);font-weight:700;">${v.houseNo || ''}</td>
-            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);">${esc(v.residentName || '—')}</td>
-            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);">${esc(choice)}</td>
+            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);">${escHtml(v.residentName || '—')}</td>
+            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);">${escHtml(choice)}</td>
             <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);color:var(--status-ok);">${signed}</td>
           </tr>`;
         }).join('');
@@ -1605,7 +1605,7 @@
       return '<div style="font-size:.84rem;color:var(--status-ok);">ครบทุกบ้านแล้ว</div>';
     }
     return `<div style="display:flex;flex-wrap:wrap;gap:6px;line-height:1;">
-      ${houses.map(h => `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:52px;padding:6px 9px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text-body);font-size:.78rem;font-weight:700;">${esc(h)}</span>`).join('')}
+      ${houses.map(h => `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:52px;padding:6px 9px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--text-body);font-size:.78rem;font-weight:700;">${escHtml(h)}</span>`).join('')}
     </div>`;
   }
 
@@ -1642,7 +1642,7 @@
     }
     const slipHtml = votes.map(v => {
       const signature = v.signatureDataUrl
-        ? `<img class="signature-img" src="${v.signatureDataUrl}" alt="ลายเซ็นบ้าน ${esc(v.houseNo || '')}">`
+        ? `<img class="signature-img" src="${v.signatureDataUrl}" alt="ลายเซ็นบ้าน ${escHtml(v.houseNo || '')}">`
         : `<div class="signature-empty">ไม่มีรูป e-sign</div>`;
       return `
         <section class="slip">
@@ -1651,20 +1651,20 @@
               <div class="brand">Pattra Villa 8</div>
               <div class="doc-type">หลักฐานการลงคะแนน / Vote Endorsement</div>
             </div>
-            <div class="house-pill">${esc(v.houseNo || '')}</div>
+            <div class="house-pill">${escHtml(v.houseNo || '')}</div>
           </div>
-          <div class="poll-title">${esc(data.poll.title || '')}</div>
-          ${data.poll.description ? `<div class="poll-desc">${esc(data.poll.description)}</div>` : ''}
+          <div class="poll-title">${escHtml(data.poll.title || '')}</div>
+          ${data.poll.description ? `<div class="poll-desc">${escHtml(data.poll.description)}</div>` : ''}
           <div class="grid">
-            <div><span>บ้านเลขที่</span><strong>${esc(v.houseNo || '')}</strong></div>
-            <div><span>ชื่อ-นามสกุล</span><strong>${esc(v.residentName || '—')}</strong></div>
-            <div><span>คำตอบ</span><strong>${esc(choiceText(v.choice))}</strong></div>
-            <div><span>วันที่ลงคะแนน</span><strong>${esc(firestoreTimeText(v.votedAt))}</strong></div>
+            <div><span>บ้านเลขที่</span><strong>${escHtml(v.houseNo || '')}</strong></div>
+            <div><span>ชื่อ-นามสกุล</span><strong>${escHtml(v.residentName || '—')}</strong></div>
+            <div><span>คำตอบ</span><strong>${escHtml(choiceText(v.choice))}</strong></div>
+            <div><span>วันที่ลงคะแนน</span><strong>${escHtml(firestoreTimeText(v.votedAt))}</strong></div>
           </div>
           <div class="signature-block">
             <div class="signature-label">E-Signature</div>
             ${signature}
-            <div class="signature-caption">ลงชื่อ ${esc(v.residentName || '________________')} เจ้าของสิทธิ์บ้าน ${esc(v.houseNo || '')}</div>
+            <div class="signature-caption">ลงชื่อ ${escHtml(v.residentName || '________________')} เจ้าของสิทธิ์บ้าน ${escHtml(v.houseNo || '')}</div>
           </div>
         </section>`;
     }).join('');
