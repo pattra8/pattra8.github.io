@@ -1663,58 +1663,83 @@
       alert('ยังไม่มีบ้านที่โหวต');
       return;
     }
-    const slipHtml = votes.map(v => {
+    const renderSlip = v => {
       const signature = v.signatureDataUrl
         ? `<img class="signature-img" src="${v.signatureDataUrl}" alt="ลายเซ็นบ้าน ${escHtml(v.houseNo || '')}">`
         : `<div class="signature-empty">ไม่มีรูป e-sign</div>`;
       return `
-        <section class="slip">
-          <div class="slip-head">
-            <div>
-              <div class="brand">Pattra Villa 8</div>
-              <div class="doc-type">หลักฐานการลงคะแนน / Vote Endorsement</div>
+        <article class="slip">
+          <div class="slip-top">
+            <div class="house">${escHtml(v.houseNo || '')}</div>
+            <div class="person">
+              <div class="label">ชื่อ-นามสกุล</div>
+              <div class="value">${escHtml(v.residentName || '—')}</div>
             </div>
-            <div class="house-pill">${escHtml(v.houseNo || '')}</div>
+            <div class="topic">
+              <div class="label">หัวข้อโหวต</div>
+              <div class="value">${escHtml(data.poll.title || '')}</div>
+            </div>
           </div>
-          <div class="poll-title">${escHtml(data.poll.title || '')}</div>
-          ${data.poll.description ? `<div class="poll-desc">${escHtml(data.poll.description)}</div>` : ''}
-          <div class="grid">
-            <div><span>บ้านเลขที่</span><strong>${escHtml(v.houseNo || '')}</strong></div>
-            <div><span>ชื่อ-นามสกุล</span><strong>${escHtml(v.residentName || '—')}</strong></div>
-            <div><span>คำตอบ</span><strong>${escHtml(choiceText(v.choice))}</strong></div>
-            <div><span>วันที่ลงคะแนน</span><strong>${escHtml(firestoreTimeText(v.votedAt))}</strong></div>
+          <div class="slip-body">
+            <div class="endorse">
+              <div class="answer-strip"><span>คำตอบ</span>${escHtml(choiceText(v.choice))}</div>
+              <div class="date">วันที่ลงคะแนน ${escHtml(firestoreTimeText(v.votedAt))}</div>
+            </div>
+            <div class="signature">
+              <div class="label">E-Signature</div>
+              <div class="sig-box">${signature}</div>
+              <div class="sig-name">${escHtml(v.residentName || '')}</div>
+            </div>
           </div>
-          <div class="signature-block">
-            <div class="signature-label">E-Signature</div>
-            ${signature}
-            <div class="signature-caption">ลงชื่อ ${escHtml(v.residentName || '________________')} เจ้าของสิทธิ์บ้าน ${escHtml(v.houseNo || '')}</div>
+        </article>`;
+    };
+    const pages = [];
+    for (let i = 0; i < votes.length; i += 4) {
+      pages.push(votes.slice(i, i + 4));
+    }
+    const slipHtml = pages.map(pageVotes => `
+      <main class="sheet">
+        <header class="page-head">
+          <div>
+            <div class="brand">Pattra Villa 8</div>
+            <div class="sub">Vote Endorsement / หลักฐานการลงคะแนน</div>
           </div>
-        </section>`;
-    }).join('');
+          <div class="page-title">หลักฐานการลงคะแนนรายบ้าน<span>พิมพ์รวมหลายบ้าน: 4 slip ต่อหน้า A4</span></div>
+        </header>
+        <section class="slips">${pageVotes.map(renderSlip).join('')}</section>
+      </main>
+    `).join('');
     const w = window.open('', '_blank');
     w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Pattra8 Vote Slips</title>
       <style>
-        @page { size: A4; margin: 12mm; }
-        body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Sarabun','Noto Sans Thai',sans-serif; color:#2b2118; background:#fff; }
-        .slip { page-break-after: always; border:1.5px solid #dfd1ba; border-radius:10px; padding:18px 20px; min-height:245mm; box-sizing:border-box; }
-        .slip:last-child { page-break-after: auto; }
-        .slip-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; border-bottom:1px solid #eadfcd; padding-bottom:14px; margin-bottom:16px; }
-        .brand { font-size:28px; font-weight:800; letter-spacing:.02em; }
-        .doc-type { margin-top:4px; color:#8a6d4f; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-        .house-pill { background:#c77b2a; color:white; border-radius:8px; padding:10px 14px; font-size:24px; font-weight:900; }
-        .poll-title { font-size:22px; line-height:1.35; font-weight:900; margin-bottom:6px; }
-        .poll-desc { color:#746554; font-size:14px; line-height:1.6; margin-bottom:14px; }
-        .grid { display:grid; grid-template-columns:1fr 1fr; border:1px solid #eadfcd; border-radius:8px; overflow:hidden; margin-top:16px; }
-        .grid div { padding:13px 14px; border-bottom:1px solid #eadfcd; }
-        .grid div:nth-child(odd) { border-right:1px solid #eadfcd; }
-        .grid div:nth-last-child(-n+2) { border-bottom:0; }
-        .grid span { display:block; color:#8a6d4f; font-size:13px; font-weight:700; margin-bottom:5px; }
-        .grid strong { font-size:20px; line-height:1.35; }
-        .signature-block { margin-top:24px; border:1px solid #eadfcd; border-radius:8px; padding:14px; }
-        .signature-label { color:#8a6d4f; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; }
-        .signature-img { display:block; max-width:100%; height:150px; object-fit:contain; border:1px dashed #d6c5a8; border-radius:6px; background:#fffdf8; margin-bottom:12px; }
-        .signature-empty { height:150px; display:flex; align-items:center; justify-content:center; border:1px dashed #d6c5a8; color:#9a8a78; border-radius:6px; margin-bottom:12px; }
-        .signature-caption { border-top:1px solid #eadfcd; padding-top:10px; font-size:15px; font-weight:700; }
+        @page { size: A4; margin: 10mm; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Sarabun','Noto Sans Thai',sans-serif; color:#2d251f; background:#fff; }
+        .sheet { width:190mm; min-height:277mm; padding:0; page-break-after:always; }
+        .sheet:last-child { page-break-after:auto; }
+        .page-head { display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid #d9c7ac;padding-bottom:10px;margin-bottom:10px; }
+        .brand { font-size:24px;font-weight:900;line-height:1; }
+        .sub { margin-top:6px;color:#8b7358;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase; }
+        .page-title { text-align:right;font-size:13px;font-weight:900; }
+        .page-title span { display:block;margin-top:4px;color:#8b7358;font-size:10px;font-weight:800; }
+        .slips { display:grid;grid-template-columns:1fr;gap:8px; }
+        .slip { border:1.4px solid #dcc9ad;border-radius:8px;background:#fff;overflow:hidden;page-break-inside:avoid; }
+        .slip-top { display:grid;grid-template-columns:82px minmax(230px,300px) minmax(0,1fr);border-bottom:1px solid #eadfce;min-height:48px; }
+        .house { display:flex;align-items:center;justify-content:center;background:#c67827;color:#fff;font-size:24px;font-weight:950; }
+        .person,.topic { padding:8px 11px;border-right:1px solid #eadfce; }
+        .topic { border-right:0; }
+        .label { color:#8b7358;font-size:10px;font-weight:900;letter-spacing:.04em;margin-bottom:3px; }
+        .value { font-size:15px;font-weight:900;line-height:1.25; }
+        .slip-body { display:grid;grid-template-columns:minmax(0,1fr) 178px;min-height:92px; }
+        .endorse { display:flex;flex-direction:column;justify-content:center;gap:14px;padding:10px 12px;border-right:1px solid #eadfce; }
+        .answer-strip { align-self:flex-start;border:1.4px solid #c67827;border-radius:7px;padding:7px 12px;background:#fff8ef;color:#2d251f;font-weight:900;font-size:15px;line-height:1.25; }
+        .answer-strip span { color:#8b7358;font-size:10px;font-weight:900;letter-spacing:.04em;margin-right:8px;text-transform:uppercase; }
+        .date { color:#6f604f;font-size:11px;font-weight:800; }
+        .signature { padding:9px;display:flex;flex-direction:column;gap:5px; }
+        .sig-box { height:58px;border:1px dashed #d4bea0;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fffdf8; }
+        .signature-img { display:block;max-width:100%;max-height:100%;object-fit:contain; }
+        .signature-empty { color:#9a8a78;font-size:11px;font-weight:700; }
+        .sig-name { font-size:10.5px;font-weight:800;color:#2d251f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center; }
       </style></head><body>${slipHtml}</body></html>`);
     w.document.close();
     w.focus();
