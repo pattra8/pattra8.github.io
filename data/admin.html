@@ -1010,7 +1010,7 @@
               </select>
             </div>
             <div>
-              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">หมดเขต</label>
+              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">หมดเขต (ไม่บังคับ)</label>
               <input id="voteDeadline" type="datetime-local"
                 style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.95rem;" />
             </div>
@@ -1378,7 +1378,6 @@
       if (options.length < 2) { status.textContent = 'ต้องมีอย่างน้อย 2 ตัวเลือก'; return; }
     }
     if (!title) { status.textContent = 'กรุณาใส่ชื่อ poll'; return; }
-    if (!deadline) { status.textContent = 'กรุณาเลือกวันหมดเขต'; return; }
     btn.disabled = true; status.textContent = 'กำลังสร้าง...';
     try {
       const res = await fetch(POLL_URL, {
@@ -1390,7 +1389,7 @@
           poll: {
             title, description: desc, type, options,
             maxChoices: type === 'multi' ? maxChoices : null,
-            deadline: new Date(deadline).toISOString(),
+            deadline: deadline ? new Date(deadline).toISOString() : null,
             totalHouses: allData.length || 68
           }
         })
