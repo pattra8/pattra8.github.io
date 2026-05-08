@@ -196,6 +196,49 @@
       background: var(--accent);
       color: #fff;
     }
+    .admin-quick-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .admin-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--text-body);
+      border-radius: 9px;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .admin-link-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .section-head-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .section-head-row h2 { margin: 0 0 6px; }
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
     /* ─── TABS ─── */
     .tabs {
@@ -818,6 +861,9 @@
     }
     @media (max-width: 720px) {
       .dashboard > header { padding: 14px 16px; }
+      .dashboard > header > div:last-child { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+      .admin-quick-links { width: 100%; }
+      .admin-link-btn { flex: 1 1 auto; }
       .tabs { padding: 14px 16px 0; overflow-x: auto; }
       .toolbar { padding: 14px 16px; }
       .table-wrap { margin: 0 16px 16px; }
@@ -884,7 +930,12 @@
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
       <span class="badge">ADMIN</span>
-      <button class="main-page-btn" onclick="window.location.href='./'">หน้าข้อมูลหลัก</button>
+      <nav class="admin-quick-links" aria-label="Admin quick links">
+        <a class="admin-link-btn" href="/" target="_blank" rel="noopener">🏠 Home</a>
+        <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 ข้อมูลลูกบ้าน</a>
+        <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 ทะเบียนรถ</a>
+        <a class="admin-link-btn" href="/vote/" target="_blank" rel="noopener">🗳 หน้าโหวต</a>
+      </nav>
       <button class="logout-btn" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
       <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
     </div>
@@ -944,6 +995,18 @@
 
   <!-- Tab: Pending Corrections -->
   <div id="pendingTab" style="display:none">
+    <div style="max-width:1120px;margin:24px auto 10px;padding:0 28px;">
+      <div class="section-head-row">
+        <div>
+          <h2 style="font-size:1.3rem;">📬 คำร้องรอ Approve</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:.9rem;">คำร้องแก้ไขข้อมูลและทะเบียนรถจากลูกบ้าน</p>
+        </div>
+        <div class="section-actions">
+          <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 เปิดหน้าทะเบียนลูกบ้าน</a>
+          <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 เปิดหน้าข้อมูลลูกบ้าน</a>
+        </div>
+      </div>
+    </div>
     <div class="pending-wrap" id="pendingList">
       <div class="pending-empty">
         <div class="big">⏳</div>
@@ -992,8 +1055,15 @@
 
       <!-- Create Poll -->
       <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
-        <h2 style="margin:0 0 6px;font-size:1.3rem;">➕ สร้าง Poll ใหม่</h2>
-        <p style="margin:0 0 20px;color:var(--text-muted);font-size:.9rem;">ลูกบ้านโหวตที่ <strong>pattra8.com/vote/</strong></p>
+        <div class="section-head-row">
+          <div>
+            <h2 style="font-size:1.3rem;">➕ สร้าง Poll ใหม่</h2>
+            <p style="margin:0;color:var(--text-muted);font-size:.9rem;">ลูกบ้านโหวตที่ <strong>pattra8.com/vote/</strong></p>
+          </div>
+          <div class="section-actions">
+            <a class="admin-link-btn" href="/vote/" target="_blank" rel="noopener">🗳 เปิดหน้าโหวตลูกบ้าน</a>
+          </div>
+        </div>
         <div style="display:grid;gap:12px;">
           <input id="voteTitle" type="text" placeholder="ชื่อ poll เช่น โครงการติดตั้งกล้อง CCTV เพิ่ม"
             style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:1rem;font-family:inherit;width:100%;" />
