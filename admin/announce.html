@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pattra Villa 8 · Announcement Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --taupe: #3d3530;
+      --taupe-mid: #6b5f58;
+      --gold: #b8975a;
+      --gold-pale: #f2e9d8;
+      --bg: #faf7f2;
+      --bg2: #f0ebe3;
+      --card: #ffffff;
+      --text: #2e2820;
+      --muted: #8a7f76;
+      --border: #e4ddd3;
+      --danger: #b94d42;
+      --radius: 12px;
+      --shadow: 0 2px 16px rgba(61,53,48,0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      height: 68px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--taupe);
+    }
+
+    .mark {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .top-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 12px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 8px 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    .hero {
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(38px, 7vw, 64px);
+      line-height: 1;
+      color: var(--taupe);
+      margin-bottom: 12px;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 520px;
+      font-weight: 300;
+    }
+
+    .login-card,
+    .panel,
+    .list-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .login-card {
+      max-width: 420px;
+      padding: 28px;
+      margin-top: 28px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel,
+    .list-card {
+      padding: 24px;
+    }
+
+    h2 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--taupe-mid);
+      margin-bottom: 8px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 12px 13px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea {
+      min-height: 124px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184,151,90,0.14);
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    button {
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: #fff;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--gold);
+    }
+
+    .btn-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: transparent;
+    }
+
+    .btn-small {
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    .hidden { display: none !important; }
+
+    .notice {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .error { color: var(--danger); }
+
+    /* ─── ANNOUNCEMENT LIST CARDS ─── */
+    .ann-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .ann-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .ann-card:hover { border-color: var(--gold); }
+
+    .ann-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .ann-type-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .ann-type-dot.urgent { background: #c0392b; }
+    .ann-type-dot.info   { background: var(--border); border: 1.5px solid var(--muted); }
+
+    .ann-card-title {
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .ann-card-body {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 10px;
+      margin-left: 17px;
+      white-space: pre-wrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ann-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+    }
+
+    .ann-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ann-date {
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+    }
+
+    .ann-pill {
+      font-size: 10px;
+      border: 1px solid var(--border);
+      color: var(--taupe-mid);
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: var(--card);
+      letter-spacing: 0.03em;
+    }
+
+    .ann-file-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+      margin-bottom: 8px;
+    }
+
+    .ann-file-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--taupe-mid);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 7px;
+    }
+
+    .ann-file-chip svg { flex-shrink: 0; }
+
+    .ann-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ann-thumbnails {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+      margin-bottom: 8px;
+    }
+
+    .ann-thumbnails img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .empty {
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 22px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    /* legacy - keep for compat */
+    .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--gold); font-size: 11px; }
+    .pill { border: 1px solid var(--border); color: var(--taupe-mid); border-radius: 999px; padding: 2px 8px; background: var(--bg); }
+
+    /* ─── PHOTO UPLOAD ─── */
+    .photo-drop-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .photo-drop-zone:hover,
+    .photo-drop-zone.drag-over {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+    }
+
+    .photo-drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 0;
+    }
+
+    .photo-drop-label {
+      font-size: 13px;
+      color: var(--muted);
+      pointer-events: none;
+      line-height: 1.6;
+    }
+
+    .photo-drop-label span {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .photo-previews {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .photo-preview-item {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .photo-preview-item img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      display: block;
+    }
+
+    /* non-image file preview tile */
+    .file-preview-tile {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .file-preview-tile .file-ext {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .file-preview-tile .file-name {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 4px;
+      word-break: break-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      transition: transform 0.15s;
+    }
+
+    .photo-remove-btn:hover { transform: scale(1.15); }
+
+    .photo-count {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ─── SAVE PROGRESS BAR ─── */
+    .save-progress {
+      display: none;
+      margin-top: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg2);
+      height: 6px;
+    }
+
+    .save-progress.active { display: block; }
+
+    .save-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light, #cead75));
+      border-radius: 8px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .save-progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .save-progress-label.active { display: block; }
+
+    .announcement-photos {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .announcement-photos img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 760px) {
+      header { padding: 0 18px; }
+      .brand-sub { display: none; }
+      .top-link { padding: 7px 10px; font-size: 11px; }
+      main { padding-top: 32px; }
+      .grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .announcement { grid-template-columns: 1fr; }
+    }
+    html.embed body { background: transparent; }
+    html.embed header,
+    html.embed .hero { display: none; }
+    html.embed main {
+      width: 100%;
+      padding: 0;
+    }
+    html.embed .grid {
+      gap: 18px;
+    }
+    html.embed .panel,
+    html.embed .list-card,
+    html.embed .login-card {
+      box-shadow: none;
+    }
+  </style>
+  <script>
+    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+      document.documentElement.classList.add('embed');
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <a class="brand" href="../index.html">
+      <div class="mark">PV</div>
+      <div>
+        <div class="brand-title">Pattra Villa 8</div>
+        <div class="brand-sub">Announcement Admin</div>
+      </div>
+    </a>
+    <a class="top-link" href="../index.html#announce">View Site</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Admin</div>
+      <h1>Announcements</h1>
+      <p class="lead">เพิ่ม แก้ไข หรือลบประกาศที่จะแสดงบนหน้า Resident Services</p>
+    </section>
+
+    <section class="login-card" id="loginCard">
+      <h2>เข้าสู่ระบบ</h2>
+      <div class="field">
+        <label for="passwordInput">รหัสผ่าน</label>
+        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="ใส่รหัสผ่าน" />
+      </div>
+      <button id="loginBtn">Login</button>
+      <p class="notice error hidden" id="loginError">รหัสผ่านไม่ถูกต้อง</p>
+    </section>
+
+    <section class="grid hidden" id="adminPanel">
+      <form class="panel" id="announceForm">
+        <h2 id="formTitle">เพิ่มประกาศ</h2>
+        <input type="hidden" id="docId" />
+
+        <div class="field">
+          <label for="titleInput">หัวข้อประกาศ</label>
+          <input id="titleInput" required maxlength="120" placeholder="เช่น ปิดน้ำชั่วคราว" />
+        </div>
+
+        <div class="field">
+          <label for="bodyInput">รายละเอียด</label>
+          <textarea id="bodyInput" required maxlength="600" placeholder="รายละเอียดประกาศสำหรับลูกบ้าน"></textarea>
+        </div>
+
+        <div class="field">
+          <label>ไฟล์แนบ / รูปภาพ (ไม่จำเป็น)</label>
+          <div class="photo-drop-zone" id="photoDropZone">
+            <input type="file" id="photoFileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple />
+            <div class="photo-drop-label">
+              <span>เลือกไฟล์</span> หรือลากวางที่นี่<br/>
+              <small>รูปภาพ · PDF · Word · Excel · PowerPoint · สูงสุด 5 ไฟล์ · แนะนำไม่เกิน 5MB</small>
+            </div>
+          </div>
+          <div class="photo-previews" id="photoPreviews"></div>
+          <div class="photo-count" id="photoCount"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="typeInput">ประเภท</label>
+            <select id="typeInput">
+              <option value="normal">ทั่วไป</option>
+              <option value="urgent">เร่งด่วน</option>
+              <option value="info">ข้อมูล</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dateInput">วันที่แสดง</label>
+            <input id="dateInput" type="date" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="saveBtn">Save Announcement</button>
+          <button type="button" class="btn-secondary hidden" id="cancelBtn">Cancel Edit</button>
+        </div>
+        <div class="save-progress" id="saveProgress">
+          <div class="save-progress-bar" id="saveProgressBar"></div>
+        </div>
+        <div class="save-progress-label" id="saveProgressLabel"></div>
+        <p class="notice" id="formStatus">ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh</p>
+      </form>
+
+      <div class="list-card">
+        <h2>ประกาศทั้งหมด</h2>
+        <div id="announcementList">
+          <div class="empty">กำลังโหลดประกาศ...</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      onSnapshot,
+      query,
+      orderBy,
+      serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+      deleteObject
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
+      authDomain: "pattra8-54c3f.firebaseapp.com",
+      projectId: "pattra8-54c3f",
+      storageBucket: "pattra8-54c3f.firebasestorage.app",
+      messagingSenderId: "1045231989781",
+      appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
+    };
+
+    const ADMIN_PASSWORDS = ['nitipattra8', 'team388'];
+    const SESSION_KEY = 'pattra_announce_admin_until';
+    const SESSION_DAYS = 30;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const colRef = collection(db, 'announcements');
+
+    const loginCard = document.getElementById('loginCard');
+    const adminPanel = document.getElementById('adminPanel');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+    const form = document.getElementById('announceForm');
+    const formTitle = document.getElementById('formTitle');
+    const formStatus = document.getElementById('formStatus');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const list = document.getElementById('announcementList');
+    const saveProgress = document.getElementById('saveProgress');
+    const saveProgressBar = document.getElementById('saveProgressBar');
+    const saveProgressLabel = document.getElementById('saveProgressLabel');
+
+    function showProgress(pct, label) {
+      saveProgress.classList.add('active');
+      saveProgressLabel.classList.add('active');
+      saveProgressBar.style.width = pct + '%';
+      saveProgressLabel.textContent = label;
+      formStatus.textContent = '';
+    }
+
+    function hideProgress() {
+      saveProgress.classList.remove('active');
+      saveProgressLabel.classList.remove('active');
+      saveProgressBar.style.width = '0%';
+      saveProgressLabel.textContent = '';
+    }
+
+    // ─── FILE MANAGEMENT ───
+    const MAX_FILES = 5;
+    const WARN_BYTES = 5 * 1024 * 1024;  // 5 MB — warn but allow
+    // pendingPhotos: { file (File|null), previewUrl (string), name, isImage, cat, ext, storageUrl (string|null) }
+    // storageUrl = already uploaded (from existing announcement), file = new file to upload
+    let pendingPhotos = [];
+
+    const photoFileInput = document.getElementById('photoFileInput');
+    const photoPreviews = document.getElementById('photoPreviews');
+    const photoCount = document.getElementById('photoCount');
+    const photoDropZone = document.getElementById('photoDropZone');
+
+    const FILE_ICONS = {
+      pdf:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b94d42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      doc:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2b5797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      xls:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6f42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      ppt:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d24726" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      file: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a7f76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+    };
+
+    function getFileCategory(name) {
+      const ext = name.split('.').pop().toLowerCase();
+      if (['jpg','jpeg','png','webp','gif','avif'].includes(ext)) return 'image';
+      if (ext === 'pdf') return 'pdf';
+      if (['doc','docx'].includes(ext)) return 'doc';
+      if (['xls','xlsx'].includes(ext)) return 'xls';
+      if (['ppt','pptx'].includes(ext)) return 'ppt';
+      return 'file';
+    }
+
+    function getFileIcon(cat) {
+      return FILE_ICONS[cat] || FILE_ICONS.file;
+    }
+
+    function updatePhotoUI() {
+      photoPreviews.innerHTML = pendingPhotos.map((f, i) => {
+        const inner = f.isImage
+          ? `<img src="${f.previewUrl}" alt="${f.name}" />`
+          : `<div class="file-preview-tile">${getFileIcon(f.cat)}<span class="file-ext">${f.ext}</span><span class="file-name">${f.name}</span></div>`;
+        return `
+          <div class="photo-preview-item">
+            ${inner}
+            <button class="photo-remove-btn" type="button" data-photo-remove="${i}" title="ลบไฟล์">✕</button>
+          </div>`;
+      }).join('');
+      photoCount.textContent = pendingPhotos.length
+        ? `${pendingPhotos.length} / ${MAX_FILES} ไฟล์`
+        : '';
+    }
+
+    photoPreviews.addEventListener('click', e => {
+      const btn = e.target.closest('[data-photo-remove]');
+      if (!btn) return;
+      pendingPhotos.splice(Number(btn.dataset.photoRemove), 1);
+      updatePhotoUI();
+    });
+
+    // Generate a local preview URL for display before upload
+    function getPreviewUrl(file) {
+      return new Promise((resolve, reject) => {
+        const cat = getFileCategory(file.name);
+        if (cat !== 'image') { resolve(null); return; }
+        // compress for preview display only
+        const MAX_DIM = 400;
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const scale = Math.min(MAX_DIM / img.width, MAX_DIM / img.height, 1);
+            const canvas = document.createElement('canvas');
+            canvas.width  = Math.round(img.width  * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.75));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function addFiles(files) {
+      const remaining = MAX_FILES - pendingPhotos.length;
+      const toProcess = Array.from(files).slice(0, remaining);
+
+      const oversize = toProcess.filter(f => f.size > WARN_BYTES);
+      if (oversize.length) {
+        const names = oversize.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join(', ');
+        const ok = window.confirm(`ไฟล์ต่อไปนี้มีขนาดใหญ่กว่า 5MB:\n${names}\n\nต้องการอัปโหลดต่อไหม?`);
+        if (!ok) return;
+      }
+
+      try {
+        const previews = await Promise.all(toProcess.map(getPreviewUrl));
+        const newEntries = toProcess.map((file, i) => {
+          const cat = getFileCategory(file.name);
+          const ext = file.name.split('.').pop().toLowerCase();
+          return { file, previewUrl: previews[i], name: file.name, isImage: cat === 'image', cat, ext, storageUrl: null };
+        });
+        pendingPhotos = [...pendingPhotos, ...newEntries];
+        updatePhotoUI();
+        formStatus.textContent = 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
+        formStatus.classList.remove('error');
+      } catch {
+        formStatus.textContent = 'ไม่สามารถโหลดไฟล์ได้';
+        formStatus.classList.add('error');
+      }
+    }
+
+    // Upload a single file to Firebase Storage, return download URL
+    async function uploadToStorage(entry, announcementId) {
+      if (entry.storageUrl) return entry.storageUrl; // already uploaded
+      const path = `announcements/${announcementId}/${Date.now()}_${entry.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, entry.file);
+      return await getDownloadURL(storageRef);
+    }
+
+    photoFileInput.addEventListener('change', e => {
+      if (e.target.files.length) addFiles(e.target.files);
+      photoFileInput.value = '';
+    });
+
+    photoDropZone.addEventListener('dragover', e => { e.preventDefault(); photoDropZone.classList.add('drag-over'); });
+    photoDropZone.addEventListener('dragleave', () => photoDropZone.classList.remove('drag-over'));
+    photoDropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      photoDropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+    });
+
+    function esc(value) {
+      return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[char]));
+    }
+
+    function formatDate(item) {
+      if (item.dateValue) return formatDateFromISO(item.dateValue);
+      if (item.dateText) return item.dateText;
+      const source = item.createdAt?.toDate ? item.createdAt.toDate() : null;
+      if (!source) return '';
+      return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function todayISO() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateFromISO(value) {
+      if (!value) return '';
+      const [year, month, day] = value.split('-').map(Number);
+      if (!year || !month || !day) return '';
+      return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function requireLogin() {
+      const expiry = Number(localStorage.getItem(SESSION_KEY) || 0);
+      const ok = expiry > Date.now();
+      if (!ok) localStorage.removeItem(SESSION_KEY);
+      loginCard.classList.toggle('hidden', ok);
+      adminPanel.classList.toggle('hidden', !ok);
+      return ok;
+    }
+
+    function resetForm(message) {
+      form.reset();
+      document.getElementById('docId').value = '';
+      document.getElementById('dateInput').value = todayISO();
+      formTitle.textContent = 'เพิ่มประกาศ';
+      cancelBtn.classList.add('hidden');
+      formStatus.textContent = message || 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
+      formStatus.classList.remove('error');
+      pendingPhotos = [];
+      updatePhotoUI();
+      hideProgress();
+    }
+
+    const TYPE_LABELS = { normal: 'ทั่วไป', urgent: 'เร่งด่วน', info: 'ข้อมูล' };
+
+    function renderList(items) {
+      if (!items.length) {
+        list.innerHTML = '<div class="empty">ยังไม่มีประกาศ</div>';
+        return;
+      }
+
+      const cards = items.map(item => {
+        const photos = Array.isArray(item.photos) ? item.photos : [];
+        const images = photos.filter(f => (typeof f === 'string') || f.isImage);
+        const docs   = photos.filter(f => typeof f !== 'string' && !f.isImage);
+
+        const thumbsHtml = images.slice(0, 4).map(f => {
+          const src = typeof f === 'string' ? f : (f.url || f.dataUrl || '');
+          return `<img src="${esc(src)}" alt="" />`;
+        }).join('') + (images.length > 4 ? `<span style="font-size:10px;color:var(--muted);align-self:center;">+${images.length - 4}</span>` : '');
+
+        const chipsHtml = docs.map(f =>
+          `<span class="ann-file-chip">${getFileIcon(f.cat)}<span>${esc(f.name)}</span></span>`
+        ).join('');
+
+        const typeLabel = TYPE_LABELS[item.type] || item.type || 'ทั่วไป';
+
+        return `
+          <div class="ann-card">
+            <div class="ann-card-top">
+              <div class="ann-type-dot ${esc(item.type || '')}"></div>
+              <div class="ann-card-title">${esc(item.title)}</div>
+            </div>
+            <div class="ann-card-body">${esc(item.body)}</div>
+            ${images.length ? `<div class="ann-thumbnails">${thumbsHtml}</div>` : ''}
+            ${docs.length   ? `<div class="ann-file-chips">${chipsHtml}</div>` : ''}
+            <div class="ann-card-footer">
+              <div class="ann-card-meta">
+                <span class="ann-date">${esc(formatDate(item))}</span>
+                <span class="ann-pill">${esc(typeLabel)}</span>
+                ${photos.length ? `<span class="ann-pill">${photos.length} ไฟล์</span>` : ''}
+              </div>
+              <div class="ann-card-actions">
+                <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">แก้ไข</button>
+                <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">ลบ</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      list.innerHTML = `<div class="ann-list">${cards}</div>`;
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      if (ADMIN_PASSWORDS.includes(passwordInput.value)) {
+        const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+        localStorage.setItem(SESSION_KEY, String(expiry));
+        loginError.classList.add('hidden');
+        requireLogin();
+      } else {
+        loginError.classList.remove('hidden');
+      }
+    });
+
+    passwordInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const id = document.getElementById('docId').value;
+      const title = document.getElementById('titleInput').value.trim();
+      const body  = document.getElementById('bodyInput').value.trim();
+      if (!title || !body) return;
+
+      formStatus.textContent = '';
+      formStatus.classList.remove('error');
+      document.getElementById('saveBtn').disabled = true;
+
+      try {
+        // Step 1: create/get doc ID so we can use it as storage folder
+        showProgress(15, 'กำลังเตรียมข้อมูล...');
+        const announcementId = id || `tmp_${Date.now()}`;
+
+        // Step 2: upload new files to Firebase Storage
+        const newFiles = pendingPhotos.filter(f => f.file && !f.storageUrl);
+        if (newFiles.length) {
+          showProgress(30, `กำลังอัปโหลดไฟล์ (0 / ${newFiles.length})...`);
+          for (let i = 0; i < newFiles.length; i++) {
+            showProgress(30 + Math.round((i / newFiles.length) * 50), `กำลังอัปโหลดไฟล์ (${i + 1} / ${newFiles.length})...`);
+            newFiles[i].storageUrl = await uploadToStorage(newFiles[i], announcementId);
+          }
+        }
+
+        showProgress(85, 'กำลังบันทึกข้อมูล...');
+
+        // Step 3: build photos array with storage URLs only (no base64)
+        const photosData = pendingPhotos.map(f => ({
+          url: f.storageUrl,
+          name: f.name,
+          isImage: f.isImage,
+          cat: f.cat,
+          ext: f.ext
+        }));
+
+        const data = {
+          title,
+          body,
+          type: document.getElementById('typeInput').value,
+          dateValue: document.getElementById('dateInput').value || todayISO(),
+          dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
+          photos: photosData,
+          updatedAt: serverTimestamp()
+        };
+
+        if (id) {
+          await updateDoc(doc(db, 'announcements', id), data);
+        } else {
+          await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
+        }
+
+        showProgress(100, '✓ บันทึกเรียบร้อยแล้ว');
+        await new Promise(r => setTimeout(r, 700));
+        hideProgress();
+        resetForm(id ? 'แก้ไขประกาศเรียบร้อยแล้ว' : 'เพิ่มประกาศเรียบร้อยแล้ว');
+      } catch (error) {
+        console.error(error);
+        hideProgress();
+        formStatus.textContent = `บันทึกไม่สำเร็จ: ${error.message || 'กรุณาตรวจสอบ Firebase permissions'}`;
+        formStatus.classList.add('error');
+      } finally {
+        document.getElementById('saveBtn').disabled = false;
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => resetForm());
+
+    let cachedItems = [];
+    list.addEventListener('click', async event => {
+      const editBtn = event.target.closest('[data-edit]');
+      const deleteBtn = event.target.closest('[data-delete]');
+
+      if (editBtn) {
+        const item = cachedItems.find(entry => entry.id === editBtn.dataset.edit);
+        if (!item) return;
+        document.getElementById('docId').value = item.id;
+        document.getElementById('titleInput').value = item.title || '';
+        document.getElementById('bodyInput').value = item.body || '';
+        document.getElementById('typeInput').value = item.type || 'normal';
+        document.getElementById('dateInput').value = item.dateValue || todayISO();
+        // load existing photos as already-uploaded entries (no file, just storageUrl)
+        pendingPhotos = Array.isArray(item.photos) ? item.photos.map(f => {
+          if (typeof f === 'string') {
+            // legacy base64 — treat as already uploaded image
+            return { file: null, previewUrl: f, name: 'image.jpg', isImage: true, cat: 'image', ext: 'jpg', storageUrl: f };
+          }
+          return { file: null, previewUrl: f.url, name: f.name, isImage: f.isImage, cat: f.cat, ext: f.ext, storageUrl: f.url };
+        }) : [];
+        updatePhotoUI();
+        formTitle.textContent = 'แก้ไขประกาศ';
+        cancelBtn.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      if (deleteBtn) {
+        const item = cachedItems.find(entry => entry.id === deleteBtn.dataset.delete);
+        if (!item) return;
+        const ok = window.confirm(`ลบประกาศ "${item.title}" ใช่ไหม?`);
+        if (!ok) return;
+        try {
+          await deleteDoc(doc(db, 'announcements', item.id));
+        } catch (error) {
+          console.error(error);
+          window.alert('ลบประกาศไม่สำเร็จ กรุณาตรวจสอบ Firestore permissions');
+        }
+      }
+    });
+
+    const announceQuery = query(colRef, orderBy('createdAt', 'desc'));
+    onSnapshot(announceQuery, snapshot => {
+      cachedItems = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+      renderList(cachedItems);
+    }, error => {
+      console.error(error);
+      list.innerHTML = '<div class="empty">โหลดประกาศไม่สำเร็จ</div>';
+    });
+
+    requireLogin();
+    resetForm();
+  </script>
+</body>
+</html>
