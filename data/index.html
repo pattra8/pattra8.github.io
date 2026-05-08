@@ -14,10 +14,13 @@
         const isValidHouse = value => /^38\/\d{1,2}$/.test(String(value || '').trim());
         const u = new URLSearchParams(location.search).get('house');
         const s = sessionStorage.getItem('pattra_current_house');
+        const residentSession = JSON.parse(localStorage.getItem('pattra_resident_session_v1') || 'null');
+        const l = residentSession && residentSession.expiresAt > Date.now() ? residentSession.houseNo : '';
         const h = isValidHouse(u) ? u.trim() : isValidHouse(s) ? s.trim() : '';
-        if (h) {
-          if (isValidHouse(u)) sessionStorage.setItem('pattra_current_house', h);
-          document.documentElement.dataset.ctx = h;
+        const selected = h || (isValidHouse(l) ? l.trim() : '');
+        if (selected) {
+          sessionStorage.setItem('pattra_current_house', selected);
+          document.documentElement.dataset.ctx = selected;
         } else if (s && !isValidHouse(s)) {
           sessionStorage.removeItem('pattra_current_house');
         }
@@ -1231,6 +1234,7 @@
   const RESIDENT_AUTH_URL = `${FUNCTION_BASE}/residentPinAuth`;
   const PIN_SESSION_KEY   = 'pattra_pin_sessions_v1';
   const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
+  const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
   const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
   let allData = [];
@@ -1255,6 +1259,11 @@
     }
     const stored = sessionStorage.getItem(SESSION_KEY);
     if (isValidHouseContext(stored)) return normalizeHouseForAuth(stored);
+    const residentSession = getResidentSession();
+    if (residentSession && isValidHouseContext(residentSession.houseNo)) {
+      sessionStorage.setItem(SESSION_KEY, residentSession.houseNo);
+      return residentSession.houseNo;
+    }
     if (stored) sessionStorage.removeItem(SESSION_KEY);
     return null;
   }
@@ -1268,6 +1277,7 @@
   }
   function clearStoredHouse() {
     sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(RESIDENT_SESSION_KEY);
     const url = new URL(location.href);
     url.searchParams.delete('house');
     history.replaceState(null, '', url);
@@ -1362,6 +1372,35 @@
     localStorage.setItem(RESIDENT_UNLOCK_KEY, JSON.stringify(unlocks));
   }
 
+  function storeResidentSession(houseNo, pin) {
+    const key = normalizeHouseForAuth(houseNo);
+    if (!key || !pin) return;
+    const session = {
+      houseNo: key,
+      pin,
+      expiresAt: Date.now() + RESIDENT_UNLOCK_TTL_MS
+    };
+    localStorage.setItem(RESIDENT_SESSION_KEY, JSON.stringify(session));
+    sessionStorage.setItem(SESSION_KEY, key);
+  }
+
+  function getResidentSession() {
+    try {
+      const session = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+      if (!session || !session.houseNo || !session.pin) return null;
+      if (Number(session.expiresAt || 0) <= Date.now()) {
+        localStorage.removeItem(RESIDENT_SESSION_KEY);
+        return null;
+      }
+      return {
+        houseNo: normalizeHouseForAuth(session.houseNo),
+        pin: String(session.pin)
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
   function storePinSession(houseNo, pin) {
     const key = normalizeHouseForAuth(houseNo);
     if (!key || !pin) return;
@@ -1369,6 +1408,7 @@
       const sessions = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
       sessions[key] = pin;
       sessionStorage.setItem(PIN_SESSION_KEY, JSON.stringify(sessions));
+      storeResidentSession(key, pin);
     } catch (_) {}
   }
 
@@ -1377,7 +1417,7 @@
     if (!key) return null;
     try {
       const sessions = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
-      return sessions[key] || null;
+      return sessions[key] || (getResidentSession()?.houseNo === key ? getResidentSession().pin : null);
     } catch (_) { return null; }
   }
 

@@ -92,6 +92,8 @@
     }
     .poll-badge.active { background: var(--accent-pale); color: var(--accent-deep); }
     .poll-badge.closed { background: #f0f0f0; color: #888; }
+    .poll-badge.voted { background: #e8efd9; color: #3f6431; }
+    .poll-badge.pending { background: #fff4df; color: var(--accent-deep); }
     .poll-title { font-size: 1.05rem; font-weight: 700; color: var(--text); flex: 1; }
     .poll-desc { font-size: .9rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 12px; }
     .poll-meta { display: flex; gap: 12px; font-size: .8rem; color: var(--text-muted); flex-wrap: wrap; align-items: center; margin-top: 12px; }
@@ -122,6 +124,31 @@
     /* ── Empty / loading ── */
     .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     .empty .big { font-size: 3rem; margin-bottom: 12px; }
+    .session-card {
+      background: var(--accent-pale);
+      border: 1px solid var(--accent-soft);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--accent-deep);
+      font-size: .9rem;
+    }
+    .session-card strong { font-weight: 800; }
+    .session-card button {
+      margin-left: auto;
+      font-family: inherit;
+      border: 1px solid var(--accent-soft);
+      border-radius: 9px;
+      padding: 6px 12px;
+      background: #fff;
+      color: var(--accent-deep);
+      font-weight: 700;
+      cursor: pointer;
+    }
     .spinner {
       width: 36px; height: 36px; border: 3px solid var(--border);
       border-top-color: var(--accent); border-radius: 50%;
@@ -409,6 +436,8 @@
   const FUNCTION_BASE = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net';
   const POLL_URL = `${FUNCTION_BASE}/pollAction`;
   const PIN_SESSION_KEY = 'pattra_pin_sessions_v1';
+  const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+  const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
   // ── PIN session helpers ──────────────────────────────────────────────────
   function storePinSession(houseNo, pin) {
@@ -416,12 +445,29 @@
       const map = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
       map[houseNo] = pin;
       sessionStorage.setItem(PIN_SESSION_KEY, JSON.stringify(map));
+      localStorage.setItem(RESIDENT_SESSION_KEY, JSON.stringify({
+        houseNo,
+        pin,
+        expiresAt: Date.now() + RESIDENT_UNLOCK_TTL_MS
+      }));
     } catch (_) {}
+  }
+  function getResidentSession() {
+    try {
+      const session = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+      if (!session || !session.houseNo || !session.pin) return null;
+      if (Number(session.expiresAt || 0) <= Date.now()) {
+        localStorage.removeItem(RESIDENT_SESSION_KEY);
+        return null;
+      }
+      return {houseNo: session.houseNo, pin: String(session.pin)};
+    } catch (_) { return null; }
   }
   function getPinSession(houseNo) {
     try {
       const map = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
-      return map[houseNo] || null;
+      const localSession = getResidentSession();
+      return map[houseNo] || (localSession?.houseNo === houseNo ? localSession.pin : null);
     } catch (_) { return null; }
   }
 
@@ -498,6 +544,7 @@
   let currentPoll = null;
   let currentHouseNo = null;
   let currentPin = null;
+  let myVotes = {};
 
   const app = document.getElementById('app');
 
@@ -525,13 +572,14 @@
     }
     const cards = polls.map(p => {
       const closed = isPollClosed(p);
+      const voted = Boolean(myVotes[p.id]?.voted);
       const cdId = `cd_${p.id}`;
       return `
         <div class="poll-card ${closed ? 'closed' : ''}" onclick="openPoll('${esc(p.id)}')">
           <div class="poll-card-header">
             <div class="poll-title">${esc(p.title)}</div>
-            <span class="poll-badge ${closed ? 'closed' : 'active'}">
-              ${closed ? '✅ ปิดแล้ว' : '🗳 กำลังโหวต'}
+            <span class="poll-badge ${closed ? 'closed' : voted ? 'voted' : currentHouseNo ? 'pending' : 'active'}">
+              ${closed ? '✅ ปิดแล้ว' : voted ? '✅ โหวตแล้ว' : currentHouseNo ? 'รอโหวต' : '🗳 กำลังโหวต'}
             </span>
           </div>
           ${p.description ? `<div class="poll-desc">${esc(p.description)}</div>` : ''}
@@ -546,6 +594,17 @@
     app.innerHTML = `
       <h1 class="page-title">🗳 โหวต</h1>
       <div class="page-sub">ร่วมกันตัดสินใจเพื่อหมู่บ้านของเรา — 1 บ้าน 1 เสียง</div>
+      ${currentHouseNo ? `
+        <div class="session-card">
+          <span>เข้าสู่ระบบเป็น <strong>บ้าน ${esc(currentHouseNo)}</strong></span>
+          <button type="button" onclick="logoutResident()">ออก</button>
+        </div>
+      ` : `
+        <div class="session-card">
+          <span>ใส่ PIN ครั้งเดียวเพื่อดูว่า poll ไหนโหวตแล้ว</span>
+          <button type="button" onclick="showLoginOnlyModal()">เข้าสู่ระบบ</button>
+        </div>
+      `}
       ${cards}
     `;
     // start countdown timers after DOM is ready
@@ -557,6 +616,10 @@
   function openPoll(pollId) {
     currentPoll = polls.find(p => p.id === pollId);
     if (!currentPoll) return;
+    if (myVotes[pollId]?.voted) {
+      showVotedConfirm(currentPoll, myVotes[pollId].choice, currentHouseNo);
+      return;
+    }
     if (isPollClosed(currentPoll)) {
       showResults(pollId);
       return;
@@ -565,8 +628,44 @@
     showVoteForm(currentPoll);
   }
 
+  async function loadMyVotes(houseNo, pin) {
+    const data = await apiCall({action:'myVotes', houseNo, pin});
+    currentHouseNo = data.houseNo || houseNo;
+    currentPin = pin;
+    myVotes = data.votes || {};
+    storePinSession(currentHouseNo, pin);
+    return data;
+  }
+
+  async function restoreResidentSession() {
+    const session = getResidentSession();
+    if (!session) return;
+    try {
+      await loadMyVotes(session.houseNo, session.pin);
+    } catch (_) {
+      localStorage.removeItem(RESIDENT_SESSION_KEY);
+      myVotes = {};
+      currentHouseNo = null;
+      currentPin = null;
+    }
+  }
+
+  function logoutResident() {
+    localStorage.removeItem(RESIDENT_SESSION_KEY);
+    sessionStorage.removeItem(PIN_SESSION_KEY);
+    myVotes = {};
+    currentHouseNo = null;
+    currentPin = null;
+    renderPollList();
+  }
+
+  function showLoginOnlyModal() {
+    showPinModal(null, () => renderPollList(), {loginOnly: true});
+  }
+
   // ── PIN + signature modal (shown after choice is selected) ───────────────
-  function showPinModal(choiceToSubmit, onSuccess) {
+  function showPinModal(choiceToSubmit, onSuccess, options = {}) {
+    const loginOnly = Boolean(options.loginOnly);
     const overlay = document.createElement('div');
     overlay.className = 'pin-overlay';
     overlay.innerHTML = `
@@ -584,7 +683,7 @@
         <div class="pin-error" id="pinError"></div>
         <div class="pin-actions">
           <button class="btn-cancel" id="pinCancelBtn">ยกเลิก</button>
-          <button class="btn-primary" id="pinSubmitBtn">ถัดไป</button>
+          <button class="btn-primary" id="pinSubmitBtn">${loginOnly ? 'เข้าสู่ระบบ' : 'ถัดไป'}</button>
         </div>
       </div>
     `;
@@ -605,10 +704,11 @@
 
     // auto-fill from session
     const sessions = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
-    const firstSession = Object.keys(sessions).sort()[0];
+    const localSession = getResidentSession();
+    const firstSession = localSession?.houseNo || Object.keys(sessions).sort()[0];
     if (firstSession) {
       houseInput.value = firstSession.replace(/^38\//, '');
-      codeInput.value = sessions[firstSession];
+      codeInput.value = localSession?.houseNo === firstSession ? localSession.pin : sessions[firstSession];
     }
     (firstSession ? codeInput : houseInput).focus();
 
@@ -623,10 +723,14 @@
 
       submitBtn.disabled = true; submitBtn.textContent = 'กำลังตรวจสอบ…';
       try {
+        if (loginOnly) {
+          await loadMyVotes(houseNo, pin);
+          close();
+          onSuccess(houseNo);
+          return;
+        }
         const sig = await apiCall({action:'signatureStatus', houseNo, pin, pollId: currentPoll.id});
-        storePinSession(houseNo, pin);
-        currentHouseNo = houseNo;
-        currentPin = pin;
+        await loadMyVotes(houseNo, pin);
         if (sig.alreadyVoted) {
           throw Object.assign(new Error('already_voted'), {data: sig});
         }
@@ -644,7 +748,7 @@
           : (err.message || 'เกิดข้อผิดพลาด');
         errorBox.textContent = msg;
         errorBox.className = 'pin-error active';
-        submitBtn.disabled = false; submitBtn.textContent = 'ถัดไป';
+        submitBtn.disabled = false; submitBtn.textContent = loginOnly ? 'เข้าสู่ระบบ' : 'ถัดไป';
       }
     };
 
@@ -712,6 +816,7 @@
           ...(signatureDataUrl ? {signatureDataUrl} : {})
         });
         overlay.remove();
+        myVotes[currentPoll.id] = {voted: true, choice: choiceToSubmit};
         onSuccess(houseNo);
       } catch (err) {
         const msg = err.message === 'already_voted' ? 'บ้านนี้โหวตไปแล้ว'
@@ -1012,6 +1117,7 @@
     try {
       const data = await apiCall({action:'list'});
       polls = data.polls || [];
+      await restoreResidentSession();
       renderPollList();
     } catch (err) {
       app.innerHTML = `<div class="empty"><div class="big">⚠️</div>โหลดไม่ได้: ${esc(err.message)}</div>`;
