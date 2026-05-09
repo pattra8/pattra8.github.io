@@ -1258,6 +1258,17 @@
   const RESIDENT_AUTH_URL = `${FUNCTION_BASE}/residentPinAuth`;
   const UPDATE_RESIDENT_URL = `${FUNCTION_BASE}/updateResidentData`;
   const PIN_SESSION_KEY   = 'pattra_pin_sessions_v1';
+
+  // ── Car quota ──────────────────────────────────────────────────────────────
+  const CAR_QUOTA_DEFAULT  = 2;
+  const CAR_QUOTA_3_HOUSES = new Set([
+    '38/3', '38/8', '38/15', '38/20', '38/21',
+    '38/35', '38/43', '38/45', '38/67',
+  ]);
+  function getCarQuota(houseNo) {
+    return CAR_QUOTA_3_HOUSES.has((houseNo || '').replace(/\s/g, ''))
+      ? 3 : CAR_QUOTA_DEFAULT;
+  }
   const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
   const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
   const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -1873,6 +1884,8 @@
     const cars = currentRecord.cars || [];
     const motos = currentRecord.motorcycles || [];
     const total = cars.length + motos.length;
+    const carQuota = getCarQuota(currentRecord.house_no);
+    const carsAtQuota = cars.length >= carQuota;
 
     const ownerHtml = `
       <div class="owner-bar">
@@ -1887,7 +1900,7 @@
       </div>
 
       <div class="vehicles-header">
-        <div class="vehicles-title">ทะเบียนรถ<span class="vehicles-title-count">(${total} คัน)</span></div>
+        <div class="vehicles-title">ทะเบียนรถ<span class="vehicles-title-count">(${total} คัน · 🚗 ${cars.length}/${carQuota})</span></div>
         <button class="add-btn" id="addBtn"><span class="plus">+</span> เพิ่มรถ</button>
       </div>
     `;
@@ -2031,6 +2044,17 @@
   function renderEditModal({ plate }) {
     const isAdd = editingIndex === -1;
     const isCar = editingType === 'car';
+    const cars = currentRecord ? (currentRecord.cars || []) : [];
+    const carQuota = currentRecord ? getCarQuota(currentRecord.house_no) : CAR_QUOTA_DEFAULT;
+    const carFull  = isAdd && cars.length >= carQuota;   // quota เต็มตอน add เท่านั้น
+
+    // ถ้า quota เต็มและ default type = car → switch เป็น moto
+    if (carFull && editingType === 'car') editingType = 'moto';
+    const isCar2 = editingType === 'car';
+
+    const carDisabledHtml = carFull
+      ? `<div style="font-size:.72rem;color:var(--status-error,#ef4444);margin-top:2px;">ครบโควต้า ${carQuota} คัน</div>`
+      : '';
 
     modalContent.innerHTML = `
       <div class="modal-header">
@@ -2041,11 +2065,13 @@
       <div class="field">
         <div class="field-label">ประเภทรถ</div>
         <div class="type-toggle" id="typeToggle">
-          <div class="type-option ${isCar ? 'active' : ''}" data-type="car">
+          <div class="type-option ${isCar2 ? 'active' : ''} ${carFull ? 'quota-disabled' : ''}" data-type="car"
+               style="${carFull ? 'opacity:.45;cursor:not-allowed;' : ''}">
             <div class="type-option-icon">🚗</div>
             <div class="type-option-label">รถยนต์</div>
+            ${carDisabledHtml}
           </div>
-          <div class="type-option ${!isCar ? 'active' : ''}" data-type="moto">
+          <div class="type-option ${!isCar2 ? 'active' : ''}" data-type="moto">
             <div class="type-option-icon">🏍️</div>
             <div class="type-option-label">มอเตอร์ไซค์</div>
           </div>
@@ -2068,9 +2094,10 @@
     document.getElementById('closeBtn').addEventListener('click', closeModal);
     document.getElementById('cancelBtn').addEventListener('click', closeModal);
 
-    // Type toggle
+    // Type toggle — skip ถ้า option นั้น quota-disabled
     modalContent.querySelectorAll('.type-option').forEach(opt => {
       opt.addEventListener('click', () => {
+        if (opt.classList.contains('quota-disabled')) return;
         modalContent.querySelectorAll('.type-option').forEach(o => o.classList.remove('active'));
         opt.classList.add('active');
         editingType = opt.dataset.type;
@@ -2091,8 +2118,15 @@
       plate = document.getElementById('plateInput').value.trim();
       if (!plate) { alert('กรุณากรอกทะเบียนรถ'); return; }
       if (action === 'add') {
-        if (editingType === 'car') newCars.push(plate);
-        else newMotos.push(plate);
+        if (editingType === 'car') {
+          // Client-side quota guard
+          const quota = getCarQuota(currentRecord.house_no);
+          if (newCars.length >= quota) {
+            alert(`บ้านนี้มีสิทธิ์จอดรถยนต์สูงสุด ${quota} คัน`);
+            return;
+          }
+          newCars.push(plate);
+        } else newMotos.push(plate);
       } else {
         if (editingType === 'car') newCars[editingIndex] = plate;
         else newMotos[editingIndex] = plate;
@@ -2122,6 +2156,11 @@
       });
 
       const json = await res.json().catch(() => ({}));
+      if (json.error === 'car_quota_exceeded') {
+        alert(`เพิ่มไม่ได้ — บ้านนี้มีสิทธิ์จอดรถยนต์สูงสุด ${json.quota} คัน`);
+        btn.disabled = false; btn.textContent = 'บันทึก';
+        return;
+      }
       if ((!res.ok && res.status !== 207) || (!json.ok && res.status !== 207)) {
         throw new Error(json.error || `HTTP ${res.status}`);
       }
