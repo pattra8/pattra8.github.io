@@ -1256,6 +1256,7 @@
   const DEFAULT_HOUSE_PREFIX = '38/';
   const FUNCTION_BASE     = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net';
   const RESIDENT_AUTH_URL = `${FUNCTION_BASE}/residentPinAuth`;
+  const UPDATE_RESIDENT_URL = `${FUNCTION_BASE}/updateResidentData`;
   const PIN_SESSION_KEY   = 'pattra_pin_sessions_v1';
   const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
   const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
@@ -1265,8 +1266,6 @@
   let currentRecord = null;
   let editingIndex = -1;        // index in cars or motorcycles array; -1 = adding new
   let editingType = 'car';      // 'car' | 'moto'
-  let optimisticPendingIssues = [];
-  let pendingRefreshTimer = null;
 
   // ── Cross-page session context (Level 1+2+3) ──
   const SESSION_KEY = 'pattra_current_house';
@@ -2082,11 +2081,8 @@
     setTimeout(() => document.getElementById('plateInput')?.focus(), 100);
   }
 
-  // ── Submit (creates GitHub Issue) ──
+  // ── Submit — updates resident data directly via updateResidentData ──
   async function submitChange(action) {
-    const reporter = `เจ้าของบ้าน ${currentRecord.house_no}`;
-    const contact = currentRecord.phone || currentRecord.email || '';
-
     let newCars = [...currentRecord.cars];
     let newMotos = [...currentRecord.motorcycles];
     let plate = '';
@@ -2108,286 +2104,51 @@
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.textContent = 'กำลังส่ง...';
-
-    const reason = document.getElementById('reasonInput')?.value.trim() || '';
-    const actionTh = action === 'add' ? 'เพิ่ม' : action === 'edit' ? 'แก้ไข' : 'ลบ';
-    const typeTh = editingType === 'car' ? 'รถยนต์' : 'มอเตอร์ไซค์';
-
-    const payload = {
-      source: '/vehicle/',
-      action,
-      house_no: currentRecord.house_no,
-      vehicle_type: editingType,
-      old: {
-        cars: currentRecord.cars,
-        motorcycles: currentRecord.motorcycles
-      },
-      new: {
-        cars: newCars,
-        motorcycles: newMotos
-      },
-      change: {
-        plate: plate || (currentRecord[editingType === 'car' ? 'cars' : 'motorcycles'][editingIndex] || ''),
-        reason: reason || null
-      },
-      reporter,
-      contact,
-      reporter_source: 'resident_pin_session',
-      submitted_at: new Date().toISOString()
-    };
-
-    const issueTitle = `[${actionTh}ทะเบียน${typeTh}] บ้าน ${currentRecord.house_no} — ${currentRecord.name || '(ไม่มีชื่อ)'}`;
-    const issueBody = [
-      `**ผู้แจ้ง:** ${reporter}`,
-      `**ติดต่อกลับ:** ${contact || '-'}`,
-      `**การเปลี่ยนแปลง:** ${actionTh} ${typeTh} \`${payload.change.plate}\``,
-      reason ? `**เหตุผล:** ${reason}` : '',
-      ``,
-      '```json',
-      JSON.stringify(payload, null, 2),
-      '```'
-    ].filter(Boolean).join('\n');
+    btn.textContent = 'กำลังบันทึก...';
 
     try {
       const pin = getPinSession(normalizeHouseForAuth(currentRecord.house_no));
-      const res = await fetch(`${FUNCTION_BASE}/submitRequest`, {
+      const res = await fetch(UPDATE_RESIDENT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           houseNo: currentRecord.house_no,
           pin: pin || '',
-          title: issueTitle,
-          body: issueBody,
-          labels: ['vehicle']
+          vehicles: {
+            cars: newCars,
+            motorcycles: newMotos
+          }
         })
       });
 
       const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) {
+      if ((!res.ok && res.status !== 207) || (!json.ok && res.status !== 207)) {
         throw new Error(json.error || `HTTP ${res.status}`);
       }
-      const createdIssue = { number: json.issue_number, html_url: json.issue_url,
-        title: issueTitle, body: issueBody, state: 'open',
-        created_at: new Date().toISOString() };
-      optimisticPendingIssues = [
-        createdIssue,
-        ...optimisticPendingIssues.filter(issue => issue.number !== createdIssue.number)
-      ];
-      if (currentRecord) {
-        _renderPendingInto(ensurePendingSection(), currentRecord.house_no, optimisticPendingIssues);
-        startPendingAutoRefresh(currentRecord.house_no);
-      }
+      currentRecord.cars = newCars;
+      currentRecord.motorcycles = newMotos;
+      currentRecord.last_updated = new Date().toISOString();
+      renderResult();
 
       // Show success
       modalContent.innerHTML = `
         <div class="modal-success">
           <div class="modal-success-icon">✓</div>
-          <div class="modal-success-title">ส่งคำร้องแล้ว</div>
-          <div class="modal-success-msg">ได้รับเรื่องแล้ว จะถูกดำเนินการภายใน 12–24 ชั่วโมง<br/>คุณสามารถติดตามสถานะได้ด้านล่างรายการรถ</div>
+          <div class="modal-success-title">บันทึกทะเบียนแล้ว</div>
+          <div class="modal-success-msg">${editingType === 'car' ? 'ระบบอัปเดตข้อมูลและ sync เข้า LPR ทั้ง 2 ตัวแล้ว' : 'ระบบบันทึกข้อมูลมอเตอร์ไซค์แล้ว'}<br/>ประวัติการแก้ไขถูกเก็บไว้ให้นิติบุคคลตรวจสอบ</div>
           <button class="btn-primary" id="closeSuccessBtn" style="max-width: 200px; margin: 0 auto; display: block;">เรียบร้อย</button>
         </div>
       `;
       const doCloseAndRefresh = () => {
         closeModal();
-        if (currentRecord) refreshPendingRequests(currentRecord.house_no, { silent: true });
       };
       document.getElementById('closeSuccessBtn').addEventListener('click', doCloseAndRefresh);
-      setTimeout(doCloseAndRefresh, 4000);
+      setTimeout(doCloseAndRefresh, 2500);
     } catch (err) {
-      alert('ไม่สามารถส่งคำร้องได้: ' + err.message);
+      alert('ไม่สามารถบันทึกข้อมูลได้: ' + err.message);
       btn.disabled = false;
       btn.textContent = 'บันทึก';
     }
-  }
-
-  // ── Pending Requests (GitHub Issues) ──
-  function ensurePendingSection() {
-    const sec = document.getElementById('resultSection');
-    let pendingEl = document.getElementById('pendingSection');
-    if (!pendingEl) {
-      pendingEl = document.createElement('div');
-      pendingEl.id = 'pendingSection';
-      pendingEl.className = 'pending-section';
-      sec.appendChild(pendingEl);
-    }
-    return pendingEl;
-  }
-
-  function issueBelongsToHouse(issue, houseNo) {
-    if ((issue.title || '').includes(`บ้าน ${houseNo}`)) return true;
-    try {
-      const bodyMatch = (issue.body || '').match(/```json\s*([\s\S]*?)```/);
-      if (bodyMatch) {
-        const data = JSON.parse(bodyMatch[1]);
-        return (data.house_no || '') === houseNo;
-      }
-    } catch (_) {}
-    return false;
-  }
-
-  function mergePendingIssues(houseNo, fetchedIssues) {
-    const byNumber = new Map();
-    [...optimisticPendingIssues, ...fetchedIssues].forEach(issue => {
-      if (issue && issue.number) byNumber.set(issue.number, issue);
-    });
-    optimisticPendingIssues = [...byNumber.values()]
-      .filter(issue => issue.state === 'open' && issueBelongsToHouse(issue, houseNo));
-    return optimisticPendingIssues;
-  }
-
-  function startPendingAutoRefresh(houseNo) {
-    if (pendingRefreshTimer) clearInterval(pendingRefreshTimer);
-    let ticks = 0;
-    pendingRefreshTimer = setInterval(async () => {
-      ticks += 1;
-      await refreshPendingRequests(houseNo, { silent: true });
-      if (ticks >= 24 || !currentRecord || currentRecord.house_no !== houseNo) {
-        clearInterval(pendingRefreshTimer);
-        pendingRefreshTimer = null;
-      }
-    }, 5000);
-  }
-
-  async function refreshPendingRequests(houseNo, { silent = false } = {}) {
-    const pendingEl = ensurePendingSection();
-    if (!silent && optimisticPendingIssues.length === 0) {
-      pendingEl.innerHTML = `<div class="req-loading">กำลังตรวจสอบคำร้อง...</div>`;
-    }
-    const issues = await fetchPendingRequests(houseNo);
-    _renderPendingInto(pendingEl, houseNo, mergePendingIssues(houseNo, issues));
-  }
-
-  async function fetchPendingRequests(houseNo) {
-    try {
-      const pin = getPinSession(normalizeHouseForAuth(houseNo));
-      if (!pin) return [];
-      const res = await fetch(`${FUNCTION_BASE}/getPendingRequests`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ houseNo, pin })
-      });
-      if (!res.ok) return [];
-      const json = await res.json();
-      return json.issues || [];
-    } catch (_) {
-      return [];
-    }
-  }
-
-  function parseActionFromIssue(issue) {
-    const title = issue.title || '';
-    if (title.includes('เพิ่มทะเบียน')) return { action: 'add', icon: '➕', label: 'เพิ่มทะเบียน' };
-    if (title.includes('แก้ไขทะเบียน')) return { action: 'edit', icon: '✏️', label: 'แก้ไขทะเบียน' };
-    if (title.includes('ลบทะเบียน')) return { action: 'delete', icon: '🗑️', label: 'ลบทะเบียน' };
-    return { action: 'other', icon: '📋', label: 'คำร้อง' };
-  }
-
-  function parsePlateFromIssue(issue) {
-    // Try body JSON first
-    try {
-      const bodyMatch = (issue.body || '').match(/```json\s*([\s\S]*?)```/);
-      if (bodyMatch) {
-        const data = JSON.parse(bodyMatch[1]);
-        return data.change?.plate || '';
-      }
-    } catch (_) {}
-    return '';
-  }
-
-  function formatIssueDate(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const datePart = new Intl.DateTimeFormat('th-TH', {
-      day: 'numeric', month: 'short', year: 'numeric'
-    }).format(d);
-    const timePart = new Intl.DateTimeFormat('th-TH', {
-      hour: '2-digit', minute: '2-digit', hour12: false
-    }).format(d).replace(/[.֊]/, ':');   // fix "17.13" or "17:13" safely
-    return `${datePart} ${timePart} น.`;
-  }
-
-  async function renderPendingRequestsFromPromise(houseNo, issuesPromise) {
-    const pendingEl = ensurePendingSection();
-    pendingEl.innerHTML = `<div class="req-loading">กำลังตรวจสอบคำร้อง...</div>`;
-    const issues = await issuesPromise;
-    _renderPendingInto(pendingEl, houseNo, mergePendingIssues(houseNo, issues));
-  }
-
-  async function renderPendingRequests(houseNo) {
-    return refreshPendingRequests(houseNo);
-  }
-
-  async function cancelPendingRequest(issueNumber, btn) {
-    if (!confirm('ยกเลิกคำร้องนี้ใช่ไหม?\nคำร้องจะถูกปิด และต้องส่งใหม่ถ้าต้องการเปลี่ยนแปลงภายหลัง')) return;
-    btn.disabled = true;
-    btn.textContent = 'กำลังยกเลิก...';
-    try {
-      const houseNo = currentRecord ? normalizeHouseForAuth(currentRecord.house_no) : '';
-      const pin = getPinSession(houseNo);
-      if (!pin) throw new Error('session หมดอายุ กรุณา login ใหม่');
-      const res = await fetch(`${FUNCTION_BASE}/cancelRequest`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ houseNo, pin, issue_number: issueNumber })
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) throw new Error(json.error || 'cancel failed');
-      const card = document.getElementById(`req-card-${issueNumber}`);
-      if (card) {
-        card.style.transition = 'opacity 0.3s, transform 0.3s';
-        card.style.opacity = '0';
-        card.style.transform = 'translateX(12px)';
-        setTimeout(() => {
-          card.remove();
-          const section = document.getElementById('pendingSection');
-          if (section && !section.querySelector('.req-card')) section.remove();
-        }, 320);
-      }
-    } catch (err) {
-      btn.disabled = false;
-      btn.textContent = 'ยกเลิก';
-      alert('ไม่สามารถยกเลิกคำร้องได้: ' + err.message);
-    }
-  }
-
-  function _renderPendingInto(pendingEl, houseNo, issues) {
-    const openIssues = issues.filter(i => i.state === 'open');
-    if (openIssues.length === 0) { pendingEl.remove(); return; }
-
-    const cardsHtml = openIssues.map(issue => {
-      const { action } = parseActionFromIssue(issue);
-      const plate = parsePlateFromIssue(issue);
-      let isMoto = false;
-      try {
-        const bm = (issue.body || '').match(/```json\s*([\s\S]*?)```/);
-        if (bm) { const d = JSON.parse(bm[1]); isMoto = d.vehicle_type === 'moto'; }
-      } catch (_) {}
-      const badgeLabel = action === 'add' ? 'รอเพิ่ม' : action === 'edit' ? 'รอแก้ไข' : 'รอลบ';
-      const badgeCls   = action === 'delete' ? 'error' : 'pending';
-      const issueNum = issue.number;
-      return `
-        <div class="req-card" id="req-card-${issueNum}">
-          <div class="req-plate${isMoto ? ' req-moto' : ''}">${plate ? esc(plate) : '—'}</div>
-          <div class="req-info">
-            <div class="req-info-row">
-              <span class="req-type-icon">${isMoto ? '🏍️' : '🚗'}</span>
-              <span class="req-type-label">${isMoto ? 'มอเตอร์ไซค์' : 'รถยนต์'}</span>
-              <span class="status ${badgeCls}">${badgeLabel}</span>
-            </div>
-            <div class="req-meta">ส่งเมื่อ ${esc(formatIssueDate(issue.created_at))}</div>
-          </div>
-          <button class="req-cancel-btn" onclick="cancelPendingRequest(${issueNum}, this)">ยกเลิก</button>
-        </div>`;
-    }).join('');
-
-    pendingEl.innerHTML = `
-      <div class="pending-header">
-        <div class="pending-title">คำร้องที่รอดำเนินการ</div>
-        <span class="pending-count-badge">${openIssues.length} รายการ</span>
-      </div>
-      <div class="pending-info-note">⏳ คำร้องด้านล่างรอ admin อนุมัติ (ปกติภายใน 12–24 ชม.) — ทะเบียนจะถูกอัปเดตเมื่ออนุมัติแล้ว</div>
-      ${cardsHtml}`;
   }
 
   async function performSearch(q) {
@@ -2428,8 +2189,6 @@
     renderResult();
     setStoredHouse(found.house_no);
     showContextBar(found);
-    const pendingPromise = fetchPendingRequests(found.house_no);
-    renderPendingRequestsFromPromise(found.house_no, pendingPromise);
     return found;
   }
 

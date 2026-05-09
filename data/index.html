@@ -1167,7 +1167,7 @@
     <div id="formView">
       <div class="modal-header">
         <div class="modal-header-info">
-          <h2>แจ้งแก้ไขข้อมูล</h2>
+          <h2>แก้ไขข้อมูล</h2>
           <div class="modal-subtitle">บ้านเลขที่ <span id="mHouseNo">—</span></div>
         </div>
         <button class="modal-close" onclick="closeModal()" aria-label="ปิด">✕</button>
@@ -1175,7 +1175,7 @@
 
       <div class="form-hint-box">
         <span class="hint-icon">💡</span>
-        <span>แก้ไขข้อมูลที่ต้องการเปลี่ยน แล้วกด "แจ้งแก้ไขข้อมูล" — นิติบุคคลจะตรวจสอบและอัปเดตให้ภายใน 24 ชั่วโมง</span>
+        <span>แก้ไขข้อมูลแล้วกดบันทึก ระบบจะอัปเดตข้อมูลบ้านนี้ทันที และเก็บประวัติไว้ให้นิติบุคคลตรวจสอบ</span>
       </div>
 
       <div class="form-group">
@@ -1202,15 +1202,15 @@
 
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-        <button class="btn-submit" id="submitBtn" onclick="submitForm()"><span>📨</span> แจ้งแก้ไขข้อมูล</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()"><span>✓</span> บันทึกข้อมูล</button>
       </div>
     </div>
 
     <!-- Success view -->
     <div class="success-view" id="successView">
       <div class="s-icon">✓</div>
-      <h3>ส่งคำร้องเรียบร้อยแล้ว</h3>
-      <p>นิติบุคคลได้รับคำร้องของท่านแล้ว<br/>และจะดำเนินการให้ภายใน 24 ชั่วโมง</p>
+      <h3>บันทึกข้อมูลเรียบร้อยแล้ว</h3>
+      <p>ข้อมูลของบ้านนี้ถูกอัปเดตแล้ว<br/>ระบบบันทึกประวัติการแก้ไขไว้ให้นิติบุคคลตรวจสอบ</p>
     </div>
   </div>
 </div>
@@ -1232,6 +1232,7 @@
   const DEFAULT_HOUSE_PREFIX = '38/';
   const FUNCTION_BASE = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net';
   const RESIDENT_AUTH_URL = `${FUNCTION_BASE}/residentPinAuth`;
+  const UPDATE_RESIDENT_URL = `${FUNCTION_BASE}/updateResidentData`;
   const PIN_SESSION_KEY   = 'pattra_pin_sessions_v1';
   const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
   const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
@@ -1809,7 +1810,7 @@
       <div class="info-header">
         <div class="info-title">ข้อมูลส่วนตัว</div>
         <button class="edit-btn" onclick="openModal('${esc(r.house_no)}')">
-          <span>✏️</span> แจ้งแก้ไขข้อมูล
+          <span>✏️</span> แก้ไขข้อมูล
         </button>
       </div>
 
@@ -1893,7 +1894,7 @@
     document.getElementById('successView').classList.remove('visible');
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<span>📨</span> แจ้งแก้ไขข้อมูล';
+    submitBtn.innerHTML = '<span>✓</span> บันทึกข้อมูล';
     isSubmitting = false;
     document.getElementById('modalOverlay').classList.add('active');
     modalInitialState = buildModalState();
@@ -1918,7 +1919,7 @@
     if (e.target.id === 'modalOverlay') closeModal();
   });
 
-  // ── Submit (preserve original GitHub Issue creation) ──
+  // ── Submit direct resident update ──
   async function submitForm() {
     function cleanPhone(raw) {
       if (!raw || !raw.trim()) return '';
@@ -1930,8 +1931,6 @@
     const newName  = document.getElementById('f_name').value.trim();
     const newEmail = document.getElementById('f_email').value.trim();
     const newPhone = cleanPhone(document.getElementById('f_phone').value);
-    const reporter = `เจ้าของบ้าน ${currentRecord.houseNo}`;
-    const contact = newPhone || newEmail || currentRecord.phone || currentRecord.email || '';
 
     const noChange =
       newName === (currentRecord.name || '') &&
@@ -1945,68 +1944,44 @@
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳</span> กำลังส่ง...';
+    btn.innerHTML = '<span>⏳</span> กำลังบันทึก...';
     isSubmitting = true;
-
-    const payload = {
-      house_no: currentRecord.houseNo,
-      old: {
-        name: currentRecord.name,
-        email: currentRecord.email,
-        phone: currentRecord.phone,
-        cars: currentRecord.cars,
-        motorcycles: currentRecord.motorcycles
-      },
-      new: {
-        name: newName,
-        email: newEmail,
-        phone: newPhone,
-        cars: currentRecord.cars,           // unchanged here — managed in /vehicle/
-        motorcycles: currentRecord.motorcycles
-      },
-      reporter,
-      contact,
-      reporter_source: 'resident_pin_session',
-      submitted_at: new Date().toISOString()
-    };
-
-    const issueTitle = `[แก้ไขข้อมูล] บ้านเลขที่ ${currentRecord.houseNo} — ${currentRecord.name || '(ไม่มีชื่อ)'}`;
-    const issueBody  = [
-      `**ผู้แจ้ง:** ${reporter}`,
-      `**ติดต่อกลับ:** ${contact || '-'}`,
-      ``,
-      '```json',
-      JSON.stringify(payload, null, 2),
-      '```'
-    ].join('\n');
 
     try {
       const pin = getPinSession(normalizeHouseForAuth(currentRecord.houseNo));
-      const res = await fetch(`${FUNCTION_BASE}/submitRequest`, {
+      const res = await fetch(UPDATE_RESIDENT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           houseNo: currentRecord.houseNo,
           pin: pin || '',
-          title: issueTitle,
-          body: issueBody,
-          labels: ['resident-data']
+          profile: {
+            name: newName,
+            email: newEmail,
+            phone: newPhone
+          }
         })
       });
 
       const json = await res.json();
       if (res.ok && json.ok) {
+        currentRecord.name = newName;
+        currentRecord.email = newEmail;
+        currentRecord.phone = newPhone;
         document.getElementById('formView').style.display = 'none';
         document.getElementById('successView').classList.add('visible');
         modalInitialState = null;
-        setTimeout(() => closeModal(true), 3200);
+        setTimeout(async () => {
+          closeModal(true);
+          await performSearch(currentRecord.houseNo);
+        }, 1800);
       } else {
         throw new Error(json.error || `HTTP ${res.status}`);
       }
     } catch (err) {
-      alert('ไม่สามารถส่งคำร้องได้ กรุณาลองใหม่\n(' + err.message + ')');
+      alert('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่\n(' + err.message + ')');
       btn.disabled = false;
-      btn.innerHTML = '<span>📨</span> แจ้งแก้ไขข้อมูล';
+      btn.innerHTML = '<span>✓</span> บันทึกข้อมูล';
       isSubmitting = false;
     }
   }
