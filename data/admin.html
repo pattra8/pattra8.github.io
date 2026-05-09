@@ -1361,7 +1361,7 @@
       if (!json.ok) throw new Error(json.error || 'load failed');
       renderActivityLog(json.logs || []);
     } catch (err) {
-      el.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${esc(err.message)}</div>`;
+      el.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${escHtml(err.message)}</div>`;
     } finally {
       btn.disabled = false;
       btn.textContent = '🔄 โหลดใหม่';
@@ -1402,9 +1402,9 @@
         if (Array.isArray(ov) || Array.isArray(nv)) {
           const o = [].concat(ov || []).join(', ') || '—';
           const n = [].concat(nv || []).join(', ') || '—';
-          return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${esc(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${esc(o)}</span> → <span style="color:#22c55e">${esc(n)}</span></div>`;
+          return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(o)}</span> → <span style="color:#22c55e">${escHtml(n)}</span></div>`;
         }
-        return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${esc(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${esc(String(ov||'—'))}</span> → <span style="color:#22c55e">${esc(String(nv||'—'))}</span></div>`;
+        return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(String(ov||'—'))}</span> → <span style="color:#22c55e">${escHtml(String(nv||'—'))}</span></div>`;
       }).join('');
     };
 
@@ -1415,16 +1415,16 @@
       if (lpr) {
         lprCell = lpr.ok
           ? `<span style="color:#22c55e">✓ Synced</span>`
-          : `<span style="color:#ef4444" title="${esc(JSON.stringify(lpr.errors||[]))}">✗ Failed</span>`;
+          : `<span style="color:#ef4444" title="${escHtml(JSON.stringify(lpr.errors||[]))}">✗ Failed</span>`;
       }
       return `<tr>
         <td style="white-space:nowrap;font-size:.78rem;color:var(--text-muted)">${fmtTs(log.ts)}</td>
-        <td><strong>${esc(log.houseNo||'—')}</strong></td>
+        <td><strong>${escHtml(log.houseNo||'—')}</strong></td>
         <td>${actionLabel(log.action)}</td>
         <td>${ok ? '<span style="color:#22c55e">✓</span>' : '<span style="color:#ef4444">✗</span>'}</td>
         <td style="font-size:.82rem;max-width:280px">${fmtDiff(log)}</td>
         <td>${lprCell}</td>
-        <td style="font-size:.75rem;color:var(--text-muted)">${esc(log.ip||'')}</td>
+        <td style="font-size:.75rem;color:var(--text-muted)">${escHtml(log.ip||'')}</td>
       </tr>`;
     }).join('');
 
