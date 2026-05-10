@@ -239,13 +239,6 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-    .announce-admin-frame {
-      width: 100%;
-      min-height: 900px;
-      border: 0;
-      border-radius: 16px;
-      background: transparent;
-    }
 
     /* ─── TABS ─── */
     .tabs {
@@ -942,7 +935,6 @@
         <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 ข้อมูลลูกบ้าน</a>
         <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 ทะเบียนรถ</a>
         <a class="admin-link-btn" href="/vote/" target="_blank" rel="noopener">🗳 หน้าโหวต</a>
-        <a class="admin-link-btn" href="/announce/" target="_blank" rel="noopener">📢 ประกาศ</a>
       </nav>
       <button class="logout-btn" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
       <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
@@ -964,8 +956,8 @@
     <button class="tab-btn" id="tabVote" onclick="switchTab('vote')">
       🗳 โหวต
     </button>
-    <button class="tab-btn" id="tabAnnounce" onclick="switchTab('announce')">
-      📢 ประกาศ
+    <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
+      🧾 Activity Log
     </button>
   </div>
 
@@ -1144,23 +1136,22 @@
     </div>
   </div>
 
-  <!-- Tab: Announcement Admin -->
-  <div id="announceTab" style="display:none">
-    <div style="max-width:1120px;margin:28px auto;padding:0 28px;">
-      <div class="section-head-row">
+  <!-- Tab: Activity Log -->
+  <div id="logTab" style="display:none">
+    <div style="max-width:1100px;margin:28px auto;padding:0 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <div>
-          <h2 style="font-size:1.3rem;">📢 จัดการประกาศ</h2>
-          <p style="margin:0;color:var(--text-muted);font-size:.9rem;">เพิ่ม แก้ไข หรือลบประกาศที่แสดงบนหน้า Home</p>
+          <h2 style="margin:0 0 4px;font-size:1.3rem;">🧾 Activity Log</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:.88rem;">ประวัติการแก้ไขข้อมูลลูกบ้าน — อัปเดตโดย resident โดยตรง</p>
         </div>
-        <div class="section-actions">
-          <a class="admin-link-btn" href="/announce/" target="_blank" rel="noopener">📢 เปิดหน้าประกาศลูกบ้าน</a>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="number" id="logLimitInput" value="80" min="10" max="200" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.88rem;">
+          <button class="toolbar-btn" onclick="loadActivityLog()" id="logRefreshBtn">🔄 โหลดใหม่</button>
         </div>
       </div>
-      <iframe
-        class="announce-admin-frame"
-        title="Announcement admin"
-        src="/admin/announce.html?embed=1"
-      ></iframe>
+      <div id="logContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="padding:40px;text-align:center;color:var(--text-muted);">กดปุ่ม "🔄 โหลดใหม่" เพื่อโหลด log</div>
+      </div>
     </div>
   </div>
 
@@ -1238,7 +1229,6 @@
   const GH_REPO   = 'pattra8.github.io';
   const GH_PATH   = 'data/residents.json';
   const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
-  const ANNOUNCE_ADMIN_SESSION_KEY = 'pattra_announce_admin_until';
   const ADMIN_SESSION_DAYS = 7;
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
   // GitHub token — โหลดจาก localStorage (ไม่ฝังใน source code)
@@ -1264,27 +1254,16 @@
   function getSessionExpiry() { return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0); }
   function hasValidSession()  { return Date.now() < getSessionExpiry(); }
   function startAdminSession() {
-    const expiry = Date.now() + ADMIN_SESSION_DAYS * 86400000;
-    localStorage.setItem(ADMIN_SESSION_KEY, String(expiry));
-    localStorage.setItem(ANNOUNCE_ADMIN_SESSION_KEY, String(expiry));
+    localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_DAYS * 86400000));
   }
-  function clearAdminSession() {
-    localStorage.removeItem(ADMIN_SESSION_KEY);
-    localStorage.removeItem(ANNOUNCE_ADMIN_SESSION_KEY);
-  }
+  function clearAdminSession() { localStorage.removeItem(ADMIN_SESSION_KEY); }
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   function showDashboard() {
-    const expiry = getSessionExpiry();
-    if (expiry > Date.now()) {
-      localStorage.setItem(ANNOUNCE_ADMIN_SESSION_KEY, String(expiry));
-    }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('dashboard').style.display  = 'block';
     loadAdminData();
     loadPending();
-    const initialTab = tabFromHash();
-    if (initialTab && initialTab !== currentTab) switchTab(initialTab, {preserveHash: true});
   }
   function showTokenInput() {
     document.getElementById('tokenSaved').style.display = 'none';
@@ -1348,34 +1327,128 @@
   }
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
-  function tabFromHash() {
-    const tab = String(location.hash || '').replace(/^#/, '');
-    return ['residents', 'pending', 'pins', 'vote', 'announce'].includes(tab) ? tab : '';
-  }
-
-  function switchTab(tab, opts = {}) {
+  function switchTab(tab) {
     currentTab = tab;
     document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
     document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
-    document.getElementById('voteTab').style.display = tab === 'vote' ? 'block' : 'none';
-    document.getElementById('announceTab').style.display = tab === 'announce' ? 'block' : 'none';
+    document.getElementById('voteTab').style.display      = tab === 'vote'      ? 'block' : 'none';
+    document.getElementById('logTab').style.display       = tab === 'log'       ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
     document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
-    document.getElementById('tabAnnounce').classList.toggle('active', tab === 'announce');
-    if (!opts.preserveHash && location.hash !== `#${tab}`) {
-      history.replaceState(null, '', `#${tab}`);
-    }
+    document.getElementById('tabLog').classList.toggle('active', tab === 'log');
     if (tab === 'pending') loadPending();
     if (tab === 'vote') loadAdminPolls();
+    if (tab === 'log') loadActivityLog();
   }
 
-  window.addEventListener('hashchange', () => {
-    const tab = tabFromHash();
-    if (tab && tab !== currentTab && hasValidSession()) switchTab(tab, {preserveHash: true});
-  });
+  // ── Activity Log ──────────────────────────────────────────────────────────
+  async function loadActivityLog() {
+    const el = document.getElementById('logContent');
+    const btn = document.getElementById('logRefreshBtn');
+    const limit = parseInt(document.getElementById('logLimitInput').value) || 80;
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">⏳ กำลังโหลด...</div>';
+    btn.disabled = true;
+    try {
+      const res = await fetch(RESIDENT_AUTH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'adminAuditLogs', adminPassword: 'PATTRADATA', limit })
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'load failed');
+      renderActivityLog(json.logs || []);
+    } catch (err) {
+      el.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${escHtml(err.message)}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔄 โหลดใหม่';
+    }
+  }
+
+  function renderActivityLog(logs) {
+    const el = document.getElementById('logContent');
+    if (!logs.length) {
+      el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">ยังไม่มีประวัติการแก้ไข</div>';
+      return;
+    }
+
+    const actionLabel = a => ({
+      resident_update: '✏️ แก้ข้อมูล',
+      pin_verify: '🔑 Verify PIN',
+      pin_change: '🔑 เปลี่ยน PIN',
+      admin_pin_reset: '🔑 Admin Reset PIN',
+      poll_vote: '🗳 โหวต',
+    }[a] || a);
+
+    const fmtTs = ts => {
+      if (!ts) return '—';
+      const d = ts._seconds ? new Date(ts._seconds * 1000) : new Date(ts);
+      return new Intl.DateTimeFormat('th-TH', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+        timeZone: 'Asia/Bangkok'
+      }).format(d);
+    };
+
+    const fmtDiff = (log) => {
+      if (!log.old || !log.new) return '';
+      const fields = log.changedFields || [];
+      if (!fields.length) return '';
+      return fields.map(f => {
+        const ov = log.old[f], nv = log.new[f];
+        if (Array.isArray(ov) || Array.isArray(nv)) {
+          const o = [].concat(ov || []).join(', ') || '—';
+          const n = [].concat(nv || []).join(', ') || '—';
+          return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(o)}</span> → <span style="color:#22c55e">${escHtml(n)}</span></div>`;
+        }
+        return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(String(ov||'—'))}</span> → <span style="color:#22c55e">${escHtml(String(nv||'—'))}</span></div>`;
+      }).join('');
+    };
+
+    const rows = logs.map(log => {
+      const ok = log.success !== false;
+      const lpr = log.lprSync;
+      let lprCell = '—';
+      if (lpr) {
+        lprCell = lpr.ok
+          ? `<span style="color:#22c55e">✓ Synced</span>`
+          : `<span style="color:#ef4444" title="${escHtml(JSON.stringify(lpr.errors||[]))}">✗ Failed</span>`;
+      }
+      return `<tr>
+        <td style="white-space:nowrap;font-size:.78rem;color:var(--text-muted)">${fmtTs(log.ts)}</td>
+        <td><strong>${escHtml(log.houseNo||'—')}</strong></td>
+        <td>${actionLabel(log.action)}</td>
+        <td>${ok ? '<span style="color:#22c55e">✓</span>' : '<span style="color:#ef4444">✗</span>'}</td>
+        <td style="font-size:.82rem;max-width:280px">${fmtDiff(log)}</td>
+        <td>${lprCell}</td>
+        <td style="font-size:.75rem;color:var(--text-muted)">${escHtml(log.ip||'')}</td>
+      </tr>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+          <thead>
+            <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+              <th style="padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap">เวลา</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600">บ้าน</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600">Action</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600">OK</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600">การเปลี่ยนแปลง</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600">LPR</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600">IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+        <div style="padding:10px 14px;color:var(--text-muted);font-size:.78rem;border-top:1px solid var(--border);">${logs.length} รายการ</div>
+      </div>`;
+  }
 
   async function generateResidentPinForAdmin() {
     const houseNo = document.getElementById('pinHouseInput').value.trim();
@@ -1581,6 +1654,10 @@
               <button onclick="navigator.clipboard.writeText('https://pattra8.com/vote/').then(()=>alert('Copy link แล้ว'))"
                 style="font-family:inherit;font-size:.82rem;background:none;color:var(--text-soft);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
                 🔗 Copy Link
+              </button>
+              <button onclick="deletePoll('${p.id}','${(p.title||'').replace(/'/g,"\\'")}',this)"
+                style="font-family:inherit;font-size:.82rem;background:#fff0f0;color:#a33d30;border:1px solid #f0cfc8;border-radius:8px;padding:6px 12px;cursor:pointer;">
+                🗑 ลบ
               </button>
             </div>
           </div>
@@ -1888,6 +1965,24 @@
     } catch (err) {
       alert('ปิดไม่สำเร็จ: ' + err.message);
       btn.disabled = false; btn.textContent = '🔒 ปิด Poll';
+    }
+  }
+
+  async function deletePoll(pollId, title, btn) {
+    if (!confirm(`ลบ Poll "${title}" ?\n\nข้อมูลโหวตทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้`)) return;
+    btn.disabled = true; btn.textContent = 'กำลังลบ...';
+    try {
+      const res = await fetch(POLL_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action:'delete', adminPassword:'PATTRADATA', pollId})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) throw new Error(data.error || 'Failed');
+      loadAdminPolls();
+    } catch (err) {
+      alert('ลบไม่สำเร็จ: ' + err.message);
+      btn.disabled = false; btn.textContent = '🗑 ลบ';
     }
   }
 
