@@ -1655,6 +1655,10 @@
                 style="font-family:inherit;font-size:.82rem;background:none;color:var(--text-soft);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
                 🔗 Copy Link
               </button>
+              <button onclick="deletePoll('${p.id}','${(p.title||'').replace(/'/g,"\\'")}',this)"
+                style="font-family:inherit;font-size:.82rem;background:#fff0f0;color:#a33d30;border:1px solid #f0cfc8;border-radius:8px;padding:6px 12px;cursor:pointer;">
+                🗑 ลบ
+              </button>
             </div>
           </div>
         `;
@@ -1961,6 +1965,24 @@
     } catch (err) {
       alert('ปิดไม่สำเร็จ: ' + err.message);
       btn.disabled = false; btn.textContent = '🔒 ปิด Poll';
+    }
+  }
+
+  async function deletePoll(pollId, title, btn) {
+    if (!confirm(`ลบ Poll "${title}" ?\n\nข้อมูลโหวตทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้`)) return;
+    btn.disabled = true; btn.textContent = 'กำลังลบ...';
+    try {
+      const res = await fetch(POLL_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action:'delete', adminPassword:'PATTRADATA', pollId})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok) throw new Error(data.error || 'Failed');
+      loadAdminPolls();
+    } catch (err) {
+      alert('ลบไม่สำเร็จ: ' + err.message);
+      btn.disabled = false; btn.textContent = '🗑 ลบ';
     }
   }
 
