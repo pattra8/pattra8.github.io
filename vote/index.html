@@ -128,18 +128,32 @@
       background: var(--accent-pale);
       border: 1px solid var(--accent-soft);
       border-radius: 14px;
-      padding: 12px 14px;
+      padding: 12px 16px;
       margin-bottom: 18px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
       color: var(--accent-deep);
       font-size: .9rem;
     }
     .session-card strong { font-weight: 800; }
+    .session-card .identity-block {
+      display: flex; flex-direction: column; gap: 2px; flex: 1;
+    }
+    .session-card .identity-house {
+      font-weight: 800; font-size: 1rem; color: var(--accent-deep);
+    }
+    .session-card .identity-name {
+      font-size: .82rem; color: var(--text-soft); font-weight: 500;
+    }
+    .session-card .avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; flex-shrink: 0;
+    }
     .session-card button {
-      margin-left: auto;
       font-family: inherit;
       border: 1px solid var(--accent-soft);
       border-radius: 9px;
@@ -148,7 +162,24 @@
       color: var(--accent-deep);
       font-weight: 700;
       cursor: pointer;
+      font-size: .83rem;
     }
+    /* identity pill in header */
+    .identity-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--accent-pale); border: 1px solid var(--accent-soft);
+      border-radius: 99px; padding: 4px 12px 4px 6px;
+      cursor: pointer; transition: all .15s;
+    }
+    .identity-pill:hover { background: #f0dbb8; }
+    .identity-pill .pill-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 800; flex-shrink: 0;
+    }
+    .identity-pill .pill-text { font-size: .82rem; font-weight: 700; color: var(--accent-deep); }
+    .identity-pill .pill-sub { font-size: .72rem; color: var(--text-muted); }
     .spinner {
       width: 36px; height: 36px; border: 3px solid var(--border);
       border-top-color: var(--accent); border-radius: 50%;
@@ -479,6 +510,7 @@
 <header>
   <a class="logo" href="https://pattra8.com/">Pattra <span>Villa 8</span></a>
   <div class="header-right">
+    <div id="headerIdentity"></div>
     <a class="header-btn" href="https://pattra8.com/">🏠 หน้าหลัก</a>
   </div>
 </header>
@@ -495,7 +527,7 @@
   const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
   // ── PIN session helpers ──────────────────────────────────────────────────
-  function storePinSession(houseNo, pin) {
+  function storePinSession(houseNo, pin, residentName) {
     try {
       const map = JSON.parse(sessionStorage.getItem(PIN_SESSION_KEY) || '{}');
       map[houseNo] = pin;
@@ -503,6 +535,7 @@
       localStorage.setItem(RESIDENT_SESSION_KEY, JSON.stringify({
         houseNo,
         pin,
+        residentName: residentName || '',
         expiresAt: Date.now() + RESIDENT_UNLOCK_TTL_MS
       }));
     } catch (_) {}
@@ -515,8 +548,26 @@
         localStorage.removeItem(RESIDENT_SESSION_KEY);
         return null;
       }
-      return {houseNo: session.houseNo, pin: String(session.pin)};
+      return {houseNo: session.houseNo, pin: String(session.pin), residentName: session.residentName || ''};
     } catch (_) { return null; }
+  }
+
+  function updateHeaderIdentity() {
+    const el = document.getElementById('headerIdentity');
+    if (!el) return;
+    if (!currentHouseNo) { el.innerHTML = ''; return; }
+    const initial = (currentResidentName || currentHouseNo).charAt(0).toUpperCase();
+    const nameLine = currentResidentName
+      ? `<span class="pill-sub">${esc(currentResidentName)}</span>` : '';
+    el.innerHTML = `
+      <div class="identity-pill" onclick="logoutResident()" title="ออกจากระบบ">
+        <div class="pill-avatar">${esc(initial)}</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <span class="pill-text">บ้าน ${esc(currentHouseNo)}</span>
+          ${nameLine}
+        </div>
+      </div>
+    `;
   }
   function getPinSession(houseNo) {
     try {
@@ -599,6 +650,7 @@
   let currentPoll = null;
   let currentHouseNo = null;
   let currentPin = null;
+  let currentResidentName = '';
   let myVotes = {};
 
   const app = document.getElementById('app');
@@ -651,12 +703,19 @@
       <div class="page-sub">ร่วมกันตัดสินใจเพื่อหมู่บ้านของเรา — 1 บ้าน 1 เสียง</div>
       ${currentHouseNo ? `
         <div class="session-card">
-          <span>เข้าสู่ระบบเป็น <strong>บ้าน ${esc(currentHouseNo)}</strong></span>
+          <div class="avatar">${esc((currentResidentName || currentHouseNo).charAt(0).toUpperCase())}</div>
+          <div class="identity-block">
+            <span class="identity-house">🏠 บ้านเลขที่ ${esc(currentHouseNo)}</span>
+            ${currentResidentName ? `<span class="identity-name">👤 ${esc(currentResidentName)}</span>` : ''}
+          </div>
           <button type="button" onclick="logoutResident()">ออก</button>
         </div>
       ` : `
         <div class="session-card">
-          <span>ใส่ PIN ครั้งเดียวเพื่อดูว่า poll ไหนโหวตแล้ว</span>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:.9rem;">ยืนยันตัวตนเพื่อโหวต</div>
+            <div style="font-size:.8rem;margin-top:2px;color:var(--text-soft);">ใส่บ้านเลขที่ + PIN ครั้งเดียวเพื่อดูว่า poll ไหนโหวตแล้ว</div>
+          </div>
           <button type="button" onclick="showLoginOnlyModal()">เข้าสู่ระบบ</button>
         </div>
       `}
@@ -688,8 +747,10 @@
     const data = await apiCall({action:'myVotes', houseNo, pin});
     currentHouseNo = data.houseNo || houseNo;
     currentPin = pin;
+    currentResidentName = data.residentName || '';
     myVotes = data.votes || {};
-    storePinSession(currentHouseNo, pin);
+    storePinSession(currentHouseNo, pin, currentResidentName);
+    updateHeaderIdentity();
     return data;
   }
 
@@ -697,12 +758,18 @@
     const session = getResidentSession();
     if (!session) return;
     try {
+      // Optimistically set from cache so header shows immediately
+      currentHouseNo = session.houseNo;
+      currentResidentName = session.residentName || '';
+      updateHeaderIdentity();
       await loadMyVotes(session.houseNo, session.pin);
     } catch (_) {
       localStorage.removeItem(RESIDENT_SESSION_KEY);
       myVotes = {};
       currentHouseNo = null;
       currentPin = null;
+      currentResidentName = '';
+      updateHeaderIdentity();
     }
   }
 
@@ -712,6 +779,8 @@
     myVotes = {};
     currentHouseNo = null;
     currentPin = null;
+    currentResidentName = '';
+    updateHeaderIdentity();
     renderPollList();
   }
 
@@ -785,7 +854,9 @@
           onSuccess(houseNo);
           return;
         }
-        const sig = await apiCall({action:'signatureStatus', houseNo, pin, pollId: currentPoll.id});
+        const [sig] = await Promise.all([
+          apiCall({action:'signatureStatus', houseNo, pin, pollId: currentPoll.id}),
+        ]);
         await loadMyVotes(houseNo, pin);
         if (sig.alreadyVoted) {
           throw Object.assign(new Error('already_voted'), {data: sig});
@@ -818,6 +889,7 @@
       <div class="pin-modal signature-step">
         <div class="pin-eyebrow">E-Signature</div>
         <h2>${hasSignature ? 'ยืนยันลายเซ็นบ้าน ' : 'ลงลายเซ็นบ้าน '}${esc(houseNo)}</h2>
+        ${currentResidentName ? `<div style="display:inline-flex;align-items:center;gap:6px;background:var(--accent-pale);border:1px solid var(--accent-soft);border-radius:99px;padding:4px 12px;margin-bottom:12px;font-size:.83rem;font-weight:700;color:var(--accent-deep);">👤 ${esc(currentResidentName)}</div>` : ''}
         <p>${hasSignature
           ? 'ระบบจะใช้ลายเซ็นที่บ้านนี้เคยบันทึกไว้เพื่อยืนยันการลงคะแนนครั้งนี้'
           : 'กรุณาเซ็น 1 ครั้ง ระบบจะบันทึกไว้กับบ้านนี้และใช้ยืนยันการโหวตครั้งต่อไป'}</p>
@@ -1234,6 +1306,7 @@
 
   function showVotedConfirm(poll, choice, houseNo, answers) {
     const house = houseNo || currentHouseNo || '';
+    const name = currentResidentName || '';
     const isSurvey = poll.mode === 'survey';
     const badge = isSurvey
       ? `<div class="voted-choice-badge">ตอบครบ ${(poll.questions||[]).length} วาระ</div>`
@@ -1243,6 +1316,7 @@
       <div class="voted-confirm">
         <div class="big">✅</div>
         <h2>บ้าน ${esc(house)} ${isSurvey ? 'ตอบแบบสอบถามแล้ว' : 'โหวตแล้ว'}!</h2>
+        ${name ? `<div style="font-size:.88rem;color:var(--text-soft);margin:-4px 0 8px;">👤 ${esc(name)}</div>` : ''}
         ${badge}
         <p>ขอบคุณที่ร่วม${isSurvey ? 'แสดงความคิดเห็น' : 'โหวต'}<br>ผลจะแสดงหลังปิด</p>
       </div>
