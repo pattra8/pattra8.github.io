@@ -310,6 +310,12 @@
       padding: 5px 12px; border-radius: 20px; margin-bottom: 22px;
     }
 
+    /* Poll header image */
+    .poll-header-img {
+      width: 100%; max-height: 220px; object-fit: cover;
+      border-radius: 14px; margin-bottom: 18px;
+    }
+
     /* Option cards */
     .options-label {
       font-size: .82rem; font-weight: 700; color: var(--text-muted);
@@ -322,9 +328,7 @@
       transition: all .15s; user-select: none;
     }
     .option-card:hover { border-color: var(--accent-soft); background: var(--accent-pale); }
-    .option-card.selected {
-      border-color: var(--accent); background: var(--accent-pale);
-    }
+    .option-card.selected { border-color: var(--accent); background: var(--accent-pale); }
     .option-mark {
       width: 22px; height: 22px; border-radius: 50%;
       border: 2px solid var(--border); flex-shrink: 0;
@@ -335,7 +339,46 @@
       background: var(--accent); border-color: var(--accent); color: #fff;
     }
     .option-card.multi .option-mark { border-radius: 6px; }
-    .option-text { font-size: .97rem; font-weight: 500; color: var(--text); }
+    .option-text { font-size: .97rem; font-weight: 500; color: var(--text); flex: 1; }
+    /* Image option card */
+    .option-card.has-img { flex-direction: column; align-items: stretch; padding: 0; overflow: hidden; }
+    .option-card.has-img .option-img { width: 100%; height: 140px; object-fit: cover; }
+    .option-card.has-img .option-body { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+    /* Acknowledge button */
+    .ack-btn {
+      width: 100%; padding: 16px; border: 2px solid var(--accent-soft);
+      border-radius: 14px; background: var(--accent-pale); color: var(--accent-deep);
+      font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: all .15s; margin-bottom: 10px;
+    }
+    .ack-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .ack-btn.acked { background: var(--accent); color: #fff; border-color: var(--accent); }
+    /* Dropdown */
+    .q-dropdown {
+      width: 100%; padding: 12px 14px; border: 2px solid var(--border);
+      border-radius: 12px; font-family: inherit; font-size: .97rem;
+      background: #fff; color: var(--text); appearance: none; cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .q-dropdown:focus { outline: none; border-color: var(--accent); }
+    /* Text input */
+    .q-text {
+      width: 100%; padding: 12px 14px; border: 2px solid var(--border);
+      border-radius: 12px; font-family: inherit; font-size: .95rem;
+      color: var(--text); resize: vertical; min-height: 44px;
+      transition: border-color .15s;
+    }
+    .q-text:focus { outline: none; border-color: var(--accent); }
+    /* Survey question block */
+    .q-block {
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 16px; margin-bottom: 16px;
+    }
+    .q-num { font-size: .75rem; font-weight: 700; color: var(--accent-deep);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .q-label { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+    .q-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; }
+    .q-required { color: #a33d30; margin-left: 4px; }
 
     /* Star rating */
     .stars-row { display: flex; gap: 10px; margin-bottom: 10px; }
@@ -387,6 +430,18 @@
       text-align: center; margin-bottom: 4px;
     }
     .rating-avg-sub { text-align: center; font-size: .85rem; color: var(--text-muted); margin-bottom: 20px; }
+    /* Survey results */
+    .q-result-block {
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; margin-bottom: 16px; background: #fff;
+    }
+    .q-result-title { font-size: .92rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .comment-list { margin-top: 6px; }
+    .comment-item {
+      background: var(--bg-soft); border-radius: 8px; padding: 8px 12px;
+      margin-bottom: 6px; font-size: .88rem; color: var(--text-body);
+    }
+    .comment-house { font-size: .75rem; color: var(--text-muted); margin-bottom: 2px; }
 
     /* ── Voted confirmation ── */
     .voted-confirm {
@@ -617,7 +672,8 @@
     currentPoll = polls.find(p => p.id === pollId);
     if (!currentPoll) return;
     if (myVotes[pollId]?.voted) {
-      showVotedConfirm(currentPoll, myVotes[pollId].choice, currentHouseNo);
+      const v = myVotes[pollId];
+      showVotedConfirm(currentPoll, v.choice, currentHouseNo, v.answers);
       return;
     }
     if (isPollClosed(currentPoll)) {
@@ -807,16 +863,20 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'กำลังบันทึก…';
       try {
+        const surveyAnswers = options.answers;
         await apiCall({
           action: 'vote',
           houseNo,
           pin,
           pollId: currentPoll.id,
-          choice: choiceToSubmit,
+          ...(surveyAnswers ? {answers: surveyAnswers} : {choice: choiceToSubmit}),
           ...(signatureDataUrl ? {signatureDataUrl} : {})
         });
         overlay.remove();
-        myVotes[currentPoll.id] = {voted: true, choice: choiceToSubmit};
+        myVotes[currentPoll.id] = {
+          voted: true,
+          ...(surveyAnswers ? {answers: surveyAnswers} : {choice: choiceToSubmit}),
+        };
         onSuccess(houseNo);
       } catch (err) {
         const msg = err.message === 'already_voted' ? 'บ้านนี้โหวตไปแล้ว'
@@ -911,47 +971,146 @@
     };
   }
 
+  // ── Render one question's input UI ──────────────────────────────────────
+  function renderQuestion(q, qIdx, answers, ratings) {
+    const reqMark = q.required !== false ? `<span class="q-required">*</span>` : '';
+    const imgHtml = q.imageUrl
+      ? `<img src="${esc(q.imageUrl)}" class="q-img" alt="" loading="lazy">`
+      : '';
+    let inputHtml = '';
+
+    if (q.type === 'acknowledge') {
+      inputHtml = `<button class="ack-btn" id="ack_${qIdx}"
+        onclick="toggleAck(${qIdx})">☐ รับทราบแล้ว</button>`;
+
+    } else if (q.type === 'single' || q.type === 'dropdown' && q.options?.length <= 6) {
+      const isMulti = false;
+      inputHtml = `<div class="options-label">เลือก 1 ข้อ</div>` +
+        q.options.map((o, i) => {
+          const label = typeof o === 'object' ? o.label : o;
+          const img   = typeof o === 'object' ? o.imageUrl : '';
+          const hasImg = Boolean(img);
+          return `<div class="option-card${hasImg ? ' has-img' : ''}" id="opt_${qIdx}_${i}"
+            onclick="toggleOpt(${qIdx},${i},'${esc(label)}',false)">
+            ${hasImg ? `<img src="${esc(img)}" class="option-img" alt="" loading="lazy">
+              <div class="option-body"><div class="option-mark" id="mark_${qIdx}_${i}"></div><div class="option-text">${esc(label)}</div></div>`
+            : `<div class="option-mark" id="mark_${qIdx}_${i}"></div><div class="option-text">${esc(label)}</div>`}
+          </div>`;
+        }).join('');
+
+    } else if (q.type === 'dropdown') {
+      inputHtml = `<select class="q-dropdown" id="drop_${qIdx}" onchange="answers['${q.id}']=this.value">
+        <option value="">— เลือก —</option>
+        ${q.options.map(o => {
+          const label = typeof o === 'object' ? o.label : o;
+          return `<option value="${esc(label)}">${esc(label)}</option>`;
+        }).join('')}
+      </select>`;
+
+    } else if (q.type === 'multi') {
+      const max = q.maxChoices || 2;
+      inputHtml = `<div class="options-label">เลือกได้สูงสุด ${max} ข้อ</div>` +
+        q.options.map((o, i) => {
+          const label = typeof o === 'object' ? o.label : o;
+          const img   = typeof o === 'object' ? o.imageUrl : '';
+          const hasImg = Boolean(img);
+          return `<div class="option-card multi${hasImg ? ' has-img' : ''}" id="opt_${qIdx}_${i}"
+            onclick="toggleOpt(${qIdx},${i},'${esc(label)}',true,${max})">
+            ${hasImg ? `<img src="${esc(img)}" class="option-img" alt="" loading="lazy">
+              <div class="option-body"><div class="option-mark" id="mark_${qIdx}_${i}"></div><div class="option-text">${esc(label)}</div></div>`
+            : `<div class="option-mark" id="mark_${qIdx}_${i}"></div><div class="option-text">${esc(label)}</div>`}
+          </div>`;
+        }).join('');
+
+    } else if (q.type === 'rating') {
+      inputHtml = `<div class="options-label">ให้คะแนนความพอใจ</div>
+        <div class="stars-row" id="stars_${qIdx}">
+          ${[1,2,3,4,5].map(i =>
+            `<button class="star-btn" data-val="${i}" onclick="setQRating(${qIdx},${i})">☆</button>`
+          ).join('')}
+        </div>
+        <div class="star-label" id="starlabel_${qIdx}">กรุณาเลือกคะแนน 1-5</div>`;
+
+    } else if (q.type === 'text') {
+      inputHtml = `<input type="text" class="q-text" id="text_${qIdx}" maxlength="500"
+        placeholder="พิมพ์คำตอบ..." oninput="answers['${q.id}']=this.value">`;
+
+    } else if (q.type === 'textarea') {
+      inputHtml = `<textarea class="q-text" id="text_${qIdx}" rows="3" maxlength="1000"
+        placeholder="พิมพ์ความเห็นของท่าน..." oninput="answers['${q.id}']=this.value"></textarea>`;
+    }
+
+    return `<div class="q-block" id="qblock_${qIdx}">
+      <div class="q-num">วาระที่ ${qIdx + 1}</div>
+      <div class="q-label">${esc(q.label)}${reqMark}</div>
+      ${imgHtml}
+      ${inputHtml}
+    </div>`;
+  }
+
   // ── Vote form ────────────────────────────────────────────────────────────
   function showVoteForm(poll) {
-    let selectedChoices = poll.type === 'multi' ? [] : null;
-    let selectedRating = null;
+    const isSurvey = poll.mode === 'survey';
+    // State
+    const answers  = {};   // survey: { qId: value }
+    const multiSel = {};   // { qIdx: [labels] }
+    const ratings  = {};   // { qIdx: 1-5 }
+    const acked    = {};   // { qIdx: bool }
 
-    const optionsHtml = () => {
-      if (poll.type === 'rating') {
-        return `
+    // Build inner HTML
+    const headerImg = poll.imageUrl
+      ? `<img src="${esc(poll.imageUrl)}" class="poll-header-img" alt="" loading="lazy">`
+      : '';
+
+    let bodyHtml = '';
+    if (isSurvey) {
+      bodyHtml = poll.questions.map((q, i) => renderQuestion(q, i, answers, ratings)).join('');
+    } else {
+      // single-question mode (phase 1)
+      if (poll.type === 'acknowledge') {
+        bodyHtml = `<button class="ack-btn" id="ack_0" onclick="toggleAck(0)">☐ รับทราบแล้ว</button>`;
+      } else if (poll.type === 'rating') {
+        bodyHtml = `
           <div class="options-label">ให้คะแนนความพอใจ</div>
-          <div class="stars-row" id="starsRow">
-            ${[1,2,3,4,5].map(i => `<button class="star-btn" data-val="${i}" onclick="setRating(${i})">☆</button>`).join('')}
+          <div class="stars-row" id="stars_0">
+            ${[1,2,3,4,5].map(i =>
+              `<button class="star-btn" data-val="${i}" onclick="setQRating(0,${i})">☆</button>`
+            ).join('')}
           </div>
-          <div class="star-label" id="starLabel">กรุณาเลือกคะแนน 1-5</div>
-        `;
+          <div class="star-label" id="starlabel_0">กรุณาเลือกคะแนน 1-5</div>`;
+      } else {
+        const isMulti = poll.type === 'multi';
+        const max = poll.maxChoices || 2;
+        const label = isMulti ? `เลือกได้สูงสุด ${max} ข้อ` : 'เลือก 1 ข้อ';
+        bodyHtml = `<div class="options-label">${label}</div>` +
+          (poll.options || []).map((o, i) => {
+            const lbl = typeof o === 'object' ? o.label : o;
+            const img = typeof o === 'object' ? o.imageUrl : '';
+            const hasImg = Boolean(img);
+            return `<div class="option-card${isMulti ? ' multi' : ''}${hasImg ? ' has-img' : ''}" id="opt_0_${i}"
+              onclick="toggleOpt(0,${i},'${esc(lbl)}',${isMulti},${max})">
+              ${hasImg
+                ? `<img src="${esc(img)}" class="option-img" alt="" loading="lazy">
+                   <div class="option-body"><div class="option-mark" id="mark_0_${i}"></div><div class="option-text">${esc(lbl)}</div></div>`
+                : `<div class="option-mark" id="mark_0_${i}"></div><div class="option-text">${esc(lbl)}</div>`}
+            </div>`;
+          }).join('');
       }
-      const isMulti = poll.type === 'multi';
-      const label = isMulti
-        ? `เลือกได้สูงสุด ${poll.maxChoices || 2} ข้อ`
-        : 'เลือก 1 ข้อ';
-      return `
-        <div class="options-label">${label}</div>
-        ${poll.options.map((opt, i) => `
-          <div class="option-card ${isMulti ? 'multi' : ''}" id="opt_${i}"
-            onclick="toggleOption(${i}, '${esc(opt)}', ${isMulti})">
-            <div class="option-mark" id="mark_${i}">${isMulti ? '' : ''}</div>
-            <div class="option-text">${esc(opt)}</div>
-          </div>
-        `).join('')}
-      `;
-    };
+    }
 
     app.innerHTML = `
       <button class="back-btn" onclick="goBack()">← กลับ</button>
       <div class="vote-wrap">
-        <div class="vote-eyebrow">🗳 โหวต</div>
+        ${headerImg}
+        <div class="vote-eyebrow">🗳 ${isSurvey ? 'แบบสอบถาม' : 'โหวต'}</div>
         <div class="vote-title">${esc(poll.title)}</div>
         ${poll.description ? `<div class="vote-desc">${esc(poll.description)}</div>` : ''}
         ${poll.deadline ? `<div id="voteFormCd" class="countdown-bar" style="margin-bottom:20px;"></div>` : ''}
-        ${optionsHtml()}
+        ${bodyHtml}
         <div class="vote-submit-row">
-          <button class="btn-primary" id="voteSubmitBtn" onclick="submitVote()">🗳 โหวตเลย</button>
+          <button class="btn-primary" id="voteSubmitBtn" onclick="submitVote()">
+            ${isSurvey ? '📋 ส่งแบบสอบถาม' : '🗳 โหวตเลย'}
+          </button>
           <span class="vote-error" id="voteError"></span>
         </div>
         <div style="margin-top:10px;font-size:.78rem;color:var(--text-muted);">
@@ -962,63 +1121,108 @@
 
     if (poll.deadline) buildCountdown(poll, 'voteFormCd');
 
-    // expose helpers to global
-    window.toggleOption = (idx, val, isMulti) => {
-      if (isMulti) {
-        const pos = selectedChoices.indexOf(val);
-        if (pos >= 0) {
-          selectedChoices.splice(pos, 1);
-          document.getElementById(`opt_${idx}`).classList.remove('selected');
-          document.getElementById(`mark_${idx}`).textContent = '';
-        } else {
-          if (selectedChoices.length >= (poll.maxChoices || 2)) return;
-          selectedChoices.push(val);
-          document.getElementById(`opt_${idx}`).classList.add('selected');
-          document.getElementById(`mark_${idx}`).textContent = '✓';
-        }
-      } else {
-        poll.options.forEach((_, i) => {
-          document.getElementById(`opt_${i}`)?.classList.remove('selected');
-          const m = document.getElementById(`mark_${i}`);
-          if (m) m.textContent = '';
-        });
-        selectedChoices = val;
-        document.getElementById(`opt_${idx}`).classList.add('selected');
-        document.getElementById(`mark_${idx}`).textContent = '●';
+    // ── global event handlers ────────────────────────────────────────────
+    window.toggleAck = (qIdx) => {
+      const q = isSurvey ? poll.questions[qIdx] : {id: 'q0'};
+      const qid = q ? q.id : 'q0';
+      acked[qIdx] = !acked[qIdx];
+      answers[qid] = acked[qIdx] ? 'ทราบแล้ว' : null;
+      const btn = document.getElementById(`ack_${qIdx}`);
+      if (btn) {
+        btn.textContent = acked[qIdx] ? '☑ รับทราบแล้ว' : '☐ รับทราบแล้ว';
+        btn.classList.toggle('acked', acked[qIdx]);
       }
     };
 
-    window.setRating = (val) => {
-      selectedRating = val;
-      document.querySelectorAll('.star-btn').forEach(b => {
+    window.toggleOpt = (qIdx, optIdx, val, isMulti, maxC = 99) => {
+      const q = isSurvey ? poll.questions[qIdx] : {id: 'q0', options: poll.options};
+      const qid = q ? q.id : 'q0';
+      const opts = isSurvey ? q.options : poll.options;
+      if (isMulti) {
+        if (!multiSel[qIdx]) multiSel[qIdx] = [];
+        const pos = multiSel[qIdx].indexOf(val);
+        if (pos >= 0) {
+          multiSel[qIdx].splice(pos, 1);
+          document.getElementById(`opt_${qIdx}_${optIdx}`)?.classList.remove('selected');
+          const m = document.getElementById(`mark_${qIdx}_${optIdx}`);
+          if (m) m.textContent = '';
+        } else {
+          if (multiSel[qIdx].length >= maxC) return;
+          multiSel[qIdx].push(val);
+          document.getElementById(`opt_${qIdx}_${optIdx}`)?.classList.add('selected');
+          const m = document.getElementById(`mark_${qIdx}_${optIdx}`);
+          if (m) m.textContent = '✓';
+        }
+        answers[qid] = [...multiSel[qIdx]];
+      } else {
+        (opts || []).forEach((_, i) => {
+          document.getElementById(`opt_${qIdx}_${i}`)?.classList.remove('selected');
+          const m = document.getElementById(`mark_${qIdx}_${i}`);
+          if (m) m.textContent = '';
+        });
+        answers[qid] = val;
+        document.getElementById(`opt_${qIdx}_${optIdx}`)?.classList.add('selected');
+        const m = document.getElementById(`mark_${qIdx}_${optIdx}`);
+        if (m) m.textContent = '●';
+      }
+    };
+
+    window.setQRating = (qIdx, val) => {
+      const q = isSurvey ? poll.questions[qIdx] : {id: 'q0'};
+      const qid = q ? q.id : 'q0';
+      ratings[qIdx] = val;
+      answers[qid] = val;
+      document.querySelectorAll(`#stars_${qIdx} .star-btn`).forEach(b => {
         const v = Number(b.dataset.val);
         b.textContent = v <= val ? '★' : '☆';
         b.classList.toggle('lit', v <= val);
       });
       const labels = ['','แย่มาก','พอใช้','ปานกลาง','ดี','ดีมาก'];
-      document.getElementById('starLabel').textContent = `${val} ดาว — ${labels[val]}`;
+      const lbl = document.getElementById(`starlabel_${qIdx}`);
+      if (lbl) lbl.textContent = `${val} ดาว — ${labels[val]}`;
     };
 
     window.submitVote = () => {
       const errEl = document.getElementById('voteError');
       errEl.textContent = '';
-      let choice;
-      if (poll.type === 'rating') {
-        if (!selectedRating) { errEl.textContent = 'กรุณาเลือกคะแนนก่อน'; return; }
-        choice = selectedRating;
-      } else if (poll.type === 'multi') {
-        if (!selectedChoices.length) { errEl.textContent = 'กรุณาเลือกอย่างน้อย 1 ข้อ'; return; }
-        choice = selectedChoices;
-      } else {
-        if (!selectedChoices) { errEl.textContent = 'กรุณาเลือก 1 ข้อก่อน'; return; }
-        choice = selectedChoices;
-      }
-      // PIN modal — submit happens inside
-      showPinModal(choice, (houseNo) => {
-        showVotedConfirm(poll, choice, houseNo);
-      });
-    };
 
+      if (isSurvey) {
+        for (const q of poll.questions) {
+          if (q.required !== false) {
+            const a = answers[q.id];
+            if (a === undefined || a === null || a === '' ||
+                (Array.isArray(a) && a.length === 0)) {
+              errEl.textContent = `กรุณาตอบ: ${q.label}`;
+              document.getElementById(`qblock_${poll.questions.indexOf(q)}`)
+                ?.scrollIntoView({behavior:'smooth', block:'center'});
+              return;
+            }
+          }
+        }
+        showPinModal(null, (houseNo) => {
+          showVotedConfirm(poll, null, houseNo, answers);
+        }, {answers});
+      } else {
+        // single-question
+        let choice;
+        if (poll.type === 'acknowledge') {
+          choice = 'ทราบแล้ว';
+          if (!acked[0]) { errEl.textContent = 'กรุณากดรับทราบก่อน'; return; }
+        } else if (poll.type === 'rating') {
+          if (!ratings[0]) { errEl.textContent = 'กรุณาเลือกคะแนนก่อน'; return; }
+          choice = ratings[0];
+        } else if (poll.type === 'multi') {
+          if (!multiSel[0]?.length) { errEl.textContent = 'กรุณาเลือกอย่างน้อย 1 ข้อ'; return; }
+          choice = multiSel[0];
+        } else {
+          if (!answers['q0']) { errEl.textContent = 'กรุณาเลือก 1 ข้อก่อน'; return; }
+          choice = answers['q0'];
+        }
+        showPinModal(choice, (houseNo) => {
+          showVotedConfirm(poll, choice, houseNo);
+        });
+      }
+    };
   }
 
   // ── Voted confirm ────────────────────────────────────────────────────────
@@ -1028,17 +1232,64 @@
     return String(choice);
   }
 
-  function showVotedConfirm(poll, choice, houseNo) {
+  function showVotedConfirm(poll, choice, houseNo, answers) {
     const house = houseNo || currentHouseNo || '';
+    const isSurvey = poll.mode === 'survey';
+    const badge = isSurvey
+      ? `<div class="voted-choice-badge">ตอบครบ ${(poll.questions||[]).length} วาระ</div>`
+      : `<div class="voted-choice-badge">${esc(choiceDisplay(poll, choice))}</div>`;
     app.innerHTML = `
       <button class="back-btn" onclick="goBack()">← กลับรายการ</button>
       <div class="voted-confirm">
         <div class="big">✅</div>
-        <h2>บ้าน ${esc(house)} โหวตแล้ว!</h2>
-        <div class="voted-choice-badge">${esc(choiceDisplay(poll, choice))}</div>
-        <p>ขอบคุณที่ร่วมโหวต<br>ผลจะแสดงหลังปิดโหวต</p>
+        <h2>บ้าน ${esc(house)} ${isSurvey ? 'ตอบแบบสอบถามแล้ว' : 'โหวตแล้ว'}!</h2>
+        ${badge}
+        <p>ขอบคุณที่ร่วม${isSurvey ? 'แสดงความคิดเห็น' : 'โหวต'}<br>ผลจะแสดงหลังปิด</p>
       </div>
     `;
+  }
+
+  // ── Results helpers ──────────────────────────────────────────────────────
+  function renderBars(qType, qOptions, qCounts, total) {
+    if (qType === 'rating') {
+      const avg = total > 0
+        ? (Object.entries(qCounts).reduce((s,[k,v]) => s + Number(k)*v, 0) / total).toFixed(2)
+        : '—';
+      return `
+        <div class="rating-avg">${avg} ★</div>
+        <div class="rating-avg-sub">คะแนนเฉลี่ยจาก ${total} เสียง</div>
+        ${[1,2,3,4,5].map(i => {
+          const cnt = qCounts[i] || 0;
+          const pct = total > 0 ? Math.round(cnt/total*100) : 0;
+          return `<div class="bar-row">
+            <div class="bar-label"><span>${i} ดาว</span><span class="bar-pct">${pct}%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div class="bar-count">${cnt} เสียง</div>
+          </div>`;
+        }).join('')}`;
+    }
+    if (qType === 'text' || qType === 'textarea') {
+      const texts = qCounts.__texts || [];
+      if (!texts.length) return `<div style="color:var(--text-muted);font-size:.88rem;">ยังไม่มีความเห็น</div>`;
+      return `<div class="comment-list">` +
+        texts.map(t => `<div class="comment-item">
+          <div class="comment-house">บ้าน ${esc(t.houseNo)}</div>
+          ${esc(t.text)}
+        </div>`).join('') + `</div>`;
+    }
+    // single / multi / dropdown / acknowledge
+    const opts = qOptions
+      ? qOptions.map(o => typeof o === 'object' ? o.label : o)
+      : Object.keys(qCounts).filter(k => k !== '__texts');
+    return opts.map(opt => {
+      const cnt = qCounts[opt] || 0;
+      const pct = total > 0 ? Math.round(cnt/total*100) : 0;
+      return `<div class="bar-row">
+        <div class="bar-label"><span>${esc(String(opt))}</span><span class="bar-pct">${pct}%</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-count">${cnt} เสียง</div>
+      </div>`;
+    }).join('');
   }
 
   // ── Results ──────────────────────────────────────────────────────────────
@@ -1048,43 +1299,32 @@
       const data = await apiCall({action:'results', pollId});
       const {poll, results} = data;
       const {counts, total, totalHouses, participationPct} = results;
+      const isSurvey = poll.mode === 'survey';
 
       let barsHtml = '';
-      if (poll.type === 'rating') {
-        const avg = total > 0
-          ? (Object.entries(counts).reduce((s,[k,v]) => s + Number(k)*v, 0) / total).toFixed(2)
-          : '—';
-        barsHtml = `
-          <div class="rating-avg">${avg} ★</div>
-          <div class="rating-avg-sub">คะแนนเฉลี่ยจาก ${total} เสียง</div>
-          ${[1,2,3,4,5].map(i => {
-            const cnt = counts[i] || 0;
-            const pct = total > 0 ? Math.round(cnt/total*100) : 0;
-            return `
-              <div class="bar-row">
-                <div class="bar-label"><span>${i} ดาว</span><span class="bar-pct">${pct}%</span></div>
-                <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-                <div class="bar-count">${cnt} เสียง</div>
-              </div>`;
-          }).join('')}
-        `;
-      } else {
-        const opts = poll.options || Object.keys(counts);
-        barsHtml = opts.map(opt => {
-          const cnt = counts[opt] || 0;
-          const pct = total > 0 ? Math.round(cnt/total*100) : 0;
-          return `
-            <div class="bar-row">
-              <div class="bar-label"><span>${esc(opt)}</span><span class="bar-pct">${pct}%</span></div>
-              <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-              <div class="bar-count">${cnt} เสียง</div>
-            </div>`;
+      if (isSurvey) {
+        barsHtml = (poll.questions || []).map((q, qi) => {
+          const qCounts = counts[q.id] || {};
+          return `<div class="q-result-block">
+            <div class="q-result-title">วาระที่ ${qi+1}: ${esc(q.label)}</div>
+            ${renderBars(q.type, q.options, qCounts, total)}
+          </div>`;
         }).join('');
+      } else {
+        const optList = poll.options
+          ? poll.options.map(o => typeof o === 'object' ? o.label : o)
+          : null;
+        barsHtml = renderBars(poll.type, optList, counts, total);
       }
+
+      const headerImg = poll.imageUrl
+        ? `<img src="${esc(poll.imageUrl)}" class="poll-header-img" alt="" loading="lazy">`
+        : '';
 
       app.innerHTML = `
         <button class="back-btn" onclick="goBack()">← กลับรายการ</button>
         <div class="results-wrap">
+          ${headerImg}
           <div class="vote-eyebrow">📊 ผลโหวต</div>
           <div class="results-title">${esc(poll.title)}</div>
           <div class="results-sub">${esc(poll.description || '')}</div>
