@@ -832,10 +832,49 @@
     </div>
   </a>
   <div class="header-actions">
-    <a href="/admin/#announce" class="header-btn secondary">Admin</a>
+    <div id="headerIdentity"></div>
+    <a href="/admin/" class="header-btn secondary">Admin</a>
     <a href="/report/" class="header-btn">แจ้งปัญหา</a>
   </div>
 </header>
+
+<script>
+// ── Resident Session — read-only (no login prompt) ──
+(function() {
+  try {
+    const raw = localStorage.getItem('pattra_resident_session_v1');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (!s || !s.expiresAt || Number(s.expiresAt) <= Date.now()) return;
+    const el = document.getElementById('headerIdentity');
+    if (!el) return;
+    function escH(v) {
+      return String(v || '').replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+    const initial = (s.residentName || s.houseNo || '?').charAt(0).toUpperCase();
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;
+                  background:var(--accent-pale);border:1px solid var(--accent-soft);
+                  border-radius:99px;padding:4px 14px 4px 6px;white-space:nowrap;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);
+                    color:#fff;display:flex;align-items:center;justify-content:center;
+                    font-size:.8rem;font-weight:800;flex-shrink:0;">
+          ${escH(initial)}
+        </div>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--text);line-height:1.2;">
+            บ้าน ${escH(s.houseNo)}
+          </div>
+          ${s.residentName
+            ? `<div style="font-size:.72rem;color:var(--text-soft);line-height:1.2;">
+                ${escH(s.residentName)}</div>`
+            : ''}
+        </div>
+      </div>`;
+  } catch (_) {}
+})();
+</script>
 
 
 <!-- ─── PAGE HEADER ─── -->
@@ -845,7 +884,7 @@
   <p class="page-intro">รวมประกาศสำคัญ ข่าวสารจากนิติบุคคล และข้อมูลทั่วไปของหมู่บ้าน<span class="nowrap">ภัทราวิลล่า 8</span></p>
   <div class="page-actions">
     <a class="ghost-link" href="/">← กลับหน้าบริการทั้งหมด</a>
-    <a class="ghost-link" href="/admin/#announce">จัดการประกาศ</a>
+    <a class="ghost-link" href="/admin/">จัดการประกาศ</a>
   </div>
 </div>
 
