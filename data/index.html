@@ -1113,6 +1113,54 @@
     }
     .survey-status.saving { color: var(--accent-text); }
     .survey-status.saved  { color: var(--status-ok); }
+    .survey-chip-2l {
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 1.5px solid var(--accent-soft);
+      background: var(--bg-soft);
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      text-align: left;
+      min-width: 150px;
+    }
+    .survey-chip-2l.active {
+      background: var(--accent-pale);
+      border-color: var(--accent);
+    }
+    .chip-title {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--text-body);
+    }
+    .chip-sub {
+      font-size: .72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .survey-chip-2l.active .chip-title { color: var(--accent-deep); }
+    .survey-chip-2l.active .chip-sub   { color: var(--accent-text); opacity: .85; }
+    .survey-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--accent-soft);
+      border-radius: 10px;
+      background: var(--bg-soft);
+      color: var(--text-body);
+      font-family: inherit;
+      font-size: .88rem;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 72px;
+      transition: border-color .15s;
+    }
+    .survey-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 640px) {
@@ -1982,13 +2030,32 @@
         <div class="survey-section">
           <div class="survey-section-label">🎪 Workshop ที่อยากให้มีในหมู่บ้าน (เลือกได้หลายข้อ)</div>
           <div class="survey-chips" id="surveyWorkshops">
-            <div class="survey-chip" data-val="massage">💆 นวดผ่อนคลาย</div>
-            <div class="survey-chip" data-val="arts">🎨 ศิลปะ / งานฝีมือ</div>
-            <div class="survey-chip" data-val="cooking">🍳 ทำอาหาร / เบเกอรี่</div>
-            <div class="survey-chip" data-val="knowledge">📚 ความรู้ / พัฒนาอาชีพ</div>
-            <div class="survey-chip" data-val="yoga">🧘 โยคะ / สุขภาพ</div>
-            <div class="survey-chip" data-val="family">👨‍👩‍👧 กิจกรรมครอบครัว</div>
+            <div class="survey-chip-2l" data-val="massage">
+              <span class="chip-title">💆 นวดผ่อนคลาย</span>
+              <span class="chip-sub">นวดไทย · นวดเท้า · aromatherapy</span>
+            </div>
+            <div class="survey-chip-2l" data-val="arts">
+              <span class="chip-title">🎨 ศิลปะ / งานฝีมือ</span>
+              <span class="chip-sub">ปั้นดินเผา · วาดรูป · สีน้ำ</span>
+            </div>
+            <div class="survey-chip-2l" data-val="yoga">
+              <span class="chip-title">🧘 Yoga / ยืดกล้ามเนื้อ</span>
+              <span class="chip-sub">แก้ office syndrome · ผ่อนคลาย</span>
+            </div>
+            <div class="survey-chip-2l" data-val="knowledge">
+              <span class="chip-title">💡 ความรู้ / พัฒนาตัวเอง</span>
+              <span class="chip-sub">การเงิน · AI · ถ่ายรูป · ภาษา</span>
+            </div>
+            <div class="survey-chip-2l" data-val="family">
+              <span class="chip-title">👨‍👩‍👧 กิจกรรมครอบครัว</span>
+              <span class="chip-sub">เกม · ทำของขวัญ · outdoor</span>
+            </div>
           </div>
+        </div>
+        <div class="survey-section">
+          <div class="survey-section-label">💬 อยากให้มี Workshop อะไรเพิ่มเติม? (ไม่บังคับ)</div>
+          <textarea id="workshopSuggestion" class="survey-textarea"
+            placeholder="เช่น workshop ทำเทียน, ดนตรีสำหรับเด็ก..."></textarea>
         </div>
         <div class="survey-status" id="surveyStatus"></div>
       </div>
@@ -2225,11 +2292,17 @@
   const SURVEY_UPDATE_URL =
     'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/updateLifestyleSurvey';
 
-  let surveyState = {occupants: null, ageGroups: [], pets: [], activities: [], workshops: []};
+  let surveyState = {
+    occupants: null, ageGroups: [], pets: [], activities: [],
+    workshops: [], workshopSuggestion: '',
+  };
   let surveyTimer = null;
 
   function initSurveyCard(houseNo, pin) {
-    surveyState = {occupants: null, ageGroups: [], pets: [], activities: [], workshops: []};
+    surveyState = {
+      occupants: null, ageGroups: [], pets: [], activities: [],
+      workshops: [], workshopSuggestion: '',
+    };
     // Build occupant buttons 1–7 + "8+"
     const occRow = document.getElementById('surveyOccupants');
     if (!occRow) return;
@@ -2257,12 +2330,11 @@
     };
     occRow.appendChild(b8);
 
-    // Wire multi-select chips
+    // Wire standard multi-select chips
     [
       ['surveyAgeGroups', 'ageGroups'],
       ['surveyPets', 'pets'],
       ['surveyActivities', 'activities'],
-      ['surveyWorkshops', 'workshops'],
     ].forEach(([id, key]) => {
       document.querySelectorAll(`#${id} .survey-chip`).forEach((chip) => {
         chip.onclick = () => {
@@ -2276,6 +2348,28 @@
         };
       });
     });
+
+    // Wire workshop 2-line chips
+    document.querySelectorAll('#surveyWorkshops .survey-chip-2l').forEach((chip) => {
+      chip.onclick = () => {
+        const v = chip.dataset.val;
+        const arr = surveyState.workshops || [];
+        surveyState.workshops = arr.includes(v)
+          ? arr.filter((x) => x !== v)
+          : [...arr, v];
+        renderSurveyUI();
+        scheduleSurveySave(houseNo, pin);
+      };
+    });
+
+    // Wire suggestion textarea
+    const suggTa = document.getElementById('workshopSuggestion');
+    if (suggTa) {
+      suggTa.addEventListener('input', () => {
+        surveyState.workshopSuggestion = suggTa.value.slice(0, 300);
+        scheduleSurveySave(houseNo, pin);
+      });
+    }
 
     loadSurveyData(houseNo, pin);
     const card = document.getElementById('lifestyleSurvey');
@@ -2292,7 +2386,6 @@
       ['surveyAgeGroups', 'ageGroups'],
       ['surveyPets', 'pets'],
       ['surveyActivities', 'activities'],
-      ['surveyWorkshops', 'workshops'],
     ].forEach(([id, key]) => {
       document.querySelectorAll(`#${id} .survey-chip`).forEach((chip) => {
         chip.classList.toggle(
@@ -2300,6 +2393,19 @@
         );
       });
     });
+    // Workshop 2-line chips
+    document.querySelectorAll('#surveyWorkshops .survey-chip-2l').forEach((chip) => {
+      chip.classList.toggle(
+          'active', (surveyState.workshops || []).includes(chip.dataset.val)
+      );
+    });
+    // Suggestion textarea
+    const suggTa = document.getElementById('workshopSuggestion');
+    if (suggTa && surveyState.workshopSuggestion !== undefined) {
+      if (document.activeElement !== suggTa) {
+        suggTa.value = surveyState.workshopSuggestion;
+      }
+    }
   }
 
   async function loadSurveyData(houseNo, pin) {
@@ -2317,6 +2423,7 @@
           pets: d.survey.pets || [],
           activities: d.survey.activities || [],
           workshops: d.survey.workshops || [],
+          workshopSuggestion: d.survey.workshopSuggestion || '',
         };
         renderSurveyUI();
         const secs = d.survey.updatedAt && d.survey.updatedAt.seconds;
