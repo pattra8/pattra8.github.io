@@ -1031,6 +1031,90 @@
       color: var(--bg3);
     }
 
+    /* ─── IDENTITY PILL ─── */
+    .identity-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--gold-pale); border: 1px solid var(--gold-light);
+      border-radius: 99px; padding: 4px 14px 4px 6px;
+      cursor: pointer; transition: background 0.2s; white-space: nowrap;
+    }
+    .identity-pill:hover { background: var(--bg3); }
+    .pill-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--gold); color: #fff; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 800;
+    }
+    .pill-house { font-size: .8rem; font-weight: 700; color: var(--taupe); line-height: 1.2; }
+    .pill-name  { font-size: .72rem; color: var(--muted); line-height: 1.2; }
+
+    /* ─── LOGIN MODAL ─── */
+    .login-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(30,24,20,.72); backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px); z-index: 2000;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .login-overlay.open { display: flex; }
+    .login-modal {
+      background: var(--card); border-radius: 20px; position: relative;
+      max-width: 400px; width: 100%; padding: 40px 36px 36px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.28);
+      animation: lm-pop 0.22s cubic-bezier(.22,.68,0,1.15);
+    }
+    @keyframes lm-pop {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .login-close {
+      position: absolute; top: 14px; right: 14px;
+      background: var(--bg2); border: none; width: 32px; height: 32px;
+      border-radius: 50%; cursor: pointer; font-size: 14px;
+      color: var(--taupe-mid); display: flex; align-items: center;
+      justify-content: center; transition: background 0.15s;
+    }
+    .login-close:hover { background: var(--bg3); }
+    .login-modal h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 24px;
+      font-weight: 400; color: var(--taupe); margin-bottom: 6px;
+    }
+    .login-modal .login-sub {
+      font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.6;
+    }
+    .login-fg { margin-bottom: 16px; }
+    .login-fg label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--taupe-mid);
+      margin-bottom: 8px;
+    }
+    .login-house-row { display: flex; }
+    .login-prefix {
+      background: var(--bg2); border: 1px solid var(--border); border-right: none;
+      border-radius: 10px 0 0 10px; padding: 11px 14px; font-size: 15px;
+      color: var(--muted); white-space: nowrap; display: flex; align-items: center;
+    }
+    .login-input {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 14px; font-size: 15px; font-family: 'Sarabun', sans-serif;
+      color: var(--text); background: var(--card); outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-house-row .login-input { border-radius: 0 10px 10px 0; }
+    .login-input:focus { border-color: var(--gold); }
+    .login-error {
+      font-size: 12px; color: #c0392b; margin-top: 8px;
+      background: #fae5e1; padding: 8px 12px; border-radius: 8px; display: none;
+    }
+    .login-error.show { display: block; }
+    .login-submit {
+      width: 100%; background: var(--gold); color: #fff; border: none;
+      border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 600;
+      font-family: 'Sarabun', sans-serif; cursor: pointer;
+      letter-spacing: .08em; transition: background 0.2s; margin-top: 8px;
+    }
+    .login-submit:hover { background: var(--gold-light); }
+    .login-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
     /* ─── RESPONSIVE ─── */
     @media (max-width: 640px) {
       header { padding: 0 16px; height: auto; min-height: 68px; gap: 12px; }
@@ -1112,7 +1196,9 @@
     </div>
   </a>
   <div class="header-actions">
+    <div id="headerIdentity"></div>
     <a href="/admin/" class="header-btn secondary">Admin</a>
+    <a href="/report/" class="header-btn">Report Issue</a>
   </div>
 </header>
 
@@ -1137,18 +1223,29 @@
 
     <!-- 1. แจ้งปัญหา -->
     <a href="/report/" class="service-card featured">
+      <div class="tag">Live</div>
       <div class="service-icon">🔧</div>
-      <div class="service-title">แจ้งปัญหา</div>
-      <p class="service-desc">แจ้งปัญหาและข้อร้องเรียนภายในโครงการ ติดตามสถานะการดำเนินการ</p>
+      <div class="service-title">แจ้งปัญหา / ซ่อมแซม</div>
+      <p class="service-desc">แจ้งปัญหาภายในโครงการ ติดตามสถานะการแก้ไขแบบ real-time</p>
       <span class="service-cta">
-        Report Issue
+        Go to Board
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </span>
     </a>
 
-    <!-- 2. ข้อมูลลูกบ้าน -->
+    <!-- 2. ชำระเงิน -->
+    <a href="https://pattravilla8.web.app/payment.html" class="service-card">
+      <div class="service-icon">💳</div>
+      <div class="service-title">ชำระค่าส่วนกลาง & ค่าจอดรถ</div>
+      <p class="service-desc">ชำระค่าธรรมเนียมส่วนกลาง ค่าที่จอดรถ ดูประวัติการชำระ</p>
+      <span class="service-cta">
+        Payment
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <!-- 3. ข้อมูลลูกบ้าน -->
     <a href="/data/" class="service-card">
-      <div class="tag">PIN</div>
       <div class="service-icon">🏠</div>
       <div class="service-title">ข้อมูลลูกบ้าน</div>
       <p class="service-desc">ตรวจสอบข้อมูลบ้าน อัปเดตข้อมูลติดต่อ จัดการผู้พักอาศัย</p>
@@ -1158,7 +1255,7 @@
       </span>
     </a>
 
-    <!-- 3. ทะเบียนรถเข้า-ออก -->
+    <!-- 4. ทะเบียนรถเข้า-ออก -->
     <a href="/vehicle/" class="service-card">
       <div class="service-icon">🚗</div>
       <div class="service-title">ทะเบียนรถเข้า-ออก</div>
@@ -1169,29 +1266,7 @@
       </span>
     </a>
 
-    <!-- 4. โหวต -->
-    <a href="/vote/" class="service-card">
-      <div class="service-icon">🗳️</div>
-      <div class="service-title">โหวต / ลงคะแนน</div>
-      <p class="service-desc">เข้าร่วมโหวตของหมู่บ้าน ดูสถานะการลงคะแนน และยืนยันตัวตนด้วย PIN บ้าน</p>
-      <span class="service-cta">
-        Vote
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 5. ประกาศ -->
-    <a href="/announce/" class="service-card">
-      <div class="service-icon">📢</div>
-      <div class="service-title">ประกาศ & ข่าวสาร</div>
-      <p class="service-desc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
-      <span class="service-cta">
-        Announcements
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 6. สถานะที่จอดรถ -->
+    <!-- 5. สถานะที่จอดรถ -->
     <a href="/parking/" class="service-card">
       <div class="service-icon">🅿️</div>
       <div class="service-title">สถานะที่จอดรถ</div>
@@ -1202,13 +1277,24 @@
       </span>
     </a>
 
-    <!-- 7. ชำระเงิน -->
-    <a href="https://pattravilla8.web.app/payment.html" class="service-card">
-      <div class="service-icon">💳</div>
-      <div class="service-title">ชำระค่าส่วนกลาง & ค่าจอดรถ</div>
-      <p class="service-desc">ชำระค่าธรรมเนียมส่วนกลาง ค่าที่จอดรถ ดูประวัติการชำระ</p>
+    <!-- 6. รายงานการเงิน -->
+    <a href="https://pattravilla8.web.app/report.html" class="service-card">
+      <div class="service-icon">📊</div>
+      <div class="service-title">รายงานการเงิน</div>
+      <p class="service-desc">ดูรายงานการเงินหมู่บ้าน รายรับ-รายจ่าย งบประมาณประจำปี</p>
       <span class="service-cta">
-        Payment
+        Financial Report
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <!-- 7. ประกาศ -->
+    <a href="/announce/" class="service-card">
+      <div class="service-icon">📢</div>
+      <div class="service-title">ประกาศ & ข่าวสาร</div>
+      <p class="service-desc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
+      <span class="service-cta">
+        Announcements
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </span>
     </a>
@@ -1223,7 +1309,7 @@
       <div class="section-title">ประกาศจากนิติบุคคล</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <a class="admin-link" href="/announce/">ดูประกาศทั้งหมด</a>
-        <a class="admin-link" href="/admin/#announce">Manage Announcements</a>
+        <a class="admin-link" href="/admin/">Manage Announcements</a>
       </div>
     </div>
 
@@ -1269,15 +1355,184 @@
   <div class="footer-logo">Pattra Villa 8</div>
   <div class="footer-tagline">Resident Services</div>
   <div class="footer-links">
+    <a href="/report/">Report Issue</a>
     <a href="https://pattravilla8.web.app/payment.html">Payment</a>
+    <a href="https://pattravilla8.web.app/report.html">Financial Report</a>
     <a href="/data/">Residents</a>
-    <a href="/vehicle/">Vehicle Access</a>
-    <a href="/vote/">Vote</a>
+    <a href="/data/">Vehicle Access</a>
     <a href="/parking/">Parking</a>
     <a href="/announce/">Announcements</a>
   </div>
   <div class="footer-copy">© 2026 Pattra Villa 8 · All rights reserved.</div>
 </footer>
+
+<!-- ─── RESIDENT LOGIN MODAL ─── -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-modal">
+    <button class="login-close" id="loginClose" aria-label="ปิด">✕</button>
+    <h3>เข้าสู่ระบบลูกบ้าน</h3>
+    <p class="login-sub">กรอกเลขบ้านและ PIN เพื่อเข้าถึงบริการของคุณ</p>
+    <div class="login-fg">
+      <label>บ้านเลขที่</label>
+      <div class="login-house-row">
+        <div class="login-prefix">38/</div>
+        <input class="login-input" type="number" id="loginSuffix"
+               placeholder="เช่น 8" min="1" max="99" />
+      </div>
+    </div>
+    <div class="login-fg">
+      <label>PIN (6 หลัก)</label>
+      <input class="login-input" type="password" id="loginPin"
+             maxlength="6" placeholder="••••••" />
+      <div class="login-error" id="loginError"></div>
+    </div>
+    <button class="login-submit" id="loginSubmit">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<script>
+// ── Resident Session — Landing Page ──
+const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+const RESIDENT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const RESIDENT_AUTH_URL =
+  'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
+
+function getResidentSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+    if (!s || Number(s.expiresAt) <= Date.now()) {
+      localStorage.removeItem(RESIDENT_SESSION_KEY); return null;
+    }
+    return s;
+  } catch { return null; }
+}
+function storeResidentSession(houseNo, pin, residentName) {
+  localStorage.setItem(RESIDENT_SESSION_KEY, JSON.stringify({
+    houseNo, pin, residentName: residentName || '',
+    expiresAt: Date.now() + RESIDENT_TTL_MS
+  }));
+}
+function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
+
+function escH(s) {
+  return String(s || '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function renderHeaderIdentity(session) {
+  const el = document.getElementById('headerIdentity');
+  if (!el) return;
+  if (!session) {
+    el.innerHTML =
+      `<button class="header-btn" onclick="showLoginModal()">เข้าสู่ระบบ</button>`;
+    return;
+  }
+  const initial = (session.residentName || session.houseNo).charAt(0).toUpperCase();
+  el.innerHTML = `
+    <div class="identity-pill" onclick="logoutResident()" title="กดเพื่อออกจากระบบ">
+      <div class="pill-avatar">${escH(initial)}</div>
+      <div>
+        <div class="pill-house">บ้าน ${escH(session.houseNo)}</div>
+        ${session.residentName
+          ? `<div class="pill-name">${escH(session.residentName)}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function logoutResident() {
+  if (!confirm('ออกจากระบบ?')) return;
+  clearResidentSession();
+  renderHeaderIdentity(null);
+  document.querySelectorAll('a[href^="/data/"],a[href^="/vehicle/"]').forEach(a => {
+    a.href = a.getAttribute('href').split('?')[0];
+  });
+}
+
+function updateServiceLinks(houseNo) {
+  document.querySelectorAll('a[href^="/data/"],a[href^="/vehicle/"]').forEach(a => {
+    const base = a.getAttribute('href').split('?')[0];
+    a.href = base + '?house=' + encodeURIComponent(houseNo);
+  });
+}
+
+function showLoginModal() {
+  document.getElementById('loginSuffix').value = '';
+  document.getElementById('loginPin').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('loginOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('loginSuffix').focus(), 80);
+}
+
+function closeLoginModal() {
+  document.getElementById('loginOverlay').classList.remove('open');
+}
+
+async function handleLoginSubmit() {
+  const suffix = String(document.getElementById('loginSuffix').value).trim();
+  const pin    = String(document.getElementById('loginPin').value).trim();
+  const errEl  = document.getElementById('loginError');
+  const btn    = document.getElementById('loginSubmit');
+  errEl.classList.remove('show');
+
+  if (!suffix || !/^\d{1,2}$/.test(suffix)) {
+    errEl.textContent = 'กรุณากรอกเลขบ้านให้ถูกต้อง (ตัวเลข 1–99)';
+    errEl.classList.add('show'); return;
+  }
+  if (pin.length !== 6) {
+    errEl.textContent = 'PIN ต้องมี 6 หลัก';
+    errEl.classList.add('show'); return;
+  }
+  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ…';
+  try {
+    const houseNo = '38/' + suffix;
+    const resp = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ houseNo, pin })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      const msg = (data.error || '').toLowerCase();
+      errEl.textContent =
+        msg.includes('pin') ? 'PIN ไม่ถูกต้อง' :
+        (msg.includes('house') || resp.status === 404) ? 'ไม่พบบ้านเลขที่นี้' :
+        'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+      errEl.classList.add('show'); return;
+    }
+    const residentName = (data.resident && data.resident.name) || '';
+    storeResidentSession('38/' + suffix, pin, residentName);
+    renderHeaderIdentity(getResidentSession());
+    updateServiceLinks('38/' + suffix);
+    closeLoginModal();
+  } catch (e) {
+    errEl.textContent = 'เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ';
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const session = getResidentSession();
+  renderHeaderIdentity(session);
+  if (session) updateServiceLinks(session.houseNo);
+
+  document.getElementById('loginOverlay').addEventListener('click', e => {
+    if (e.target.id === 'loginOverlay') closeLoginModal();
+  });
+  document.getElementById('loginClose').addEventListener('click', closeLoginModal);
+  document.getElementById('loginSubmit').addEventListener('click', handleLoginSubmit);
+  document.getElementById('loginPin').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLoginSubmit();
+  });
+  document.getElementById('loginSuffix').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginPin').focus();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLoginModal();
+  });
+});
+</script>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
