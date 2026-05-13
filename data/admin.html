@@ -1410,6 +1410,7 @@
     ageGroups:  {child:'👶 เด็ก (ต่ำกว่า 12)', teen:'🧑 วัยรุ่น (12–18)', adult:'👨 ผู้ใหญ่', elderly:'👴 ผู้สูงอายุ'},
     pets:       {dog:'🐕 หมา', cat:'🐈 แมว', other:'🐦 อื่นๆ', none:'❌ ไม่มี'},
     activities: {garden:'🌿 เดินสวน', fitness:'💪 ฟิตเนส', pool:'🏊 สระว่ายน้ำ', running:'🚶 วิ่ง/เดิน', other:'✨ อื่นๆ'},
+    workshops:  {massage:'💆 นวดผ่อนคลาย', arts:'🎨 ศิลปะ/งานฝีมือ', cooking:'🍳 ทำอาหาร/เบเกอรี่', knowledge:'📚 ความรู้/พัฒนาอาชีพ', yoga:'🧘 โยคะ/สุขภาพ', family:'👨‍👩‍👧 กิจกรรมครอบครัว'},
   };
 
   function surveyBar(count, max, label) {
@@ -1442,6 +1443,7 @@
       const maxAg  = Math.max(...Object.values(s.ageGroups || {x:1}), 1);
       const maxPet = Math.max(...Object.values(s.pets || {x:1}), 1);
       const maxAct = Math.max(...Object.values(s.activities || {x:1}), 1);
+      const maxWs  = Math.max(...Object.values(s.workshops || {x:1}), 1);
 
       const occBars = [1,2,3,4,5,6,7,8].map(i =>
         surveyBar(s.occupants[String(i)]||0, maxOcc, `${i === 8 ? '8+' : i} คน`)
@@ -1457,6 +1459,10 @@
 
       const actBars = Object.entries(SURVEY_LABELS.activities).map(([k,lab]) =>
         surveyBar(s.activities[k]||0, maxAct, lab)
+      ).join('');
+
+      const wsBars = Object.entries(SURVEY_LABELS.workshops).map(([k,lab]) =>
+        surveyBar(s.workshops[k]||0, maxWs, lab)
       ).join('');
 
       el.innerHTML = `
@@ -1485,6 +1491,11 @@
           🏃 กิจกรรมที่ชื่นชอบ
         </h3>
         ${actBars}
+        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
+        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
+          🎪 Workshop ที่อยากให้มี
+        </h3>
+        ${wsBars}
       `;
     } catch (e) {
       el.innerHTML = `<div style="color:#a33d30;padding:20px;">เกิดข้อผิดพลาด: ${e.message}</div>`;
