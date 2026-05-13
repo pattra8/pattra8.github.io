@@ -317,7 +317,6 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
       </div>
     </div>
     <div class="hbtns">
-      <button class="hbtn btn-ghost" onclick="location.href='/'">🏠 บริการทั้งหมด</button>
       <button class="hbtn btn-ghost" id="adminToggle" onclick="openAdminLogin()">🔑 Admin</button>
       <button class="hbtn btn-purple" onclick="openPrivateModal()">🔒 แจ้งแบบส่วนตัว</button>
       <button class="hbtn btn-orange" onclick="openModal()">➕ รายงานปัญหา</button>
@@ -412,6 +411,8 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
   <div class="fg">
     <label>🏠 บ้านเลขที่ *</label>
     <select id="inp-house"></select>
+    <div id="reporterBadge" style="display:none;margin-top:8px;padding:8px 12px;
+         background:#e8f4f0;border-radius:8px;font-size:13px;color:#1b5e42;"></div>
     <div class="anon-row" onclick="toggleAnon('anonCheck','inp-house')"><input type="checkbox" id="anonCheck" onclick="event.stopPropagation();toggleAnon('anonCheck','inp-house')"/><span>🙈 ไม่ประสงค์ออกนาม</span><small>ซ่อนเลขบ้าน</small></div>
   </div>
   <div class="fg">
@@ -478,6 +479,8 @@ header{background:linear-gradient(135deg,#1b3a2d 0%,#2d6a4f 60%,#40916c 100%);co
   <div class="fg">
     <label>🏠 บ้านเลขที่ *</label>
     <select id="priv-house"></select>
+    <div id="privReporterBadge" style="display:none;margin-top:8px;padding:8px 12px;
+         background:#e8f4f0;border-radius:8px;font-size:13px;color:#1b5e42;"></div>
     <div class="anon-row" onclick="toggleAnon('privAnonCheck','priv-house')"><input type="checkbox" id="privAnonCheck" onclick="event.stopPropagation();toggleAnon('privAnonCheck','priv-house')"/><span>🙈 ไม่ระบุเลขบ้าน</span><small>แม้นิติฯ ก็ไม่เห็น</small></div>
   </div>
   <div class="fg">
@@ -678,7 +681,7 @@ window.notifyAdminByEmail = function(params){
     description: params.desc || '(ไม่มีรายละเอียด)',
     priority: params.priority === 'urgent' ? 'ด่วนมาก' : params.priority === 'high' ? 'ด่วน' : 'ปกติ',
     date: params.date || new Date().toLocaleString('th-TH'),
-    board_url: 'https://pattra8.com/report/'
+    board_url: 'https://pattra8.github.io/report/'
   };
   Promise.allSettled(
     EMAIL_CFG.adminEmails.map(email =>
@@ -695,6 +698,57 @@ window.notifyAdminByEmail = function(params){
     });
   });
 };
+</script>
+
+<script>
+// ── Resident Session — pre-fill house selects ──
+(function() {
+  try {
+    const raw = localStorage.getItem('pattra_resident_session_v1');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (!s || !s.expiresAt || Number(s.expiresAt) <= Date.now()) return;
+    const houseNo = s.houseNo;
+    if (!houseNo) return;
+
+    function escH(v) {
+      return String(v||'').replace(/[&<>"']/g,c=>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+    const badgeHtml = s.residentName
+      ? `🏠 กำลังแจ้งในนาม บ้าน ${escH(houseNo)} · ${escH(s.residentName)}`
+      : `🏠 กำลังแจ้งในนาม บ้าน ${escH(houseNo)}`;
+
+    function trySetHouse(selId, badgeId) {
+      const sel = document.getElementById(selId);
+      const badge = document.getElementById(badgeId);
+      if (!sel) return;
+      const doSet = () => {
+        const opt = Array.from(sel.options).find(o => o.value === houseNo);
+        if (opt) {
+          sel.value = houseNo;
+          if (badge) { badge.innerHTML = badgeHtml; badge.style.display = 'block'; }
+          return true;
+        }
+        return false;
+      };
+      if (!doSet()) {
+        const obs = new MutationObserver(() => { if (doSet()) obs.disconnect(); });
+        obs.observe(sel, { childList: true });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      trySetHouse('inp-house', 'reporterBadge');
+      trySetHouse('priv-house', 'privReporterBadge');
+    });
+    // Also try immediately in case DOM is already ready
+    if (document.readyState !== 'loading') {
+      trySetHouse('inp-house', 'reporterBadge');
+      trySetHouse('priv-house', 'privReporterBadge');
+    }
+  } catch (_) {}
+})();
 </script>
 
 <script type="module">
