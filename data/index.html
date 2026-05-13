@@ -1030,6 +1030,83 @@
       color: var(--text-soft);
     }
 
+    /* ─── LIFESTYLE SURVEY ─── */
+    .survey-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1.5px dashed var(--accent-soft);
+      margin-top: 16px;
+    }
+    .survey-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .survey-sub {
+      font-size: .82rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .survey-section { margin-bottom: 20px; }
+    .survey-section-label {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+    .survey-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .survey-chip {
+      padding: 6px 14px;
+      border-radius: 99px;
+      border: 1.5px solid var(--accent-soft);
+      background: var(--bg-soft);
+      color: var(--text-body);
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .survey-chip.active {
+      background: var(--accent-pale);
+      border-color: var(--accent);
+      color: var(--accent-deep);
+      font-weight: 700;
+    }
+    .survey-num-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .survey-num-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1.5px solid var(--accent-soft);
+      background: var(--bg-soft);
+      color: var(--text-body);
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+    .survey-num-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .survey-status {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: 16px;
+      min-height: 18px;
+      transition: color .2s;
+    }
+    .survey-status.saving { color: var(--accent-text); }
+    .survey-status.saved  { color: var(--status-ok); }
+
     /* ─── RESPONSIVE ─── */
     @media (max-width: 640px) {
       header {
@@ -1856,7 +1933,56 @@
         </div>
         <div class="vehicle-summary-arrow">→</div>
       </a>
+
+      <div class="survey-card" id="lifestyleSurvey" style="display:none">
+        <div class="survey-title">📊 ช่วยเราพัฒนา Pattra Villa 8</div>
+        <div class="survey-sub">ไม่บังคับ · ข้อมูลใช้เพื่อวางแผนโครงการ ไม่เปิดเผยส่วนตัว</div>
+        <div class="survey-section">
+          <div class="survey-section-label">👥 ผู้อยู่อาศัย (คน)</div>
+          <div class="survey-num-row" id="surveyOccupants"></div>
+        </div>
+        <div class="survey-section">
+          <div class="survey-section-label">🎂 กลุ่มอายุในบ้าน (เลือกได้หลายข้อ)</div>
+          <div class="survey-chips" id="surveyAgeGroups">
+            <div class="survey-chip" data-val="child">👶 เด็ก (ต่ำกว่า 12)</div>
+            <div class="survey-chip" data-val="teen">🧑 วัยรุ่น (12–18)</div>
+            <div class="survey-chip" data-val="adult">👨 ผู้ใหญ่</div>
+            <div class="survey-chip" data-val="elderly">👴 ผู้สูงอายุ</div>
+          </div>
+        </div>
+        <div class="survey-section">
+          <div class="survey-section-label">🐾 สัตว์เลี้ยง (เลือกได้หลายข้อ)</div>
+          <div class="survey-chips" id="surveyPets">
+            <div class="survey-chip" data-val="dog">🐕 หมา</div>
+            <div class="survey-chip" data-val="cat">🐈 แมว</div>
+            <div class="survey-chip" data-val="other">🐦 อื่นๆ</div>
+            <div class="survey-chip" data-val="none">❌ ไม่มี</div>
+          </div>
+        </div>
+        <div class="survey-section">
+          <div class="survey-section-label">🏃 กิจกรรมที่ชื่นชอบ (เลือกได้หลายข้อ)</div>
+          <div class="survey-chips" id="surveyActivities">
+            <div class="survey-chip" data-val="garden">🌿 เดินสวน</div>
+            <div class="survey-chip" data-val="fitness">💪 ฟิตเนส</div>
+            <div class="survey-chip" data-val="pool">🏊 สระว่ายน้ำ</div>
+            <div class="survey-chip" data-val="running">🚶 วิ่ง/เดิน</div>
+            <div class="survey-chip" data-val="other">✨ อื่นๆ</div>
+          </div>
+        </div>
+        <div class="survey-status" id="surveyStatus"></div>
+      </div>
     `;
+    // Init survey card if session has PIN
+    const _survSess = (() => {
+      try {
+        return JSON.parse(
+            localStorage.getItem('pattra_resident_session_v1') || 'null'
+        );
+      } catch (_) { return null; }
+    })();
+    if (_survSess && _survSess.pin) {
+      initSurveyCard(r.house_no, _survSess.pin);
+    }
   }
 
   // ── Modal ──
@@ -2070,6 +2196,137 @@
     requestIdleCallback(() => loadData());
   } else {
     setTimeout(() => loadData(), 1500);
+  }
+
+  // ── Lifestyle Survey ────────────────────────────────────────────────────────
+  const SURVEY_GET_URL =
+    'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getLifestyleSurvey';
+  const SURVEY_UPDATE_URL =
+    'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/updateLifestyleSurvey';
+
+  let surveyState = {occupants: null, ageGroups: [], pets: [], activities: []};
+  let surveyTimer = null;
+
+  function initSurveyCard(houseNo, pin) {
+    surveyState = {occupants: null, ageGroups: [], pets: [], activities: []};
+    // Build occupant buttons 1–7 + "8+"
+    const occRow = document.getElementById('surveyOccupants');
+    if (!occRow) return;
+    occRow.innerHTML = '';
+    for (let i = 1; i <= 7; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'survey-num-btn';
+      btn.textContent = i;
+      btn.dataset.val = i;
+      btn.onclick = () => {
+        surveyState.occupants = i;
+        renderSurveyUI();
+        scheduleSurveySave(houseNo, pin);
+      };
+      occRow.appendChild(btn);
+    }
+    const b8 = document.createElement('button');
+    b8.className = 'survey-num-btn';
+    b8.textContent = '8+';
+    b8.dataset.val = 8;
+    b8.onclick = () => {
+      surveyState.occupants = 8;
+      renderSurveyUI();
+      scheduleSurveySave(houseNo, pin);
+    };
+    occRow.appendChild(b8);
+
+    // Wire multi-select chips
+    [
+      ['surveyAgeGroups', 'ageGroups'],
+      ['surveyPets', 'pets'],
+      ['surveyActivities', 'activities'],
+    ].forEach(([id, key]) => {
+      document.querySelectorAll(`#${id} .survey-chip`).forEach((chip) => {
+        chip.onclick = () => {
+          const v = chip.dataset.val;
+          const arr = surveyState[key] || [];
+          surveyState[key] = arr.includes(v)
+            ? arr.filter((x) => x !== v)
+            : [...arr, v];
+          renderSurveyUI();
+          scheduleSurveySave(houseNo, pin);
+        };
+      });
+    });
+
+    loadSurveyData(houseNo, pin);
+    const card = document.getElementById('lifestyleSurvey');
+    if (card) card.style.display = 'block';
+  }
+
+  function renderSurveyUI() {
+    document.querySelectorAll('#surveyOccupants .survey-num-btn').forEach((btn) => {
+      btn.classList.toggle(
+          'active', Number(btn.dataset.val) === surveyState.occupants
+      );
+    });
+    [
+      ['surveyAgeGroups', 'ageGroups'],
+      ['surveyPets', 'pets'],
+      ['surveyActivities', 'activities'],
+    ].forEach(([id, key]) => {
+      document.querySelectorAll(`#${id} .survey-chip`).forEach((chip) => {
+        chip.classList.toggle(
+            'active', (surveyState[key] || []).includes(chip.dataset.val)
+        );
+      });
+    });
+  }
+
+  async function loadSurveyData(houseNo, pin) {
+    try {
+      const r = await fetch(SURVEY_GET_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({houseNo, pin}),
+      });
+      const d = await r.json();
+      if (d.ok && d.survey) {
+        surveyState = {
+          occupants: d.survey.occupants || null,
+          ageGroups: d.survey.ageGroups || [],
+          pets: d.survey.pets || [],
+          activities: d.survey.activities || [],
+        };
+        renderSurveyUI();
+        const secs = d.survey.updatedAt && d.survey.updatedAt.seconds;
+        const ts = secs
+          ? new Date(secs * 1000).toLocaleDateString('th-TH')
+          : null;
+        setSurveyStatus('saved', ts ? `✓ บันทึกแล้วเมื่อ ${ts}` : '✓ บันทึกแล้ว');
+      }
+    } catch (_) { /* silent */ }
+  }
+
+  function scheduleSurveySave(houseNo, pin) {
+    setSurveyStatus('saving', 'กำลังบันทึก...');
+    clearTimeout(surveyTimer);
+    surveyTimer = setTimeout(() => saveSurveyData(houseNo, pin), 600);
+  }
+
+  async function saveSurveyData(houseNo, pin) {
+    try {
+      const r = await fetch(SURVEY_UPDATE_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({houseNo, pin, ...surveyState}),
+      });
+      const d = await r.json();
+      setSurveyStatus(d.ok ? 'saved' : '', d.ok ? '✓ บันทึกแล้ว' : '');
+    } catch (_) { setSurveyStatus('', ''); }
+  }
+
+  function setSurveyStatus(cls, msg) {
+    const el = document.getElementById('surveyStatus');
+    if (!el) return;
+    el.className = 'survey-status' + (cls ? ` ${cls}` : '');
+    el.textContent = msg;
   }
 </script>
 
