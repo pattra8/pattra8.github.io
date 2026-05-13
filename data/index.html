@@ -1979,6 +1979,17 @@
             <div class="survey-chip" data-val="other">✨ อื่นๆ</div>
           </div>
         </div>
+        <div class="survey-section">
+          <div class="survey-section-label">🎪 Workshop ที่อยากให้มีในหมู่บ้าน (เลือกได้หลายข้อ)</div>
+          <div class="survey-chips" id="surveyWorkshops">
+            <div class="survey-chip" data-val="massage">💆 นวดผ่อนคลาย</div>
+            <div class="survey-chip" data-val="arts">🎨 ศิลปะ / งานฝีมือ</div>
+            <div class="survey-chip" data-val="cooking">🍳 ทำอาหาร / เบเกอรี่</div>
+            <div class="survey-chip" data-val="knowledge">📚 ความรู้ / พัฒนาอาชีพ</div>
+            <div class="survey-chip" data-val="yoga">🧘 โยคะ / สุขภาพ</div>
+            <div class="survey-chip" data-val="family">👨‍👩‍👧 กิจกรรมครอบครัว</div>
+          </div>
+        </div>
         <div class="survey-status" id="surveyStatus"></div>
       </div>
     `;
@@ -2214,11 +2225,11 @@
   const SURVEY_UPDATE_URL =
     'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/updateLifestyleSurvey';
 
-  let surveyState = {occupants: null, ageGroups: [], pets: [], activities: []};
+  let surveyState = {occupants: null, ageGroups: [], pets: [], activities: [], workshops: []};
   let surveyTimer = null;
 
   function initSurveyCard(houseNo, pin) {
-    surveyState = {occupants: null, ageGroups: [], pets: [], activities: []};
+    surveyState = {occupants: null, ageGroups: [], pets: [], activities: [], workshops: []};
     // Build occupant buttons 1–7 + "8+"
     const occRow = document.getElementById('surveyOccupants');
     if (!occRow) return;
@@ -2251,6 +2262,7 @@
       ['surveyAgeGroups', 'ageGroups'],
       ['surveyPets', 'pets'],
       ['surveyActivities', 'activities'],
+      ['surveyWorkshops', 'workshops'],
     ].forEach(([id, key]) => {
       document.querySelectorAll(`#${id} .survey-chip`).forEach((chip) => {
         chip.onclick = () => {
@@ -2280,6 +2292,7 @@
       ['surveyAgeGroups', 'ageGroups'],
       ['surveyPets', 'pets'],
       ['surveyActivities', 'activities'],
+      ['surveyWorkshops', 'workshops'],
     ].forEach(([id, key]) => {
       document.querySelectorAll(`#${id} .survey-chip`).forEach((chip) => {
         chip.classList.toggle(
@@ -2303,6 +2316,7 @@
           ageGroups: d.survey.ageGroups || [],
           pets: d.survey.pets || [],
           activities: d.survey.activities || [],
+          workshops: d.survey.workshops || [],
         };
         renderSurveyUI();
         const secs = d.survey.updatedAt && d.survey.updatedAt.seconds;
