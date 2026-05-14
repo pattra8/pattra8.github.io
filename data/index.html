@@ -2032,26 +2032,18 @@
         <div class="survey-section">
           <div class="survey-section-label">🎪 Workshop ที่อยากให้มีในหมู่บ้าน (เลือกได้หลายข้อ)</div>
           <div class="survey-chips" id="surveyWorkshops">
-            <div class="survey-chip-2l" data-val="massage">
-              <span class="chip-title">💆 นวดผ่อนคลาย</span>
-              <span class="chip-sub">นวดไทย · นวดเท้า · aromatherapy</span>
-            </div>
-            <div class="survey-chip-2l" data-val="arts">
-              <span class="chip-title">🎨 ศิลปะ / งานฝีมือ</span>
-              <span class="chip-sub">ปั้นดินเผา · วาดรูป · สีน้ำ</span>
-            </div>
-            <div class="survey-chip-2l" data-val="yoga">
-              <span class="chip-title">🧘 Yoga / ยืดกล้ามเนื้อ</span>
-              <span class="chip-sub">แก้ office syndrome · ผ่อนคลาย</span>
-            </div>
-            <div class="survey-chip-2l" data-val="knowledge">
-              <span class="chip-title">💡 ความรู้ / พัฒนาตัวเอง</span>
-              <span class="chip-sub">การเงิน · AI · ถ่ายรูป · ภาษา</span>
-            </div>
-            <div class="survey-chip-2l" data-val="family">
-              <span class="chip-title">👨‍👩‍👧 กิจกรรมครอบครัว</span>
-              <span class="chip-sub">เกม · ทำของขวัญ · outdoor</span>
-            </div>
+            <div class="survey-chip" data-val="massage">💆 นวดผ่อนคลาย</div>
+            <div class="survey-chip" data-val="yoga">🧘 โยคะ / ยืดกล้ามเนื้อ</div>
+            <div class="survey-chip" data-val="painting">🎨 ระบายสี</div>
+            <div class="survey-chip" data-val="pottery">🏺 ปั้นดินเผา</div>
+            <div class="survey-chip" data-val="candle">🕯️ ทำเทียนหอม</div>
+            <div class="survey-chip" data-val="soap">🧼 ทำสบู่</div>
+            <div class="survey-chip" data-val="resin">💎 งานเรซิน</div>
+            <div class="survey-chip" data-val="flower">💐 จัดดอกไม้</div>
+            <div class="survey-chip" data-val="baking">🧁 เบเกอรี่ / ทำขนม</div>
+            <div class="survey-chip" data-val="gardening">🌱 ปลูกต้นไม้ / จัดสวน</div>
+            <div class="survey-chip" data-val="photo">📷 ถ่ายรูป</div>
+            <div class="survey-chip" data-val="gift">🎁 ทำของขวัญ DIY</div>
           </div>
         </div>
         <div class="survey-section">
@@ -2351,8 +2343,8 @@
       });
     });
 
-    // Wire workshop 2-line chips
-    document.querySelectorAll('#surveyWorkshops .survey-chip-2l').forEach((chip) => {
+    // Wire workshop chips
+    document.querySelectorAll('#surveyWorkshops .survey-chip').forEach((chip) => {
       chip.onclick = () => {
         const v = chip.dataset.val;
         const arr = surveyState.workshops || [];
@@ -2395,8 +2387,8 @@
         );
       });
     });
-    // Workshop 2-line chips
-    document.querySelectorAll('#surveyWorkshops .survey-chip-2l').forEach((chip) => {
+    // Workshop chips
+    document.querySelectorAll('#surveyWorkshops .survey-chip').forEach((chip) => {
       chip.classList.toggle(
           'active', (surveyState.workshops || []).includes(chip.dataset.val)
       );
