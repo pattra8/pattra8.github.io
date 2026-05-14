@@ -1078,10 +1078,11 @@
       user-select: none;
     }
     .survey-chip.active {
-      background: var(--accent-pale);
-      border-color: var(--accent);
-      color: var(--accent-deep);
+      background: var(--accent);
+      border-color: var(--accent-deep);
+      color: #fff;
       font-weight: 700;
+      box-shadow: 0 2px 8px rgba(196,122,44,0.35);
     }
     .survey-num-row { display: flex; flex-wrap: wrap; gap: 6px; }
     .survey-num-btn {
@@ -1128,8 +1129,9 @@
       min-width: 150px;
     }
     .survey-chip-2l.active {
-      background: var(--accent-pale);
-      border-color: var(--accent);
+      background: var(--accent);
+      border-color: var(--accent-deep);
+      box-shadow: 0 2px 8px rgba(196,122,44,0.35);
     }
     .chip-title {
       font-size: .88rem;
@@ -1141,8 +1143,8 @@
       color: var(--text-muted);
       line-height: 1.4;
     }
-    .survey-chip-2l.active .chip-title { color: var(--accent-deep); }
-    .survey-chip-2l.active .chip-sub   { color: var(--accent-text); opacity: .85; }
+    .survey-chip-2l.active .chip-title { color: #fff; }
+    .survey-chip-2l.active .chip-sub   { color: rgba(255,255,255,0.8); opacity: 1; }
     .survey-textarea {
       width: 100%;
       padding: 10px 14px;
