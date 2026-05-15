@@ -2161,8 +2161,11 @@
         btn.disabled = false; btn.textContent = 'บันทึก';
         return;
       }
-      if ((!res.ok && res.status !== 207) || (!json.ok && res.status !== 207)) {
-        throw new Error(json.error || `HTTP ${res.status}`);
+      if (!res.ok || !json.ok) {
+        if (json.error === 'lpr_sync_failed') {
+          throw new Error('ระบบ LPR ทั้ง 2 ตัวยังไม่ตอบ ข้อมูลทะเบียนยังไม่ถูกเปลี่ยน กรุณาลองใหม่อีกครั้ง หรือแจ้งนิติบุคคล');
+        }
+        throw new Error(json.error || json.message || `HTTP ${res.status}`);
       }
       currentRecord.cars = newCars;
       currentRecord.motorcycles = newMotos;
