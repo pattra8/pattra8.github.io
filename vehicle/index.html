@@ -1371,8 +1371,9 @@
 
   // ── Data fetch ──
   async function fetchResidentData(houseNo, pin) {
-    const res = await fetch(`${FUNCTION_BASE}/getResidentData`, {
+    const res = await fetch(`${FUNCTION_BASE}/getResidentData?t=${Date.now()}`, {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ houseNo, pin })
     });
@@ -2168,10 +2169,15 @@
       if (!res.ok || !json.ok) {
         throw new Error(json.error || json.message || `HTTP ${res.status}`);
       }
-      currentRecord.cars = newCars;
-      currentRecord.motorcycles = newMotos;
-      currentRecord.lpr_sync_pending = !!json.lprPending;
-      currentRecord.last_updated = new Date().toISOString();
+      try {
+        const fresh = await fetchResidentData(currentRecord.house_no, pin || '');
+        currentRecord = normaliseRecord(fresh);
+      } catch (_) {
+        currentRecord.cars = newCars;
+        currentRecord.motorcycles = newMotos;
+        currentRecord.lpr_sync_pending = !!json.lprPending;
+        currentRecord.last_updated = new Date().toISOString();
+      }
       renderResult();
 
       const lprPending = editingType === 'car' && json.lprPending;

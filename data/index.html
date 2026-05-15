@@ -1850,8 +1850,9 @@
 
   // ── Data fetch via Firebase Function (Phase 2) ──
   async function fetchResidentData(houseNo, pin) {
-    const res = await fetch(`${FUNCTION_BASE}/getResidentData`, {
+    const res = await fetch(`${FUNCTION_BASE}/getResidentData?t=${Date.now()}`, {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ houseNo, pin })
     });
@@ -2178,9 +2179,16 @@
 
       const json = await res.json();
       if (res.ok && json.ok) {
-        currentRecord.name = newName;
-        currentRecord.email = newEmail;
-        currentRecord.phone = newPhone;
+        try {
+          const fresh = await fetchResidentData(currentRecord.houseNo, pin || '');
+          const found = normalise(fresh);
+          allData = [found];
+          currentRecord = found;
+        } catch (_) {
+          currentRecord.name = newName;
+          currentRecord.email = newEmail;
+          currentRecord.phone = newPhone;
+        }
         document.getElementById('formView').style.display = 'none';
         document.getElementById('successView').classList.add('visible');
         modalInitialState = null;
@@ -2409,8 +2417,9 @@
 
   async function loadSurveyData(houseNo, pin) {
     try {
-      const r = await fetch(SURVEY_GET_URL, {
+      const r = await fetch(`${SURVEY_GET_URL}?t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({houseNo, pin}),
       });
@@ -2442,13 +2451,18 @@
 
   async function saveSurveyData(houseNo, pin) {
     try {
-      const r = await fetch(SURVEY_UPDATE_URL, {
+      const r = await fetch(`${SURVEY_UPDATE_URL}?t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({houseNo, pin, ...surveyState}),
       });
       const d = await r.json();
-      setSurveyStatus(d.ok ? 'saved' : '', d.ok ? '✓ บันทึกแล้ว' : '');
+      if (d.ok) {
+        await loadSurveyData(houseNo, pin);
+      } else {
+        setSurveyStatus('', '');
+      }
     } catch (_) { setSurveyStatus('', ''); }
   }
 
