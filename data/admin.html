@@ -1397,7 +1397,25 @@
     ageGroups:  {child:'👶 เด็ก (ต่ำกว่า 12)', teen:'🧑 วัยรุ่น (12–18)', adult:'👨 ผู้ใหญ่', elderly:'👴 ผู้สูงอายุ'},
     pets:       {dog:'🐕 หมา', cat:'🐈 แมว', other:'🐦 อื่นๆ', none:'❌ ไม่มี'},
     activities: {garden:'🌿 เดินสวน', fitness:'💪 ฟิตเนส', pool:'🏊 สระว่ายน้ำ', running:'🚶 วิ่ง/เดิน', other:'✨ อื่นๆ'},
-    workshops:  {massage:'💆 นวดผ่อนคลาย', arts:'🎨 ศิลปะ/งานฝีมือ', cooking:'🍳 ทำอาหาร/เบเกอรี่', knowledge:'📚 ความรู้/พัฒนาอาชีพ', yoga:'🧘 โยคะ/สุขภาพ', family:'👨‍👩‍👧 กิจกรรมครอบครัว'},
+    workshops:  {
+      massage: '💆 นวดผ่อนคลาย',
+      yoga: '🧘 โยคะ / ยืดกล้ามเนื้อ',
+      stretching: '🤸 Body Stretching แก้ Office Syndrome',
+      weight: '🏋️ Weight / Personal Trainer',
+      soundbath: '🎵 Sound Bath / Meditation',
+      painting: '🎨 ระบายสี',
+      pottery: '🏺 ปั้นดินเผา',
+      candle: '🕯️ ทำเทียนหอม',
+      soap: '🧼 ทำสบู่',
+      perfume: '🧴 น้ำหอม DIY',
+      macrame: '🧵 ถักร้อย / Macramé',
+      flower: '💐 จัดดอกไม้',
+      gardening: '🌱 ปลูกต้นไม้ / จัดสวน',
+      photo: '📷 ถ่ายรูป',
+      gift: '🎁 ทำของขวัญ DIY',
+      boardgame: '🎲 Board Game Night',
+      wine: '🍷 Wine Tasting',
+    },
   };
 
   function surveyBar(count, max, label) {
@@ -1448,8 +1466,16 @@
         surveyBar(s.activities[k]||0, maxAct, lab)
       ).join('');
 
-      const wsBars = Object.entries(SURVEY_LABELS.workshops).map(([k,lab]) =>
-        surveyBar(s.workshops[k]||0, maxWs, lab)
+      const workshopKeys = [
+        ...Object.keys(SURVEY_LABELS.workshops),
+        ...Object.keys(s.workshops || {}).filter(k => !SURVEY_LABELS.workshops[k]),
+      ];
+      const wsBars = workshopKeys.map(k =>
+        surveyBar(
+          s.workshops[k] || 0,
+          maxWs,
+          SURVEY_LABELS.workshops[k] || `อื่นๆ: ${escHtml(k)}`
+        )
       ).join('');
 
       el.innerHTML = `
