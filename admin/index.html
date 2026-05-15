@@ -956,6 +956,9 @@
     <button class="tab-btn" id="tabVote" onclick="switchTab('vote')">
       🗳 โหวต
     </button>
+    <button class="tab-btn" id="tabSurvey" onclick="switchTab('survey')">
+      📊 ไลฟ์สไตล์
+    </button>
     <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
       🧾 Activity Log
     </button>
@@ -1039,17 +1042,6 @@
       <div id="pinAdminError" style="display:none;margin-top:14px;color:#a33d30;font-weight:700;"></div>
     </div>
 
-
-    <!-- Bootstrap Firestore residents -->
-    <div style="max-width:760px;margin:24px auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
-      <h2 style="margin:0 0 8px;font-size:1.4rem;">🗄 Bootstrap ข้อมูลลูกบ้าน → Firestore</h2>
-      <p style="margin:0 0 18px;color:var(--text-muted);font-size:0.93rem;">ใช้ครั้งเดียวเพื่อย้ายข้อมูลจาก residents.json ไปยัง Firestore collection <code>residents</code><br>หลังทำสำเร็จแล้วสามารถลบ residents.json ออกจาก public repo ได้</p>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <button class="approve-btn" id="bootstrapBtn" onclick="bootstrapResidentsToFirestore()" style="background:#4f46e5;">Bootstrap ข้อมูล (<span id="bootstrapCount">?</span> records)</button>
-        <span id="bootstrapStatus" style="color:var(--text-muted);font-size:0.9rem;"></span>
-      </div>
-      <div id="bootstrapResult" style="display:none;margin-top:14px;padding:14px;border-radius:12px;font-size:0.92rem;"></div>
-    </div>
   </div>
 
   <!-- Tab: Vote / Poll -->
@@ -1192,6 +1184,22 @@
     </div>
   </div>
 
+  <!-- Tab: Lifestyle Survey Stats -->
+  <div id="surveyTab" style="display:none">
+    <div style="max-width:860px;margin:28px auto;padding:0 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <h2 style="margin:0 0 4px;font-size:1.3rem;">📊 แบบสอบถามไลฟ์สไตล์</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:.88rem;">ข้อมูลรวม — ไม่ระบุตัวบุคคล ใช้เพื่อพัฒนาโครงการ</p>
+        </div>
+        <button class="toolbar-btn" onclick="loadSurveyStats()" id="surveyRefreshBtn">🔄 โหลด Stats</button>
+      </div>
+      <div id="surveyStatsContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:var(--shadow);">
+        <div style="text-align:center;color:var(--text-muted);padding:20px;">กดปุ่ม "🔄 โหลด Stats" เพื่อดูข้อมูล</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="modal-overlay" id="editModal">
@@ -1259,12 +1267,10 @@
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
   const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
-  const DATA_URL  = 'https://pattra8.github.io/data/residents.json';
   const LPR_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprPlateSync';
   const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
   const GH_OWNER  = 'pattra8';
   const GH_REPO   = 'pattra8.github.io';
-  const GH_PATH   = 'data/residents.json';
   const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
@@ -1370,15 +1376,119 @@
     document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
     document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
     document.getElementById('voteTab').style.display      = tab === 'vote'      ? 'block' : 'none';
+    document.getElementById('surveyTab').style.display    = tab === 'survey'    ? 'block' : 'none';
     document.getElementById('logTab').style.display       = tab === 'log'       ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
     document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
+    document.getElementById('tabSurvey').classList.toggle('active', tab === 'survey');
     document.getElementById('tabLog').classList.toggle('active', tab === 'log');
     if (tab === 'pending') loadPending();
     if (tab === 'vote') loadAdminPolls();
     if (tab === 'log') loadActivityLog();
+  }
+
+  // ── Lifestyle Survey Stats ───────────────────────────────────────────────
+  const SURVEY_STATS_URL =
+    'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getLifestyleSurveyStats';
+
+  const SURVEY_LABELS = {
+    ageGroups:  {child:'👶 เด็ก (ต่ำกว่า 12)', teen:'🧑 วัยรุ่น (12–18)', adult:'👨 ผู้ใหญ่', elderly:'👴 ผู้สูงอายุ'},
+    pets:       {dog:'🐕 หมา', cat:'🐈 แมว', other:'🐦 อื่นๆ', none:'❌ ไม่มี'},
+    activities: {garden:'🌿 เดินสวน', fitness:'💪 ฟิตเนส', pool:'🏊 สระว่ายน้ำ', running:'🚶 วิ่ง/เดิน', other:'✨ อื่นๆ'},
+    workshops:  {massage:'💆 นวดผ่อนคลาย', arts:'🎨 ศิลปะ/งานฝีมือ', cooking:'🍳 ทำอาหาร/เบเกอรี่', knowledge:'📚 ความรู้/พัฒนาอาชีพ', yoga:'🧘 โยคะ/สุขภาพ', family:'👨‍👩‍👧 กิจกรรมครอบครัว'},
+  };
+
+  function surveyBar(count, max, label) {
+    const pct = max > 0 ? Math.round((count / max) * 100) : 0;
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:140px;font-size:.85rem;flex-shrink:0;">${label}</div>
+        <div style="flex:1;background:#f3ecdd;border-radius:4px;height:14px;overflow:hidden;">
+          <div style="width:${pct}%;background:var(--accent);height:100%;border-radius:4px;transition:width .4s;"></div>
+        </div>
+        <div style="width:38px;text-align:right;font-size:.82rem;color:var(--text-muted);">${count}</div>
+      </div>`;
+  }
+
+  async function loadSurveyStats() {
+    const el = document.getElementById('surveyStatsContent');
+    const btn = document.getElementById('surveyRefreshBtn');
+    el.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">กำลังโหลด...</div>';
+    btn.disabled = true;
+    try {
+      const r = await fetch(SURVEY_STATS_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({adminPassword: 'PATTRADATA'}),
+      });
+      const d = await r.json();
+      if (!d.ok) { el.innerHTML = `<div style="color:#a33d30;padding:20px;">${d.error}</div>`; return; }
+      const s = d.stats;
+      const maxOcc = Math.max(...Object.values(s.occupants || {1:1}), 1);
+      const maxAg  = Math.max(...Object.values(s.ageGroups || {x:1}), 1);
+      const maxPet = Math.max(...Object.values(s.pets || {x:1}), 1);
+      const maxAct = Math.max(...Object.values(s.activities || {x:1}), 1);
+      const maxWs  = Math.max(...Object.values(s.workshops || {x:1}), 1);
+
+      const occBars = [1,2,3,4,5,6,7,8].map(i =>
+        surveyBar(s.occupants[String(i)]||0, maxOcc, `${i === 8 ? '8+' : i} คน`)
+      ).join('');
+
+      const agBars = Object.entries(SURVEY_LABELS.ageGroups).map(([k,lab]) =>
+        surveyBar(s.ageGroups[k]||0, maxAg, lab)
+      ).join('');
+
+      const petBars = Object.entries(SURVEY_LABELS.pets).map(([k,lab]) =>
+        surveyBar(s.pets[k]||0, maxPet, lab)
+      ).join('');
+
+      const actBars = Object.entries(SURVEY_LABELS.activities).map(([k,lab]) =>
+        surveyBar(s.activities[k]||0, maxAct, lab)
+      ).join('');
+
+      const wsBars = Object.entries(SURVEY_LABELS.workshops).map(([k,lab]) =>
+        surveyBar(s.workshops[k]||0, maxWs, lab)
+      ).join('');
+
+      el.innerHTML = `
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">
+          ${s.total} บ้านตอบแบบสอบถามแล้ว
+        </div>
+        <div style="font-size:.82rem;color:var(--text-muted);margin-bottom:24px;">
+          (ข้อมูลเป็น multi-select — ผลรวมเกิน 100% ได้)
+        </div>
+        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
+          👥 จำนวนผู้อยู่อาศัย
+        </h3>
+        ${occBars}
+        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
+        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
+          🎂 กลุ่มอายุ
+        </h3>
+        ${agBars}
+        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
+        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
+          🐾 สัตว์เลี้ยง
+        </h3>
+        ${petBars}
+        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
+        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
+          🏃 กิจกรรมที่ชื่นชอบ
+        </h3>
+        ${actBars}
+        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
+        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
+          🎪 Workshop ที่อยากให้มี
+        </h3>
+        ${wsBars}
+      `;
+    } catch (e) {
+      el.innerHTML = `<div style="color:#a33d30;padding:20px;">เกิดข้อผิดพลาด: ${e.message}</div>`;
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   // ── Activity Log ──────────────────────────────────────────────────────────
@@ -1417,6 +1527,7 @@
       pin_verify: '🔑 Verify PIN',
       pin_change: '🔑 เปลี่ยน PIN',
       admin_pin_reset: '🔑 Admin Reset PIN',
+      admin_resident_update: '🛠 Admin แก้ข้อมูล',
       poll_vote: '🗳 โหวต',
     }[a] || a);
 
@@ -1450,9 +1561,21 @@
       const lpr = log.lprSync;
       let lprCell = '—';
       if (lpr) {
-        lprCell = lpr.ok
-          ? `<span style="color:#22c55e">✓ Synced</span>`
-          : `<span style="color:#ef4444" title="${escHtml(JSON.stringify(lpr.errors||[]))}">✗ Failed</span>`;
+        if (lpr.ok) {
+          lprCell = `<span style="color:#22c55e">✓ Synced</span>`;
+        } else {
+          // Errors live in lpr.results[].errors, not lpr.errors
+          const allErrors = [];
+          (lpr.results || []).forEach(r => {
+            (r.errors || []).forEach(e => allErrors.push(
+              `${e.action} ${e.plate}: ${e.error}`
+            ));
+          });
+          const summary = allErrors.length
+            ? allErrors.join('\n')
+            : JSON.stringify(lpr, null, 2);
+          lprCell = `<span style="color:#ef4444;cursor:help" title="${escHtml(summary)}" onclick="alert(this.getAttribute('title'))">✗ Failed</span>`;
+        }
       }
       return `<tr>
         <td style="white-space:nowrap;font-size:.78rem;color:var(--text-muted)">${fmtTs(log.ts)}</td>
@@ -1522,49 +1645,6 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Generate PIN';
-    }
-  }
-
-  async function bootstrapResidentsToFirestore() {
-    const btn = document.getElementById('bootstrapBtn');
-    const status = document.getElementById('bootstrapStatus');
-    const result = document.getElementById('bootstrapResult');
-    if (!allData || allData.length === 0) {
-      result.style.display = 'block';
-      result.style.background = '#fee2e2';
-      result.style.color = '#991b1b';
-      result.textContent = 'ยังไม่มีข้อมูลใน allData — กรุณาโหลดตาราง Residents ก่อน';
-      return;
-    }
-    if (!confirm(`Bootstrap ${allData.length} records ไปยัง Firestore residents?\nการทำซ้ำจะ overwrite ข้อมูลเดิม`)) return;
-    btn.disabled = true;
-    status.textContent = 'กำลัง bootstrap...';
-    result.style.display = 'none';
-    try {
-      const res = await fetch(RESIDENT_AUTH_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'bootstrapResidentData',
-          adminPassword: 'PATTRADATA',
-          residents: allData
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      result.style.display = 'block';
-      result.style.background = '#dcfce7';
-      result.style.color = '#166534';
-      result.textContent = `✅ Bootstrap สำเร็จ: ${data.written || allData.length} records เขียนลง Firestore แล้ว`;
-      status.textContent = '';
-    } catch (err) {
-      result.style.display = 'block';
-      result.style.background = '#fee2e2';
-      result.style.color = '#991b1b';
-      result.textContent = 'Bootstrap ไม่สำเร็จ: ' + err.message;
-      status.textContent = '';
-    } finally {
-      btn.disabled = false;
     }
   }
 
@@ -2221,25 +2301,21 @@
     }
   }
 
-  // ── Load resident data (ดึงตรงจาก GitHub API — ไม่มี CDN cache) ──────────
+  // ── Load resident data (Firestore is the source of truth) ────────────────
   async function loadAdminData() {
     setToolbarNote('กำลังโหลด...');
     try {
-      // ใช้ GitHub Contents API แทน GitHub Pages — real-time, ไม่มี CDN delay
-      const res = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`,
-        { headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
-      );
-      if (!res.ok) throw new Error(`GitHub API: ${res.status}`);
-      const meta = await res.json();
-      // Decode base64 content (GitHub API returns base64-encoded file content)
-      const json = decodeURIComponent(escape(atob(meta.content.replace(/\n/g, ''))));
-      allData = JSON.parse(json);
+      const res = await fetch(RESIDENT_AUTH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'adminResidents', adminPassword: 'PATTRADATA' })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) throw new Error(json.error || `Firestore API: ${res.status}`);
+      allData = Array.isArray(json.residents) ? json.residents : [];
       filteredData = [...allData];
       renderAdmin(filteredData);
-      const bcEl = document.getElementById('bootstrapCount');
-      if (bcEl) bcEl.textContent = allData.length;
-      setToolbarNote(`✅ Real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
+      setToolbarNote(`✅ Firestore real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
     } catch(e) {
       document.getElementById('adminBody').innerHTML =
         `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
@@ -2414,6 +2490,23 @@
     return JSON.stringify(getFormValues()) !== JSON.stringify(originalSnap);
   }
 
+  async function saveResidentToFirestore(record) {
+    const houseNo = record.house_no;
+    const res = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'adminUpdateResidentData',
+        adminPassword: 'PATTRADATA',
+        houseNo,
+        record
+      })
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.ok) throw new Error(json.error || `Firestore update failed (${res.status})`);
+    return json;
+  }
+
   async function saveEdit() {
     if (editingIndex < 0) return;
     const btn = document.getElementById('saveEditBtn');
@@ -2421,70 +2514,26 @@
       btn.disabled = true;
       btn.textContent = 'กำลังบันทึก...';
     }
-    const previousCars = normalizePlateArray(allData[editingIndex]?.cars);
     const formRec = getFormValues();
     formRec.phone = cleanPhone(formRec.phone);
-    formRec.last_updated = new Date().toLocaleString('sv-SE').replace('T',' ');
-    Object.assign(allData[editingIndex], formRec);
-    filterAdmin();
-    closeEditModal();
-    const committed = await doCommit('✅ บันทึกสำเร็จ');
-    if (committed) {
-      try {
-        const syncResult = await syncLprCars({
-          houseNo: formRec.house_no,
-          oldCars: previousCars,
-          newCars: formRec.cars,
-        });
-        if (!syncResult.skipped) {
-          setToolbarNote(`✅ บันทึกและ sync LPR สำเร็จ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
-        }
-      } catch(e) {
-        setToolbarNote(`⚠️ บันทึกแล้ว แต่ sync LPR ไม่สำเร็จ: ${e.message}`, 'error');
-        alert('บันทึกข้อมูลแล้ว แต่ sync ทะเบียนเข้า LPR ไม่สำเร็จ\n\n' + e.message);
+    try {
+      setToolbarNote('กำลังบันทึกเข้า Firestore...', 'saving');
+      const result = await saveResidentToFirestore(formRec);
+      closeEditModal();
+      await loadAdminData();
+      if (result.lprPending) {
+        setToolbarNote(`⚠️ บันทึกแล้ว · LPR pending · ${new Date().toLocaleTimeString('th-TH')}`, 'error');
+      } else {
+        setToolbarNote(`✅ บันทึก Firestore${result.lprSync ? ' และ sync LPR' : ''} สำเร็จ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
       }
+    } catch(e) {
+      await loadAdminData().catch(() => {});
+      setToolbarNote(`❌ บันทึกไม่สำเร็จ: ${e.message}`, 'error');
+      alert('บันทึกไม่สำเร็จ\n\n' + e.message);
     }
     if (btn) {
       btn.disabled = false;
       btn.textContent = '💾 บันทึก';
-    }
-  }
-
-  // ── GitHub API ────────────────────────────────────────────────────────────
-  async function commitToGitHub(data, message) {
-    const apiBase = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
-    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' };
-    const getRes  = await fetch(apiBase, { headers });
-    if (!getRes.ok) throw new Error(`GitHub GET: ${getRes.status}`);
-    const { sha } = await getRes.json();
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-    const putRes  = await fetch(apiBase, {
-      method: 'PUT',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: message || 'Update resident data via admin panel', content, sha })
-    });
-    if (!putRes.ok) {
-      const err = await putRes.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub PUT: ${putRes.status}`);
-    }
-    return putRes.json();
-  }
-
-  async function doCommit(successMsg) {
-    setToolbarNote('กำลังบันทึกขึ้น GitHub...', 'saving');
-    try {
-      const result = await commitToGitHub(allData);
-      // Reload จาก GitHub API ทันทีหลัง commit — ไม่ต้องรอ CDN
-      await loadAdminData();
-      const shortSha = result?.commit?.sha ? result.commit.sha.slice(0, 7) : '';
-      const suffix = shortSha ? ` · commit ${shortSha}` : '';
-      setToolbarNote(`${successMsg || '✅ บันทึกสำเร็จ'}${suffix} · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
-      return true;
-    } catch(e) {
-      await loadAdminData().catch(() => {});
-      setToolbarNote(`❌ บันทึกขึ้น GitHub ไม่สำเร็จ: ${e.message}`, 'error');
-      alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
-      return false;
     }
   }
 
@@ -2656,8 +2705,6 @@
       alert(`ไม่พบบ้านเลขที่ ${houseNo} ในระบบ`);
       return;
     }
-    const previousCars = normalizePlateArray(allData[idx].cars);
-
     // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
     processedIssues.add(issueNumber);
 
@@ -2676,21 +2723,15 @@
     });
 
     try {
-      await commitToGitHub(allData, `Approve correction for house ${houseNo} via admin panel`);
-      try {
-        await syncLprCars({
-          houseNo,
-          oldCars: previousCars,
-          newCars: allData[idx].cars,
-        });
-      } catch(syncError) {
-        alert('Approve และบันทึก GitHub แล้ว แต่ sync ทะเบียนเข้า LPR ไม่สำเร็จ\n\n' + syncError.message);
+      const result = await saveResidentToFirestore(allData[idx]);
+      if (result.lprPending) {
+        alert('Approve และบันทึก Firestore แล้ว แต่ LPR ยัง pending\n\nระบบเก็บ log ไว้ให้ sync ซ้ำภายหลัง');
       }
       await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
       card.style.transition = 'opacity 0.4s';
       card.style.opacity = '0.5';
       card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
-      // Reload ข้อมูลจาก GitHub API ทันที (real-time — ไม่ต้องรอ CDN)
+      // Reload ข้อมูลจาก Firestore ทันที
       await loadAdminData();
       // ลบ card ออกทันทีหลังแสดง success — ไม่รอ GitHub API ซึ่งอาจยังไม่ปิด issue
       setTimeout(() => {

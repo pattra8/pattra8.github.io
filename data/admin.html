@@ -1042,17 +1042,6 @@
       <div id="pinAdminError" style="display:none;margin-top:14px;color:#a33d30;font-weight:700;"></div>
     </div>
 
-
-    <!-- Bootstrap Firestore residents -->
-    <div style="max-width:760px;margin:24px auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
-      <h2 style="margin:0 0 8px;font-size:1.4rem;">🗄 Bootstrap ข้อมูลลูกบ้าน → Firestore</h2>
-      <p style="margin:0 0 18px;color:var(--text-muted);font-size:0.93rem;">ใช้ครั้งเดียวเพื่อย้ายข้อมูลจาก residents.json ไปยัง Firestore collection <code>residents</code><br>หลังทำสำเร็จแล้วสามารถลบ residents.json ออกจาก public repo ได้</p>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <button class="approve-btn" id="bootstrapBtn" onclick="bootstrapResidentsToFirestore()" style="background:#4f46e5;">Bootstrap ข้อมูล (<span id="bootstrapCount">?</span> records)</button>
-        <span id="bootstrapStatus" style="color:var(--text-muted);font-size:0.9rem;"></span>
-      </div>
-      <div id="bootstrapResult" style="display:none;margin-top:14px;padding:14px;border-radius:12px;font-size:0.92rem;"></div>
-    </div>
   </div>
 
   <!-- Tab: Vote / Poll -->
@@ -1278,12 +1267,10 @@
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
   const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'nitipattra8'];
-  const DATA_URL  = 'https://pattra8.github.io/data/residents.json';
   const LPR_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprPlateSync';
   const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
   const GH_OWNER  = 'pattra8';
   const GH_REPO   = 'pattra8.github.io';
-  const GH_PATH   = 'data/residents.json';
   const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
   const ADMIN_SESSION_DAYS = 7;
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
@@ -1658,49 +1645,6 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Generate PIN';
-    }
-  }
-
-  async function bootstrapResidentsToFirestore() {
-    const btn = document.getElementById('bootstrapBtn');
-    const status = document.getElementById('bootstrapStatus');
-    const result = document.getElementById('bootstrapResult');
-    if (!allData || allData.length === 0) {
-      result.style.display = 'block';
-      result.style.background = '#fee2e2';
-      result.style.color = '#991b1b';
-      result.textContent = 'ยังไม่มีข้อมูลใน allData — กรุณาโหลดตาราง Residents ก่อน';
-      return;
-    }
-    if (!confirm(`Bootstrap ${allData.length} records ไปยัง Firestore residents?\nการทำซ้ำจะ overwrite ข้อมูลเดิม`)) return;
-    btn.disabled = true;
-    status.textContent = 'กำลัง bootstrap...';
-    result.style.display = 'none';
-    try {
-      const res = await fetch(RESIDENT_AUTH_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'bootstrapResidentData',
-          adminPassword: 'PATTRADATA',
-          residents: allData
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      result.style.display = 'block';
-      result.style.background = '#dcfce7';
-      result.style.color = '#166534';
-      result.textContent = `✅ Bootstrap สำเร็จ: ${data.written || allData.length} records เขียนลง Firestore แล้ว`;
-      status.textContent = '';
-    } catch (err) {
-      result.style.display = 'block';
-      result.style.background = '#fee2e2';
-      result.style.color = '#991b1b';
-      result.textContent = 'Bootstrap ไม่สำเร็จ: ' + err.message;
-      status.textContent = '';
-    } finally {
-      btn.disabled = false;
     }
   }
 
@@ -2371,8 +2315,6 @@
       allData = Array.isArray(json.residents) ? json.residents : [];
       filteredData = [...allData];
       renderAdmin(filteredData);
-      const bcEl = document.getElementById('bootstrapCount');
-      if (bcEl) bcEl.textContent = allData.length;
       setToolbarNote(`✅ Firestore real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
     } catch(e) {
       document.getElementById('adminBody').innerHTML =
@@ -2592,44 +2534,6 @@
     if (btn) {
       btn.disabled = false;
       btn.textContent = '💾 บันทึก';
-    }
-  }
-
-  // ── GitHub API ────────────────────────────────────────────────────────────
-  async function commitToGitHub(data, message) {
-    const apiBase = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
-    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' };
-    const getRes  = await fetch(apiBase, { headers });
-    if (!getRes.ok) throw new Error(`GitHub GET: ${getRes.status}`);
-    const { sha } = await getRes.json();
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-    const putRes  = await fetch(apiBase, {
-      method: 'PUT',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: message || 'Update resident data via admin panel', content, sha })
-    });
-    if (!putRes.ok) {
-      const err = await putRes.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub PUT: ${putRes.status}`);
-    }
-    return putRes.json();
-  }
-
-  async function doCommit(successMsg) {
-    setToolbarNote('กำลังบันทึกขึ้น GitHub...', 'saving');
-    try {
-      const result = await commitToGitHub(allData);
-      // Reload จาก GitHub API ทันทีหลัง commit — ไม่ต้องรอ CDN
-      await loadAdminData();
-      const shortSha = result?.commit?.sha ? result.commit.sha.slice(0, 7) : '';
-      const suffix = shortSha ? ` · commit ${shortSha}` : '';
-      setToolbarNote(`${successMsg || '✅ บันทึกสำเร็จ'}${suffix} · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
-      return true;
-    } catch(e) {
-      await loadAdminData().catch(() => {});
-      setToolbarNote(`❌ บันทึกขึ้น GitHub ไม่สำเร็จ: ${e.message}`, 'error');
-      alert('บันทึกในหน้า admin แล้ว แต่ commit ขึ้น GitHub ไม่สำเร็จ\n\n' + e.message);
-      return false;
     }
   }
 
