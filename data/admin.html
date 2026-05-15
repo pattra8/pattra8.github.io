@@ -1573,9 +1573,21 @@
       const lpr = log.lprSync;
       let lprCell = '—';
       if (lpr) {
-        lprCell = lpr.ok
-          ? `<span style="color:#22c55e">✓ Synced</span>`
-          : `<span style="color:#ef4444" title="${escHtml(JSON.stringify(lpr.errors||[]))}">✗ Failed</span>`;
+        if (lpr.ok) {
+          lprCell = `<span style="color:#22c55e">✓ Synced</span>`;
+        } else {
+          // Errors live in lpr.results[].errors, not lpr.errors
+          const allErrors = [];
+          (lpr.results || []).forEach(r => {
+            (r.errors || []).forEach(e => allErrors.push(
+              `${e.action} ${e.plate}: ${e.error}`
+            ));
+          });
+          const summary = allErrors.length
+            ? allErrors.join('\n')
+            : JSON.stringify(lpr, null, 2);
+          lprCell = `<span style="color:#ef4444;cursor:help" title="${escHtml(summary)}" onclick="alert(this.getAttribute('title'))">✗ Failed</span>`;
+        }
       }
       return `<tr>
         <td style="white-space:nowrap;font-size:.78rem;color:var(--text-muted)">${fmtTs(log.ts)}</td>
