@@ -1393,6 +1393,7 @@
       phone: r.phone || '',
       cars: Array.isArray(r.cars) ? [...r.cars] : [],
       motorcycles: Array.isArray(r.motorcycles) ? [...r.motorcycles] : [],
+      lpr_sync_pending: !!r.lpr_sync_pending,
       last_updated: r.last_updated || null
     };
   }
@@ -1866,6 +1867,9 @@
     if (isMoto) {
       return { cls: 'saved', label: 'บันทึกแล้ว' };
     }
+    if (currentRecord && currentRecord.lpr_sync_pending) {
+      return { cls: 'pending', label: 'รอ LPR' };
+    }
     if (currentRecord && currentRecord.last_updated) {
       return { cls: 'ok', label: 'LPR Synced' };
     }
@@ -2162,22 +2166,28 @@
         return;
       }
       if (!res.ok || !json.ok) {
-        if (json.error === 'lpr_sync_failed') {
-          throw new Error('ระบบ LPR ทั้ง 2 ตัวยังไม่ตอบ ข้อมูลทะเบียนยังไม่ถูกเปลี่ยน กรุณาลองใหม่อีกครั้ง หรือแจ้งนิติบุคคล');
-        }
         throw new Error(json.error || json.message || `HTTP ${res.status}`);
       }
       currentRecord.cars = newCars;
       currentRecord.motorcycles = newMotos;
+      currentRecord.lpr_sync_pending = !!json.lprPending;
       currentRecord.last_updated = new Date().toISOString();
       renderResult();
+
+      const lprPending = editingType === 'car' && json.lprPending;
+      const successTitle = lprPending ? 'บันทึกทะเบียนแล้ว' : 'บันทึกทะเบียนแล้ว';
+      const successMsg = editingType === 'car'
+        ? (lprPending
+          ? 'ระบบรับข้อมูลแล้ว และบันทึก log ไว้ให้นิติบุคคล sync เข้า LPR เมื่อกล้องกลับมาออนไลน์'
+          : 'ระบบอัปเดตข้อมูลและ sync เข้า LPR ทั้ง 2 ตัวแล้ว')
+        : 'ระบบบันทึกข้อมูลมอเตอร์ไซค์แล้ว';
 
       // Show success
       modalContent.innerHTML = `
         <div class="modal-success">
           <div class="modal-success-icon">✓</div>
-          <div class="modal-success-title">บันทึกทะเบียนแล้ว</div>
-          <div class="modal-success-msg">${editingType === 'car' ? 'ระบบอัปเดตข้อมูลและ sync เข้า LPR ทั้ง 2 ตัวแล้ว' : 'ระบบบันทึกข้อมูลมอเตอร์ไซค์แล้ว'}<br/>ประวัติการแก้ไขถูกเก็บไว้ให้นิติบุคคลตรวจสอบ</div>
+          <div class="modal-success-title">${successTitle}</div>
+          <div class="modal-success-msg">${successMsg}<br/>ประวัติการแก้ไขถูกเก็บไว้ให้นิติบุคคลตรวจสอบ</div>
           <button class="btn-primary" id="closeSuccessBtn" style="max-width: 200px; margin: 0 auto; display: block;">เรียบร้อย</button>
         </div>
       `;
