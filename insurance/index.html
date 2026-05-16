@@ -545,15 +545,15 @@
       padding: 11px 13px;
     }
     .cell-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
     .cell-value {
-      font-size: 17px;
+      font-size: 19px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.3;
@@ -1149,12 +1149,11 @@
         const cardClass = tone === 'critical' ? 'bad' : tone;
         const pct   = getWarrantyPct(info.warrantyStartDate, info.endDate);
 
-        // Status badge
-        let badgeClass = 'tag', badgeText = '○ ยังไม่ระบุวันหมด';
+        // Status badge (only show for warn/critical/bad — not ok)
+        let badgeClass = '', badgeText = '';
         if (info.countdown) {
           const d = Math.abs(info.countdown.days);
-          if (tone === 'ok')       { badgeClass = 'tag ok';       badgeText = `● เหลือ ${d} วัน`; }
-          else if (tone === 'warn'){ badgeClass = 'tag warn';     badgeText = `⚠ ใกล้หมด ${d} วัน`; }
+          if (tone === 'warn')     { badgeClass = 'tag warn';     badgeText = `⚠ ใกล้หมด ${d} วัน`; }
           else if (tone === 'critical'){ badgeClass = 'tag critical'; badgeText = `🔴 เร่งด่วน เหลือ ${d} วัน`; }
           else if (tone === 'bad') { badgeClass = 'tag bad';      badgeText = `✕ หมดแล้ว ${d} วัน`; }
         }
@@ -1188,7 +1187,7 @@
                 <div class="card-title">${esc(info.title)}</div>
                 <div class="card-tags">
                   <span class="tag">${esc(info.category)}</span>
-                  <span class="${badgeClass}">${esc(badgeText)}</span>
+                  ${badgeText ? `<span class="${badgeClass}">${esc(badgeText)}</span>` : ''}
                 </div>
               </div>
             </div>
@@ -1213,8 +1212,7 @@
               <div class="cell">
                 <div class="cell-label">เหลืออีก</div>
                 ${info.countdown
-                  ? `<div class="cell-value ${tone === 'critical' ? 'bad' : tone}" style="font-size:17px;font-weight:800">${esc(Math.abs(info.countdown.days) + ' วัน')}</div>
-                     <div class="cell-sub">${esc(info.countdown.label)}</div>`
+                  ? `<div class="cell-value ${tone === 'critical' ? 'bad' : tone}" style="font-size:20px;font-weight:800">${esc(Math.abs(info.countdown.days) + ' วัน')}</div>`
                   : `<div class="cell-value muted">—</div>`}
               </div>
               <div class="cell">
