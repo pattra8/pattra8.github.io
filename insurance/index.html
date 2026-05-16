@@ -312,7 +312,9 @@
       <div class="panel login-box" id="loginPanel">
         <div>
           <label for="adminPassword">Admin password</label>
-          <input id="adminPassword" type="password" autocomplete="current-password" placeholder="adminpattra8" />
+          <input id="adminPassword" type="password" autocomplete="new-password"
+                 autocapitalize="off" spellcheck="false"
+                 placeholder="กรอกรหัส admin" readonly />
         </div>
         <button class="btn gold-fill" id="loginBtn">เข้าสู่ระบบ</button>
         <div class="status" id="loginStatus"></div>
@@ -363,6 +365,7 @@
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
     const ADMIN_PASSWORD_KEY = 'pattra_admin_password_vault';
+    const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
     const ADMIN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
     function $(id) { return document.getElementById(id); }
@@ -373,6 +376,22 @@
       const until = Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0);
       if (until <= Date.now()) return '';
       return sessionStorage.getItem(ADMIN_PASSWORD_KEY) || '';
+    }
+    function getResidentSession() {
+      try {
+        const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+        if (!s || Number(s.expiresAt) <= Date.now()) return null;
+        return s;
+      } catch { return null; }
+    }
+    function getAuthPayload() {
+      const adminPassword = getAdminPassword();
+      if (adminPassword) return {adminPassword};
+      const resident = getResidentSession();
+      if (resident && resident.houseNo === '38/8' && resident.pin) {
+        return {houseNo: resident.houseNo, pin: resident.pin};
+      }
+      return null;
     }
     function setStatus(id, msg, type = '') {
       const el = $(id);
@@ -437,13 +456,13 @@
       });
     }
     async function loadDocs() {
-      const adminPassword = getAdminPassword();
-      if (!adminPassword) return;
+      const auth = getAuthPayload();
+      if (!auth) return;
       $('vaultPanel').classList.remove('hidden');
       $('logoutBtn').classList.remove('hidden');
       $('loginPanel').classList.add('hidden');
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
-      const data = await api({action: 'list', adminPassword});
+      const data = await api({action: 'list', ...auth});
       renderDocs(data.documents || []);
     }
     async function login() {
@@ -461,9 +480,13 @@
     }
     async function uploadDoc(e) {
       e.preventDefault();
-      const adminPassword = getAdminPassword();
+      const auth = getAuthPayload();
       const file = $('fileInput').files[0];
       if (!file) return;
+      if (!auth) {
+        setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error');
+        return;
+      }
       if (file.size > 15 * 1024 * 1024) {
         setStatus('uploadStatus', 'ไฟล์ใหญ่เกิน 15 MB', 'error');
         return;
@@ -473,7 +496,7 @@
         const dataUrl = await fileToDataUrl(file);
         await api({
           action: 'upload',
-          adminPassword,
+          ...auth,
           category: $('category').value,
           title: $('title').value,
           notes: $('notes').value,
@@ -490,7 +513,7 @@
     async function deleteDoc(id) {
       if (!confirm('ลบเอกสารนี้?')) return;
       try {
-        await api({action: 'delete', adminPassword: getAdminPassword(), documentId: id});
+        await api({action: 'delete', ...getAuthPayload(), documentId: id});
         await loadDocs();
       } catch (err) {
         alert(err.message || 'ลบไม่สำเร็จ');
@@ -506,6 +529,10 @@
       $('pageTitle').textContent = cfg.title;
       $('pageIntro').textContent = cfg.intro;
       $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
+      $('adminPassword').value = '';
+      $('adminPassword').addEventListener('focus', () => {
+        $('adminPassword').removeAttribute('readonly');
+      });
       $('loginBtn').addEventListener('click', login);
       $('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
       $('uploadForm').addEventListener('submit', uploadDoc);

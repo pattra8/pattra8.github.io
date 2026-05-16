@@ -1464,7 +1464,8 @@
     <div class="login-fg">
       <label>Admin password</label>
       <input class="login-input" type="password" id="adminLoginPassword"
-             autocomplete="current-password" placeholder="adminpattra8" />
+             autocomplete="new-password" autocapitalize="off" spellcheck="false"
+             placeholder="กรอกรหัส admin" readonly />
       <div class="login-error" id="adminLoginError"></div>
     </div>
     <button class="login-submit" id="adminLoginSubmit">เข้าสู่ระบบ</button>
@@ -1501,6 +1502,8 @@ function storeResidentSession(houseNo, pin, residentName) {
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
 
 function hasAdminSession() {
+  const resident = getResidentSession();
+  if (resident && resident.houseNo === '38/8') return true;
   return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0) > Date.now();
 }
 
@@ -1546,6 +1549,7 @@ function logoutResident() {
   if (!confirm('ออกจากระบบ?')) return;
   clearResidentSession();
   renderHeaderIdentity(null);
+  renderAdminCards();
   document.querySelectorAll('a[href^="/data/"],a[href^="/vehicle/"]').forEach(a => {
     a.href = a.getAttribute('href').split('?')[0];
   });
@@ -1665,6 +1669,7 @@ async function handleLoginSubmit() {
     storeResidentSession('38/' + suffix, pin, residentName);
     renderHeaderIdentity(getResidentSession());
     updateServiceLinks('38/' + suffix);
+    renderAdminCards();
     closeLoginModal();
   } catch (e) {
     errEl.textContent = 'เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ';
@@ -1685,6 +1690,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('adminLoginOverlay').addEventListener('click', e => {
     if (e.target.id === 'adminLoginOverlay') closeAdminLoginModal();
+  });
+  document.getElementById('adminLoginPassword').value = '';
+  document.getElementById('adminLoginPassword').addEventListener('focus', () => {
+    document.getElementById('adminLoginPassword').removeAttribute('readonly');
   });
   document.getElementById('adminHomeBtn').addEventListener('click', showAdminLoginModal);
   document.getElementById('adminLoginClose').addEventListener('click', closeAdminLoginModal);
