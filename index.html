@@ -1455,34 +1455,13 @@
   </div>
 </div>
 
-<!-- ─── ADMIN LOGIN MODAL ─── -->
-<div class="login-overlay" id="adminLoginOverlay">
-  <div class="login-modal">
-    <button class="login-close" id="adminLoginClose" aria-label="ปิด">✕</button>
-    <h3>เข้าสู่ระบบ Admin</h3>
-    <p class="login-sub">เข้าสู่ระบบเพื่อเปิดเมนู Asset Insurance และ Blueprints บนหน้าแรก</p>
-    <div class="login-fg">
-      <label>Admin password</label>
-      <input class="login-input" type="password" id="adminLoginPassword"
-             autocomplete="new-password" autocapitalize="off" spellcheck="false"
-             placeholder="กรอกรหัส admin" readonly />
-      <div class="login-error" id="adminLoginError"></div>
-    </div>
-    <button class="login-submit" id="adminLoginSubmit">เข้าสู่ระบบ</button>
-  </div>
-</div>
 
 <script>
 // ── Resident Session — Landing Page ──
 const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
-const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
-const ADMIN_PASSWORD_KEY = 'pattra_admin_password_vault';
 const RESIDENT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const ADMIN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const RESIDENT_AUTH_URL =
   'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
-const ADMIN_DOC_AUTH_URL =
-  'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
 
 function getResidentSession() {
   try {
@@ -1503,13 +1482,7 @@ function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY);
 
 function hasAdminSession() {
   const resident = getResidentSession();
-  if (resident && resident.houseNo === '38/8') return true;
-  return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0) > Date.now();
-}
-
-function storeAdminSession(password) {
-  localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_TTL_MS));
-  sessionStorage.setItem(ADMIN_PASSWORD_KEY, password);
+  return !!(resident && resident.houseNo === '38/8');
 }
 
 function renderAdminCards() {
@@ -1575,62 +1548,7 @@ function closeLoginModal() {
 }
 
 function showAdminLoginModal() {
-  if (hasAdminSession()) {
-    window.location.href = '/admin/';
-    return;
-  }
-  document.getElementById('adminLoginPassword').value = '';
-  document.getElementById('adminLoginError').classList.remove('show');
-  document.getElementById('adminLoginOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('adminLoginPassword').focus(), 80);
-}
-
-function closeAdminLoginModal() {
-  document.getElementById('adminLoginOverlay').classList.remove('open');
-}
-
-async function handleAdminLoginSubmit() {
-  const pw = String(document.getElementById('adminLoginPassword').value).trim();
-  const errEl = document.getElementById('adminLoginError');
-  const btn = document.getElementById('adminLoginSubmit');
-  errEl.classList.remove('show');
-  if (!pw) {
-    errEl.textContent = 'กรุณากรอกรหัส Admin';
-    errEl.classList.add('show');
-    return;
-  }
-  btn.disabled = true;
-  btn.textContent = 'กำลังตรวจสอบ…';
-  try {
-    const resp = await fetch(ADMIN_DOC_AUTH_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        adminPassword: pw,
-        vaultType: 'insurance',
-        action: 'list'
-      })
-    });
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok || !data.ok) {
-      errEl.textContent = 'รหัส Admin ไม่ถูกต้อง';
-      errEl.classList.add('show');
-      return;
-    }
-    storeAdminSession(pw);
-    renderAdminCards();
-    closeAdminLoginModal();
-    document.querySelector('[data-admin-card]')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center'
-    });
-  } catch (e) {
-    errEl.textContent = 'ตรวจสอบรหัสไม่สำเร็จ กรุณาลองใหม่';
-    errEl.classList.add('show');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'เข้าสู่ระบบ';
-  }
+  window.location.href = '/admin/';
 }
 
 async function handleLoginSubmit() {
@@ -1688,19 +1606,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginOverlay').addEventListener('click', e => {
     if (e.target.id === 'loginOverlay') closeLoginModal();
   });
-  document.getElementById('adminLoginOverlay').addEventListener('click', e => {
-    if (e.target.id === 'adminLoginOverlay') closeAdminLoginModal();
-  });
-  document.getElementById('adminLoginPassword').value = '';
-  document.getElementById('adminLoginPassword').addEventListener('focus', () => {
-    document.getElementById('adminLoginPassword').removeAttribute('readonly');
-  });
   document.getElementById('adminHomeBtn').addEventListener('click', showAdminLoginModal);
-  document.getElementById('adminLoginClose').addEventListener('click', closeAdminLoginModal);
-  document.getElementById('adminLoginSubmit').addEventListener('click', handleAdminLoginSubmit);
-  document.getElementById('adminLoginPassword').addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleAdminLoginSubmit();
-  });
   document.getElementById('loginClose').addEventListener('click', closeLoginModal);
   document.getElementById('loginSubmit').addEventListener('click', handleLoginSubmit);
   document.getElementById('loginPin').addEventListener('keydown', e => {
@@ -1710,15 +1616,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('loginPin').focus();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      closeLoginModal();
-      closeAdminLoginModal();
-    }
+    if (e.key === 'Escape') closeLoginModal();
   });
 });
 
 window.addEventListener('storage', e => {
-  if (e.key === ADMIN_SESSION_KEY) renderAdminCards();
+  if (e.key === RESIDENT_SESSION_KEY) renderAdminCards();
 });
 </script>
 

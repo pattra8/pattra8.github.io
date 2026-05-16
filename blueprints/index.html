@@ -310,14 +310,7 @@
         <p class="hero-copy" id="pageIntro">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท เช่น ไฟฟ้า ประปา ระบายน้ำ CCTV Network และ Master Plan</p>
       </div>
       <div class="panel login-box" id="loginPanel">
-        <div>
-          <label for="adminPassword">Admin password</label>
-          <input id="adminPassword" type="password" autocomplete="new-password"
-                 autocapitalize="off" spellcheck="false"
-                 placeholder="กรอกรหัส admin" readonly />
-        </div>
-        <button class="btn gold-fill" id="loginBtn">เข้าสู่ระบบ</button>
-        <div class="status" id="loginStatus"></div>
+        <div class="status" id="loginStatus">กำลังตรวจสอบสิทธิ์...</div>
       </div>
     </section>
 
@@ -363,19 +356,11 @@
       }
     };
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
-    const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
-    const ADMIN_PASSWORD_KEY = 'pattra_admin_password_vault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
-    const ADMIN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
       return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-    }
-    function getAdminPassword() {
-      const until = Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0);
-      if (until <= Date.now()) return '';
-      return sessionStorage.getItem(ADMIN_PASSWORD_KEY) || '';
     }
     function getResidentSession() {
       try {
@@ -385,8 +370,6 @@
       } catch { return null; }
     }
     function getAuthPayload() {
-      const adminPassword = getAdminPassword();
-      if (adminPassword) return {adminPassword};
       const resident = getResidentSession();
       if (resident && resident.houseNo === '38/8' && resident.pin) {
         return {houseNo: resident.houseNo, pin: resident.pin};
@@ -465,19 +448,6 @@
       const data = await api({action: 'list', ...auth});
       renderDocs(data.documents || []);
     }
-    async function login() {
-      const pw = $('adminPassword').value.trim();
-      setStatus('loginStatus', 'กำลังตรวจสอบ...');
-      try {
-        await api({action: 'list', adminPassword: pw});
-        localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_TTL_MS));
-        sessionStorage.setItem(ADMIN_PASSWORD_KEY, pw);
-        setStatus('loginStatus', '');
-        await loadDocs();
-      } catch (err) {
-        setStatus('loginStatus', 'รหัสไม่ถูกต้อง', 'error');
-      }
-    }
     async function uploadDoc(e) {
       e.preventDefault();
       const auth = getAuthPayload();
@@ -520,25 +490,22 @@
       }
     }
     function logout() {
-      sessionStorage.removeItem(ADMIN_PASSWORD_KEY);
-      localStorage.removeItem(ADMIN_SESSION_KEY);
-      location.reload();
+      location.href = '/';
     }
     function init() {
       const cfg = PAGE_CONFIG[VAULT_TYPE];
       $('pageTitle').textContent = cfg.title;
       $('pageIntro').textContent = cfg.intro;
       $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
-      $('adminPassword').value = '';
-      $('adminPassword').addEventListener('focus', () => {
-        $('adminPassword').removeAttribute('readonly');
-      });
-      $('loginBtn').addEventListener('click', login);
-      $('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
       $('uploadForm').addEventListener('submit', uploadDoc);
       $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
       $('logoutBtn').addEventListener('click', logout);
-      if (getAdminPassword()) loadDocs().catch(() => logout());
+      const resident = getResidentSession();
+      if (!resident || resident.houseNo !== '38/8') {
+        location.href = '/';
+        return;
+      }
+      loadDocs().catch(() => { location.href = '/'; });
     }
     init();
   </script>
