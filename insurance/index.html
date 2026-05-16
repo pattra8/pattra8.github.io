@@ -261,23 +261,24 @@
     }
     .planner-preview strong { color: var(--gold); }
 
-    /* ── Drop zone ── */
-    .drop-zone {
-      grid-column: 1;
+    /* ── File upload area ── */
+    .drop-area {
+      grid-column: 1 / -1;
       border: 2px dashed var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: var(--bg);
-      padding: 36px 24px;
+      padding: 22px 20px;
       text-align: center;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
       position: relative;
+      user-select: none;
     }
-    .drop-zone:hover, .drop-zone.drag-over {
+    .drop-area:hover, .drop-area.drag-over {
       border-color: var(--gold);
       background: var(--gold-pale);
     }
-    .drop-zone input[type="file"] {
+    .drop-area input[type="file"] {
       position: absolute;
       inset: 0;
       opacity: 0;
@@ -285,42 +286,114 @@
       width: 100%;
       height: 100%;
     }
-    .drop-zone-icon { font-size: 32px; margin-bottom: 10px; }
-    .drop-zone-label {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .drop-zone-hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    .drop-zone-types {
+    .drop-area-icon { font-size: 26px; margin-bottom: 6px; }
+    .drop-area-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .drop-area-hint  { font-size: 12px; color: var(--muted); }
+
+    /* File preview cards */
+    .file-preview-grid {
+      grid-column: 1 / -1;
       display: flex;
-      justify-content: center;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
     }
-    .drop-zone-type {
+    .file-card {
+      position: relative;
+      width: 96px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 600;
+      border-radius: 12px;
+      padding: 10px 8px 8px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(60,40,20,0.05);
+    }
+    .file-card.file-card-new  { border-color: rgba(196,122,44,0.35); }
+    .file-card.file-card-existing { border-color: var(--border); }
+    .file-card-thumb {
+      width: 100%;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 7px;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .file-card-icon { font-size: 26px; line-height: 1; margin-bottom: 4px; }
+    .file-card-ext  {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       color: var(--muted);
-      letter-spacing: 0.05em;
       text-transform: uppercase;
+      margin-bottom: 4px;
     }
-    .drop-zone-selected {
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--gold);
-      font-weight: 500;
-      min-height: 18px;
+    .file-card-name {
+      font-size: 10px;
+      color: var(--taupe-mid);
+      line-height: 1.35;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      word-break: break-all;
     }
+    .file-card-remove {
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #e74c3c;
+      color: #fff;
+      border: 2px solid #fff;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: background 0.15s;
+    }
+    .file-card-remove:hover { background: #c0392b; }
+    .file-card-badge {
+      position: absolute;
+      top: -7px;
+      left: -7px;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 6px;
+      color: #fff;
+    }
+    .file-card-badge.existing { background: var(--taupe-mid); }
+    .file-card-badge.new-file { background: var(--gold); }
+
+    /* Upload progress */
+    .upload-progress-wrap {
+      grid-column: 1 / -1;
+      display: none;
+      margin-top: 4px;
+    }
+    .upload-progress-wrap.visible { display: block; }
+    .upload-progress-bar-bg {
+      height: 7px;
+      background: var(--bg3);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+    .upload-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+    .upload-progress-label { font-size: 12px; color: var(--taupe-mid); }
 
     /* ── Toolbar + doc list ── */
     .toolbar {
@@ -740,19 +813,22 @@
           <label for="notes">รายละเอียดเพิ่มเติม</label>
           <textarea id="notes" placeholder="เช่น มอเตอร์ใหม่ 2 ตัว ล้อเหล็กรับประกัน 6 เดือน ใช้ช่องนี้สำหรับเงื่อนไขหรือรายละเอียดเสริม"></textarea>
         </div>
-        <div class="drop-zone" id="dropZone">
-          <input id="fileInput" type="file" multiple
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic" />
-          <div class="drop-zone-icon">📂</div>
-          <div class="drop-zone-label">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</div>
-          <div class="drop-zone-hint">แนวแนะนำ: 1 รายการประกันอัปโหลดได้ 2 ไฟล์ เช่น ใบรับประกัน + รูปหน้างาน · ขนาดสูงสุด 15 MB ต่อไฟล์</div>
-          <div class="drop-zone-types">
-            <span class="drop-zone-type">PDF</span>
-            <span class="drop-zone-type">Word</span>
-            <span class="drop-zone-type">Excel</span>
-            <span class="drop-zone-type">JPG</span>
+        <div class="full" id="fileUploadSection">
+          <label>แนบสลิป / รูปภาพ</label>
+          <div class="drop-area" id="dropArea">
+            <input id="fileInput" type="file" multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic" />
+            <div class="drop-area-icon">📎</div>
+            <div class="drop-area-label">คลิกหรือลากไฟล์มาวางที่นี่</div>
+            <div class="drop-area-hint">รองรับรูป, PDF, Word, Excel หลายไฟล์พร้อมกัน · สูงสุด 15 MB ต่อไฟล์</div>
           </div>
-          <div class="drop-zone-selected" id="dropZoneSelected"></div>
+          <div class="file-preview-grid" id="filePreviewGrid"></div>
+          <div class="upload-progress-wrap" id="uploadProgressWrap">
+            <div class="upload-progress-bar-bg">
+              <div class="upload-progress-fill" id="uploadProgressFill"></div>
+            </div>
+            <div class="upload-progress-label" id="uploadProgressLabel"></div>
+          </div>
         </div>
         <div class="status full" id="uploadStatus"></div>
         <div class="modal-actions full">
@@ -802,6 +878,9 @@
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
     let activeFilter = 'all';
     let insuranceFormSnapshot = null;
+    let _selectedNewFiles = [];   // File objects pending upload
+    let _existingFileDocs = [];   // {id, fileName, downloadUrl} already on server
+    let _currentGroups = [];      // last rendered groups for lookup
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -1052,6 +1131,7 @@
         return;
       }
       const groups = groupDocuments(docs).map(group => ({ ...group, info: summarizeGroup(group) }));
+      _currentGroups = groups;
       const filtered = groups.filter(group => {
         if (activeFilter === 'all') return true;
         return group.info.filterTone === activeFilter;
@@ -1217,26 +1297,87 @@
     function confirmDiscardInsuranceForm() {
       return confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการปิดฟอร์มและทิ้งข้อมูลนี้หรือไม่?');
     }
-    // Drop zone drag events
-    function initDropZone() {
-      const zone = $('dropZone');
-      const input = $('fileInput');
-      const label = $('dropZoneSelected');
-      input.addEventListener('change', () => {
-        const files = Array.from(input.files);
-        label.textContent = files.length ? `เลือกแล้ว ${files.length} ไฟล์: ${files.map(f => f.name).join(', ')}` : '';
+    function renderFilePreview() {
+      const grid = $('filePreviewGrid');
+      let html = '';
+      _existingFileDocs.forEach((doc, i) => {
+        const ext = fileExtension(doc.fileName);
+        const name = doc.fileName || doc.title || 'ไฟล์';
+        const thumbHtml = isImageExt(ext)
+          ? `<img class="file-card-thumb" src="${esc(doc.downloadUrl)}" alt="${esc(name)}" />`
+          : `<div class="file-card-icon">${fileEmoji(ext)}</div><div class="file-card-ext">${esc(fileIcon(ext))}</div>`;
+        html += `<div class="file-card file-card-existing">
+          <span class="file-card-badge existing">บันทึกแล้ว</span>
+          ${thumbHtml}
+          <div class="file-card-name">${esc(name)}</div>
+          <button type="button" class="file-card-remove" data-rm-existing="${i}" title="ลบไฟล์นี้">×</button>
+        </div>`;
       });
-      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-      zone.addEventListener('drop', e => {
+      _selectedNewFiles.forEach((file, i) => {
+        const ext = fileExtension(file.name);
+        const objUrl = file._objUrl || '';
+        const thumbHtml = isImageExt(ext) && objUrl
+          ? `<img class="file-card-thumb" src="${esc(objUrl)}" alt="${esc(file.name)}" />`
+          : `<div class="file-card-icon">${fileEmoji(ext)}</div><div class="file-card-ext">${esc(fileIcon(ext))}</div>`;
+        html += `<div class="file-card file-card-new">
+          <span class="file-card-badge new-file">ใหม่</span>
+          ${thumbHtml}
+          <div class="file-card-name">${esc(file.name)}</div>
+          <button type="button" class="file-card-remove" data-rm-new="${i}" title="ลบออก">×</button>
+        </div>`;
+      });
+      grid.innerHTML = html;
+      grid.querySelectorAll('[data-rm-existing]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const i = Number(btn.dataset.rmExisting);
+          const doc = _existingFileDocs[i];
+          if (!doc) return;
+          if (!confirm(`ลบไฟล์ "${doc.fileName}" ออกจากระบบ?`)) return;
+          try {
+            await api({ action: 'delete', ...getAuthPayload(), documentId: doc.id });
+            _existingFileDocs.splice(i, 1);
+            renderFilePreview();
+          } catch (err) { alert(err.message || 'ลบไม่สำเร็จ'); }
+        });
+      });
+      grid.querySelectorAll('[data-rm-new]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.rmNew);
+          if (_selectedNewFiles[i]?._objUrl) URL.revokeObjectURL(_selectedNewFiles[i]._objUrl);
+          _selectedNewFiles.splice(i, 1);
+          renderFilePreview();
+        });
+      });
+    }
+
+    function addNewFiles(fileList) {
+      Array.from(fileList).forEach(file => {
+        if (isImageExt(fileExtension(file.name))) file._objUrl = URL.createObjectURL(file);
+        _selectedNewFiles.push(file);
+      });
+      renderFilePreview();
+    }
+
+    function setUploadProgress(pct, label) {
+      const wrap = $('uploadProgressWrap');
+      const fill = $('uploadProgressFill');
+      const lbl  = $('uploadProgressLabel');
+      if (pct === null) { wrap.classList.remove('visible'); fill.style.width = '0%'; return; }
+      wrap.classList.add('visible');
+      fill.style.width = Math.min(100, pct) + '%';
+      lbl.textContent = label || '';
+    }
+
+    function initFileUpload() {
+      const area  = $('dropArea');
+      const input = $('fileInput');
+      input.addEventListener('change', () => { if (input.files.length) { addNewFiles(input.files); input.value = ''; } });
+      area.addEventListener('dragover',  e => { e.preventDefault(); area.classList.add('drag-over'); });
+      area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+      area.addEventListener('drop', e => {
         e.preventDefault();
-        zone.classList.remove('drag-over');
-        const dt = e.dataTransfer;
-        if (dt.files.length) {
-          input.files = dt.files;
-          const files = Array.from(dt.files);
-          label.textContent = `เลือกแล้ว ${files.length} ไฟล์: ${files.map(f => f.name).join(', ')}`;
-        }
+        area.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) addNewFiles(e.dataTransfer.files);
       });
     }
     function updateWarrantyPreview() {
@@ -1257,12 +1398,16 @@
     }
     function resetInsuranceFormUi() {
       _editingDocId = null;
+      _selectedNewFiles.forEach(f => { if (f._objUrl) URL.revokeObjectURL(f._objUrl); });
+      _selectedNewFiles = [];
+      _existingFileDocs = [];
       $('uploadForm').reset();
-      $('dropZoneSelected').textContent = '';
+      $('filePreviewGrid').innerHTML = '';
+      setUploadProgress(null);
       $('editModeBar').classList.remove('visible');
       $('insuranceModalTitle').textContent = 'เพิ่มประกันใหม่';
       $('submitBtn').textContent = 'อัปโหลดเอกสาร';
-      $('dropZone').style.display = '';
+      $('fileUploadSection').style.display = '';
       updateWarrantyPreview();
     }
     function requestCloseInsuranceModal() {
@@ -1277,6 +1422,7 @@
 
     let _editingDocId = null;
     function editDoc(data) {
+      resetInsuranceFormUi();
       const meta = parseStructuredNotes(data.notes || '');
       _editingDocId = data.edit;
       $('category').value = data.category || $('category').options[0].value;
@@ -1287,10 +1433,17 @@
       $('contactName').value = meta.contactName || '';
       $('contactPhone').value = meta.contactPhone || '';
       $('notes').value = meta.extraNotes || meta.legacyNotes || '';
+      // Load existing files for this group
+      const group = _currentGroups.find(g => g.docs.some(d => d.id === data.edit));
+      if (group) {
+        _existingFileDocs = group.docs
+          .filter(d => d.downloadUrl)
+          .map(d => ({ id: d.id, fileName: d.fileName || d.title || 'ไฟล์', downloadUrl: d.downloadUrl }));
+        renderFilePreview();
+      }
       $('editModeBar').classList.add('visible');
       $('insuranceModalTitle').textContent = 'แก้ไขประกัน';
       $('submitBtn').textContent = 'บันทึกการแก้ไข';
-      $('dropZone').style.display = 'none';
       updateWarrantyPreview();
       openInsuranceModal();
       rememberInsuranceFormSnapshot();
@@ -1331,15 +1484,14 @@
       }
 
       // Upload mode
-      const files = Array.from($('fileInput').files);
-      if (!files.length) { setStatus('uploadStatus', 'กรุณาเลือกไฟล์', 'error'); return; }
+      const files = _selectedNewFiles;
+      if (!files.length) { setStatus('uploadStatus', 'กรุณาเลือกไฟล์อย่างน้อย 1 ไฟล์', 'error'); return; }
       const oversized = files.filter(f => f.size > 15 * 1024 * 1024);
       if (oversized.length) { setStatus('uploadStatus', `ไฟล์ใหญ่เกิน 15 MB: ${oversized.map(f => f.name).join(', ')}`, 'error'); return; }
       if ((Number($('warrantyYears').value || 0) > 0 || Number($('warrantyMonths').value || 0) > 0) && !$('warrantyStartDate').value) {
         setStatus('uploadStatus', 'ถ้าระบุกี่ปีหรือกี่เดือน กรุณาเลือกวันที่เริ่มรับประกันด้วย', 'error');
         return;
       }
-      setStatus('uploadStatus', `กำลังอัปโหลด ${files.length} ไฟล์...`);
       const category = $('category').value;
       const title = $('title').value.trim();
       const notes = buildStructuredNotes({
@@ -1353,17 +1505,22 @@
       try {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          if (files.length > 1) setStatus('uploadStatus', `กำลังอัปโหลด ${i + 1}/${files.length}: ${file.name}`);
+          const pctBase = (i / files.length) * 100;
+          setUploadProgress(pctBase, `กำลังเตรียมไฟล์ ${i + 1}/${files.length}: ${file.name}`);
           const dataUrl = await fileToDataUrl(file);
+          setUploadProgress(pctBase + (50 / files.length), `กำลังส่ง ${file.name}...`);
           await api({ action: 'upload', ...auth, category,
             title: files.length > 1 ? `${title} (${i + 1})` : title,
             notes, fileName: file.name, dataUrl });
+          setUploadProgress(((i + 1) / files.length) * 100, `อัปโหลดแล้ว ${i + 1}/${files.length}`);
         }
+        await new Promise(r => setTimeout(r, 400));
+        setUploadProgress(null);
         resetInsuranceFormUi();
         closeInsuranceModal(true);
         setStatus('uploadStatus', `อัปโหลดแล้ว ${files.length} ไฟล์ ✓`, 'ok');
         await loadDocs();
-      } catch (err) { setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
+      } catch (err) { setUploadProgress(null); setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
     }
 
     async function deleteDoc(id) {
@@ -1382,7 +1539,7 @@
       $('pageIntro').textContent = cfg.intro;
       $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
       $('uploadForm').addEventListener('submit', uploadDoc);
-      initDropZone();
+      initFileUpload();
       ['warrantyStartDate', 'warrantyYears', 'warrantyMonths'].forEach(id => {
         $(id).addEventListener('input', updateWarrantyPreview);
         $(id).addEventListener('change', updateWarrantyPreview);
