@@ -572,6 +572,10 @@
       gap: 10px;
     }
     .form-edit-mode-bar.visible { display: flex; }
+    .composer-panel {
+      margin-bottom: 24px;
+    }
+    .composer-panel.hidden { display: none !important; }
     @media (max-width: 720px) {
       header { padding: 0 20px; }
       .logo-divider { display: none; }
@@ -610,7 +614,7 @@
       </div>
     </section>
 
-    <section class="panel hidden" id="vaultPanel">
+    <section class="panel composer-panel hidden" id="vaultPanel">
       <form id="uploadForm" class="upload-grid">
         <div class="form-edit-mode-bar full" id="editModeBar">
           <span id="editModeLabel">✏️ กำลังแก้ไขเอกสาร</span>
@@ -687,6 +691,7 @@
           <button class="filter-pill" type="button" data-filter="ok">ยังปกติ</button>
           <button class="filter-pill" type="button" data-filter="unknown">ยังไม่ครบข้อมูล</button>
         </div>
+        <button class="btn gold-fill" id="addInsuranceBtn" type="button">เพิ่มประกันใหม่</button>
         <button class="btn" id="refreshBtn">โหลดใหม่</button>
       </div>
     </div>
@@ -716,6 +721,7 @@
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
     let activeFilter = 'all';
+    let isComposerOpen = false;
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -1060,7 +1066,6 @@
     async function loadDocs() {
       const auth = getAuthPayload();
       if (!auth) return;
-      $('vaultPanel').classList.remove('hidden');
       $('logoutBtn').classList.remove('hidden');
       $('loginPanel').classList.add('hidden');
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
@@ -1096,6 +1101,32 @@
         $('warrantyMonths').value
       )).replace(/·/g, '<strong>·</strong>');
     }
+    function setComposerOpen(open) {
+      isComposerOpen = open;
+      $('vaultPanel').classList.toggle('hidden', !open);
+      $('addInsuranceBtn').textContent = open ? 'ซ่อนฟอร์ม' : 'เพิ่มประกันใหม่';
+      $('addInsuranceBtn').classList.toggle('gold-fill', !open);
+      $('addInsuranceBtn').classList.toggle('edit-btn', open);
+    }
+    function openCreateForm() {
+      _editingDocId = null;
+      $('uploadForm').reset();
+      $('dropZoneSelected').textContent = '';
+      $('editModeBar').classList.remove('visible');
+      $('submitBtn').textContent = 'อัปโหลดเอกสาร';
+      $('dropZone').style.display = '';
+      updateWarrantyPreview();
+      setComposerOpen(true);
+      $('vaultPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+    function toggleComposer() {
+      if (isComposerOpen) {
+        cancelEdit();
+        setComposerOpen(false);
+        return;
+      }
+      openCreateForm();
+    }
 
     let _editingDocId = null;
     function editDoc(data) {
@@ -1113,6 +1144,7 @@
       $('submitBtn').textContent = 'บันทึกการแก้ไข';
       $('dropZone').style.display = 'none';
       updateWarrantyPreview();
+      setComposerOpen(true);
       $('vaultPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
     }
     function cancelEdit() {
@@ -1123,6 +1155,7 @@
       $('submitBtn').textContent = 'อัปโหลดเอกสาร';
       $('dropZone').style.display = '';
       updateWarrantyPreview();
+      setComposerOpen(false);
     }
 
     async function uploadDoc(e) {
@@ -1149,6 +1182,7 @@
           await api({ action: 'update', ...auth, documentId: _editingDocId,
             category: $('category').value, title: $('title').value, notes });
           cancelEdit();
+          setComposerOpen(false);
           setStatus('uploadStatus', 'บันทึกแล้ว ✓', 'ok');
           await loadDocs();
         } catch (err) { setStatus('uploadStatus', err.message || 'บันทึกไม่สำเร็จ', 'error'); }
@@ -1186,6 +1220,7 @@
         }
         $('uploadForm').reset();
         $('dropZoneSelected').textContent = '';
+        setComposerOpen(false);
         setStatus('uploadStatus', `อัปโหลดแล้ว ${files.length} ไฟล์ ✓`, 'ok');
         await loadDocs();
       } catch (err) { setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
@@ -1215,7 +1250,9 @@
       document.querySelectorAll('.filter-pill').forEach(btn => {
         btn.addEventListener('click', () => setActiveFilter(btn.dataset.filter));
       });
+      $('addInsuranceBtn').addEventListener('click', toggleComposer);
       updateWarrantyPreview();
+      setComposerOpen(false);
       $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
       $('logoutBtn').addEventListener('click', logout);
       const resident = getResidentSession();
