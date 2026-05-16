@@ -339,6 +339,36 @@
       color: var(--taupe);
       letter-spacing: 0.01em;
     }
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.72);
+      color: var(--taupe-mid);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-pill:hover { border-color: var(--gold); color: var(--gold); }
+    .filter-pill.active {
+      background: var(--gold);
+      color: #fff;
+      border-color: var(--gold);
+      box-shadow: 0 10px 24px rgba(196,122,44,0.18);
+    }
     .doc-list { display: grid; gap: 14px; max-width: 980px; }
     .doc-card {
       background:
@@ -405,6 +435,12 @@
     .doc-status-badge.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid rgba(47,109,79,0.16); }
     .doc-status-badge.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(167,101,27,0.16); }
     .doc-status-badge.bad { background: var(--bad-bg); color: var(--bad); border: 1px solid rgba(155,44,29,0.16); }
+    .doc-status-badge.critical {
+      background: linear-gradient(180deg, #c53b22, #9b2c1d);
+      color: #fff;
+      border: 1px solid rgba(155,44,29,0.32);
+      box-shadow: 0 10px 22px rgba(155,44,29,0.2);
+    }
     .doc-summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -514,6 +550,11 @@
     .status { color: var(--muted); min-height: 22px; font-size: 13px; }
     .status.error { color: var(--danger); }
     .status.ok { color: #3a7a42; }
+    .list-summary {
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
     .btn.edit-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
     .btn.edit-btn:hover { border-color: var(--gold); color: var(--gold); }
     .form-edit-mode-bar {
@@ -537,6 +578,7 @@
       main { padding: 32px 18px 60px; }
       .hero, .upload-grid, .doc-summary, .doc-card-top, .planner-grid { grid-template-columns: 1fr; }
       .doc-title { font-size: 22px; }
+      .toolbar-actions { justify-content: flex-start; }
       .doc-actions { justify-content: flex-start; }
     }
   </style>
@@ -636,8 +678,19 @@
 
     <div class="toolbar">
       <h2>รายการประกันทั้งหมด</h2>
-      <button class="btn" id="refreshBtn">โหลดใหม่</button>
+      <div class="toolbar-actions">
+        <div class="filter-pills" id="filterPills">
+          <button class="filter-pill active" type="button" data-filter="all">ทั้งหมด</button>
+          <button class="filter-pill" type="button" data-filter="critical">เร่งด่วน</button>
+          <button class="filter-pill" type="button" data-filter="warn">ใกล้หมด</button>
+          <button class="filter-pill" type="button" data-filter="bad">หมดแล้ว</button>
+          <button class="filter-pill" type="button" data-filter="ok">ยังปกติ</button>
+          <button class="filter-pill" type="button" data-filter="unknown">ยังไม่ครบข้อมูล</button>
+        </div>
+        <button class="btn" id="refreshBtn">โหลดใหม่</button>
+      </div>
     </div>
+    <div class="list-summary" id="listSummary"></div>
     <section class="doc-list" id="docList">
       <div class="empty">กรุณาเข้าสู่ระบบ admin เพื่อดูเอกสาร</div>
     </section>
@@ -662,6 +715,7 @@
     };
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+    let activeFilter = 'all';
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -787,6 +841,11 @@
         label: `หมดประกันแล้ว ${Math.abs(diffDays)} วัน`,
         tone: 'bad'
       };
+      if (diffDays <= 30) return {
+        days: diffDays,
+        label: diffDays === 0 ? 'หมดประกันวันนี้' : `เร่งด่วน เหลือ ${diffDays} วัน`,
+        tone: 'critical'
+      };
       if (diffDays <= 45) return {
         days: diffDays,
         label: diffDays === 0 ? 'หมดประกันวันนี้' : `ใกล้หมดใน ${diffDays} วัน`,
@@ -871,6 +930,7 @@
         durationLabel,
         endDate,
         countdown,
+        filterTone: countdown?.tone || (durationLabel || warrantyStartDate ? 'unknown' : 'unknown'),
         contact,
         detail
       };
@@ -916,12 +976,24 @@
     }
     function renderDocs(docs) {
       if (!docs.length) {
+        $('listSummary').textContent = '';
         $('docList').innerHTML = '<div class="empty">ยังไม่มีรายการประกันในหมวดนี้</div>';
         return;
       }
-      const groups = groupDocuments(docs);
-      $('docList').innerHTML = groups.map(group => {
-        const info = summarizeGroup(group);
+      const groups = groupDocuments(docs).map(group => ({ ...group, info: summarizeGroup(group) }));
+      const filtered = groups.filter(group => {
+        if (activeFilter === 'all') return true;
+        return group.info.filterTone === activeFilter;
+      });
+      $('listSummary').textContent = activeFilter === 'all'
+        ? `แสดง ${filtered.length} รายการทั้งหมด`
+        : `แสดง ${filtered.length} จาก ${groups.length} รายการ สำหรับสถานะ ${filterLabel(activeFilter)}`;
+      if (!filtered.length) {
+        $('docList').innerHTML = '<div class="empty">ไม่มีรายการในสถานะที่เลือก</div>';
+        return;
+      }
+      $('docList').innerHTML = filtered.map(group => {
+        const info = group.info;
         return `
         <article class="doc-card">
           <div class="doc-card-top">
@@ -967,6 +1039,23 @@
       document.querySelectorAll('[data-edit]').forEach(btn => {
         btn.addEventListener('click', () => editDoc(btn.dataset));
       });
+    }
+    function filterLabel(filter) {
+      return ({
+        all: 'ทั้งหมด',
+        critical: 'เร่งด่วน',
+        warn: 'ใกล้หมด',
+        bad: 'หมดแล้ว',
+        ok: 'ยังปกติ',
+        unknown: 'ยังไม่ครบข้อมูล'
+      })[filter] || filter;
+    }
+    function setActiveFilter(filter) {
+      activeFilter = filter;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      loadDocs().catch(err => alert(err.message || 'โหลดข้อมูลไม่สำเร็จ'));
     }
     async function loadDocs() {
       const auth = getAuthPayload();
@@ -1122,6 +1211,9 @@
       ['warrantyStartDate', 'warrantyYears', 'warrantyMonths'].forEach(id => {
         $(id).addEventListener('input', updateWarrantyPreview);
         $(id).addEventListener('change', updateWarrantyPreview);
+      });
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.addEventListener('click', () => setActiveFilter(btn.dataset.filter));
       });
       updateWarrantyPreview();
       $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
