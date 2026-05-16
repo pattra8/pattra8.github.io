@@ -356,9 +356,9 @@
 
     .service-card.admin-only-card {
       display: none;
-      background: linear-gradient(180deg, #203245 0%, #293f52 100%);
-      border-color: rgba(122, 167, 189, 0.75);
-      color: #fff;
+      background: var(--card);
+      border-color: rgba(184,151,90,0.35);
+      color: var(--text);
     }
 
     .service-card.admin-only-card.show {
@@ -366,31 +366,33 @@
     }
 
     .service-card.admin-only-card::before {
-      background: linear-gradient(90deg, transparent, #9ec7d7, transparent);
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.55;
+      left: 0;
+      right: 0;
     }
 
     .service-card.admin-only-card .service-icon {
-      background: rgba(255,255,255,0.1);
-      border-color: rgba(255,255,255,0.18);
+      background: var(--gold-pale);
+      border-color: rgba(184,151,90,0.25);
     }
 
-    .service-card.admin-only-card .service-title,
-    .service-card.admin-only-card .service-desc {
-      color: #fff;
+    .service-card.admin-only-card .service-title {
+      color: var(--text);
     }
 
     .service-card.admin-only-card .service-desc {
-      opacity: 0.82;
+      color: var(--muted);
     }
 
     .service-card.admin-only-card .service-cta {
-      color: #cfe8f1;
+      color: var(--gold);
     }
 
     .service-card.admin-only-card .tag {
-      color: #dff3fa;
-      border-color: rgba(207,232,241,0.55);
-      background: rgba(255,255,255,0.08);
+      color: var(--gold-light);
+      border-color: rgba(184,151,90,0.45);
+      background: var(--gold-pale);
     }
 
     .service-cta {

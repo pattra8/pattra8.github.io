@@ -3,2878 +3,1112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — หมู่บ้านภัทราวิลล่า 8</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <title>Pattra Villa 8 · Announcement Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Prompt:wght@300;400;500;600&family=Sarabun:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:           #f9f3e9;
-      --bg-soft:      #f3ecdd;
-      --bg-warm:      #ede2cc;
-      --card:         #ffffff;
-      --border:       #e6dcc7;
-      --border-soft:  #efe8d6;
-      --text:         #2a2218;
-      --text-body:   #3a3024;
-      --text-soft:    #6b5d4a;
-      --text-muted:   #8a7960;
-      --accent:       #c47a2c;
-      --accent-text:  #9a5c1f;
-      --accent-deep:  #855015;
-      --accent-pale:  #f7e6cd;
-      --status-ok:    #3f6431;
-      --status-ok-bg: #e8efd9;
-      --status-error: #86341e;
-      --status-error-bg: #f7dfd5;
-      --status-pending: #855015;
-      --status-pending-bg: #f7e6cd;
-      --shadow-card:  0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.06);
+      --taupe: #3d3530;
+      --taupe-mid: #6b5f58;
+      --gold: #b8975a;
+      --gold-pale: #f2e9d8;
+      --bg: #faf7f2;
+      --bg2: #f0ebe3;
+      --card: #ffffff;
+      --text: #2e2820;
+      --muted: #8a7f76;
+      --border: #e4ddd3;
+      --danger: #b94d42;
+      --radius: 12px;
+      --shadow: 0 2px 16px rgba(61,53,48,0.07);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-text-size-adjust: 100%; }
+
     body {
-      font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      font-family: 'Sarabun', sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-size: 14px;
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
     }
 
-    .hidden { display: none !important; }
-
-    /* ─── LOGIN SCREEN ─── */
-    .login-screen {
-      min-height: 100vh;
+    header {
+      height: 68px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: var(--bg);
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    .login-box {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 40px 36px 32px;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: var(--shadow-card);
-      text-align: center;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--taupe);
     }
-    .login-box h1 {
+
+    .mark {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
       font-family: 'Cormorant Garamond', serif;
-      font-size: 26px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
+      letter-spacing: 0.05em;
     }
-    .login-box > p {
-      font-size: 13px;
-      color: var(--text-soft);
-      margin-bottom: 22px;
+
+    .brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+      letter-spacing: 0.05em;
     }
-    .login-box input[type="password"],
-    .login-box input[type="text"] {
-      width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-family: inherit;
-      font-size: 15px;
-      color: var(--text);
-      outline: none;
-      background: #fff;
-      transition: border-color 0.15s;
+
+    .brand-sub {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .top-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 12px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 8px 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    .hero {
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(38px, 7vw, 64px);
+      line-height: 1;
+      color: var(--taupe);
       margin-bottom: 12px;
     }
-    .login-box input:focus { border-color: var(--accent); }
-    .login-box button {
-      width: 100%;
-      background: var(--accent);
-      border: none;
-      color: #fff;
-      padding: 13px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .login-box button:hover { background: var(--accent-deep); }
-    .login-error {
-      display: none;
-      color: var(--status-error);
-      font-size: 13px;
-      margin-top: 12px;
-      padding: 8px 12px;
-      background: var(--status-error-bg);
-      border-radius: 8px;
-    }
-    .login-error.active { display: block; }
-    #tokenSection { margin-bottom: 14px; text-align: left; }
-    #tokenSaved { font-size: 12px; color: var(--status-ok); margin-bottom: 6px; }
-    #tokenSaved a { color: var(--accent-text); font-size: 12px; text-decoration: none; font-weight: 500; }
-    #tokenSection label {
-      font-size: 12px;
-      color: var(--text-soft);
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
-    #tokenInput {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: 'IBM Plex Mono', monospace;
-      letter-spacing: 0.5px;
-      background: #fff;
-      outline: none;
-    }
-    #tokenInput:focus { border-color: var(--accent); }
 
-    /* ─── DASHBOARD ─── */
-    .dashboard { min-height: 100vh; display: none; flex-direction: column; }
-    .dashboard.active { display: flex; }
-
-    .dashboard > header {
-      background: rgba(249,243,233,0.92);
-      backdrop-filter: saturate(140%) blur(8px);
-      -webkit-backdrop-filter: saturate(140%) blur(8px);
-      border-bottom: 1px solid var(--border-soft);
-      padding: 16px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .dashboard > header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: 0.02em;
-    }
-
-    .badge {
-      background: var(--accent);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      padding: 4px 10px;
-      border-radius: 999px;
-      text-transform: uppercase;
-    }
-    .main-page-btn,
-    .logout-btn {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      color: var(--text-body);
-      border-radius: 9px;
-      padding: 8px 14px;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
-    }
-    .main-page-btn:hover,
-    .logout-btn:hover {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #fff;
-    }
-    .admin-quick-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .admin-link-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      color: var(--text-body);
-      border-radius: 9px;
-      padding: 8px 12px;
-      font-size: 12.5px;
-      font-weight: 700;
-      line-height: 1.2;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .admin-link-btn:hover {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #fff;
-    }
-    .section-head-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-    .section-head-row h2 { margin: 0 0 6px; }
-    .section-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* ─── TABS ─── */
-    .tabs {
-      display: flex;
-      gap: 4px;
-      padding: 16px 28px 0;
-      border-bottom: 1px solid var(--border-soft);
-      background: var(--bg);
-    }
-    .tab-btn {
-      background: transparent;
-      border: none;
-      padding: 10px 18px 12px;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text-soft);
-      cursor: pointer;
-      font-family: inherit;
-      border-bottom: 2.5px solid transparent;
-      margin-bottom: -1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active {
-      color: var(--accent-deep);
-      border-bottom-color: var(--accent);
-    }
-    .tab-badge {
-      background: #d64545;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 999px;
-      min-width: 18px;
-      text-align: center;
-    }
-
-    /* ─── TOOLBAR ─── */
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      padding: 18px 28px;
-      flex-wrap: wrap;
-      background: var(--bg);
-    }
-    .toolbar input[type="text"] {
-      flex: 1;
-      min-width: 220px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-family: inherit;
+    .lead {
+      color: var(--muted);
       font-size: 14px;
-      color: var(--text);
-      background: var(--card);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .toolbar input[type="text"]:focus { border-color: var(--accent); }
-    .toolbar-btn {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      color: var(--text-body);
-      padding: 10px 14px;
-      border-radius: 9px;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .toolbar-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent-deep);
-      background: var(--accent-pale);
-    }
-    .record-count {
-      font-size: 12.5px;
-      color: var(--text-soft);
-      font-weight: 500;
-      padding: 0 4px;
-    }
-    .toolbar-note {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-left: auto;
+      line-height: 1.7;
+      max-width: 520px;
+      font-weight: 300;
     }
 
-    /* ─── TABLE ─── */
-    .table-wrap {
-      margin: 0 28px 28px;
+    .login-card,
+    .panel,
+    .list-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: auto;
-      box-shadow: var(--shadow-card);
-    }
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 13px;
-    }
-    thead th {
-      background: var(--bg-soft);
-      color: var(--text-soft);
-      font-weight: 600;
-      font-size: 11.5px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 12px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      white-space: nowrap;
-    }
-    tbody td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border-soft);
-      vertical-align: middle;
-      color: var(--text);
-    }
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: var(--bg-soft); }
-
-    .col-actions { width: 78px; }
-    .col-house   { width: 100px; }
-    .col-phone   { white-space: nowrap; }
-    .col-email   { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .arrow-col   { color: var(--text-muted); font-size: 11px; }
-
-    .edit-btn {
-      background: var(--accent-pale);
-      color: var(--accent-deep);
-      border: none;
-      padding: 6px 12px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    .edit-btn:hover { background: var(--accent); color: #fff; }
-
-    .plate-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-start;
-    }
-    .plate-chip {
-      display: inline-block;
-      padding: 3px 9px;
-      background: #fff;
-      border: 1.5px solid var(--text);
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.02em;
-    }
-    .plate-chip.moto {
-      border-color: var(--text-soft);
-      color: var(--text-body);
-    }
-    .plate-empty {
-      color: var(--text-muted);
-      font-style: italic;
-      font-size: 12px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
-    /* ─── MODAL ─── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(30,24,20,0.7);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
+    .login-card {
+      max-width: 420px;
+      padding: 28px;
+      margin-top: 28px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel,
+    .list-card {
       padding: 24px;
     }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 0;
-      max-width: 640px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.32);
-      display: flex;
-      flex-direction: column;
-    }
-    .modal-header {
-      padding: 22px 28px 18px;
-      border-bottom: 1px solid var(--border-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
-    }
-    .modal-header h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
+
+    h2 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 18px;
       font-weight: 500;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--taupe-mid);
+      margin-bottom: 8px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
       color: var(--text);
-      line-height: 1.2;
-    }
-    .modal-close {
-      width: 32px; height: 32px;
-      background: var(--bg-soft);
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
+      border-radius: 8px;
+      padding: 12px 13px;
+      font: inherit;
       font-size: 14px;
-      color: var(--text-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-      flex-shrink: 0;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .modal-close:hover { background: var(--bg-warm); color: var(--text); }
-    .modal-body {
-      padding: 22px 28px;
+
+    textarea {
+      min-height: 124px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184,151,90,0.14);
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
     }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    .form-group label {
-      font-size: 12px;
-      color: var(--text-soft);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-    .form-group input {
-      width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 9px;
-      padding: 10px 12px;
-      font-family: inherit;
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .form-group input:focus { border-color: var(--accent); }
-    .form-group input[readonly] {
-      background: var(--bg-soft);
-      color: var(--text-soft);
-    }
-    .readonly-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    .modal-footer {
-      padding: 16px 28px;
-      border-top: 1px solid var(--border-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .save-note {
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-    .modal-actions { display: flex; gap: 10px; }
-    .ghost-btn {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      color: var(--text-soft);
-      padding: 10px 18px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .ghost-btn:hover { border-color: var(--text-soft); color: var(--text); }
-    .primary-btn {
-      background: var(--accent);
-      border: none;
-      color: #fff;
-      padding: 10px 22px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .primary-btn:hover { background: var(--accent-deep); }
-    .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* ─── PENDING CORRECTIONS ─── */
-    .pending-wrap {
-      padding: 0 28px 28px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      align-items: start;
-    }
-
-    /* ── Card ── */
-    .pending-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-top: 3px solid var(--accent);
-      border-radius: 12px;
-      padding: 14px 14px 12px;
-      box-shadow: var(--shadow-card);
+    .actions {
       display: flex;
-      flex-direction: column;
       gap: 10px;
-      min-width: 0;
-    }
-
-    /* top row: house + type chip + date */
-    .pc-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
       flex-wrap: wrap;
-    }
-    .pc-house {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .pc-chip {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: var(--accent-pale);
-      color: var(--accent-deep);
-      white-space: nowrap;
-    }
-    .pc-date {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      margin-left: auto;
-      white-space: nowrap;
+      margin-top: 8px;
     }
 
-    /* divider */
-    .pc-divider {
-      height: 1px;
-      background: var(--border-soft);
-      margin: 0 -2px;
-    }
-
-    /* field group: label + change row */
-    .pc-field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .pc-field-label {
-      font-size: 10.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-      letter-spacing: 0.04em;
-    }
-
-    /* change row: FROM → editable TO */
-    .pc-change {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg-soft);
-      border-radius: 6px;
-      padding: 5px 8px;
-      min-width: 0;
-    }
-    .pc-from {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-decoration: line-through;
-      white-space: nowrap;
-      flex-shrink: 0;
-      max-width: 90px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .pc-plates-old {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3px;
-      flex-shrink: 0;
-      max-width: 130px;
-    }
-    .pc-plate-chip-old {
-      display: inline-block;
-      padding: 2px 8px;
-      background: #fff;
-      border: 1.5px solid var(--text-muted);
-      border-radius: 4px;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-decoration: line-through;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-    .pc-plates-new-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 8px 10px;
-      background: var(--bg-soft);
-      border-radius: 7px;
-    }
-    .pc-plate-chip-new {
-      display: inline-block;
-      padding: 4px 12px;
-      background: #fff;
-      border: 2px solid var(--text);
-      border-radius: 5px;
-      font-family: 'IBM Plex Mono', monospace;
+    button {
+      border: 1px solid var(--gold);
+      background: var(--gold);
+      color: #fff;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-family: 'Sarabun', sans-serif;
       font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-    }
-    .pc-plates-from-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      align-items: center;
-      padding: 2px 2px;
-    }
-    .pc-from-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-    }
-    .pc-arrow { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
-    .pc-to {
-      flex: 1;
-      border: 1.5px solid var(--accent-pale);
-      background: #fffaf0;
-      border-radius: 5px;
-      padding: 4px 8px;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text);
-      outline: none;
-      min-width: 0;
-      transition: border-color 0.15s;
-    }
-    .pc-to:focus { border-color: var(--accent); }
-
-    /* bottom row: reporter + actions */
-    .pc-bottom {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding-top: 2px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
     }
 
-    .pc-reporter {
-      font-size: 11px;
-      color: var(--text-soft);
+    button:hover {
+      transform: translateY(-1px);
     }
 
-    .pc-actions {
-      display: flex;
-      gap: 7px;
-      justify-content: flex-end;
+    .btn-secondary {
+      background: transparent;
+      color: var(--gold);
     }
-    .pc-actions .reject-btn,
-    .pc-actions .approve-btn {
-      flex: 1;
+
+    .btn-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: transparent;
+    }
+
+    .btn-small {
       padding: 7px 10px;
       font-size: 12px;
-      text-align: center;
     }
 
-    .pending-card-header { display: none; }
-    .pending-card-meta { display: none; }
-    .pending-card-reporter { display: none; }
-    .pending-empty {
-      text-align: center;
-      padding: 60px 24px;
-      color: var(--text-soft);
-      grid-column: 1 / -1;
+    .hidden { display: none !important; }
+
+    .notice {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
     }
-    .pending-empty .big {
-      font-size: 40px;
-      margin-bottom: 8px;
+
+    .error { color: var(--danger); }
+
+    /* ─── ANNOUNCEMENT LIST CARDS ─── */
+    .ann-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .ann-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
     }
-    /* diff row — fixed columns, compact */
-    .diff-rows { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 8px; }
-    .diff-row {
+    .ann-card:hover { border-color: var(--gold); }
+
+    .ann-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .ann-type-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .ann-type-dot.urgent { background: #c0392b; }
+    .ann-type-dot.info   { background: var(--border); border: 1.5px solid var(--muted); }
+
+    .ann-card-title {
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .ann-card-body {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 10px;
+      margin-left: 17px;
+      white-space: pre-wrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ann-card-footer {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      padding: 4px 6px;
-      border-radius: 6px;
+      flex-wrap: wrap;
+      margin-left: 17px;
     }
-    .diff-row.changed-row { background: var(--accent-pale); }
-    .diff-field-name {
+
+    .ann-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ann-date {
       font-size: 11px;
-      font-weight: 600;
-      color: var(--text-soft);
-      white-space: nowrap;
-      width: 96px;
-      flex-shrink: 0;
+      color: var(--gold);
+      letter-spacing: 0.04em;
     }
-    .old-val {
-      font-size: 12px;
-      color: var(--text-soft);
-      text-decoration: line-through;
-      white-space: nowrap;
-      flex-shrink: 0;
+
+    .ann-pill {
+      font-size: 10px;
+      border: 1px solid var(--border);
+      color: var(--taupe-mid);
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: var(--card);
+      letter-spacing: 0.03em;
     }
-    .arrow-col { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
-    .new-input {
-      width: 200px;
-      flex-shrink: 0;
-      border: 1.5px solid var(--accent-pale);
-      background: #fffaf0;
-      border-radius: 5px;
+
+    .ann-file-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+      margin-bottom: 8px;
+    }
+
+    .ann-file-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--taupe-mid);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
       padding: 3px 7px;
-      font-family: inherit;
-      font-size: 12px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
     }
-    .new-input:focus { border-color: var(--accent); }
-    .no-val { color: var(--text-muted); font-style: italic; font-size: 11px; }
 
-    /* legacy diff-table fallback (keep for non-vehicle issues) */
-    .diff-table {
+    .ann-file-chip svg { flex-shrink: 0; }
+
+    .ann-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ann-thumbnails {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-left: 17px;
+      margin-bottom: 8px;
+    }
+
+    .ann-thumbnails img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .empty {
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 22px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    /* legacy - keep for compat */
+    .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--gold); font-size: 11px; }
+    .pill { border: 1px solid var(--border); color: var(--taupe-mid); border-radius: 999px; padding: 2px 8px; background: var(--bg); }
+
+    /* ─── PHOTO UPLOAD ─── */
+    .photo-drop-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .photo-drop-zone:hover,
+    .photo-drop-zone.drag-over {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+    }
+
+    .photo-drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
       width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      margin-top: 4px;
+      height: 100%;
+      border: none;
+      padding: 0;
     }
-    .diff-table thead { display: none; }
-    .diff-table td { padding: 4px 6px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
-    .diff-table tr:last-child td { border-bottom: none; }
-    .diff-table .field-name { font-weight: 600; color: var(--text-body); font-size: 11.5px; width: 100px; }
-    .changed-row td { background: var(--accent-pale); }
 
-    .pending-actions {
+    .photo-drop-label {
+      font-size: 13px;
+      color: var(--muted);
+      pointer-events: none;
+      line-height: 1.6;
+    }
+
+    .photo-drop-label span {
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .photo-previews {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .photo-preview-item {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .photo-preview-item img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      display: block;
+    }
+
+    /* non-image file preview tile */
+    .file-preview-tile {
+      width: 72px;
+      height: 72px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .file-preview-tile .file-ext {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .file-preview-tile .file-name {
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 4px;
+      word-break: break-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--danger);
+      border: none;
+      color: #fff;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+      transition: transform 0.15s;
+    }
+
+    .photo-remove-btn:hover { transform: scale(1.15); }
+
+    .photo-count {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ─── SAVE PROGRESS BAR ─── */
+    .save-progress {
+      display: none;
+      margin-top: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg2);
+      height: 6px;
+    }
+
+    .save-progress.active { display: block; }
+
+    .save-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light, #cead75));
+      border-radius: 8px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .save-progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      display: none;
+    }
+
+    .save-progress-label.active { display: block; }
+
+    .announcement-photos {
       display: flex;
       gap: 6px;
       margin-top: 8px;
-    }
-    .approve-btn {
-      background: var(--status-ok);
-      color: #fff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .approve-btn:hover { opacity: 0.85; }
-    .reject-btn {
-      background: transparent;
-      color: var(--status-error);
-      border: 1.5px solid var(--status-error);
-      padding: 6px 14px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .reject-btn:hover { background: var(--status-error-bg); }
-
-    /* ─── FOOTER ─── */
-    footer {
-      padding: 18px 28px;
-      font-size: 12px;
-      color: var(--text-muted);
-      border-top: 1px solid var(--border-soft);
-      background: var(--bg-warm);
-      text-align: center;
-      letter-spacing: 0.06em;
+      flex-wrap: wrap;
     }
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 1100px) {
-      .pending-wrap { grid-template-columns: repeat(2, 1fr); }
+    .announcement-photos img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
     }
-    @media (max-width: 720px) {
-      .dashboard > header { padding: 14px 16px; }
-      .dashboard > header > div:last-child { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
-      .admin-quick-links { width: 100%; }
-      .admin-link-btn { flex: 1 1 auto; }
-      .tabs { padding: 14px 16px 0; overflow-x: auto; }
-      .toolbar { padding: 14px 16px; }
-      .table-wrap { margin: 0 16px 16px; }
-      .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
 
-      /* table: hide non-essential columns */
-      #adminTable th:nth-child(1), #adminTable td:nth-child(1),
-      #adminTable th:nth-child(5), #adminTable td:nth-child(5),
-      #adminTable th:nth-child(7), #adminTable td:nth-child(7),
-      #adminTable th:nth-child(8), #adminTable td:nth-child(8),
-      #adminTable th:nth-child(9), #adminTable td:nth-child(9),
-      #adminTable th:nth-child(11), #adminTable td:nth-child(11),
-      #adminTable th:nth-child(12), #adminTable td:nth-child(12) { display: none; }
-
-      /* compact table on mobile */
-      .table-wrap { margin: 0 12px 16px; border-radius: 10px; }
-      thead th { padding: 9px 10px; font-size: 10.5px; }
-      tbody td { padding: 10px 10px; font-size: 12px; }
-
-      /* toolbar: full-width search */
-      .toolbar input[type="text"] { min-width: unset; width: 100%; }
-
-      .modal-body { grid-template-columns: 1fr; padding: 18px 22px; }
-      .modal-header { padding: 18px 22px 14px; }
-      .modal-footer { padding: 14px 22px; flex-direction: column; align-items: stretch; }
-      .modal-actions { flex-direction: column; }
-      .ghost-btn, .primary-btn { width: 100%; }
+    @media (max-width: 760px) {
+      header { padding: 0 18px; }
+      .brand-sub { display: none; }
+      .top-link { padding: 7px 10px; font-size: 11px; }
+      main { padding-top: 32px; }
+      .grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .announcement { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-
-<!-- Login Screen -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <div style="font-size:2.5rem; margin-bottom:12px;">🔐</div>
-    <h1>Admin Access</h1>
-    <p>กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
-    <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" autofocus />
-
-    <!-- GitHub Token (เก็บใน localStorage — ไม่ต้องกรอกทุกครั้ง) -->
-    <div id="tokenSection" style="margin-bottom:14px; text-align:left;">
-      <div id="tokenSaved" style="display:none; font-size:0.82rem; color:#15803d; margin-bottom:6px;">
-        ✅ GitHub Token บันทึกแล้ว &nbsp;<a href="#" onclick="showTokenInput(); return false;" style="color:#1a3a5c; font-size:0.8rem;">เปลี่ยน</a>
-      </div>
-      <div id="tokenInputWrap">
-        <label style="font-size:0.82rem; color:#555; display:block; margin-bottom:4px;">GitHub Token (กรอกครั้งเดียว จำอัตโนมัติ)</label>
-        <input type="password" id="tokenInput" placeholder="github_pat_..." autocomplete="off"
-          style="width:100%; padding:9px 12px; border:1px solid #ccc; border-radius:6px; font-size:0.85rem; font-family:monospace; letter-spacing:1px;" />
-      </div>
-    </div>
-
-    <button onclick="doLogin()">เข้าสู่ระบบ</button>
-    <div class="login-error" id="loginError">รหัสผ่านไม่ถูกต้อง</div>
-    <div class="login-error" id="tokenError" style="color:#c00;">กรุณากรอก GitHub Token</div>
-  </div>
-</div>
-
-<!-- Admin Dashboard -->
-<div class="dashboard" id="dashboard">
   <header>
-    <div>
-      <h1>Admin — หมู่บ้านภัทราวิลล่า 8</h1>
-    </div>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span class="badge">ADMIN</span>
-      <nav class="admin-quick-links" aria-label="Admin quick links">
-        <a class="admin-link-btn" href="/" target="_blank" rel="noopener">🏠 Home</a>
-        <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 ข้อมูลลูกบ้าน</a>
-        <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 ทะเบียนรถ</a>
-        <a class="admin-link-btn" href="/vote/" target="_blank" rel="noopener">🗳 หน้าโหวต</a>
-      </nav>
-      <button class="logout-btn" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
-      <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
-    </div>
+    <a class="brand" href="../index.html">
+      <div class="mark">PV</div>
+      <div>
+        <div class="brand-title">Pattra Villa 8</div>
+        <div class="brand-sub">Announcement Admin</div>
+      </div>
+    </a>
+    <a class="top-link" href="../index.html#announce">View Site</a>
   </header>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">
-      📋 ข้อมูลลูกบ้าน
-    </button>
-    <button class="tab-btn" id="tabPins" onclick="switchTab('pins')">
-      🔑 PIN ลูกบ้าน
-    </button>
-    <button class="tab-btn" id="tabVote" onclick="switchTab('vote')">
-      🗳 โหวต
-    </button>
-    <button class="tab-btn" id="tabSurvey" onclick="switchTab('survey')">
-      📊 ไลฟ์สไตล์
-    </button>
-    <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
-      🧾 Activity Log
-    </button>
-  </div>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Admin</div>
+      <h1>Announcements</h1>
+      <p class="lead">เพิ่ม แก้ไข หรือลบประกาศที่จะแสดงบนหน้า Resident Services</p>
+    </section>
 
-  <!-- Tab: Residents -->
-  <div id="residentsTab">
-  <div class="toolbar">
-    <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
-    <button class="toolbar-btn" id="exportJsonBtn" onclick="exportJSON()">⬇ Export JSON</button>
-    <button class="toolbar-btn" id="exportXlsxBtn" onclick="exportExcel()">⬇ Export Excel</button>
-    <span class="record-count" id="recordCount"></span>
-    <div class="toolbar-note" id="toolbarNote">กำลังโหลดข้อมูล...</div>
-  </div>
-
-  <div class="table-wrap">
-    <table id="adminTable">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>จัดการ</th>
-          <th>บ้านเลขที่</th>
-          <th>ชื่อ-นามสกุล</th>
-          <th>อีเมล</th>
-          <th>โทรศัพท์</th>
-          <th>โฉนด</th>
-          <th>โซน</th>
-          <th>แปลง</th>
-          <th>🚗 รถยนต์</th>
-          <th>🏍 มอเตอร์ไซค์</th>
-          <th style="color:#94a3b8;font-weight:500;font-size:0.72rem;">Updated</th>
-        </tr>
-      </thead>
-      <tbody id="adminBody"></tbody>
-    </table>
-  </div>
-
-  <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
-  </div><!-- end residentsTab -->
-
-  <!-- Tab: Resident PIN -->
-  <div id="pinsTab" style="display:none">
-    <div style="max-width:760px;margin:36px auto;background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
-      <h2 style="margin:0 0 8px;font-size:1.7rem;">🔑 Generate PIN ลูกบ้าน</h2>
-      <p style="margin:0 0 22px;color:var(--text-muted);">ใช้กรณีลูกบ้านทัก LINE มาขอ PIN ใหม่ ระบบจะสุ่ม PIN 6 หลักและบันทึกทับ PIN เดิมทันที</p>
-      <label style="display:block;font-weight:700;margin-bottom:8px;">บ้านเลขที่</label>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:12px;">
-        <input id="pinHouseInput" type="text" placeholder="เช่น 38/8" style="padding:14px 16px;border:1px solid var(--border);border-radius:12px;font-size:1.05rem;font-family:inherit;" />
-        <button class="approve-btn" id="pinGenerateBtn" onclick="generateResidentPinForAdmin()">Generate PIN</button>
+    <section class="login-card" id="loginCard">
+      <h2>เข้าสู่ระบบ</h2>
+      <div class="field">
+        <label for="passwordInput">รหัสผ่าน</label>
+        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="ใส่รหัสผ่าน" />
       </div>
-      <div id="pinAdminResult" style="display:none;margin-top:18px;padding:18px;border-radius:14px;background:#f7e6cd;color:#855015;">
-        <div style="font-size:0.9rem;font-weight:700;margin-bottom:6px;">PIN ใหม่</div>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <code id="pinAdminValue" style="font-size:2rem;font-weight:800;letter-spacing:4px;background:#fff;padding:10px 14px;border-radius:10px;color:#2a2218;"></code>
-          <button class="toolbar-btn" onclick="copyGeneratedPin()">Copy</button>
+      <button id="loginBtn">Login</button>
+      <p class="notice error hidden" id="loginError">รหัสผ่านไม่ถูกต้อง</p>
+    </section>
+
+    <section class="grid hidden" id="adminPanel">
+      <form class="panel" id="announceForm">
+        <h2 id="formTitle">เพิ่มประกาศ</h2>
+        <input type="hidden" id="docId" />
+
+        <div class="field">
+          <label for="titleInput">หัวข้อประกาศ</label>
+          <input id="titleInput" required maxlength="120" placeholder="เช่น ปิดน้ำชั่วคราว" />
         </div>
-        <div id="pinAdminHouse" style="margin-top:8px;color:#6b5d4a;"></div>
-      </div>
-      <div id="pinAdminError" style="display:none;margin-top:14px;color:#a33d30;font-weight:700;"></div>
-    </div>
 
-  </div>
-
-  <!-- Tab: Vote / Poll -->
-  <div id="voteTab" style="display:none">
-    <div style="max-width:760px;margin:28px auto;display:flex;flex-direction:column;gap:20px;">
-
-      <!-- Create Poll -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:var(--shadow);">
-        <div class="section-head-row">
-          <div>
-            <h2 style="font-size:1.3rem;">➕ สร้าง Poll ใหม่</h2>
-            <p style="margin:0;color:var(--text-muted);font-size:.9rem;">ลูกบ้านโหวตที่ <strong>pattra8.com/vote/</strong></p>
-          </div>
-          <div class="section-actions">
-            <a class="admin-link-btn" href="/vote/" target="_blank" rel="noopener">🗳 เปิดหน้าโหวตลูกบ้าน</a>
-          </div>
+        <div class="field">
+          <label for="bodyInput">รายละเอียด</label>
+          <textarea id="bodyInput" required maxlength="600" placeholder="รายละเอียดประกาศสำหรับลูกบ้าน"></textarea>
         </div>
-        <!-- Mode toggle -->
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
-          <button id="modeSingleBtn" onclick="setPollMode('single')"
-            style="font-family:inherit;font-size:.85rem;padding:7px 16px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:700;">
-            📊 คำถามเดียว
-          </button>
-          <button id="modeSurveyBtn" onclick="setPollMode('survey')"
-            style="font-family:inherit;font-size:.85rem;padding:7px 16px;border-radius:8px;border:2px solid var(--border);background:none;color:var(--text-muted);cursor:pointer;">
-            📋 แบบสอบถาม (หลายวาระ)
-          </button>
-        </div>
-        <div style="display:grid;gap:12px;">
-          <input id="voteTitle" type="text" placeholder="ชื่อ poll / หัวข้อการประชุม"
-            style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:1rem;font-family:inherit;width:100%;" />
-          <textarea id="voteDesc" rows="2" placeholder="คำอธิบาย (optional)"
-            style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:.95rem;font-family:inherit;width:100%;resize:vertical;"></textarea>
-          <div>
-            <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">🖼 URL รูปภาพประกอบ (optional)</label>
-            <input id="voteImageUrl" type="url" placeholder="https://... (ใส่รูปสโมสร, ภาพปัญหา ฯลฯ)"
-              style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
-          </div>
-          <div>
-            <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">หมดเขต (ไม่บังคับ)</label>
-            <input id="voteDeadline" type="datetime-local"
-              style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.95rem;" />
-          </div>
 
-          <!-- Single-question mode -->
-          <div id="singleModeSection">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-              <div>
-                <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">ประเภท</label>
-                <select id="voteType" onchange="onVoteTypeChange()"
-                  style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.95rem;">
-                  <option value="single">เลือก 1 ข้อ</option>
-                  <option value="multi">เลือกได้หลายข้อ</option>
-                  <option value="rating">ให้คะแนน 1-5</option>
-                  <option value="acknowledge">รับทราบ (ไม่ต้องเลือก)</option>
-                  <option value="dropdown">Dropdown list</option>
-                </select>
-              </div>
-              <div id="voteMaxChoicesRow" style="display:none;align-items:flex-end;">
-                <div style="width:100%;">
-                  <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">เลือกได้สูงสุด</label>
-                  <input id="voteMaxChoices" type="number" min="2" max="10" value="2"
-                    style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;" />
-                </div>
-              </div>
-            </div>
-            <div id="voteOptionsSection">
-              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:8px;">ตัวเลือก</label>
-              <div id="voteOptionsList">
-                <div class="vote-option-row" style="display:flex;gap:8px;margin-bottom:8px;">
-                  <input type="text" placeholder="ตัวเลือกที่ 1 (label)" class="vote-opt-input"
-                    style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
-                  <input type="url" placeholder="URL รูป (optional)" class="vote-opt-img"
-                    style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.88rem;color:var(--text-muted);" />
-                </div>
-                <div class="vote-option-row" style="display:flex;gap:8px;margin-bottom:8px;">
-                  <input type="text" placeholder="ตัวเลือกที่ 2 (label)" class="vote-opt-input"
-                    style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
-                  <input type="url" placeholder="URL รูป (optional)" class="vote-opt-img"
-                    style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.88rem;color:var(--text-muted);" />
-                </div>
-              </div>
-              <button onclick="addVoteOption()" style="font-family:inherit;font-size:.85rem;color:var(--accent-text);background:none;border:1px dashed var(--accent-soft);border-radius:8px;padding:7px 14px;cursor:pointer;">+ เพิ่มตัวเลือก</button>
+        <div class="field">
+          <label>ไฟล์แนบ / รูปภาพ (ไม่จำเป็น)</label>
+          <div class="photo-drop-zone" id="photoDropZone">
+            <input type="file" id="photoFileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple />
+            <div class="photo-drop-label">
+              <span>เลือกไฟล์</span> หรือลากวางที่นี่<br/>
+              <small>รูปภาพ · PDF · Word · Excel · PowerPoint · สูงสุด 5 ไฟล์ · แนะนำไม่เกิน 5MB</small>
             </div>
           </div>
+          <div class="photo-previews" id="photoPreviews"></div>
+          <div class="photo-count" id="photoCount"></div>
+        </div>
 
-          <!-- Survey mode -->
-          <div id="surveyModeSection" style="display:none;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <label style="font-size:.82rem;font-weight:700;color:var(--text-muted);">วาระ / คำถาม</label>
-              <button onclick="addSurveyQuestion()" style="font-family:inherit;font-size:.82rem;color:var(--accent-text);background:none;border:1px dashed var(--accent-soft);border-radius:8px;padding:6px 12px;cursor:pointer;">+ เพิ่มวาระ</button>
-            </div>
-            <div id="surveyQuestionsList"></div>
+        <div class="form-row">
+          <div class="field">
+            <label for="typeInput">ประเภท</label>
+            <select id="typeInput">
+              <option value="normal">ทั่วไป</option>
+              <option value="urgent">เร่งด่วน</option>
+              <option value="info">ข้อมูล</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dateInput">วันที่แสดง</label>
+            <input id="dateInput" type="date" />
           </div>
         </div>
-        <div style="margin-top:18px;display:flex;gap:12px;align-items:center;">
-          <button class="approve-btn" onclick="createPoll()" id="createPollBtn" style="background:var(--accent);">สร้าง Poll</button>
-          <span id="createPollStatus" style="font-size:.88rem;color:var(--text-muted);"></span>
+
+        <div class="actions">
+          <button type="submit" id="saveBtn">Save Announcement</button>
+          <button type="button" class="btn-secondary hidden" id="cancelBtn">Cancel Edit</button>
+        </div>
+        <div class="save-progress" id="saveProgress">
+          <div class="save-progress-bar" id="saveProgressBar"></div>
+        </div>
+        <div class="save-progress-label" id="saveProgressLabel"></div>
+        <p class="notice" id="formStatus">ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh</p>
+      </form>
+
+      <div class="list-card">
+        <h2>ประกาศทั้งหมด</h2>
+        <div id="announcementList">
+          <div class="empty">กำลังโหลดประกาศ...</div>
         </div>
       </div>
+    </section>
+  </main>
 
-      <!-- Poll list -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow);">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <h2 style="margin:0;font-size:1.2rem;">📋 รายการ Polls</h2>
-          <button onclick="loadAdminPolls()" style="font-family:inherit;font-size:.82rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">🔄 รีเฟรช</button>
-        </div>
-        <div id="adminPollList"><div style="color:var(--text-muted);font-size:.9rem;">กำลังโหลด...</div></div>
-      </div>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      onSnapshot,
+      query,
+      orderBy,
+      serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL,
+      deleteObject
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
-      <!-- Results panel -->
-      <div id="pollResultsModal" style="display:none;background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow);">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-          <h2 style="margin:0;font-size:1.2rem;" id="pollResultsTitle">ผลโหวต</h2>
-          <button onclick="document.getElementById('pollResultsModal').style.display='none'"
-            style="margin-left:auto;font-family:inherit;font-size:.85rem;color:var(--text-soft);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;">ซ่อน</button>
-        </div>
-        <div id="pollResultsBody"></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Tab: Activity Log -->
-  <div id="logTab" style="display:none">
-    <div style="max-width:1100px;margin:28px auto;padding:0 20px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-        <div>
-          <h2 style="margin:0 0 4px;font-size:1.3rem;">🧾 Activity Log</h2>
-          <p style="margin:0;color:var(--text-muted);font-size:.88rem;">ประวัติการแก้ไขข้อมูลลูกบ้าน — อัปเดตโดย resident โดยตรง</p>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input type="number" id="logLimitInput" value="80" min="10" max="200" style="width:70px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.88rem;">
-          <button class="toolbar-btn" onclick="loadActivityLog()" id="logRefreshBtn">🔄 โหลดใหม่</button>
-        </div>
-      </div>
-      <div id="logContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
-        <div style="padding:40px;text-align:center;color:var(--text-muted);">กดปุ่ม "🔄 โหลดใหม่" เพื่อโหลด log</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab: Lifestyle Survey Stats -->
-  <div id="surveyTab" style="display:none">
-    <div style="max-width:860px;margin:28px auto;padding:0 20px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-        <div>
-          <h2 style="margin:0 0 4px;font-size:1.3rem;">📊 แบบสอบถามไลฟ์สไตล์</h2>
-          <p style="margin:0;color:var(--text-muted);font-size:.88rem;">ข้อมูลรวม — ไม่ระบุตัวบุคคล ใช้เพื่อพัฒนาโครงการ</p>
-        </div>
-        <button class="toolbar-btn" onclick="loadSurveyStats()" id="surveyRefreshBtn">🔄 โหลด Stats</button>
-      </div>
-      <div id="surveyStatsContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:var(--shadow);">
-        <div style="text-align:center;color:var(--text-muted);padding:20px;">กดปุ่ม "🔄 โหลด Stats" เพื่อดูข้อมูล</div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<div class="modal-overlay" id="editModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <h2>แก้ไขข้อมูลลูกบ้าน</h2>
-        <div id="editHouseLabel" style="font-size:0.82rem; opacity:0.8; margin-top:4px;">บ้านเลขที่ —</div>
-      </div>
-      <button class="modal-close" onclick="closeEditModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label for="edit_house_no">บ้านเลขที่</label>
-        <input id="edit_house_no" type="text" />
-      </div>
-      <div class="form-group">
-        <label for="edit_name">ชื่อ-นามสกุล</label>
-        <input id="edit_name" type="text" />
-      </div>
-      <div class="form-group full">
-        <label for="edit_email">อีเมล</label>
-        <input id="edit_email" type="text" />
-      </div>
-      <div class="form-group">
-        <label for="edit_phone">โทรศัพท์</label>
-        <input id="edit_phone" type="text" />
-      </div>
-      <div class="form-group">
-        <label for="edit_deed_no">เลขที่โฉนด</label>
-        <input id="edit_deed_no" type="text" readonly />
-        <span class="readonly-hint">Read only</span>
-      </div>
-      <div class="form-group">
-        <label for="edit_zone">โซน</label>
-        <input id="edit_zone" type="text" readonly />
-        <span class="readonly-hint">Read only</span>
-      </div>
-      <div class="form-group">
-        <label for="edit_plot">แปลงที่</label>
-        <input id="edit_plot" type="text" readonly />
-        <span class="readonly-hint">Read only</span>
-      </div>
-      <div class="form-group full">
-        <label for="edit_cars">ทะเบียนรถยนต์ (คั่นด้วยลูกน้ำ)</label>
-        <input id="edit_cars" type="text" placeholder="เช่น 5ขฌ9398, 3กศ535" />
-      </div>
-      <div class="form-group full">
-        <label for="edit_motorcycles">ทะเบียนมอเตอร์ไซค์ (คั่นด้วยลูกน้ำ)</label>
-        <input id="edit_motorcycles" type="text" placeholder="เช่น 1กฐ1717" />
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div class="save-note" id="editSaveNote">บันทึกและ commit ขึ้น GitHub อัตโนมัติ</div>
-      <div class="modal-actions">
-        <button class="ghost-btn" onclick="closeEditModal()">ยกเลิก</button>
-        <button class="primary-btn" id="saveEditBtn" onclick="saveEdit()">💾 บันทึก</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-  // ── Config ──────────────────────────────────────────────────────────────
-  const ADMIN_LOGIN_PASSWORDS = ['pattradata', 'team388', 'adminpattra8'];
-  const LPR_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprPlateSync';
-  const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
-  const GH_OWNER  = 'pattra8';
-  const GH_REPO   = 'pattra8.github.io';
-  const ADMIN_SESSION_KEY  = 'pattra_admin_session_until';
-  const ADMIN_SESSION_DAYS = 7;
-  const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
-  // GitHub token — โหลดจาก localStorage (ไม่ฝังใน source code)
-  let GH_TOKEN = localStorage.getItem('gh_admin_token') || '';
-  // ────────────────────────────────────────────────────────────────────────
-
-  let allData      = [];
-  let filteredData = [];
-  // Track issues ที่ approve/reject แล้วในระหว่าง session — กัน card โผล่กลับก่อน GitHub ปิด
-  const processedIssues = new Set();
-  let editingIndex = -1;
-  let originalSnap = null;
-  let currentTab   = 'residents';
-
-  function setToolbarNote(message, state = '') {
-    const el = document.getElementById('toolbarNote');
-    if (!el) return;
-    el.textContent = message;
-    el.className = `toolbar-note${state ? ` ${state}` : ''}`;
-  }
-
-  // ── Session ─────────────────────────────────────────────────────────────
-  function getSessionExpiry() { return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0); }
-  function hasValidSession()  { return Date.now() < getSessionExpiry(); }
-  function startAdminSession() {
-    localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_SESSION_DAYS * 86400000));
-  }
-  function clearAdminSession() { localStorage.removeItem(ADMIN_SESSION_KEY); }
-
-  // ── Auth ─────────────────────────────────────────────────────────────────
-  function showDashboard() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').style.display  = 'block';
-    loadAdminData();
-    loadPending();
-  }
-  function showTokenInput() {
-    document.getElementById('tokenSaved').style.display = 'none';
-    document.getElementById('tokenInputWrap').style.display = 'block';
-    document.getElementById('tokenInput').value = '';
-    document.getElementById('tokenInput').focus();
-  }
-  function initTokenUI() {
-    if (GH_TOKEN) {
-      document.getElementById('tokenSaved').style.display = 'block';
-      document.getElementById('tokenInputWrap').style.display = 'none';
-    } else {
-      document.getElementById('tokenSaved').style.display = 'none';
-      document.getElementById('tokenInputWrap').style.display = 'block';
-    }
-  }
-  function doLogin() {
-    document.getElementById('loginError').style.display = 'none';
-    document.getElementById('tokenError').style.display = 'none';
-
-    const pw = document.getElementById('pwInput').value.trim().toLowerCase();
-    // รับ token จาก input (ถ้ากรอกใหม่) หรือจาก localStorage
-    const tokenInputEl = document.getElementById('tokenInput');
-    const tokenVal = (tokenInputEl.offsetParent !== null ? tokenInputEl.value.trim() : '') || GH_TOKEN;
-
-    if (!tokenVal) {
-      document.getElementById('tokenError').style.display = 'block';
-      return;
-    }
-    if (!ADMIN_LOGIN_PASSWORDS.includes(pw)) {
-      document.getElementById('loginError').style.display = 'block';
-      document.getElementById('pwInput').value = '';
-      document.getElementById('pwInput').focus();
-      return;
-    }
-    // บันทึก token ลง localStorage และ update runtime variable
-    GH_TOKEN = tokenVal;
-    localStorage.setItem('gh_admin_token', GH_TOKEN);
-    startAdminSession();
-    showDashboard();
-  }
-  function promptUpdateToken() {
-    const t = prompt('วาง GitHub Token ใหม่ที่นี่:');
-    if (!t || !t.trim()) return;
-    GH_TOKEN = t.trim();
-    localStorage.setItem('gh_admin_token', GH_TOKEN);
-    alert('✅ บันทึก Token แล้ว — โหลดข้อมูลใหม่');
-    loadAdminData();
-    loadPending();
-  }
-  function doLogout() {
-    clearAdminSession();
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboard').style.display  = 'none';
-    document.getElementById('pwInput').value = '';
-    document.getElementById('loginError').style.display = 'none';
-    document.getElementById('tokenError').style.display = 'none';
-    allData = []; filteredData = [];
-    document.getElementById('adminBody').innerHTML = '';
-    initTokenUI(); // refresh token UI (token ยังอยู่ใน localStorage — ไม่ต้องกรอกใหม่)
-  }
-
-  // ── Tabs ─────────────────────────────────────────────────────────────────
-  function switchTab(tab) {
-    if (tab === 'pending') tab = 'residents';
-    currentTab = tab;
-    document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
-    document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
-    document.getElementById('voteTab').style.display      = tab === 'vote'      ? 'block' : 'none';
-    document.getElementById('surveyTab').style.display    = tab === 'survey'    ? 'block' : 'none';
-    document.getElementById('logTab').style.display       = tab === 'log'       ? 'block' : 'none';
-    document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
-    document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
-    document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
-    document.getElementById('tabSurvey').classList.toggle('active', tab === 'survey');
-    document.getElementById('tabLog').classList.toggle('active', tab === 'log');
-    if (tab === 'vote') loadAdminPolls();
-    if (tab === 'log') loadActivityLog();
-  }
-
-  // ── Lifestyle Survey Stats ───────────────────────────────────────────────
-  const SURVEY_STATS_URL =
-    'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getLifestyleSurveyStats';
-
-  const SURVEY_LABELS = {
-    ageGroups:  {child:'👶 เด็ก (ต่ำกว่า 12)', teen:'🧑 วัยรุ่น (12–18)', adult:'👨 ผู้ใหญ่', elderly:'👴 ผู้สูงอายุ'},
-    pets:       {dog:'🐕 หมา', cat:'🐈 แมว', other:'🐦 อื่นๆ', none:'❌ ไม่มี'},
-    activities: {garden:'🌿 เดินสวน', fitness:'💪 ฟิตเนส', pool:'🏊 สระว่ายน้ำ', running:'🚶 วิ่ง/เดิน', other:'✨ อื่นๆ'},
-    workshops:  {
-      massage: '💆 นวดผ่อนคลาย',
-      yoga: '🧘 โยคะ / ยืดกล้ามเนื้อ',
-      stretching: '🤸 Body Stretching แก้ Office Syndrome',
-      weight: '🏋️ Weight / Personal Trainer',
-      soundbath: '🎵 Sound Bath / Meditation',
-      painting: '🎨 ระบายสี',
-      pottery: '🏺 ปั้นดินเผา',
-      candle: '🕯️ ทำเทียนหอม',
-      soap: '🧼 ทำสบู่',
-      perfume: '🧴 น้ำหอม DIY',
-      macrame: '🧵 ถักร้อย / Macramé',
-      flower: '💐 จัดดอกไม้',
-      gardening: '🌱 ปลูกต้นไม้ / จัดสวน',
-      photo: '📷 ถ่ายรูป',
-      gift: '🎁 ทำของขวัญ DIY',
-      boardgame: '🎲 Board Game Night',
-      wine: '🍷 Wine Tasting',
-    },
-  };
-
-  function surveyBar(count, max, label) {
-    const pct = max > 0 ? Math.round((count / max) * 100) : 0;
-    return `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div style="width:140px;font-size:.85rem;flex-shrink:0;">${label}</div>
-        <div style="flex:1;background:#f3ecdd;border-radius:4px;height:14px;overflow:hidden;">
-          <div style="width:${pct}%;background:var(--accent);height:100%;border-radius:4px;transition:width .4s;"></div>
-        </div>
-        <div style="width:38px;text-align:right;font-size:.82rem;color:var(--text-muted);">${count}</div>
-      </div>`;
-  }
-
-  async function loadSurveyStats() {
-    const el = document.getElementById('surveyStatsContent');
-    const btn = document.getElementById('surveyRefreshBtn');
-    el.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">กำลังโหลด...</div>';
-    btn.disabled = true;
-    try {
-      const r = await fetch(SURVEY_STATS_URL, {
-        method: 'POST',
-        cache: 'no-store',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({adminPassword: 'PATTRADATA'}),
-      });
-      const d = await r.json();
-      if (!d.ok) { el.innerHTML = `<div style="color:#a33d30;padding:20px;">${d.error}</div>`; return; }
-      const s = d.stats;
-      const maxOcc = Math.max(...Object.values(s.occupants || {1:1}), 1);
-      const maxAg  = Math.max(...Object.values(s.ageGroups || {x:1}), 1);
-      const maxPet = Math.max(...Object.values(s.pets || {x:1}), 1);
-      const maxAct = Math.max(...Object.values(s.activities || {x:1}), 1);
-      const maxWs  = Math.max(...Object.values(s.workshops || {x:1}), 1);
-
-      const occBars = [1,2,3,4,5,6,7,8].map(i =>
-        surveyBar(s.occupants[String(i)]||0, maxOcc, `${i === 8 ? '8+' : i} คน`)
-      ).join('');
-
-      const agBars = Object.entries(SURVEY_LABELS.ageGroups).map(([k,lab]) =>
-        surveyBar(s.ageGroups[k]||0, maxAg, lab)
-      ).join('');
-
-      const petBars = Object.entries(SURVEY_LABELS.pets).map(([k,lab]) =>
-        surveyBar(s.pets[k]||0, maxPet, lab)
-      ).join('');
-
-      const actBars = Object.entries(SURVEY_LABELS.activities).map(([k,lab]) =>
-        surveyBar(s.activities[k]||0, maxAct, lab)
-      ).join('');
-
-      const workshopKeys = [
-        ...Object.keys(SURVEY_LABELS.workshops),
-        ...Object.keys(s.workshops || {}).filter(k => !SURVEY_LABELS.workshops[k]),
-      ];
-      const wsBars = workshopKeys.map(k =>
-        surveyBar(
-          s.workshops[k] || 0,
-          maxWs,
-          SURVEY_LABELS.workshops[k] || `อื่นๆ: ${escHtml(k)}`
-        )
-      ).join('');
-
-      el.innerHTML = `
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">
-          ${s.total} บ้านตอบแบบสอบถามแล้ว
-        </div>
-        <div style="font-size:.82rem;color:var(--text-muted);margin-bottom:24px;">
-          (ข้อมูลเป็น multi-select — ผลรวมเกิน 100% ได้)
-        </div>
-        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
-          👥 จำนวนผู้อยู่อาศัย
-        </h3>
-        ${occBars}
-        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
-        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
-          🎂 กลุ่มอายุ
-        </h3>
-        ${agBars}
-        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
-        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
-          🐾 สัตว์เลี้ยง
-        </h3>
-        ${petBars}
-        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
-        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
-          🏃 กิจกรรมที่ชื่นชอบ
-        </h3>
-        ${actBars}
-        <hr style="border:none;border-top:1px solid var(--border-soft);margin:20px 0;">
-        <h3 style="font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);margin-bottom:12px;">
-          🎪 Workshop ที่อยากให้มี
-        </h3>
-        ${wsBars}
-      `;
-    } catch (e) {
-      el.innerHTML = `<div style="color:#a33d30;padding:20px;">เกิดข้อผิดพลาด: ${e.message}</div>`;
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  // ── Activity Log ──────────────────────────────────────────────────────────
-  async function loadActivityLog() {
-    const el = document.getElementById('logContent');
-    const btn = document.getElementById('logRefreshBtn');
-    const limit = parseInt(document.getElementById('logLimitInput').value) || 80;
-    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">⏳ กำลังโหลด...</div>';
-    btn.disabled = true;
-    try {
-      const res = await fetch(RESIDENT_AUTH_URL, {
-        method: 'POST',
-        cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'adminAuditLogs', adminPassword: 'PATTRADATA', limit })
-      });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'load failed');
-      renderActivityLog(json.logs || []);
-    } catch (err) {
-      el.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${escHtml(err.message)}</div>`;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '🔄 โหลดใหม่';
-    }
-  }
-
-  function renderActivityLog(logs) {
-    const el = document.getElementById('logContent');
-    if (!logs.length) {
-      el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">ยังไม่มีประวัติการแก้ไข</div>';
-      return;
-    }
-
-    const actionLabel = a => ({
-      resident_update: '✏️ แก้ข้อมูล',
-      pin_verify: '🔑 Verify PIN',
-      pin_change: '🔑 เปลี่ยน PIN',
-      admin_pin_reset: '🔑 Admin Reset PIN',
-      admin_resident_update: '🛠 Admin แก้ข้อมูล',
-      poll_vote: '🗳 โหวต',
-    }[a] || a);
-
-    const fmtTs = ts => {
-      if (!ts) return '—';
-      const d = ts._seconds ? new Date(ts._seconds * 1000) : new Date(ts);
-      return new Intl.DateTimeFormat('th-TH', {
-        day: 'numeric', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
-        timeZone: 'Asia/Bangkok'
-      }).format(d);
+    const firebaseConfig = {
+      apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
+      authDomain: "pattra8-54c3f.firebaseapp.com",
+      projectId: "pattra8-54c3f",
+      storageBucket: "pattra8-54c3f.firebasestorage.app",
+      messagingSenderId: "1045231989781",
+      appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
     };
 
-    const fmtDiff = (log) => {
-      if (!log.old || !log.new) return '';
-      const fields = log.changedFields || [];
-      if (!fields.length) return '';
-      return fields.map(f => {
-        const ov = log.old[f], nv = log.new[f];
-        if (Array.isArray(ov) || Array.isArray(nv)) {
-          const o = [].concat(ov || []).join(', ') || '—';
-          const n = [].concat(nv || []).join(', ') || '—';
-          return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(o)}</span> → <span style="color:#22c55e">${escHtml(n)}</span></div>`;
-        }
-        return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(String(ov||'—'))}</span> → <span style="color:#22c55e">${escHtml(String(nv||'—'))}</span></div>`;
-      }).join('');
+    const ADMIN_PASSWORDS = ['adminpattra8', 'team388'];
+    const SESSION_KEY = 'pattra_announce_admin_until';
+    const SESSION_DAYS = 30;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const colRef = collection(db, 'announcements');
+
+    const loginCard = document.getElementById('loginCard');
+    const adminPanel = document.getElementById('adminPanel');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+    const form = document.getElementById('announceForm');
+    const formTitle = document.getElementById('formTitle');
+    const formStatus = document.getElementById('formStatus');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const list = document.getElementById('announcementList');
+    const saveProgress = document.getElementById('saveProgress');
+    const saveProgressBar = document.getElementById('saveProgressBar');
+    const saveProgressLabel = document.getElementById('saveProgressLabel');
+
+    function showProgress(pct, label) {
+      saveProgress.classList.add('active');
+      saveProgressLabel.classList.add('active');
+      saveProgressBar.style.width = pct + '%';
+      saveProgressLabel.textContent = label;
+      formStatus.textContent = '';
+    }
+
+    function hideProgress() {
+      saveProgress.classList.remove('active');
+      saveProgressLabel.classList.remove('active');
+      saveProgressBar.style.width = '0%';
+      saveProgressLabel.textContent = '';
+    }
+
+    // ─── FILE MANAGEMENT ───
+    const MAX_FILES = 5;
+    const WARN_BYTES = 5 * 1024 * 1024;  // 5 MB — warn but allow
+    // pendingPhotos: { file (File|null), previewUrl (string), name, isImage, cat, ext, storageUrl (string|null) }
+    // storageUrl = already uploaded (from existing announcement), file = new file to upload
+    let pendingPhotos = [];
+
+    const photoFileInput = document.getElementById('photoFileInput');
+    const photoPreviews = document.getElementById('photoPreviews');
+    const photoCount = document.getElementById('photoCount');
+    const photoDropZone = document.getElementById('photoDropZone');
+
+    const FILE_ICONS = {
+      pdf:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b94d42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      doc:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2b5797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      xls:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6f42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      ppt:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d24726" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      file: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a7f76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
     };
 
-    const rows = logs.map(log => {
-      const ok = log.success !== false;
-      const lpr = log.lprSync;
-      let lprCell = '—';
-      if (lpr) {
-        if (lpr.ok) {
-          lprCell = `<span style="color:#22c55e">✓ Synced</span>`;
-        } else {
-          // Errors live in lpr.results[].errors, not lpr.errors
-          const allErrors = [];
-          (lpr.results || []).forEach(r => {
-            (r.errors || []).forEach(e => allErrors.push(
-              `${e.action} ${e.plate}: ${e.error}`
-            ));
-          });
-          const summary = allErrors.length
-            ? allErrors.join('\n')
-            : JSON.stringify(lpr, null, 2);
-          lprCell = `<span style="color:#ef4444;cursor:help" title="${escHtml(summary)}" onclick="alert(this.getAttribute('title'))">✗ Failed</span>`;
-        }
-      }
-      return `<tr>
-        <td style="white-space:nowrap;font-size:.78rem;color:var(--text-muted)">${fmtTs(log.ts)}</td>
-        <td><strong>${escHtml(log.houseNo||'—')}</strong></td>
-        <td>${actionLabel(log.action)}</td>
-        <td>${ok ? '<span style="color:#22c55e">✓</span>' : '<span style="color:#ef4444">✗</span>'}</td>
-        <td style="font-size:.82rem;max-width:280px">${fmtDiff(log)}</td>
-        <td>${lprCell}</td>
-        <td style="font-size:.75rem;color:var(--text-muted)">${escHtml(log.ip||'')}</td>
-      </tr>`;
-    }).join('');
-
-    el.innerHTML = `
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
-          <thead>
-            <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
-              <th style="padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap">เวลา</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600">บ้าน</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600">Action</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600">OK</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600">การเปลี่ยนแปลง</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600">LPR</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600">IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
-        <div style="padding:10px 14px;color:var(--text-muted);font-size:.78rem;border-top:1px solid var(--border);">${logs.length} รายการ</div>
-      </div>`;
-  }
-
-  async function generateResidentPinForAdmin() {
-    const houseNo = document.getElementById('pinHouseInput').value.trim();
-    const btn = document.getElementById('pinGenerateBtn');
-    const result = document.getElementById('pinAdminResult');
-    const error = document.getElementById('pinAdminError');
-    result.style.display = 'none';
-    error.style.display = 'none';
-    if (!/^38\/\d{1,2}$/.test(houseNo.replace(/\s+/g, ''))) {
-      error.textContent = 'กรุณาใส่บ้านเลขที่ เช่น 38/8';
-      error.style.display = 'block';
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = 'กำลัง generate...';
-    try {
-      const res = await fetch(RESIDENT_AUTH_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'adminReset',
-          houseNo,
-          githubToken: GH_TOKEN
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      document.getElementById('pinAdminValue').textContent = data.pin;
-      document.getElementById('pinAdminHouse').textContent = `บ้าน ${data.houseNo || houseNo} · ส่ง PIN นี้ให้ลูกบ้าน และแนะนำให้เปลี่ยนเองภายหลังได้`;
-      result.style.display = 'block';
-    } catch (err) {
-      error.textContent = 'Generate PIN ไม่สำเร็จ: ' + err.message;
-      error.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Generate PIN';
-    }
-  }
-
-  async function copyGeneratedPin() {
-    const pin = document.getElementById('pinAdminValue').textContent.trim();
-    if (!pin) return;
-    await navigator.clipboard.writeText(pin);
-    alert('Copy PIN แล้ว');
-  }
-
-  // ── Vote / Poll admin ────────────────────────────────────────────────────
-  const POLL_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/pollAction';
-  let _pollMode = 'single'; // 'single' | 'survey'
-  let _surveyQCount = 0;
-
-  function setPollMode(mode) {
-    _pollMode = mode;
-    const isSurvey = mode === 'survey';
-    document.getElementById('singleModeSection').style.display = isSurvey ? 'none' : 'block';
-    document.getElementById('surveyModeSection').style.display = isSurvey ? 'block' : 'none';
-    const activeStyle = 'font-family:inherit;font-size:.85rem;padding:7px 16px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:700;';
-    const idleStyle = 'font-family:inherit;font-size:.85rem;padding:7px 16px;border-radius:8px;border:2px solid var(--border);background:none;color:var(--text-muted);cursor:pointer;';
-    document.getElementById('modeSingleBtn').style.cssText = isSurvey ? idleStyle : activeStyle;
-    document.getElementById('modeSurveyBtn').style.cssText = isSurvey ? activeStyle : idleStyle;
-    if (isSurvey && document.getElementById('surveyQuestionsList').children.length === 0) {
-      addSurveyQuestion();
-    }
-  }
-
-  function _qTypeOptionsHtml(qId) {
-    return `<select class="sq-type" data-qid="${qId}" onchange="onSurveyTypeChange(this)"
-      style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.88rem;">
-      <option value="single">เลือก 1 ข้อ</option>
-      <option value="multi">เลือกได้หลายข้อ</option>
-      <option value="rating">คะแนน 1-5</option>
-      <option value="acknowledge">รับทราบ</option>
-      <option value="text">ข้อความสั้น</option>
-      <option value="textarea">ข้อความยาว</option>
-      <option value="dropdown">Dropdown</option>
-    </select>`;
-  }
-
-  function _qOptionsBlockHtml(qId, show) {
-    return `<div class="sq-opts-section" data-qid="${qId}" style="display:${show?'block':'none'};margin-top:8px;">
-      <div class="sq-opts-list" data-qid="${qId}">
-        <div class="sq-opt-row" style="display:flex;gap:6px;margin-bottom:6px;">
-          <input type="text" class="sq-opt-label" placeholder="ตัวเลือก 1"
-            style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.88rem;" />
-          <input type="url" class="sq-opt-img" placeholder="URL รูป (optional)"
-            style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem;color:var(--text-muted);" />
-        </div>
-        <div class="sq-opt-row" style="display:flex;gap:6px;margin-bottom:6px;">
-          <input type="text" class="sq-opt-label" placeholder="ตัวเลือก 2"
-            style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.88rem;" />
-          <input type="url" class="sq-opt-img" placeholder="URL รูป (optional)"
-            style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem;color:var(--text-muted);" />
-        </div>
-      </div>
-      <button onclick="addSurveyOpt(this)" data-qid="${qId}"
-        style="font-family:inherit;font-size:.8rem;color:var(--accent-text);background:none;border:1px dashed var(--accent-soft);border-radius:6px;padding:5px 10px;cursor:pointer;margin-top:2px;">
-        + เพิ่มตัวเลือก
-      </button>
-      <div class="sq-max-row" style="display:none;margin-top:8px;">
-        <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);">เลือกได้สูงสุด&nbsp;
-          <input type="number" class="sq-max" min="2" max="10" value="2"
-            style="width:56px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.88rem;" />
-          ข้อ</label>
-      </div>
-    </div>`;
-  }
-
-  function addSurveyQuestion() {
-    _surveyQCount++;
-    const qId = `q${_surveyQCount}`;
-    const list = document.getElementById('surveyQuestionsList');
-    const block = document.createElement('div');
-    block.className = 'sq-block';
-    block.dataset.qid = qId;
-    block.style.cssText = 'border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--bg-soft);';
-    block.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span style="font-weight:800;font-size:.85rem;color:var(--accent-deep);min-width:28px;">วาระ ${_surveyQCount}</span>
-        ${_qTypeOptionsHtml(qId)}
-        <label style="display:flex;align-items:center;gap:5px;font-size:.8rem;color:var(--text-muted);margin-left:4px;">
-          <input type="checkbox" class="sq-required" checked /> จำเป็น
-        </label>
-        <button onclick="this.closest('.sq-block').remove()"
-          style="margin-left:auto;font-family:inherit;font-size:.8rem;color:#a33d30;background:none;border:1px solid #f0cfc8;border-radius:6px;padding:4px 8px;cursor:pointer;">✕ ลบ</button>
-      </div>
-      <input type="text" class="sq-label" placeholder="คำถาม / หัวข้อวาระ"
-        style="width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.93rem;margin-bottom:8px;" />
-      <input type="url" class="sq-img" placeholder="URL รูปภาพประจำวาระ (optional)"
-        style="width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;color:var(--text-muted);margin-bottom:4px;" />
-      ${_qOptionsBlockHtml(qId, true)}
-    `;
-    list.appendChild(block);
-  }
-
-  function onSurveyTypeChange(sel) {
-    const block = sel.closest('.sq-block');
-    const qId = block.dataset.qid;
-    const type = sel.value;
-    const needOpts = ['single','multi','dropdown'].includes(type);
-    const optsSection = block.querySelector('.sq-opts-section');
-    const maxRow = block.querySelector('.sq-max-row');
-    if (optsSection) optsSection.style.display = needOpts ? 'block' : 'none';
-    if (maxRow) maxRow.style.display = type === 'multi' ? 'block' : 'none';
-  }
-
-  function addSurveyOpt(btn) {
-    const block = btn.closest('.sq-block');
-    const list = block.querySelector('.sq-opts-list');
-    const count = list.querySelectorAll('.sq-opt-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'sq-opt-row';
-    row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;';
-    row.innerHTML = `
-      <input type="text" class="sq-opt-label" placeholder="ตัวเลือก ${count}"
-        style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.88rem;" />
-      <input type="url" class="sq-opt-img" placeholder="URL รูป (optional)"
-        style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.82rem;color:var(--text-muted);" />
-      <button onclick="this.closest('.sq-opt-row').remove()"
-        style="font-family:inherit;font-size:.8rem;color:#a33d30;background:none;border:1px solid #f0cfc8;border-radius:6px;padding:5px 8px;cursor:pointer;">✕</button>
-    `;
-    list.appendChild(row);
-  }
-
-  function onVoteTypeChange() {
-    const type = document.getElementById('voteType').value;
-    const needOpts = !['rating','acknowledge'].includes(type);
-    document.getElementById('voteOptionsSection').style.display = needOpts ? 'block' : 'none';
-    document.getElementById('voteMaxChoicesRow').style.display = type === 'multi' ? 'flex' : 'none';
-  }
-
-  function addVoteOption() {
-    const list = document.getElementById('voteOptionsList');
-    const count = list.querySelectorAll('.vote-option-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'vote-option-row';
-    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
-    row.innerHTML = `
-      <input type="text" placeholder="ตัวเลือกที่ ${count}" class="vote-opt-input"
-        style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.93rem;" />
-      <input type="url" placeholder="URL รูป (optional)" class="vote-opt-img"
-        style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:.88rem;color:var(--text-muted);" />
-      <button onclick="this.closest('.vote-option-row').remove()"
-        style="font-family:inherit;font-size:.85rem;color:#a33d30;background:none;border:1px solid #f0cfc8;border-radius:8px;padding:6px 10px;cursor:pointer;">✕</button>
-    `;
-    list.appendChild(row);
-  }
-
-  async function createPoll() {
-    const btn = document.getElementById('createPollBtn');
-    const status = document.getElementById('createPollStatus');
-    const title = document.getElementById('voteTitle').value.trim();
-    const desc = document.getElementById('voteDesc').value.trim();
-    const deadline = document.getElementById('voteDeadline').value;
-    const imageUrl = document.getElementById('voteImageUrl').value.trim() || null;
-    if (!title) { status.textContent = 'กรุณาใส่ชื่อ poll'; return; }
-
-    let pollPayload;
-    if (_pollMode === 'survey') {
-      // Build questions array
-      const blocks = [...document.querySelectorAll('#surveyQuestionsList .sq-block')];
-      if (!blocks.length) { status.textContent = 'กรุณาเพิ่มอย่างน้อย 1 วาระ'; return; }
-      const questions = [];
-      for (let i = 0; i < blocks.length; i++) {
-        const blk = blocks[i];
-        const qLabel = blk.querySelector('.sq-label').value.trim();
-        const qType = blk.querySelector('.sq-type').value;
-        const qImg = blk.querySelector('.sq-img').value.trim() || null;
-        const qRequired = blk.querySelector('.sq-required').checked;
-        const qId = `q${i + 1}`;
-        if (!qLabel) { status.textContent = `วาระที่ ${i+1} ยังไม่มีหัวข้อ`; return; }
-        const q = {id: qId, label: qLabel, type: qType, required: qRequired, imageUrl: qImg};
-        if (['single','multi','dropdown'].includes(qType)) {
-          const optLabels = [...blk.querySelectorAll('.sq-opt-label')].map(el => el.value.trim());
-          const optImgs = [...blk.querySelectorAll('.sq-opt-img')].map(el => el.value.trim() || null);
-          q.options = optLabels.map((lbl, idx) => ({label: lbl, imageUrl: optImgs[idx]})).filter(o => o.label);
-          if (q.options.length < 1) { status.textContent = `วาระที่ ${i+1} ต้องมีอย่างน้อย 1 ตัวเลือก`; return; }
-          if (qType === 'multi') {
-            q.maxChoices = Number(blk.querySelector('.sq-max').value) || 2;
-          }
-        }
-        questions.push(q);
-      }
-      pollPayload = {mode: 'survey', title, description: desc, imageUrl, questions,
-        deadline: deadline ? new Date(deadline).toISOString() : null,
-        totalHouses: (allData || []).length || 68};
-    } else {
-      // Single question mode
-      const type = document.getElementById('voteType').value;
-      const maxChoices = Number(document.getElementById('voteMaxChoices').value) || 2;
-      let options = null;
-      if (!['rating','acknowledge'].includes(type)) {
-        const optRows = [...document.querySelectorAll('#voteOptionsList .vote-option-row')];
-        options = optRows.map(row => {
-          const lbl = row.querySelector('.vote-opt-input').value.trim();
-          const img = row.querySelector('.vote-opt-img') ? row.querySelector('.vote-opt-img').value.trim() : '';
-          return lbl ? {label: lbl, imageUrl: img || null} : null;
-        }).filter(Boolean);
-        if (options.length < 2) { status.textContent = 'ต้องมีอย่างน้อย 2 ตัวเลือก'; return; }
-      }
-      pollPayload = {mode: 'single', title, description: desc, imageUrl, type, options,
-        maxChoices: type === 'multi' ? maxChoices : null,
-        deadline: deadline ? new Date(deadline).toISOString() : null,
-        totalHouses: (allData || []).length || 68};
+    function getFileCategory(name) {
+      const ext = name.split('.').pop().toLowerCase();
+      if (['jpg','jpeg','png','webp','gif','avif'].includes(ext)) return 'image';
+      if (ext === 'pdf') return 'pdf';
+      if (['doc','docx'].includes(ext)) return 'doc';
+      if (['xls','xlsx'].includes(ext)) return 'xls';
+      if (['ppt','pptx'].includes(ext)) return 'ppt';
+      return 'file';
     }
 
-    btn.disabled = true; status.textContent = 'กำลังสร้าง...';
-    try {
-      const res = await fetch(POLL_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'create', adminPassword: 'PATTRADATA', poll: pollPayload})
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      status.textContent = `✅ สร้างแล้ว! Poll ID: ${data.pollId}`;
-      document.getElementById('voteTitle').value = '';
-      document.getElementById('voteDesc').value = '';
-      document.getElementById('voteDeadline').value = '';
-      document.getElementById('voteImageUrl').value = '';
-      document.getElementById('surveyQuestionsList').innerHTML = '';
-      _surveyQCount = 0;
-      loadAdminPolls();
-    } catch (err) {
-      status.textContent = 'สร้างไม่สำเร็จ: ' + err.message;
-    } finally { btn.disabled = false; }
-  }
+    function getFileIcon(cat) {
+      return FILE_ICONS[cat] || FILE_ICONS.file;
+    }
 
-  async function loadAdminPolls() {
-    const el = document.getElementById('adminPollList');
-    if (!el) return;
-    el.innerHTML = '<div style="color:var(--text-muted);font-size:.9rem;">กำลังโหลด...</div>';
-    try {
-      const res = await fetch(POLL_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'list'})
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!data.ok) throw new Error(data.error || 'Load failed');
-      const polls = data.polls || [];
-      if (!polls.length) {
-        el.innerHTML = '<div style="color:var(--text-muted);font-size:.9rem;">ยังไม่มี poll</div>';
-        return;
-      }
-      el.innerHTML = polls.map(p => {
-        const closed = p.status === 'closed' ||
-          (p.deadline && (p.deadline._seconds ? p.deadline._seconds*1000 : new Date(p.deadline).getTime()) < Date.now());
-        const dl = p.deadline
-          ? (p.deadline._seconds ? new Date(p.deadline._seconds*1000) : new Date(p.deadline))
-              .toLocaleDateString('th-TH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
-          : '—';
+    function updatePhotoUI() {
+      photoPreviews.innerHTML = pendingPhotos.map((f, i) => {
+        const inner = f.isImage
+          ? `<img src="${f.previewUrl}" alt="${f.name}" />`
+          : `<div class="file-preview-tile">${getFileIcon(f.cat)}<span class="file-ext">${f.ext}</span><span class="file-name">${f.name}</span></div>`;
         return `
-          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;background:${closed?'#fafafa':'#fff'};">
-            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
-              <div style="flex:1;">
-                <div style="font-weight:700;font-size:.97rem;">${p.title||'(ไม่มีชื่อ)'}</div>
-                <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px;">
-                  ${closed?'✅ ปิดแล้ว':'🗳 กำลังโหวต'} · ⏰ ${dl}
-                </div>
-              </div>
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button onclick="viewAdminPollResults('${p.id}','${(p.title||'').replace(/'/g,"\\'")}' )"
-                style="font-family:inherit;font-size:.82rem;background:var(--accent-pale);color:var(--accent-deep);border:1px solid var(--accent-soft);border-radius:8px;padding:6px 12px;cursor:pointer;">
-                📊 ดูผล
-              </button>
-              ${!closed ? `
-                <button onclick="closePoll('${p.id}',this)"
-                  style="font-family:inherit;font-size:.82rem;background:#fff0f0;color:#a33d30;border:1px solid #f0cfc8;border-radius:8px;padding:6px 12px;cursor:pointer;">
-                  🔒 ปิด Poll
-                </button>` : ''}
-              <button onclick="navigator.clipboard.writeText('https://pattra8.com/vote/').then(()=>alert('Copy link แล้ว'))"
-                style="font-family:inherit;font-size:.82rem;background:none;color:var(--text-soft);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
-                🔗 Copy Link
-              </button>
-              <button onclick="deletePoll('${p.id}','${(p.title||'').replace(/'/g,"\\'")}',this)"
-                style="font-family:inherit;font-size:.82rem;background:#fff0f0;color:#a33d30;border:1px solid #f0cfc8;border-radius:8px;padding:6px 12px;cursor:pointer;">
-                🗑 ลบ
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    } catch (err) {
-      el.innerHTML = `<div style="color:#a33d30;">${err.message}</div>`;
-    }
-  }
-
-  async function viewAdminPollResults(pollId, title) {
-    const modal = document.getElementById('pollResultsModal');
-    const body = document.getElementById('pollResultsBody');
-    document.getElementById('pollResultsTitle').textContent = 'ผลโหวต — ' + title;
-    modal.style.display = 'block';
-    body.innerHTML = '<div style="color:var(--text-muted);">กำลังโหลด...</div>';
-    try {
-      const res = await fetch(POLL_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action:'results', pollId, adminPassword:'PATTRADATA'})
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!data.ok) throw new Error(data.error || 'Load failed');
-      const {poll, results, votes = []} = data;
-      const {counts, total, totalHouses, participationPct} = results;
-      const isSurvey = poll.mode === 'survey';
-      const voteMap = new Map(votes.map(v => [String(v.houseNo || '').trim(), v]));
-      const allHouseNos = (allData || [])
-        .map(r => String(r.house_no || r.houseNo || '').trim())
-        .filter(Boolean)
-        .sort((a,b) => Number(a.split('/')[1]) - Number(b.split('/')[1]));
-      const notVoted = allHouseNos.filter(h => !voteMap.has(h));
-      window.currentPollExport = {poll, results, votes, notVoted};
-
-      function renderBarBlock(label, cnt, total, extra) {
-        const pct = total > 0 ? Math.round(cnt / total * 100) : 0;
-        return `<div style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:.88rem;font-weight:600;margin-bottom:4px;">
-            <span>${escHtml(String(label))}</span><span style="color:var(--accent-deep);">${pct}%</span>
-          </div>
-          <div style="height:10px;background:#f0ebe0;border-radius:99px;overflow:hidden;">
-            <div style="height:100%;background:var(--accent);border-radius:99px;width:${pct}%;transition:width .4s;"></div>
-          </div>
-          <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">${cnt} เสียง${extra||''}</div>
-        </div>`;
-      }
-
-      function renderQCounts(qType, qOptions, qCounts, qTotal) {
-        let out = '';
-        if (qType === 'rating') {
-          const avg = qTotal > 0
-            ? (Object.entries(qCounts).reduce((s,[k,v])=>s+Number(k)*v,0)/qTotal).toFixed(2) : '—';
-          out += `<div style="font-size:1.4rem;font-weight:800;color:var(--accent-deep);margin-bottom:8px;">${avg} ★</div>`;
-          [1,2,3,4,5].forEach(i => { out += renderBarBlock(`${i} ดาว`, qCounts[i]||0, qTotal); });
-        } else if (qType === 'acknowledge') {
-          out += renderBarBlock('รับทราบ', qCounts['acknowledged']||0, qTotal);
-        } else if (['text','textarea'].includes(qType)) {
-          const texts = qCounts.__texts || [];
-          if (!texts.length) { out += '<div style="font-size:.85rem;color:var(--text-muted);">ยังไม่มีคำตอบ</div>'; }
-          else {
-            out += `<div style="max-height:160px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:.85rem;">`;
-            texts.forEach(t => {
-              out += `<div style="padding:4px 0;border-bottom:1px solid var(--border-soft);"><strong>${escHtml(t.houseNo||'')}</strong>: ${escHtml(t.text||'')}</div>`;
-            });
-            out += '</div>';
-          }
-        } else {
-          const opts = (qOptions||[]).length ? qOptions.map(o => typeof o==='object'?o.label:o) : Object.keys(qCounts);
-          opts.forEach(opt => { out += renderBarBlock(opt, qCounts[opt]||0, qTotal); });
-        }
-        return out;
-      }
-
-      let html = `<div style="margin-bottom:12px;font-size:.88rem;color:var(--text-muted);">
-        👥 โหวตแล้ว ${total} / ${totalHouses} หลัง (${participationPct}%)
-      </div>`;
-
-      if (isSurvey) {
-        const qs = poll.questions || [];
-        qs.forEach((q, idx) => {
-          const qCounts = (counts[q.id] || {});
-          const qTotal = Object.entries(qCounts)
-            .filter(([k]) => k !== '__texts')
-            .reduce((s,[,v]) => s + (Array.isArray(v) ? v.length : Number(v)), 0);
-          html += `<div style="margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--bg-soft);">
-            <div style="font-weight:800;font-size:.9rem;color:var(--accent-deep);margin-bottom:2px;">วาระ ${idx+1}</div>
-            <div style="font-weight:700;margin-bottom:10px;">${escHtml(q.label||'')}</div>
-            ${renderQCounts(q.type, q.options, qCounts, qTotal)}
+          <div class="photo-preview-item">
+            ${inner}
+            <button class="photo-remove-btn" type="button" data-photo-remove="${i}" title="ลบไฟล์">✕</button>
           </div>`;
+      }).join('');
+      photoCount.textContent = pendingPhotos.length
+        ? `${pendingPhotos.length} / ${MAX_FILES} ไฟล์`
+        : '';
+    }
+
+    photoPreviews.addEventListener('click', e => {
+      const btn = e.target.closest('[data-photo-remove]');
+      if (!btn) return;
+      pendingPhotos.splice(Number(btn.dataset.photoRemove), 1);
+      updatePhotoUI();
+    });
+
+    // Generate a local preview URL for display before upload
+    function getPreviewUrl(file) {
+      return new Promise((resolve, reject) => {
+        const cat = getFileCategory(file.name);
+        if (cat !== 'image') { resolve(null); return; }
+        // compress for preview display only
+        const MAX_DIM = 400;
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const scale = Math.min(MAX_DIM / img.width, MAX_DIM / img.height, 1);
+            const canvas = document.createElement('canvas');
+            canvas.width  = Math.round(img.width  * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.75));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function addFiles(files) {
+      const remaining = MAX_FILES - pendingPhotos.length;
+      const toProcess = Array.from(files).slice(0, remaining);
+
+      const oversize = toProcess.filter(f => f.size > WARN_BYTES);
+      if (oversize.length) {
+        const names = oversize.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join(', ');
+        const ok = window.confirm(`ไฟล์ต่อไปนี้มีขนาดใหญ่กว่า 5MB:\n${names}\n\nต้องการอัปโหลดต่อไหม?`);
+        if (!ok) return;
+      }
+
+      try {
+        const previews = await Promise.all(toProcess.map(getPreviewUrl));
+        const newEntries = toProcess.map((file, i) => {
+          const cat = getFileCategory(file.name);
+          const ext = file.name.split('.').pop().toLowerCase();
+          return { file, previewUrl: previews[i], name: file.name, isImage: cat === 'image', cat, ext, storageUrl: null };
         });
-      } else {
-        if (poll.type === 'rating') {
-          const avg = total > 0
-            ? (Object.entries(counts).reduce((s,[k,v])=>s+Number(k)*v,0)/total).toFixed(2) : '—';
-          html += `<div style="font-size:1.8rem;font-weight:800;color:var(--accent-deep);margin-bottom:4px;">${avg} ★</div>`;
-          [1,2,3,4,5].forEach(i => { html += renderBarBlock(`${i} ดาว`, counts[i]||0, total); });
-        } else if (poll.type === 'acknowledge') {
-          html += renderBarBlock('รับทราบ', counts['acknowledged']||0, total);
-        } else {
-          const opts = (poll.options||[]).length
-            ? (poll.options||[]).map(o => typeof o==='object'?o.label:o)
-            : Object.keys(counts);
-          opts.forEach(opt => { html += renderBarBlock(opt, counts[opt]||0, total); });
-        }
+        pendingPhotos = [...pendingPhotos, ...newEntries];
+        updatePhotoUI();
+        formStatus.textContent = 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
+        formStatus.classList.remove('error');
+      } catch {
+        formStatus.textContent = 'ไม่สามารถโหลดไฟล์ได้';
+        formStatus.classList.add('error');
       }
-
-      const voteRowsHtml = votes
-        .slice()
-        .sort((a,b) => Number(String(a.houseNo).split('/')[1]) - Number(String(b.houseNo).split('/')[1]))
-        .map(v => {
-          let choiceStr;
-          if (isSurvey && v.answers) {
-            choiceStr = Object.entries(v.answers).map(([k,val]) => {
-              const ans = Array.isArray(val) ? val.join(', ') : String(val ?? '');
-              return `${k}: ${ans}`;
-            }).join(' | ');
-          } else {
-            choiceStr = Array.isArray(v.choice) ? v.choice.join(', ') : String(v.choice ?? '');
-          }
-          const signed = v.signedAt ? 'เซ็นแล้ว' : '—';
-          return `<tr>
-            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);font-weight:700;">${v.houseNo || ''}</td>
-            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);">${escHtml(v.residentName || '—')}</td>
-            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);font-size:.82rem;">${escHtml(choiceStr)}</td>
-            <td style="padding:7px 8px;border-bottom:1px solid var(--border-soft);color:var(--status-ok);">${signed}</td>
-          </tr>`;
-        }).join('');
-      html += `
-        <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button onclick="exportPollCsv()" style="font-family:inherit;font-size:.82rem;background:var(--accent);color:#fff;border:0;border-radius:8px;padding:7px 12px;cursor:pointer;">⬇️ Export CSV</button>
-          <button onclick="printPollSlips()" style="font-family:inherit;font-size:.82rem;background:none;color:var(--text-soft);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;">🖨️ Print / PDF</button>
-        </div>
-        <div style="margin-top:18px;border-top:1px solid var(--border-soft);padding-top:14px;">
-          <div style="font-weight:700;margin-bottom:8px;">บ้านที่โหวตแล้ว (${votes.length})</div>
-          <div style="max-height:260px;overflow:auto;border:1px solid var(--border);border-radius:10px;">
-            <table style="width:100%;border-collapse:collapse;font-size:.84rem;">
-              <thead style="background:var(--bg-soft);position:sticky;top:0;">
-                <tr>
-                  <th style="text-align:left;padding:7px 8px;">บ้าน</th>
-                  <th style="text-align:left;padding:7px 8px;">ชื่อ</th>
-                  <th style="text-align:left;padding:7px 8px;">คำตอบ</th>
-                  <th style="text-align:left;padding:7px 8px;">E-sign</th>
-                </tr>
-              </thead>
-              <tbody>${voteRowsHtml || '<tr><td colspan="4" style="padding:12px;color:var(--text-muted);">ยังไม่มีผู้โหวต</td></tr>'}</tbody>
-            </table>
-          </div>
-          <div style="margin-top:14px;">
-            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">ยังไม่โหวต (${notVoted.length})</div>
-            ${renderHouseChips(notVoted)}
-          </div>
-        </div>
-      `;
-      body.innerHTML = html;
-    } catch (err) {
-      body.innerHTML = `<div style="color:#a33d30;">${err.message}</div>`;
     }
-    modal.scrollIntoView({behavior:'smooth', block:'start'});
-  }
 
-  function exportPollCsv() {
-    const data = window.currentPollExport;
-    if (!data) return;
-    const rows = [
-      ['Poll', data.poll.title || ''],
-      ['Total voted', data.results.total],
-      ['Total houses', data.results.totalHouses],
-      [],
-      ['house_no', 'name', 'choice', 'signed', 'signature_reused']
-    ];
-    (data.votes || []).forEach(v => {
-      rows.push([
-        v.houseNo || '',
-        v.residentName || '',
-        Array.isArray(v.choice) ? v.choice.join('; ') : String(v.choice ?? ''),
-        v.signedAt ? 'yes' : '',
-        v.signatureReused ? 'yes' : 'no'
-      ]);
+    // Upload a single file to Firebase Storage, return download URL
+    async function uploadToStorage(entry, announcementId) {
+      if (entry.storageUrl) return entry.storageUrl; // already uploaded
+      const path = `announcements/${announcementId}/${Date.now()}_${entry.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, entry.file);
+      return await getDownloadURL(storageRef);
+    }
+
+    photoFileInput.addEventListener('change', e => {
+      if (e.target.files.length) addFiles(e.target.files);
+      photoFileInput.value = '';
     });
-    rows.push([]);
-    rows.push(['not_voted']);
-    (data.notVoted || []).forEach(h => rows.push([h]));
-    const csv = rows.map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `pattra8-vote-${(data.poll.id || 'poll')}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
 
-  function renderHouseChips(houses) {
-    if (!houses || !houses.length) {
-      return '<div style="font-size:.84rem;color:var(--status-ok);">ครบทุกบ้านแล้ว</div>';
-    }
-    const grouped = houses
-      .map(h => {
-        const suffix = Number(String(h).split('/')[1]);
-        return {house: h, suffix: Number.isFinite(suffix) ? suffix : 0};
-      })
-      .sort((a, b) => a.suffix - b.suffix)
-      .reduce((rows, item) => {
-        const start = Math.floor((Math.max(item.suffix, 1) - 1) / 10) * 10 + 1;
-        const key = `${start}-${start + 9}`;
-        if (!rows.has(key)) rows.set(key, {start, end: start + 9, houses: []});
-        rows.get(key).houses.push(item.house);
-        return rows;
-      }, new Map());
-    return `<div style="display:flex;flex-direction:column;gap:10px;">
-      ${[...grouped.values()].map(row => `
-        <div style="display:grid;grid-template-columns:104px 1fr;gap:10px;align-items:stretch;padding:8px;border:1px solid var(--border-soft);border-radius:10px;background:var(--bg-soft);">
-          <div style="display:flex;align-items:center;justify-content:center;border-radius:8px;background:#fff;color:var(--accent-deep);font-size:.76rem;font-weight:900;white-space:nowrap;border:1px solid var(--border-soft);">38/${row.start}-38/${row.end}</div>
-          <div style="display:grid;grid-template-columns:repeat(10,minmax(34px,1fr));gap:6px;line-height:1;">
-            ${row.houses.map(h => {
-              const suffix = String(h).split('/')[1] || h;
-              return `<span title="${escHtml(h)}" style="display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-body);font-size:.86rem;font-weight:800;">${escHtml(suffix)}</span>`;
-            }).join('')}
-          </div>
-        </div>
-      `).join('')}
-    </div>`;
-  }
-
-  function choiceText(choice) {
-    return Array.isArray(choice) ? choice.join(', ') : String(choice ?? '');
-  }
-
-  function firestoreTimeText(value) {
-    if (!value) return '—';
-    let date = null;
-    if (typeof value.toDate === 'function') date = value.toDate();
-    else if (value._seconds) date = new Date(value._seconds * 1000);
-    else if (value.seconds) date = new Date(value.seconds * 1000);
-    else date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    photoDropZone.addEventListener('dragover', e => { e.preventDefault(); photoDropZone.classList.add('drag-over'); });
+    photoDropZone.addEventListener('dragleave', () => photoDropZone.classList.remove('drag-over'));
+    photoDropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      photoDropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
     });
-  }
 
-  function printPollSlips() {
-    const data = window.currentPollExport;
-    if (!data) return;
-    const votes = (data.votes || [])
-      .slice()
-      .sort((a,b) => Number(String(a.houseNo).split('/')[1]) - Number(String(b.houseNo).split('/')[1]));
-    if (!votes.length) {
-      alert('ยังไม่มีบ้านที่โหวต');
-      return;
+    function esc(value) {
+      return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[char]));
     }
-    const renderSlip = v => {
-      const signature = v.signatureDataUrl
-        ? `<img class="signature-img" src="${v.signatureDataUrl}" alt="ลายเซ็นบ้าน ${escHtml(v.houseNo || '')}">`
-        : `<div class="signature-empty">ไม่มีรูป e-sign</div>`;
-      return `
-        <article class="slip">
-          <div class="slip-top">
-            <div class="house">${escHtml(v.houseNo || '')}</div>
-            <div class="person">
-              <div class="label">ชื่อ-นามสกุล</div>
-              <div class="value">${escHtml(v.residentName || '—')}</div>
-            </div>
-            <div class="topic">
-              <div class="label">หัวข้อโหวต</div>
-              <div class="value">${escHtml(data.poll.title || '')}</div>
-            </div>
-          </div>
-          <div class="slip-body">
-            <div class="endorse">
-              <div class="answer-strip"><span>คำตอบ</span>${escHtml(choiceText(v.choice))}</div>
-              <div class="date">วันที่ลงคะแนน ${escHtml(firestoreTimeText(v.votedAt))}</div>
-            </div>
-            <div class="signature">
-              <div class="label">E-Signature</div>
-              <div class="sig-box">${signature}</div>
-              <div class="sig-name">${escHtml(v.residentName || '')}</div>
-            </div>
-          </div>
-        </article>`;
-    };
-    const pages = [];
-    for (let i = 0; i < votes.length; i += 4) {
-      pages.push(votes.slice(i, i + 4));
-    }
-    const slipHtml = pages.map(pageVotes => `
-      <main class="sheet">
-        <header class="page-head">
-          <div>
-            <div class="brand">Pattra Villa 8</div>
-            <div class="sub">Vote Endorsement / หลักฐานการลงคะแนน</div>
-          </div>
-          <div class="page-title">หลักฐานการลงคะแนนรายบ้าน<span>พิมพ์รวมหลายบ้าน: 4 slip ต่อหน้า A4</span></div>
-        </header>
-        <section class="slips">${pageVotes.map(renderSlip).join('')}</section>
-      </main>
-    `).join('');
-    const w = window.open('', '_blank');
-    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Pattra8 Vote Slips</title>
-      <style>
-        @page { size: A4; margin: 10mm; }
-        * { box-sizing: border-box; }
-        body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Sarabun','Noto Sans Thai',sans-serif; color:#2d251f; background:#fff; }
-        .sheet { width:190mm; min-height:277mm; padding:0; page-break-after:always; }
-        .sheet:last-child { page-break-after:auto; }
-        .page-head { display:flex;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid #d9c7ac;padding-bottom:10px;margin-bottom:10px; }
-        .brand { font-size:24px;font-weight:900;line-height:1; }
-        .sub { margin-top:6px;color:#8b7358;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase; }
-        .page-title { text-align:right;font-size:13px;font-weight:900; }
-        .page-title span { display:block;margin-top:4px;color:#8b7358;font-size:10px;font-weight:800; }
-        .slips { display:grid;grid-template-columns:1fr;gap:8px; }
-        .slip { border:1.4px solid #dcc9ad;border-radius:8px;background:#fff;overflow:hidden;page-break-inside:avoid; }
-        .slip-top { display:grid;grid-template-columns:82px minmax(230px,300px) minmax(0,1fr);border-bottom:1px solid #eadfce;min-height:48px; }
-        .house { display:flex;align-items:center;justify-content:center;background:#c67827;color:#fff;font-size:24px;font-weight:950; }
-        .person,.topic { padding:8px 11px;border-right:1px solid #eadfce; }
-        .topic { border-right:0; }
-        .label { color:#8b7358;font-size:10px;font-weight:900;letter-spacing:.04em;margin-bottom:3px; }
-        .value { font-size:15px;font-weight:900;line-height:1.25; }
-        .slip-body { display:grid;grid-template-columns:minmax(0,1fr) 178px;min-height:92px; }
-        .endorse { display:flex;flex-direction:column;justify-content:center;gap:14px;padding:10px 12px;border-right:1px solid #eadfce; }
-        .answer-strip { align-self:flex-start;border:1.4px solid #c67827;border-radius:7px;padding:7px 12px;background:#fff8ef;color:#2d251f;font-weight:900;font-size:15px;line-height:1.25; }
-        .answer-strip span { color:#8b7358;font-size:10px;font-weight:900;letter-spacing:.04em;margin-right:8px;text-transform:uppercase; }
-        .date { color:#6f604f;font-size:11px;font-weight:800; }
-        .signature { padding:9px;display:flex;flex-direction:column;gap:5px; }
-        .sig-box { height:58px;border:1px dashed #d4bea0;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fffdf8; }
-        .signature-img { display:block;max-width:100%;max-height:100%;object-fit:contain; }
-        .signature-empty { color:#9a8a78;font-size:11px;font-weight:700; }
-        .sig-name { font-size:10.5px;font-weight:800;color:#2d251f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center; }
-      </style></head><body>${slipHtml}</body></html>`);
-    w.document.close();
-    w.focus();
-    setTimeout(() => w.print(), 500);
-  }
 
-  async function closePoll(pollId, btn) {
-    if (!confirm('ยืนยันปิด Poll นี้? ลูกบ้านจะเห็นผลโหวตทันที')) return;
-    btn.disabled = true; btn.textContent = 'กำลังปิด...';
-    try {
-      const res = await fetch(POLL_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action:'close', adminPassword:'PATTRADATA', pollId})
+    function formatDate(item) {
+      if (item.dateValue) return formatDateFromISO(item.dateValue);
+      if (item.dateText) return item.dateText;
+      const source = item.createdAt?.toDate ? item.createdAt.toDate() : null;
+      if (!source) return '';
+      return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function todayISO() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateFromISO(value) {
+      if (!value) return '';
+      const [year, month, day] = value.split('-').map(Number);
+      if (!year || !month || !day) return '';
+      return new Date(year, month - 1, day).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
       });
-      const data = await res.json().catch(() => ({}));
-      if (!data.ok) throw new Error(data.error || 'Failed');
-      loadAdminPolls();
-    } catch (err) {
-      alert('ปิดไม่สำเร็จ: ' + err.message);
-      btn.disabled = false; btn.textContent = '🔒 ปิด Poll';
     }
-  }
 
-  async function deletePoll(pollId, title, btn) {
-    if (!confirm(`ลบ Poll "${title}" ?\n\nข้อมูลโหวตทั้งหมดจะถูกลบถาวร ไม่สามารถกู้คืนได้`)) return;
-    btn.disabled = true; btn.textContent = 'กำลังลบ...';
-    try {
-      const res = await fetch(POLL_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action:'delete', adminPassword:'PATTRADATA', pollId})
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!data.ok) throw new Error(data.error || 'Failed');
-      loadAdminPolls();
-    } catch (err) {
-      alert('ลบไม่สำเร็จ: ' + err.message);
-      btn.disabled = false; btn.textContent = '🗑 ลบ';
+    function requireLogin() {
+      const expiry = Number(localStorage.getItem(SESSION_KEY) || 0);
+      const ok = expiry > Date.now();
+      if (!ok) localStorage.removeItem(SESSION_KEY);
+      loginCard.classList.toggle('hidden', ok);
+      adminPanel.classList.toggle('hidden', !ok);
+      return ok;
     }
-  }
 
-  // ── Load resident data (Firestore is the source of truth) ────────────────
-  async function loadAdminData() {
-    setToolbarNote('กำลังโหลด...');
-    try {
-      const res = await fetch(RESIDENT_AUTH_URL, {
-        method: 'POST',
-        cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'adminResidents', adminPassword: 'PATTRADATA' })
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) throw new Error(json.error || `Firestore API: ${res.status}`);
-      allData = Array.isArray(json.residents) ? json.residents : [];
-      filteredData = [...allData];
-      renderAdmin(filteredData);
-      setToolbarNote(`✅ Firestore real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
-    } catch(e) {
-      document.getElementById('adminBody').innerHTML =
-        `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
-      setToolbarNote('โหลดไม่สำเร็จ', 'error');
+    function resetForm(message) {
+      form.reset();
+      document.getElementById('docId').value = '';
+      document.getElementById('dateInput').value = todayISO();
+      formTitle.textContent = 'เพิ่มประกาศ';
+      cancelBtn.classList.add('hidden');
+      formStatus.textContent = message || 'ข้อมูลจะอัปเดตบนหน้าเว็บแบบไม่ต้อง refresh';
+      formStatus.classList.remove('error');
+      pendingPhotos = [];
+      updatePhotoUI();
+      hideProgress();
     }
-  }
 
-  // ── Render residents table ────────────────────────────────────────────────
-  function renderAdmin(data) {
-    document.getElementById('recordCount').textContent = `${data.length} รายการ`;
-    document.getElementById('adminBody').innerHTML = data.map((r, i) => {
-      const cars  = normalizePlateArray(r.cars);
-      const motos = normalizePlateArray(r.motorcycles);
-      return `<tr>
-        <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
-        <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
-        <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
-        <td class="col-name">${showVal(r.name)}</td>
-        <td class="col-email">${showVal(r.email)}</td>
-        <td class="col-phone">${showVal(formatPhone(r.phone))}</td>
-        <td class="col-deed">${showVal(r.deed_no)}</td>
-        <td class="col-zone">${showVal(r.zone)}</td>
-        <td class="col-plot">${showVal(r.plot)}</td>
-        <td style="font-size:0.77rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
-        <td style="font-size:0.77rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
-        <td style="color:#94a3b8;font-size:0.72rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
-      </tr>`;
-    }).join('');
-  }
+    const TYPE_LABELS = { normal: 'ทั่วไป', urgent: 'เร่งด่วน', info: 'ข้อมูล' };
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  function fmtDate(raw) {
-    if (!raw) return '—';
-    try { const d = new Date(raw); return isNaN(d) ? raw : d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}); }
-    catch(e) { return raw; }
-  }
-  function showVal(v) { return v ? escHtml(String(v)) : '<span class="no-val">—</span>'; }
-  function formatPhone(v) {
-    const d = String(v||'').replace(/\D/g,'');
-    return d.length === 10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : (v||'');
-  }
-  function cleanPhone(raw) {
-    if (!raw || !raw.trim()) return '';
-    const digits = raw.replace(/\D/g,'');
-    return digits.length === 10 ? `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}` : raw.trim();
-  }
-  function cleanPlates(raw) {
-    if (!raw || !raw.trim()) return [];
-    return raw.split(/[,;\n]+/).map(p => p.replace(/[\s\-]/g,'').trim()).filter(Boolean);
-  }
-  function normalizePlateArray(value) {
-    if (Array.isArray(value)) return value.map(v => String(v || '').replace(/[\s\-]/g,'').trim()).filter(Boolean);
-    if (typeof value === 'string') return cleanPlates(value);
-    return [];
-  }
-  function plateDisplayValue(value) {
-    return normalizePlateArray(value).join(', ');
-  }
-  function renderPlateStack(value) {
-    const plates = normalizePlateArray(value);
-    if (!plates.length) return '<span class="plate-empty">(ว่าง)</span>';
-    return `<div class="plate-stack">${plates.map(p => `<span class="plate-chip">${escHtml(p)}</span>`).join('')}</div>`;
-  }
-  function normalizeIssuePayload(payload) {
-    if (!payload || typeof payload !== 'object') return payload;
-    const clone = JSON.parse(JSON.stringify(payload));
-    ['old', 'new'].forEach(section => {
-      if (!clone[section]) clone[section] = {};
-      clone[section].cars = normalizePlateArray(clone[section].cars);
-      clone[section].motorcycles = normalizePlateArray(clone[section].motorcycles);
-      clone[section].phone = cleanPhone(clone[section].phone || '');
-    });
-    return clone;
-  }
-  function isVehicleIssue(issue) {
-    const title = issue?.title || '';
-    const labels = Array.isArray(issue?.labels) ? issue.labels.map(l => l.name || l) : [];
-    return labels.includes('vehicle') || /^\[(เพิ่ม|แก้ไข|ลบ)ทะเบียน/.test(title);
-  }
-  function isPendingCorrectionIssue(issue) {
-    return !processedIssues.has(issue.number) && (
-      (issue.title || '').startsWith('[แก้ไขข้อมูล]') ||
-      isVehicleIssue(issue)
-    );
-  }
-  function getIssueKind(issue, payload) {
-    if (payload?.source === '/vehicle/' || isVehicleIssue(issue)) return 'vehicle';
-    return 'profile';
-  }
-  function escHtml(v) {
-    return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function getAllCarPlates(data = allData) {
-    return [...new Set(data.flatMap(r => normalizePlateArray(r.cars)))];
-  }
-  function diffPlates(oldCars, newCars) {
-    const oldSet = new Set(normalizePlateArray(oldCars));
-    const newSet = new Set(normalizePlateArray(newCars));
-    return {
-      added: [...newSet].filter(p => !oldSet.has(p)),
-      removed: [...oldSet].filter(p => !newSet.has(p)),
-    };
-  }
-  async function syncLprCars({ houseNo, oldCars, newCars }) {
-    const diff = diffPlates(oldCars, newCars);
-    if (!diff.added.length && !diff.removed.length) {
-      return { ok: true, skipped: true };
-    }
-    setToolbarNote(`กำลัง sync LPR บ้าน ${houseNo || '—'}...`, 'saving');
-    const res = await fetch(LPR_SYNC_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        githubToken: GH_TOKEN,
-        houseNo,
-        oldCars: normalizePlateArray(oldCars),
-        newCars: normalizePlateArray(newCars),
-        allCars: getAllCarPlates(),
-      })
-    });
-    const result = await res.json().catch(() => ({}));
-    if (!res.ok && res.status !== 207) {
-      throw new Error(result.error || `LPR sync failed (${res.status})`);
-    }
-    if (result.ok === false) {
-      const errors = (result.results || []).flatMap(r => r.errors || []);
-      throw new Error(errors.map(e => `${e.action} ${e.plate}: ${e.error}`).join('\n') || 'LPR sync partially failed');
-    }
-    return result;
-  }
-
-  // ── Filter residents ──────────────────────────────────────────────────────
-  function filterAdmin() {
-    const q = document.getElementById('adminSearch').value.toLowerCase().trim();
-    filteredData = q
-      ? allData.filter(r => JSON.stringify(r).toLowerCase().includes(q))
-      : [...allData];
-    renderAdmin(filteredData);
-  }
-
-  // ── Edit modal ────────────────────────────────────────────────────────────
-  function openEditModal(index) {
-    editingIndex = index;
-    const r = allData[index];
-    if (!r) return;
-    document.getElementById('editHouseLabel').textContent = `บ้านเลขที่ ${r.house_no || '—'}`;
-    TEXT_FIELDS.forEach(k => {
-      const el = document.getElementById(`edit_${k}`);
-      if (el) el.value = k === 'phone' ? formatPhone(r[k]) : (r[k] || '');
-    });
-    document.getElementById('edit_cars').value        = plateDisplayValue(r.cars);
-    document.getElementById('edit_motorcycles').value = plateDisplayValue(r.motorcycles);
-    originalSnap = getFormValues();
-    document.getElementById('editModal').classList.add('active');
-  }
-
-  function closeEditModal() {
-    document.getElementById('editModal').classList.remove('active');
-    editingIndex = -1; originalSnap = null;
-  }
-
-  function getFormValues() {
-    const rec = {};
-    TEXT_FIELDS.forEach(k => { const el = document.getElementById(`edit_${k}`); if(el) rec[k] = el.value.trim(); });
-    rec.cars        = cleanPlates(document.getElementById('edit_cars').value);
-    rec.motorcycles = cleanPlates(document.getElementById('edit_motorcycles').value);
-    return rec;
-  }
-
-  function hasChanges() {
-    if (!originalSnap) return false;
-    return JSON.stringify(getFormValues()) !== JSON.stringify(originalSnap);
-  }
-
-  async function saveResidentToFirestore(record) {
-    const houseNo = record.house_no;
-    const res = await fetch(RESIDENT_AUTH_URL, {
-      method: 'POST',
-      cache: 'no-store',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'adminUpdateResidentData',
-        adminPassword: 'PATTRADATA',
-        houseNo,
-        record
-      })
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok || !json.ok) throw new Error(json.error || `Firestore update failed (${res.status})`);
-    return json;
-  }
-
-  async function saveEdit() {
-    if (editingIndex < 0) return;
-    const btn = document.getElementById('saveEditBtn');
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'กำลังบันทึก...';
-    }
-    const formRec = getFormValues();
-    formRec.phone = cleanPhone(formRec.phone);
-    try {
-      setToolbarNote('กำลังบันทึกเข้า Firestore...', 'saving');
-      const result = await saveResidentToFirestore(formRec);
-      closeEditModal();
-      await loadAdminData();
-      if (result.lprPending) {
-        setToolbarNote(`⚠️ บันทึกแล้ว · LPR pending · ${new Date().toLocaleTimeString('th-TH')}`, 'error');
-      } else {
-        setToolbarNote(`✅ บันทึก Firestore${result.lprSync ? ' และ sync LPR' : ''} สำเร็จ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
-      }
-    } catch(e) {
-      await loadAdminData().catch(() => {});
-      setToolbarNote(`❌ บันทึกไม่สำเร็จ: ${e.message}`, 'error');
-      alert('บันทึกไม่สำเร็จ\n\n' + e.message);
-    }
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = '💾 บันทึก';
-    }
-  }
-
-  // ── Close GitHub Issue ────────────────────────────────────────────────────
-  async function closeIssue(issueNumber, comment) {
-    const base    = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues/${issueNumber}`;
-    const headers = { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
-    if (comment) {
-      await fetch(`${base}/comments`, { method:'POST', headers, body: JSON.stringify({ body: comment }) });
-    }
-    const res = await fetch(base, { method:'PATCH', headers, body: JSON.stringify({ state: 'closed' }) });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(`ปิด Issue ไม่สำเร็จ (${res.status}): ${err.message || 'unknown'}`);
-    }
-  }
-
-  // ── Load Pending Corrections ──────────────────────────────────────────────
-  async function loadPending() {
-    const list = document.getElementById('pendingList');
-    list.innerHTML = '<div class="pending-empty"><div class="big">⏳</div>กำลังโหลดคำร้อง...</div>';
-    try {
-      const res = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/issues?state=open&per_page=100`,
-        { headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
-      );
-      if (!res.ok) throw new Error(`GitHub Issues: ${res.status}`);
-      const issues = await res.json();
-      // กรอง issue ที่ approve/reject แล้วใน session นี้ออก (กัน card โผล่กลับก่อน GitHub ปิด)
-      const corrections = issues.filter(isPendingCorrectionIssue);
-
-      // Update badge
-      const badge = document.getElementById('pendingBadge');
-      if (corrections.length > 0) {
-        badge.textContent = corrections.length;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-
-      if (!corrections.length) {
-        list.innerHTML = '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอ Approve</div>';
+    function renderList(items) {
+      if (!items.length) {
+        list.innerHTML = '<div class="empty">ยังไม่มีประกาศ</div>';
         return;
       }
 
-      list.innerHTML = corrections.map(issue => renderPendingCard(issue)).join('');
-    } catch(e) {
-      list.innerHTML = `<div class="pending-empty"><div class="big">⚠️</div>โหลดคำร้องไม่สำเร็จ: ${e.message}</div>`;
-    }
-  }
+      const cards = items.map(item => {
+        const photos = Array.isArray(item.photos) ? item.photos : [];
+        const images = photos.filter(f => (typeof f === 'string') || f.isImage);
+        const docs   = photos.filter(f => typeof f !== 'string' && !f.isImage);
 
-  function parseIssuePayload(body) {
-    try {
-      const match = body.match(/```json\n([\s\S]*?)\n```/);
-      return match ? JSON.parse(match[1]) : null;
-    } catch(e) { return null; }
-  }
+        const thumbsHtml = images.slice(0, 4).map(f => {
+          const src = typeof f === 'string' ? f : (f.url || f.dataUrl || '');
+          return `<img src="${esc(src)}" alt="" />`;
+        }).join('') + (images.length > 4 ? `<span style="font-size:10px;color:var(--muted);align-self:center;">+${images.length - 4}</span>` : '');
 
-  function renderPendingCard(issue) {
-    const payload = normalizeIssuePayload(parseIssuePayload(issue.body || ''));
-    if (!payload) return `
-      <div class="pending-card">
-        <div class="pending-card-header"><strong>${escHtml(issue.title)}</strong></div>
-        <div style="padding:16px;color:#c00;">ไม่สามารถอ่านข้อมูลได้ (รูปแบบไม่ถูกต้อง)</div>
-      </div>`;
+        const chipsHtml = docs.map(f =>
+          `<span class="ann-file-chip">${getFileIcon(f.cat)}<span>${esc(f.name)}</span></span>`
+        ).join('');
 
-    const { house_no, old: o, new: n, reporter, contact, submitted_at } = payload;
-    const kind = getIssueKind(issue, payload);
-    const submittedDate = submitted_at
-      ? new Date(submitted_at).toLocaleDateString('th-TH', {day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'})
-      : '—';
+        const typeLabel = TYPE_LABELS[item.type] || item.type || 'ทั่วไป';
 
-    const profileFields = [
-      { key: 'name',        label: '👤 ชื่อ-นามสกุล',    oldVal: o?.name  || '', newVal: n?.name  || '', isPlate: false },
-      { key: 'email',       label: '✉️ อีเมล',            oldVal: o?.email || '', newVal: n?.email || '', isPlate: false },
-      { key: 'phone',       label: '📞 โทรศัพท์',          oldVal: cleanPhone(o?.phone || ''), newVal: cleanPhone(n?.phone || ''), isPlate: false },
-    ];
-    const vehicleFields = [
-      { key: 'cars',        label: '🚗 ทะเบียนรถยนต์',     oldVal: plateDisplayValue(o?.cars), newVal: plateDisplayValue(n?.cars), oldHtml: renderPlateStack(o?.cars), isPlate: true },
-      { key: 'motorcycles', label: '🏍 มอเตอร์ไซค์',       oldVal: plateDisplayValue(o?.motorcycles), newVal: plateDisplayValue(n?.motorcycles), oldHtml: renderPlateStack(o?.motorcycles), isPlate: true },
-    ];
-    const fields = kind === 'vehicle' ? vehicleFields : [...profileFields, ...vehicleFields];
-
-    const changedFields = fields.filter(f => f.oldVal !== f.newVal);
-    const displayFields = changedFields.length ? changedFields : fields;
-
-    const changeRows = displayFields.map(f => {
-      const fromHtml = f.isPlate
-        ? `<div class="pc-plates-old">${
-            f.oldVal
-              ? f.oldVal.split(',').map(p => p.trim()).filter(Boolean)
-                  .map(p => `<span class="pc-plate-chip-old">${escHtml(p)}</span>`).join('')
-              : '<span class="pc-from">(ว่าง)</span>'
-          }</div>`
-        : `<span class="pc-from">${escHtml(f.oldVal || '(ว่าง)')}</span>`;
-
-      if (f.isPlate) {
-        const newChips = f.newVal
-          ? f.newVal.split(',').map(p => p.trim()).filter(Boolean)
-              .map(p => `<span class="pc-plate-chip-new">${escHtml(p)}</span>`).join('')
-          : '<span style="color:var(--text-muted);font-style:italic;font-size:11px;">(ว่าง)</span>';
-        const oldChips = f.oldVal
-          ? f.oldVal.split(',').map(p => p.trim()).filter(Boolean)
-              .map(p => `<span class="pc-plate-chip-old">${escHtml(p)}</span>`).join('')
-          : '';
         return `
-        <div class="pc-field-group">
-          <div class="pc-field-label">${f.label}</div>
-          <div class="pc-plates-new-row">${newChips}</div>
-          ${oldChips ? `<div class="pc-plates-from-row"><span class="pc-from-label">เดิม</span>${oldChips}</div>` : ''}
-          <input class="new-input" data-key="${f.key}" data-plate="true" type="hidden" value="${escHtml(f.newVal)}" />
-        </div>`;
+          <div class="ann-card">
+            <div class="ann-card-top">
+              <div class="ann-type-dot ${esc(item.type || '')}"></div>
+              <div class="ann-card-title">${esc(item.title)}</div>
+            </div>
+            <div class="ann-card-body">${esc(item.body)}</div>
+            ${images.length ? `<div class="ann-thumbnails">${thumbsHtml}</div>` : ''}
+            ${docs.length   ? `<div class="ann-file-chips">${chipsHtml}</div>` : ''}
+            <div class="ann-card-footer">
+              <div class="ann-card-meta">
+                <span class="ann-date">${esc(formatDate(item))}</span>
+                <span class="ann-pill">${esc(typeLabel)}</span>
+                ${photos.length ? `<span class="ann-pill">${photos.length} ไฟล์</span>` : ''}
+              </div>
+              <div class="ann-card-actions">
+                <button class="btn-secondary btn-small" data-edit="${esc(item.id)}" type="button">แก้ไข</button>
+                <button class="btn-danger btn-small" data-delete="${esc(item.id)}" type="button">ลบ</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      list.innerHTML = `<div class="ann-list">${cards}</div>`;
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      if (ADMIN_PASSWORDS.includes(passwordInput.value)) {
+        const expiry = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+        localStorage.setItem(SESSION_KEY, String(expiry));
+        loginError.classList.add('hidden');
+        requireLogin();
+      } else {
+        loginError.classList.remove('hidden');
       }
-
-      return `
-      <div class="pc-field-group">
-        <div class="pc-field-label">${f.label}</div>
-        <div class="pc-change">
-          ${fromHtml}
-          <span class="pc-arrow">→</span>
-          <input class="pc-to new-input" data-key="${f.key}" data-plate="${f.isPlate}" type="text" value="${escHtml(f.newVal)}" />
-        </div>
-      </div>`;
-    }).join('');
-
-    const kindLabel = kind === 'vehicle' ? '🚗 ทะเบียนรถ' : '👤 ข้อมูลลูกบ้าน';
-
-    return `
-    <div class="pending-card" id="issue-${issue.number}">
-      <div class="pc-top">
-        <span class="pc-house">บ้าน ${escHtml(house_no || '?')}</span>
-        <span class="pc-chip">${kindLabel}</span>
-        <span class="pc-date">${submittedDate}</span>
-      </div>
-      ${changeRows}
-      <div class="pc-bottom">
-        <div class="pc-reporter">👤 ${escHtml(reporter||'?')} &nbsp;·&nbsp; 📞 ${escHtml(contact||'?')}</div>
-        <div class="pc-actions">
-          <button class="reject-btn" onclick="rejectCorrection(${issue.number}, this)">✕ ปฏิเสธ</button>
-          <button class="approve-btn" onclick="approveCorrection(${issue.number}, '${escHtml(house_no||'')}', this)">✓ Approve</button>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // ── Approve Correction ────────────────────────────────────────────────────
-  async function approveCorrection(issueNumber, houseNo, btn) {
-    const card = document.getElementById(`issue-${issueNumber}`);
-    if (!card) return;
-
-    // Collect edited values from inputs
-    const inputs = card.querySelectorAll('.new-input');
-    const edited = {};
-    inputs.forEach(inp => {
-      const key     = inp.dataset.key;
-      const isPlate = inp.dataset.plate === 'true';
-      edited[key] = isPlate
-        ? cleanPlates(inp.value)
-        : (key === 'phone' ? cleanPhone(inp.value) : inp.value.trim());
     });
 
-    // Ensure allData is loaded
-    if (!allData.length) {
-      await loadAdminData();
-    }
-
-    const idx = allData.findIndex(r => r.house_no === houseNo);
-    if (idx < 0) {
-      alert(`ไม่พบบ้านเลขที่ ${houseNo} ในระบบ`);
-      return;
-    }
-    // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
-    processedIssues.add(issueNumber);
-
-    btn.disabled = true;
-    btn.innerHTML = '⏳ กำลังบันทึก...';
-    card.querySelector('.reject-btn').disabled = true;
-
-    // Apply changes
-    Object.assign(allData[idx], {
-      name:        edited.name        ?? allData[idx].name,
-      email:       edited.email       ?? allData[idx].email,
-      phone:       edited.phone       ?? allData[idx].phone,
-      cars:        edited.cars        ?? allData[idx].cars,
-      motorcycles: edited.motorcycles ?? allData[idx].motorcycles,
-      last_updated: new Date().toLocaleString('sv-SE').replace('T',' ')
+    passwordInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') document.getElementById('loginBtn').click();
     });
 
-    try {
-      const result = await saveResidentToFirestore(allData[idx]);
-      if (result.lprPending) {
-        alert('Approve และบันทึก Firestore แล้ว แต่ LPR ยัง pending\n\nระบบเก็บ log ไว้ให้ sync ซ้ำภายหลัง');
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const id = document.getElementById('docId').value;
+      const title = document.getElementById('titleInput').value.trim();
+      const body  = document.getElementById('bodyInput').value.trim();
+      if (!title || !body) return;
+
+      formStatus.textContent = '';
+      formStatus.classList.remove('error');
+      document.getElementById('saveBtn').disabled = true;
+
+      try {
+        // Step 1: create/get doc ID so we can use it as storage folder
+        showProgress(15, 'กำลังเตรียมข้อมูล...');
+        const announcementId = id || `tmp_${Date.now()}`;
+
+        // Step 2: upload new files to Firebase Storage
+        const newFiles = pendingPhotos.filter(f => f.file && !f.storageUrl);
+        if (newFiles.length) {
+          showProgress(30, `กำลังอัปโหลดไฟล์ (0 / ${newFiles.length})...`);
+          for (let i = 0; i < newFiles.length; i++) {
+            showProgress(30 + Math.round((i / newFiles.length) * 50), `กำลังอัปโหลดไฟล์ (${i + 1} / ${newFiles.length})...`);
+            newFiles[i].storageUrl = await uploadToStorage(newFiles[i], announcementId);
+          }
+        }
+
+        showProgress(85, 'กำลังบันทึกข้อมูล...');
+
+        // Step 3: build photos array with storage URLs only (no base64)
+        const photosData = pendingPhotos.map(f => ({
+          url: f.storageUrl,
+          name: f.name,
+          isImage: f.isImage,
+          cat: f.cat,
+          ext: f.ext
+        }));
+
+        const data = {
+          title,
+          body,
+          type: document.getElementById('typeInput').value,
+          dateValue: document.getElementById('dateInput').value || todayISO(),
+          dateText: formatDateFromISO(document.getElementById('dateInput').value || todayISO()),
+          photos: photosData,
+          updatedAt: serverTimestamp()
+        };
+
+        if (id) {
+          await updateDoc(doc(db, 'announcements', id), data);
+        } else {
+          await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
+        }
+
+        showProgress(100, '✓ บันทึกเรียบร้อยแล้ว');
+        await new Promise(r => setTimeout(r, 700));
+        hideProgress();
+        resetForm(id ? 'แก้ไขประกาศเรียบร้อยแล้ว' : 'เพิ่มประกาศเรียบร้อยแล้ว');
+      } catch (error) {
+        console.error(error);
+        hideProgress();
+        formStatus.textContent = `บันทึกไม่สำเร็จ: ${error.message || 'กรุณาตรวจสอบ Firebase permissions'}`;
+        formStatus.classList.add('error');
+      } finally {
+        document.getElementById('saveBtn').disabled = false;
       }
-      await closeIssue(issueNumber, `✅ Approved and applied by admin on ${new Date().toLocaleString('th-TH')}`);
-      card.style.transition = 'opacity 0.4s';
-      card.style.opacity = '0.5';
-      card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
-      // Reload ข้อมูลจาก Firestore ทันที
-      await loadAdminData();
-      // ลบ card ออกทันทีหลังแสดง success — ไม่รอ GitHub API ซึ่งอาจยังไม่ปิด issue
-      setTimeout(() => {
-        card.style.transition = 'all 0.5s';
-        card.style.opacity = '0';
-        card.style.maxHeight = card.scrollHeight + 'px';
-        requestAnimationFrame(() => {
-          card.style.maxHeight = '0';
-          card.style.overflow = 'hidden';
-          card.style.marginBottom = '0';
-          card.style.paddingBottom = '0';
-        });
-        setTimeout(() => {
-          card.remove();
-          // อัพเดต badge
-          const remaining = document.querySelectorAll('.pending-card').length;
-          const badge = document.getElementById('pendingBadge');
-          if (badge) {
-            if (remaining > 0) {
-              badge.textContent = remaining;
-              badge.classList.remove('hidden');
-            } else {
-              badge.textContent = '';
-              badge.classList.add('hidden');
-            }
+    });
+
+    cancelBtn.addEventListener('click', () => resetForm());
+
+    let cachedItems = [];
+    list.addEventListener('click', async event => {
+      const editBtn = event.target.closest('[data-edit]');
+      const deleteBtn = event.target.closest('[data-delete]');
+
+      if (editBtn) {
+        const item = cachedItems.find(entry => entry.id === editBtn.dataset.edit);
+        if (!item) return;
+        document.getElementById('docId').value = item.id;
+        document.getElementById('titleInput').value = item.title || '';
+        document.getElementById('bodyInput').value = item.body || '';
+        document.getElementById('typeInput').value = item.type || 'normal';
+        document.getElementById('dateInput').value = item.dateValue || todayISO();
+        // load existing photos as already-uploaded entries (no file, just storageUrl)
+        pendingPhotos = Array.isArray(item.photos) ? item.photos.map(f => {
+          if (typeof f === 'string') {
+            // legacy base64 — treat as already uploaded image
+            return { file: null, previewUrl: f, name: 'image.jpg', isImage: true, cat: 'image', ext: 'jpg', storageUrl: f };
           }
-          if (remaining === 0) {
-            document.getElementById('pendingList').innerHTML =
-              '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอดำเนินการ</div>';
-          }
-        }, 500);
-      }, 1200);
-      // Background sync หลัง 5 วิ เผื่อ GitHub ปิด issue เสร็จแล้ว
-      setTimeout(loadPending, 5000);
-    } catch(e) {
-      processedIssues.delete(issueNumber); // rollback — ให้ card โผล่กลับมาได้ถ้า approve ล้มเหลว
-      alert('Approve ล้มเหลว: ' + e.message);
-      btn.disabled = false;
-      btn.innerHTML = '✅ Approve & บันทึก';
-      card.querySelector('.reject-btn').disabled = false;
-    }
-  }
+          return { file: null, previewUrl: f.url, name: f.name, isImage: f.isImage, cat: f.cat, ext: f.ext, storageUrl: f.url };
+        }) : [];
+        updatePhotoUI();
+        formTitle.textContent = 'แก้ไขประกาศ';
+        cancelBtn.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
-  // ── Reject Correction ─────────────────────────────────────────────────────
-  async function rejectCorrection(issueNumber, btn) {
-    const reason = prompt('เหตุผลในการปฏิเสธ (ไม่บังคับ):') ?? '';
-    const card = document.getElementById(`issue-${issueNumber}`);
-    if (!card) return;
-    // Mark as processed ทันที — กัน loadPending แสดง card กลับมา
-    processedIssues.add(issueNumber);
-    btn.disabled = true;
-    btn.innerHTML = '⏳...';
-    const approveBtnEl = card.querySelector('.approve-btn');
-    if (approveBtnEl) approveBtnEl.disabled = true;
-    try {
-      const comment = reason
-        ? `❌ ปฏิเสธโดย admin: ${reason}`
-        : `❌ ปฏิเสธโดย admin (${new Date().toLocaleString('th-TH')})`;
-      await closeIssue(issueNumber, comment);
-      card.style.transition = 'opacity 0.4s';
-      card.style.opacity = '0.5';
-      card.innerHTML = `<div style="padding:16px;text-align:center;color:#b91c1c;font-weight:600;">❌ ปฏิเสธแล้ว${reason ? ` — ${escHtml(reason)}` : ''}</div>`;
-      // ลบ card ออกทันที ไม่รอ GitHub API
-      setTimeout(() => {
-        card.style.transition = 'all 0.5s';
-        card.style.opacity = '0';
-        card.style.maxHeight = card.scrollHeight + 'px';
-        requestAnimationFrame(() => {
-          card.style.maxHeight = '0';
-          card.style.overflow = 'hidden';
-          card.style.marginBottom = '0';
-          card.style.paddingBottom = '0';
-        });
-        setTimeout(() => {
-          card.remove();
-          const remaining = document.querySelectorAll('.pending-card').length;
-          const badge = document.getElementById('pendingBadge');
-          if (badge) {
-            if (remaining > 0) {
-              badge.textContent = remaining;
-              badge.classList.remove('hidden');
-            } else {
-              badge.textContent = '';
-              badge.classList.add('hidden');
-            }
-          }
-          if (remaining === 0) {
-            document.getElementById('pendingList').innerHTML =
-              '<div class="pending-empty"><div class="big">✅</div>ไม่มีคำร้องที่รอดำเนินการ</div>';
-          }
-        }, 500);
-      }, 1200);
-      setTimeout(loadPending, 5000);
-    } catch(e) {
-      processedIssues.delete(issueNumber); // rollback
-      alert('ปฏิเสธล้มเหลว: ' + e.message);
-      btn.disabled = false;
-      btn.innerHTML = '❌ ปฏิเสธ';
-      if (approveBtnEl) approveBtnEl.disabled = false;
-    }
-  }
+      if (deleteBtn) {
+        const item = cachedItems.find(entry => entry.id === deleteBtn.dataset.delete);
+        if (!item) return;
+        const ok = window.confirm(`ลบประกาศ "${item.title}" ใช่ไหม?`);
+        if (!ok) return;
+        try {
+          await deleteDoc(doc(db, 'announcements', item.id));
+        } catch (error) {
+          console.error(error);
+          window.alert('ลบประกาศไม่สำเร็จ กรุณาตรวจสอบ Firestore permissions');
+        }
+      }
+    });
 
-  // ── Export ────────────────────────────────────────────────────────────────
-  function exportJSON() {
-    const json = JSON.stringify(allData, null, 2);
-    downloadBlob(new Blob([json],{type:'application/json'}), `residents_${dateStamp()}.json`);
-  }
+    const announceQuery = query(colRef, orderBy('createdAt', 'desc'));
+    onSnapshot(announceQuery, snapshot => {
+      cachedItems = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+      renderList(cachedItems);
+    }, error => {
+      console.error(error);
+      list.innerHTML = '<div class="empty">โหลดประกาศไม่สำเร็จ</div>';
+    });
 
-  function exportExcel() {
-    if (!allData.length) { alert('ยังไม่มีข้อมูล'); return; }
-    const rows = allData.map(r => ({
-      'บ้านเลขที่':            r.house_no    || '',
-      'ชื่อ-นามสกุล':         r.name        || '',
-      'อีเมล':                r.email       || '',
-      'โทรศัพท์':             r.phone       || '',
-      'เลขที่โฉนด':           r.deed_no     || '',
-      'โซน':                  r.zone        || '',
-      'แปลงที่':              r.plot        || '',
-      'ทะเบียนรถยนต์':        (r.cars        || []).join(', '),
-      'ทะเบียนมอเตอร์ไซค์':   (r.motorcycles || []).join(', '),
-      'อัปเดตล่าสุด':         r.last_updated || '',
-    }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Residents');
-    XLSX.writeFile(wb, `residents_${dateStamp()}.xlsx`);
-  }
-
-  function dateStamp() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
-  function downloadBlob(blob, filename) {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
-  }
-
-  // ── Close modal on backdrop click ─────────────────────────────────────────
-  document.getElementById('editModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('editModal') && !hasChanges()) closeEditModal();
-  });
-
-  // Init token UI และ session check
-  initTokenUI();
-  if (hasValidSession() && GH_TOKEN) showDashboard();
-</script>
+    requireLogin();
+    resetForm();
+  </script>
 </body>
 </html>
