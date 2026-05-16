@@ -16,18 +16,27 @@
       --gold-pale:  #f7e6cd;
       --bg:         #f9f3e9;
       --bg2:        #f3ecdd;
+      --bg3:        #ede2cc;
       --card:       #ffffff;
       --text:       #2a2218;
       --muted:      #6b5d4a;
       --border:     #e6dcc7;
       --danger:     #9b2c1d;
+      --ok:         #2f6d4f;
+      --ok-bg:      #e7f3ea;
+      --warn:       #a7651b;
+      --warn-bg:    #fff1dd;
+      --bad:        #9b2c1d;
+      --bad-bg:     #f9e5e1;
       --radius:     14px;
       --shadow:     0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
       --shadow-lg:  0 8px 32px rgba(60,40,20,0.12);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, rgba(247,230,205,0.8), transparent 28%),
+        linear-gradient(180deg, #fbf5ec 0%, var(--bg) 35%, #f7efe3 100%);
       color: var(--text);
       font-family: 'IBM Plex Sans Thai', sans-serif;
       font-size: 15px;
@@ -138,7 +147,7 @@
       margin-bottom: 28px;
     }
     .panel {
-      background: var(--card);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,244,0.98));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 30px;
@@ -214,6 +223,44 @@
       max-width: 860px;
     }
     .full { grid-column: 1 / -1; }
+    .warranty-planner {
+      grid-column: 1 / -1;
+      background: linear-gradient(180deg, rgba(251,245,236,0.98), rgba(243,236,221,0.92));
+      border: 1px solid rgba(219, 201, 169, 0.95);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .planner-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .planner-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .planner-hint {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .planner-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr 0.8fr;
+      gap: 12px;
+      align-items: end;
+    }
+    .planner-preview {
+      margin-top: 12px;
+      min-height: 20px;
+      font-size: 13px;
+      color: var(--taupe-mid);
+    }
+    .planner-preview strong { color: var(--gold); }
 
     /* ── Drop zone ── */
     .drop-zone {
@@ -294,7 +341,9 @@
     }
     .doc-list { display: grid; gap: 14px; max-width: 980px; }
     .doc-card {
-      background: var(--card);
+      background:
+        radial-gradient(circle at top right, rgba(247,230,205,0.45), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(255,248,240,0.98));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 22px 24px;
@@ -317,7 +366,7 @@
     }
     .doc-title {
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 26px;
+      font-size: 30px;
       font-weight: 600;
       color: var(--text);
       line-height: 1.3;
@@ -343,15 +392,28 @@
       color: var(--gold);
       border: 1px solid rgba(196, 122, 44, 0.24);
     }
+    .doc-status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .doc-status-badge.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid rgba(47,109,79,0.16); }
+    .doc-status-badge.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(167,101,27,0.16); }
+    .doc-status-badge.bad { background: var(--bad-bg); color: var(--bad); border: 1px solid rgba(155,44,29,0.16); }
     .doc-summary {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
       margin-top: 12px;
     }
     .summary-cell {
-      background: linear-gradient(180deg, rgba(249,243,233,0.95), rgba(243,236,221,0.8));
-      border: 1px solid rgba(230, 220, 199, 0.95);
+      background: linear-gradient(180deg, rgba(251,245,236,0.98), rgba(243,236,221,0.92));
+      border: 1px solid rgba(219, 201, 169, 0.95);
       border-radius: 12px;
       padding: 11px 12px;
       min-height: 74px;
@@ -388,8 +450,8 @@
       width: 56px;
       min-height: 56px;
       border-radius: 12px;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, #fff, #f6efe2);
+      border: 1px solid #d9bc92;
+      background: linear-gradient(180deg, #fffdf9, #f7eada);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -424,47 +486,18 @@
       color: var(--muted);
       font-size: 12px;
     }
+    .proof-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
     .doc-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       justify-content: flex-end;
       align-items: flex-start;
-    }
-    .doc-files {
-      display: grid;
-      gap: 10px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(230, 220, 199, 0.85);
-    }
-    .doc-file-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(249,243,233,0.7);
-      border: 1px solid rgba(230, 220, 199, 0.85);
-    }
-    .doc-file-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-    }
-    .doc-file-meta {
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 12px;
-      margin-top: 2px;
-      word-break: break-word;
-    }
-    .doc-file-actions {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
     }
     .doc-actions {
       margin-left: auto;
@@ -502,9 +535,9 @@
       header { padding: 0 20px; }
       .logo-divider { display: none; }
       main { padding: 32px 18px 60px; }
-      .hero, .upload-grid, .doc-summary, .doc-card-top, .doc-file-row { grid-template-columns: 1fr; }
+      .hero, .upload-grid, .doc-summary, .doc-card-top, .planner-grid { grid-template-columns: 1fr; }
       .doc-title { font-size: 22px; }
-      .doc-actions, .doc-file-actions { justify-content: flex-start; }
+      .doc-actions { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -549,15 +582,32 @@
           <label for="category">หมวดหมู่</label>
           <select id="category"></select>
         </div>
-        <div>
-          <label for="coverageDuration">รับประกันนานแค่ไหน</label>
-          <input id="coverageDuration" placeholder="เช่น 2 ปี / 6 เดือน / ถึง 17 พ.ค. 2571" />
+        <div class="warranty-planner">
+          <div class="planner-head">
+            <div class="planner-title">Warranty Planner</div>
+            <div class="planner-hint">เลือกวันเริ่มแบบ calendar แล้วใส่กี่ปีหรือกี่เดือน ระบบจะคำนวณวันหมดประกันและ countdown ให้หน้า list อัตโนมัติ</div>
+          </div>
+          <div class="planner-grid">
+            <div>
+              <label for="warrantyStartDate">วันที่เริ่มรับประกัน</label>
+              <input id="warrantyStartDate" type="date" />
+            </div>
+            <div>
+              <label for="warrantyYears">กี่ปี</label>
+              <input id="warrantyYears" type="number" min="0" step="1" placeholder="เช่น 2" />
+            </div>
+            <div>
+              <label for="warrantyMonths">กี่เดือน</label>
+              <input id="warrantyMonths" type="number" min="0" step="1" placeholder="เช่น 6" />
+            </div>
+          </div>
+          <div class="planner-preview" id="plannerPreview">ยังไม่ตั้งระยะรับประกัน</div>
         </div>
         <div>
           <label for="contactName">ติดต่อใคร</label>
           <input id="contactName" placeholder="เช่น ช่างเทห์ / บริษัท ABC Service" />
         </div>
-        <div class="full">
+        <div>
           <label for="contactPhone">เบอร์ติดต่อ</label>
           <input id="contactPhone" placeholder="เช่น 08x-xxx-xxxx" />
         </div>
@@ -692,9 +742,76 @@
       if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
       return '📎';
     }
-    function buildStructuredNotes({ coverageDuration, contactName, contactPhone, extraNotes }) {
+    function toIsoDate(value) {
+      if (!value) return '';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return '';
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    function addWarrantyDuration(startDate, years, months) {
+      const iso = toIsoDate(startDate);
+      if (!iso) return '';
+      const d = new Date(`${iso}T00:00:00`);
+      d.setFullYear(d.getFullYear() + Number(years || 0));
+      d.setMonth(d.getMonth() + Number(months || 0));
+      return toIsoDate(d);
+    }
+    function formatThaiDate(iso) {
+      if (!iso) return '';
+      return new Date(`${iso}T00:00:00`).toLocaleDateString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        dateStyle: 'medium'
+      });
+    }
+    function describeWarrantyDuration(years, months) {
+      const parts = [];
+      const y = Number(years || 0);
+      const m = Number(months || 0);
+      if (y > 0) parts.push(`${y} ปี`);
+      if (m > 0) parts.push(`${m} เดือน`);
+      return parts.join(' ') || '';
+    }
+    function getWarrantyCountdown(endDate) {
+      const iso = toIsoDate(endDate);
+      if (!iso) return null;
+      const today = new Date();
+      const todayIso = toIsoDate(today);
+      const end = new Date(`${iso}T00:00:00`);
+      const start = new Date(`${todayIso}T00:00:00`);
+      const diffDays = Math.round((end - start) / 86400000);
+      if (diffDays < 0) return {
+        days: diffDays,
+        label: `หมดประกันแล้ว ${Math.abs(diffDays)} วัน`,
+        tone: 'bad'
+      };
+      if (diffDays <= 45) return {
+        days: diffDays,
+        label: diffDays === 0 ? 'หมดประกันวันนี้' : `ใกล้หมดใน ${diffDays} วัน`,
+        tone: 'warn'
+      };
+      return {
+        days: diffDays,
+        label: `เหลืออีก ${diffDays} วัน`,
+        tone: 'ok'
+      };
+    }
+    function warrantyPreviewText(startDate, years, months) {
+      const duration = describeWarrantyDuration(years, months);
+      if (!duration && !startDate) return 'ยังไม่ตั้งระยะรับประกัน';
+      if (duration && !startDate) return `ใส่ระยะ ${duration} แล้ว เหลือเลือกวันเริ่มเพื่อให้ระบบนับถอยหลัง`;
+      if (!duration && startDate) return `เลือกวันเริ่ม ${formatThaiDate(startDate)} แล้ว เหลือใส่กี่ปีหรือกี่เดือน`;
+      const endDate = addWarrantyDuration(startDate, years, months);
+      const countdown = getWarrantyCountdown(endDate);
+      return `เริ่ม ${formatThaiDate(startDate)} · หมด ${formatThaiDate(endDate)}${countdown ? ` · ${countdown.label}` : ''}`;
+    }
+    function buildStructuredNotes({ warrantyStartDate, warrantyYears, warrantyMonths, contactName, contactPhone, extraNotes }) {
       const lines = [];
-      if (coverageDuration) lines.push(`ระยะรับประกัน: ${coverageDuration}`);
+      if (warrantyStartDate) lines.push(`วันที่เริ่มรับประกัน: ${warrantyStartDate}`);
+      if (Number(warrantyYears || 0) > 0) lines.push(`ระยะปี: ${Number(warrantyYears)}`);
+      if (Number(warrantyMonths || 0) > 0) lines.push(`ระยะเดือน: ${Number(warrantyMonths)}`);
       if (contactName) lines.push(`ผู้ติดต่อ: ${contactName}`);
       if (contactPhone) lines.push(`เบอร์ติดต่อ: ${contactPhone}`);
       if (extraNotes) lines.push(`รายละเอียด: ${extraNotes}`);
@@ -703,7 +820,9 @@
     function parseStructuredNotes(notes) {
       const text = String(notes || '').trim();
       const meta = {
-        coverageDuration: '',
+        warrantyStartDate: '',
+        warrantyYears: '',
+        warrantyMonths: '',
         contactName: '',
         contactPhone: '',
         extraNotes: '',
@@ -712,26 +831,46 @@
       if (!text) return meta;
       const extra = [];
       text.split(/\n+/).map(line => line.trim()).filter(Boolean).forEach(line => {
-        if (line.startsWith('ระยะรับประกัน:')) meta.coverageDuration = line.slice('ระยะรับประกัน:'.length).trim();
+        if (line.startsWith('วันที่เริ่มรับประกัน:')) meta.warrantyStartDate = line.slice('วันที่เริ่มรับประกัน:'.length).trim();
+        else if (line.startsWith('ระยะปี:')) meta.warrantyYears = line.slice('ระยะปี:'.length).trim();
+        else if (line.startsWith('ระยะเดือน:')) meta.warrantyMonths = line.slice('ระยะเดือน:'.length).trim();
         else if (line.startsWith('ผู้ติดต่อ:')) meta.contactName = line.slice('ผู้ติดต่อ:'.length).trim();
         else if (line.startsWith('เบอร์ติดต่อ:')) meta.contactPhone = line.slice('เบอร์ติดต่อ:'.length).trim();
         else if (line.startsWith('รายละเอียด:')) extra.push(line.slice('รายละเอียด:'.length).trim());
         else extra.push(line);
       });
+      const legacy = text.match(/ระยะรับประกัน:\s*(.+)/);
+      if (legacy && !meta.warrantyYears && !meta.warrantyMonths) {
+        const raw = legacy[1];
+        const y = raw.match(/(\d+)\s*ปี/);
+        const m = raw.match(/(\d+)\s*เดือน/);
+        meta.warrantyYears = y ? y[1] : '';
+        meta.warrantyMonths = m ? m[1] : '';
+      }
       meta.extraNotes = extra.join(' · ');
       return meta;
     }
     function summarizeGroup(group) {
       const first = group.docs[0] || {};
-      const coverageDuration = group.docs.map(doc => doc._meta.coverageDuration).find(Boolean) || '';
+      const warrantyStartDate = group.docs.map(doc => doc._meta.warrantyStartDate).find(Boolean) || '';
+      const warrantyYears = group.docs.map(doc => doc._meta.warrantyYears).find(Boolean) || '';
+      const warrantyMonths = group.docs.map(doc => doc._meta.warrantyMonths).find(Boolean) || '';
       const contactName = group.docs.map(doc => doc._meta.contactName).find(Boolean) || '';
       const contactPhone = group.docs.map(doc => doc._meta.contactPhone).find(Boolean) || '';
       const detail = group.docs.map(doc => doc._meta.extraNotes).find(Boolean) || '';
       const contact = [contactName, contactPhone].filter(Boolean).join(' · ');
+      const durationLabel = describeWarrantyDuration(warrantyYears, warrantyMonths);
+      const endDate = warrantyStartDate ? addWarrantyDuration(warrantyStartDate, warrantyYears, warrantyMonths) : '';
+      const countdown = getWarrantyCountdown(endDate);
       return {
         title: group.baseTitle || first.title || '-',
         category: first.category || '-',
-        coverageDuration,
+        warrantyStartDate,
+        warrantyYears,
+        warrantyMonths,
+        durationLabel,
+        endDate,
+        countdown,
         contact,
         detail
       };
@@ -764,23 +903,13 @@
       const count = `<div class="proof-count">มีหลักฐาน ${docs.length} ไฟล์</div>`;
       return `<div class="doc-proof-strip">${tiles}</div>${count}`;
     }
-    function renderFileRows(docs) {
+    function renderProofActions(docs) {
       return `
-        <div class="doc-files">
-          ${docs.map(doc => `
-            <div class="doc-file-row">
-              <div>
-                <div class="doc-file-title">${esc(doc.fileName || 'ไฟล์แนบ')}</div>
-                <div class="doc-file-meta">
-                  ${esc(doc.category || '-')} · ${formatSize(doc.size)} · อัปโหลดเมื่อ ${formatDate(doc.createdAt)}
-                </div>
-              </div>
-              <div class="doc-file-actions">
-                ${doc.downloadUrl ? `<a class="btn gold" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>` : ''}
-                <button class="btn edit-btn" data-edit="${esc(doc.id)}" data-title="${esc(doc.title)}" data-category="${esc(doc.category)}" data-notes="${esc(doc.notes || '')}">แก้ไข</button>
-                <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
-              </div>
-            </div>
+        <div class="proof-actions">
+          ${docs.map((doc, index) => `
+            ${doc.downloadUrl ? `<a class="btn gold" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์ ${docs.length > 1 ? index + 1 : ''}</a>` : ''}
+            <button class="btn edit-btn" data-edit="${esc(doc.id)}" data-title="${esc(doc.title)}" data-category="${esc(doc.category)}" data-notes="${esc(doc.notes || '')}">แก้ไข</button>
+            <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
           `).join('')}
         </div>
       `;
@@ -800,7 +929,8 @@
               <div class="doc-title-row">
                 <h3 class="doc-title">${esc(info.title)}</h3>
                 <span class="doc-category-badge">${esc(info.category)}</span>
-                <span class="doc-duration-badge">${esc(info.coverageDuration || 'ยังไม่ระบุระยะรับประกัน')}</span>
+                <span class="doc-duration-badge">${esc(info.durationLabel || 'ยังไม่ระบุระยะรับประกัน')}</span>
+                ${info.countdown ? `<span class="doc-status-badge ${esc(info.countdown.tone)}">${esc(info.countdown.label)}</span>` : ''}
               </div>
               <div class="doc-summary">
                 <div class="summary-cell">
@@ -809,7 +939,11 @@
                 </div>
                 <div class="summary-cell">
                   <div class="summary-label">รับประกันนานไหม</div>
-                  <div class="summary-value ${info.coverageDuration ? '' : 'muted'}">${esc(info.coverageDuration || 'ยังไม่ระบุ')}</div>
+                  <div class="summary-value ${info.durationLabel ? '' : 'muted'}">${esc(info.durationLabel || 'ยังไม่ระบุ')}</div>
+                </div>
+                <div class="summary-cell">
+                  <div class="summary-label">เริ่ม / หมด</div>
+                  <div class="summary-value ${info.warrantyStartDate || info.endDate ? '' : 'muted'}">${esc([formatThaiDate(info.warrantyStartDate), formatThaiDate(info.endDate)].filter(Boolean).join(' → ') || 'ยังไม่ระบุ')}</div>
                 </div>
                 <div class="summary-cell">
                   <div class="summary-label">ติดต่อใคร</div>
@@ -818,12 +952,12 @@
               </div>
               ${info.detail ? `<div class="doc-description">${esc(info.detail)}</div>` : ''}
               ${renderProofTiles(group.docs.filter(doc => doc.downloadUrl))}
+              ${renderProofActions(group.docs)}
             </div>
             <div class="doc-actions">
               <button class="btn edit-btn" data-edit="${esc(group.docs[0].id)}" data-title="${esc(group.docs[0].title)}" data-category="${esc(group.docs[0].category)}" data-notes="${esc(group.docs[0].notes || '')}">แก้ข้อมูลหลัก</button>
             </div>
           </div>
-          ${renderFileRows(group.docs)}
         </article>
       `;
       }).join('');
@@ -866,6 +1000,13 @@
         }
       });
     }
+    function updateWarrantyPreview() {
+      $('plannerPreview').innerHTML = esc(warrantyPreviewText(
+        $('warrantyStartDate').value,
+        $('warrantyYears').value,
+        $('warrantyMonths').value
+      )).replace(/·/g, '<strong>·</strong>');
+    }
 
     let _editingDocId = null;
     function editDoc(data) {
@@ -873,13 +1014,16 @@
       _editingDocId = data.edit;
       $('category').value = data.category || $('category').options[0].value;
       $('title').value = data.title || '';
-      $('coverageDuration').value = meta.coverageDuration || '';
+      $('warrantyStartDate').value = meta.warrantyStartDate || '';
+      $('warrantyYears').value = meta.warrantyYears || '';
+      $('warrantyMonths').value = meta.warrantyMonths || '';
       $('contactName').value = meta.contactName || '';
       $('contactPhone').value = meta.contactPhone || '';
       $('notes').value = meta.extraNotes || meta.legacyNotes || '';
       $('editModeBar').classList.add('visible');
       $('submitBtn').textContent = 'บันทึกการแก้ไข';
       $('dropZone').style.display = 'none';
+      updateWarrantyPreview();
       $('vaultPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
     }
     function cancelEdit() {
@@ -889,6 +1033,7 @@
       $('editModeBar').classList.remove('visible');
       $('submitBtn').textContent = 'อัปโหลดเอกสาร';
       $('dropZone').style.display = '';
+      updateWarrantyPreview();
     }
 
     async function uploadDoc(e) {
@@ -900,8 +1045,14 @@
       if (_editingDocId) {
         setStatus('uploadStatus', 'กำลังบันทึก...');
         try {
+          if ((Number($('warrantyYears').value || 0) > 0 || Number($('warrantyMonths').value || 0) > 0) && !$('warrantyStartDate').value) {
+            setStatus('uploadStatus', 'ถ้าระบุกี่ปีหรือกี่เดือน กรุณาเลือกวันที่เริ่มรับประกันด้วย', 'error');
+            return;
+          }
           const notes = buildStructuredNotes({
-            coverageDuration: $('coverageDuration').value.trim(),
+            warrantyStartDate: $('warrantyStartDate').value.trim(),
+            warrantyYears: $('warrantyYears').value.trim(),
+            warrantyMonths: $('warrantyMonths').value.trim(),
             contactName: $('contactName').value.trim(),
             contactPhone: $('contactPhone').value.trim(),
             extraNotes: $('notes').value.trim()
@@ -920,11 +1071,17 @@
       if (!files.length) { setStatus('uploadStatus', 'กรุณาเลือกไฟล์', 'error'); return; }
       const oversized = files.filter(f => f.size > 15 * 1024 * 1024);
       if (oversized.length) { setStatus('uploadStatus', `ไฟล์ใหญ่เกิน 15 MB: ${oversized.map(f => f.name).join(', ')}`, 'error'); return; }
+      if ((Number($('warrantyYears').value || 0) > 0 || Number($('warrantyMonths').value || 0) > 0) && !$('warrantyStartDate').value) {
+        setStatus('uploadStatus', 'ถ้าระบุกี่ปีหรือกี่เดือน กรุณาเลือกวันที่เริ่มรับประกันด้วย', 'error');
+        return;
+      }
       setStatus('uploadStatus', `กำลังอัปโหลด ${files.length} ไฟล์...`);
       const category = $('category').value;
       const title = $('title').value.trim();
       const notes = buildStructuredNotes({
-        coverageDuration: $('coverageDuration').value.trim(),
+        warrantyStartDate: $('warrantyStartDate').value.trim(),
+        warrantyYears: $('warrantyYears').value.trim(),
+        warrantyMonths: $('warrantyMonths').value.trim(),
         contactName: $('contactName').value.trim(),
         contactPhone: $('contactPhone').value.trim(),
         extraNotes: $('notes').value.trim()
@@ -962,6 +1119,11 @@
       $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
       $('uploadForm').addEventListener('submit', uploadDoc);
       initDropZone();
+      ['warrantyStartDate', 'warrantyYears', 'warrantyMonths'].forEach(id => {
+        $(id).addEventListener('input', updateWarrantyPreview);
+        $(id).addEventListener('change', updateWarrantyPreview);
+      });
+      updateWarrantyPreview();
       $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
       $('logoutBtn').addEventListener('click', logout);
       const resident = getResidentSession();
