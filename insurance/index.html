@@ -214,6 +214,67 @@
     }
     .full { grid-column: 1 / -1; }
 
+    /* ── Drop zone ── */
+    .drop-zone {
+      grid-column: 1 / -1;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      background: var(--bg);
+      padding: 36px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-pale);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .drop-zone-icon { font-size: 32px; margin-bottom: 10px; }
+    .drop-zone-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .drop-zone-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .drop-zone-types {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .drop-zone-type {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .drop-zone-selected {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+      min-height: 18px;
+    }
+
     /* ── Toolbar + doc list ── */
     .toolbar {
       display: flex;
@@ -326,9 +387,19 @@
           <label for="notes">หมายเหตุ</label>
           <textarea id="notes" placeholder="รายละเอียดสั้น ๆ เช่น วันหมดอายุ บริษัทประกัน หรือจุดติดตั้ง"></textarea>
         </div>
-        <div class="full">
-          <label for="fileInput">ไฟล์แนบ</label>
-          <input id="fileInput" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+        <div class="drop-zone" id="dropZone">
+          <input id="fileInput" type="file" multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic" />
+          <div class="drop-zone-icon">📂</div>
+          <div class="drop-zone-label">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</div>
+          <div class="drop-zone-hint">รองรับหลายไฟล์พร้อมกัน · ขนาดสูงสุด 15 MB ต่อไฟล์</div>
+          <div class="drop-zone-types">
+            <span class="drop-zone-type">PDF</span>
+            <span class="drop-zone-type">Word</span>
+            <span class="drop-zone-type">Excel</span>
+            <span class="drop-zone-type">JPG</span>
+          </div>
+          <div class="drop-zone-selected" id="dropZoneSelected"></div>
         </div>
         <button class="btn gold-fill full" type="submit">อัปโหลดเอกสาร</button>
         <div class="status full" id="uploadStatus"></div>
@@ -446,33 +517,68 @@
       const data = await api({action: 'list', ...auth});
       renderDocs(data.documents || []);
     }
+    // Drop zone drag events
+    function initDropZone() {
+      const zone = $('dropZone');
+      const input = $('fileInput');
+      const label = $('dropZoneSelected');
+      input.addEventListener('change', () => {
+        const files = Array.from(input.files);
+        label.textContent = files.length ? `เลือกแล้ว ${files.length} ไฟล์: ${files.map(f => f.name).join(', ')}` : '';
+      });
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        const dt = e.dataTransfer;
+        if (dt.files.length) {
+          input.files = dt.files;
+          const files = Array.from(dt.files);
+          label.textContent = `เลือกแล้ว ${files.length} ไฟล์: ${files.map(f => f.name).join(', ')}`;
+        }
+      });
+    }
+
     async function uploadDoc(e) {
       e.preventDefault();
       const auth = getAuthPayload();
-      const file = $('fileInput').files[0];
-      if (!file) return;
       if (!auth) {
         setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error');
         return;
       }
-      if (file.size > 15 * 1024 * 1024) {
-        setStatus('uploadStatus', 'ไฟล์ใหญ่เกิน 15 MB', 'error');
+      const files = Array.from($('fileInput').files);
+      if (!files.length) {
+        setStatus('uploadStatus', 'กรุณาเลือกไฟล์', 'error');
         return;
       }
-      setStatus('uploadStatus', 'กำลังอัปโหลด...');
+      const oversized = files.filter(f => f.size > 15 * 1024 * 1024);
+      if (oversized.length) {
+        setStatus('uploadStatus', `ไฟล์ใหญ่เกิน 15 MB: ${oversized.map(f => f.name).join(', ')}`, 'error');
+        return;
+      }
+      setStatus('uploadStatus', `กำลังอัปโหลด ${files.length} ไฟล์...`);
+      const category = $('category').value;
+      const title = $('title').value;
+      const notes = $('notes').value;
       try {
-        const dataUrl = await fileToDataUrl(file);
-        await api({
-          action: 'upload',
-          ...auth,
-          category: $('category').value,
-          title: $('title').value,
-          notes: $('notes').value,
-          fileName: file.name,
-          dataUrl
-        });
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (files.length > 1) setStatus('uploadStatus', `กำลังอัปโหลด ${i + 1}/${files.length}: ${file.name}`);
+          const dataUrl = await fileToDataUrl(file);
+          await api({
+            action: 'upload',
+            ...auth,
+            category,
+            title: files.length > 1 ? `${title} (${i + 1})` : title,
+            notes,
+            fileName: file.name,
+            dataUrl
+          });
+        }
         $('uploadForm').reset();
-        setStatus('uploadStatus', 'อัปโหลดแล้ว', 'ok');
+        $('dropZoneSelected').textContent = '';
+        setStatus('uploadStatus', `อัปโหลดแล้ว ${files.length} ไฟล์ ✓`, 'ok');
         await loadDocs();
       } catch (err) {
         setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error');
@@ -496,6 +602,7 @@
       $('pageIntro').textContent = cfg.intro;
       $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
       $('uploadForm').addEventListener('submit', uploadDoc);
+      initDropZone();
       $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
       $('logoutBtn').addEventListener('click', logout);
       const resident = getResidentSession();
