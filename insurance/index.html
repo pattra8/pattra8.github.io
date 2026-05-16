@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asset Insurance | Pattra Villa 8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f0e6;
+      --card: #fffdf9;
+      --ink: #2f261e;
+      --muted: #806f5d;
+      --line: #e3d8c5;
+      --gold: #c77b28;
+      --admin: #203245;
+      --admin2: #2f5066;
+      --danger: #9b2c1d;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 16px;
+    }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--admin);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: Georgia, serif;
+      font-size: 20px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, serif;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 400;
+    }
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    a, button {
+      font: inherit;
+    }
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: var(--radius);
+      padding: 11px 16px;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn.primary {
+      background: var(--gold);
+      color: #fff;
+      border-color: var(--gold);
+    }
+    .btn.admin {
+      background: var(--admin);
+      border-color: var(--admin);
+      color: #fff;
+    }
+    .btn.danger {
+      color: var(--danger);
+      border-color: rgba(155,44,29,.35);
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 38px 22px 70px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: 0 12px 34px rgba(47,38,30,.06);
+    }
+    .hero-title {
+      margin: 0;
+      font-family: 'Prompt', sans-serif;
+      font-size: clamp(30px, 6vw, 52px);
+      line-height: 1.08;
+    }
+    .hero-copy {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 12px 0 0;
+    }
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(32,50,69,.1);
+      color: var(--admin);
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+    .login-box {
+      display: grid;
+      gap: 12px;
+      align-content: center;
+    }
+    label {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 7px;
+      color: var(--muted);
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      color: var(--ink);
+      font: inherit;
+    }
+    textarea {
+      min-height: 94px;
+      resize: vertical;
+    }
+    .hidden { display: none !important; }
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .full { grid-column: 1 / -1; }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 26px 0 14px;
+      flex-wrap: wrap;
+    }
+    .toolbar h2 {
+      margin: 0;
+      font-family: 'Prompt', sans-serif;
+      font-size: 28px;
+    }
+    .doc-list {
+      display: grid;
+      gap: 12px;
+    }
+    .doc-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .doc-title {
+      margin: 0 0 6px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 20px;
+    }
+    .doc-meta {
+      color: var(--muted);
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .doc-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 42px 20px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.45);
+    }
+    .status {
+      color: var(--muted);
+      min-height: 24px;
+    }
+    .status.error { color: var(--danger); }
+    .status.ok { color: #2f6b37; }
+    @media (max-width: 760px) {
+      header { align-items: flex-start; padding: 16px; }
+      .brand h1 { font-size: 25px; }
+      .nav .btn { padding: 9px 11px; font-size: 14px; }
+      .hero, .upload-grid, .doc-card { grid-template-columns: 1fr; }
+      .doc-actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">PV</div>
+      <div>
+        <h1>Pattra Villa 8</h1>
+        <p>Admin Documents</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="btn" href="/">🏠 Home</a>
+      <a class="btn" href="/admin/">Admin</a>
+      <button class="btn danger hidden" id="logoutBtn">ออกจากระบบ</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="panel">
+        <div class="admin-badge">Admin Only</div>
+        <h2 class="hero-title" id="pageTitle">Asset Insurance</h2>
+        <p class="hero-copy" id="pageIntro">จัดเก็บกรมธรรม์ เอกสารรับประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง เช่น ประตูเหล็กไฟฟ้า มอเตอร์ อุปกรณ์ฟิตเนส CCTV และระบบส่วนกลางอื่น ๆ</p>
+      </div>
+      <div class="panel login-box" id="loginPanel">
+        <div>
+          <label for="adminPassword">Admin password</label>
+          <input id="adminPassword" type="password" autocomplete="current-password" placeholder="adminpattra8" />
+        </div>
+        <button class="btn admin" id="loginBtn">เข้าสู่ระบบ</button>
+        <div class="status" id="loginStatus"></div>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="vaultPanel">
+      <form id="uploadForm" class="upload-grid">
+        <div>
+          <label for="category">หมวดหมู่</label>
+          <select id="category"></select>
+        </div>
+        <div>
+          <label for="title">ชื่อเอกสาร</label>
+          <input id="title" required placeholder="เช่น ประกันมอเตอร์ประตูหน้าโครงการ" />
+        </div>
+        <div class="full">
+          <label for="notes">หมายเหตุ</label>
+          <textarea id="notes" placeholder="รายละเอียดสั้น ๆ เช่น วันหมดอายุ บริษัทประกัน หรือจุดติดตั้ง"></textarea>
+        </div>
+        <div class="full">
+          <label for="fileInput">ไฟล์แนบ</label>
+          <input id="fileInput" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+        </div>
+        <button class="btn primary full" type="submit">อัปโหลดเอกสาร</button>
+        <div class="status full" id="uploadStatus"></div>
+      </form>
+    </section>
+
+    <div class="toolbar">
+      <h2>เอกสารทั้งหมด</h2>
+      <button class="btn" id="refreshBtn">โหลดใหม่</button>
+    </div>
+    <section class="doc-list" id="docList">
+      <div class="empty">กรุณาเข้าสู่ระบบ admin เพื่อดูเอกสาร</div>
+    </section>
+  </main>
+
+  <script>
+    const VAULT_TYPE = 'insurance';
+    const PAGE_CONFIG = {
+      insurance: {
+        title: 'Asset Insurance',
+        intro: 'จัดเก็บกรมธรรม์ เอกสารรับประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง เช่น ประตูเหล็กไฟฟ้า มอเตอร์ อุปกรณ์ฟิตเนส CCTV และระบบส่วนกลางอื่น ๆ',
+        categories: ['ประตูเหล็กไฟฟ้า + มอเตอร์', 'อุปกรณ์ฟิตเนส', 'CCTV / Network / LPR', 'ส่วนกลาง / อาคาร / ระบบอื่น']
+      }
+    };
+    const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
+    const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
+    const ADMIN_PASSWORD_KEY = 'pattra_admin_password_vault';
+    const ADMIN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+    function $(id) { return document.getElementById(id); }
+    function esc(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+    function getAdminPassword() {
+      const until = Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0);
+      if (until <= Date.now()) return '';
+      return sessionStorage.getItem(ADMIN_PASSWORD_KEY) || '';
+    }
+    function setStatus(id, msg, type = '') {
+      const el = $(id);
+      el.textContent = msg || '';
+      el.className = 'status ' + type;
+    }
+    async function api(payload) {
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({vaultType: VAULT_TYPE, ...payload})
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    }
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    function formatDate(iso) {
+      if (!iso) return '-';
+      return new Date(iso).toLocaleString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+    }
+    function formatSize(size) {
+      const n = Number(size || 0);
+      if (n > 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+      if (n > 1024) return Math.round(n / 1024) + ' KB';
+      return n + ' B';
+    }
+    function renderDocs(docs) {
+      if (!docs.length) {
+        $('docList').innerHTML = '<div class="empty">ยังไม่มีเอกสารในหมวดนี้</div>';
+        return;
+      }
+      $('docList').innerHTML = docs.map(doc => `
+        <article class="doc-card">
+          <div>
+            <h3 class="doc-title">${esc(doc.title)}</h3>
+            <div class="doc-meta">
+              ${esc(doc.category)} · ${esc(doc.fileName)} · ${formatSize(doc.size)}<br>
+              อัปโหลดเมื่อ ${formatDate(doc.createdAt)}
+              ${doc.notes ? `<br>${esc(doc.notes)}` : ''}
+            </div>
+          </div>
+          <div class="doc-actions">
+            ${doc.downloadUrl ? `<a class="btn admin" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>` : ''}
+            <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
+          </div>
+        </article>
+      `).join('');
+      document.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => deleteDoc(btn.dataset.delete));
+      });
+    }
+    async function loadDocs() {
+      const adminPassword = getAdminPassword();
+      if (!adminPassword) return;
+      $('vaultPanel').classList.remove('hidden');
+      $('logoutBtn').classList.remove('hidden');
+      $('loginPanel').classList.add('hidden');
+      $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
+      const data = await api({action: 'list', adminPassword});
+      renderDocs(data.documents || []);
+    }
+    async function login() {
+      const pw = $('adminPassword').value.trim();
+      setStatus('loginStatus', 'กำลังตรวจสอบ...');
+      try {
+        await api({action: 'list', adminPassword: pw});
+        localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now() + ADMIN_TTL_MS));
+        sessionStorage.setItem(ADMIN_PASSWORD_KEY, pw);
+        setStatus('loginStatus', '');
+        await loadDocs();
+      } catch (err) {
+        setStatus('loginStatus', 'รหัสไม่ถูกต้อง', 'error');
+      }
+    }
+    async function uploadDoc(e) {
+      e.preventDefault();
+      const adminPassword = getAdminPassword();
+      const file = $('fileInput').files[0];
+      if (!file) return;
+      if (file.size > 15 * 1024 * 1024) {
+        setStatus('uploadStatus', 'ไฟล์ใหญ่เกิน 15 MB', 'error');
+        return;
+      }
+      setStatus('uploadStatus', 'กำลังอัปโหลด...');
+      try {
+        const dataUrl = await fileToDataUrl(file);
+        await api({
+          action: 'upload',
+          adminPassword,
+          category: $('category').value,
+          title: $('title').value,
+          notes: $('notes').value,
+          fileName: file.name,
+          dataUrl
+        });
+        $('uploadForm').reset();
+        setStatus('uploadStatus', 'อัปโหลดแล้ว', 'ok');
+        await loadDocs();
+      } catch (err) {
+        setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error');
+      }
+    }
+    async function deleteDoc(id) {
+      if (!confirm('ลบเอกสารนี้?')) return;
+      try {
+        await api({action: 'delete', adminPassword: getAdminPassword(), documentId: id});
+        await loadDocs();
+      } catch (err) {
+        alert(err.message || 'ลบไม่สำเร็จ');
+      }
+    }
+    function logout() {
+      sessionStorage.removeItem(ADMIN_PASSWORD_KEY);
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+      location.reload();
+    }
+    function init() {
+      const cfg = PAGE_CONFIG[VAULT_TYPE];
+      $('pageTitle').textContent = cfg.title;
+      $('pageIntro').textContent = cfg.intro;
+      $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
+      $('loginBtn').addEventListener('click', login);
+      $('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+      $('uploadForm').addEventListener('submit', uploadDoc);
+      $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
+      $('logoutBtn').addEventListener('click', logout);
+      if (getAdminPassword()) loadDocs().catch(() => logout());
+    }
+    init();
+  </script>
+</body>
+</html>

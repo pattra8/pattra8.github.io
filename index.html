@@ -354,6 +354,45 @@
 
     .service-card.featured .service-desc { color: var(--muted); }
 
+    .service-card.admin-only-card {
+      display: none;
+      background: linear-gradient(180deg, #203245 0%, #293f52 100%);
+      border-color: rgba(122, 167, 189, 0.75);
+      color: #fff;
+    }
+
+    .service-card.admin-only-card.show {
+      display: flex;
+    }
+
+    .service-card.admin-only-card::before {
+      background: linear-gradient(90deg, transparent, #9ec7d7, transparent);
+    }
+
+    .service-card.admin-only-card .service-icon {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .service-card.admin-only-card .service-title,
+    .service-card.admin-only-card .service-desc {
+      color: #fff;
+    }
+
+    .service-card.admin-only-card .service-desc {
+      opacity: 0.82;
+    }
+
+    .service-card.admin-only-card .service-cta {
+      color: #cfe8f1;
+    }
+
+    .service-card.admin-only-card .tag {
+      color: #dff3fa;
+      border-color: rgba(207,232,241,0.55);
+      background: rgba(255,255,255,0.08);
+    }
+
     .service-cta {
       display: inline-flex;
       align-items: center;
@@ -1299,6 +1338,30 @@
       </span>
     </a>
 
+    <!-- Admin only: Asset Insurance -->
+    <a href="/insurance/" class="service-card admin-only-card" data-admin-card>
+      <div class="tag">Admin</div>
+      <div class="service-icon">🛡️</div>
+      <div class="service-title">Asset Insurance</div>
+      <p class="service-desc">จัดเก็บกรมธรรม์ เอกสารรับประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง</p>
+      <span class="service-cta">
+        Insurance Files
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <!-- Admin only: Blueprints -->
+    <a href="/blueprints/" class="service-card admin-only-card" data-admin-card>
+      <div class="tag">Admin</div>
+      <div class="service-icon">📐</div>
+      <div class="service-title">Blueprints</div>
+      <p class="service-desc">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท</p>
+      <span class="service-cta">
+        Open Plans
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
   </div>
 
 
@@ -1393,6 +1456,7 @@
 <script>
 // ── Resident Session — Landing Page ──
 const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+const ADMIN_SESSION_KEY = 'pattra_admin_session_until';
 const RESIDENT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const RESIDENT_AUTH_URL =
   'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
@@ -1413,6 +1477,16 @@ function storeResidentSession(houseNo, pin, residentName) {
   }));
 }
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
+
+function hasAdminSession() {
+  return Number(localStorage.getItem(ADMIN_SESSION_KEY) || 0) > Date.now();
+}
+
+function renderAdminCards() {
+  document.querySelectorAll('[data-admin-card]').forEach(card => {
+    card.classList.toggle('show', hasAdminSession());
+  });
+}
 
 function escH(s) {
   return String(s || '').replace(/[&<>"']/g, c =>
@@ -1515,6 +1589,7 @@ async function handleLoginSubmit() {
 document.addEventListener('DOMContentLoaded', () => {
   const session = getResidentSession();
   renderHeaderIdentity(session);
+  renderAdminCards();
   if (session) updateServiceLinks(session.houseNo);
 
   document.getElementById('loginOverlay').addEventListener('click', e => {
@@ -1531,6 +1606,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeLoginModal();
   });
+});
+
+window.addEventListener('storage', e => {
+  if (e.key === ADMIN_SESSION_KEY) renderAdminCards();
 });
 </script>
 
