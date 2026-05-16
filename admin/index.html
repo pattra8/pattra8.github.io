@@ -531,7 +531,7 @@
   // ════════════════════════════════════════════
   let allResidents = [];
 
-  window.loadResidents = async function() {
+  async function loadResidents() {
     const notice = document.getElementById('resNotice');
     const tbl    = document.getElementById('resTable');
     notice.textContent = '';
@@ -549,7 +549,7 @@
     } catch(e) {
       tbl.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`;
     }
-  };
+  }
 
   function renderResidents(list) {
     const tbl = document.getElementById('resTable');
@@ -580,7 +580,7 @@
 
   document.getElementById('resSearch').addEventListener('input', () => renderResidents(allResidents));
 
-  window.openEditResident = function(houseNo) {
+  function openEditResident(houseNo) {
     const r = allResidents.find(x => x.houseNo === houseNo);
     if (!r) return;
     document.getElementById('resEditTitle').textContent = `แก้ไขข้อมูล บ้านเลขที่ ${r.houseNo}`;
@@ -596,9 +596,9 @@
     document.getElementById('resEditCard').dataset.house = houseNo;
     document.getElementById('resEditCard').classList.remove('hidden');
     document.getElementById('resEditCard').scrollIntoView({ behavior: 'smooth' });
-  };
+  }
 
-  window.saveResident = async function() {
+  async function saveResident() {
     const notice   = document.getElementById('reeNotice');
     const houseNo  = document.getElementById('resEditCard').dataset.house;
     notice.className = 'notice';
@@ -631,12 +631,12 @@
       notice.className = 'notice err';
       notice.textContent = 'บันทึกไม่สำเร็จ: ' + e.message;
     }
-  };
+  }
 
   // ════════════════════════════════════════════
   //  TAB: PIN ลูกบ้าน
   // ════════════════════════════════════════════
-  window.resetPin = async function() {
+  async function resetPin() {
     const notice  = document.getElementById('pinNotice');
     const houseNo = document.getElementById('pinHouse').value.trim();
     const pin     = document.getElementById('pinNew').value.trim();
@@ -659,9 +659,9 @@
       notice.className = 'notice err';
       notice.textContent = 'ไม่สำเร็จ: ' + e.message;
     }
-  };
+  }
 
-  window.loadPinStatus = async function() {
+  async function loadPinStatus() {
     const el = document.getElementById('pinTable');
     el.innerHTML = '<div class="empty">กำลังโหลด...</div>';
     try {
@@ -686,21 +686,21 @@
     } catch(e) {
       el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`;
     }
-  };
+  }
 
   // ════════════════════════════════════════════
   //  TAB: โหวต
   // ════════════════════════════════════════════
-  window.addPollOption = function() {
+  function addPollOption() {
     const wrap = document.getElementById('pollOpts');
     const idx  = wrap.querySelectorAll('.poll-opt-input').length + 1;
     const d    = document.createElement('div');
     d.className = 'field';
     d.innerHTML = `<label>ตัวเลือกที่ ${idx}</label><input class="poll-opt-input" />`;
     wrap.appendChild(d);
-  };
+  }
 
-  window.createPoll = async function() {
+  async function createPoll() {
     const notice  = document.getElementById('pollCreateNotice');
     const q       = document.getElementById('pollQ').value.trim();
     const opts    = [...document.querySelectorAll('.poll-opt-input')].map(i => i.value.trim()).filter(Boolean);
@@ -720,9 +720,9 @@
     } catch(e) {
       notice.className='notice err'; notice.textContent='ไม่สำเร็จ: '+e.message;
     }
-  };
+  }
 
-  window.loadPolls = async function() {
+  async function loadPolls() {
     const el = document.getElementById('pollList');
     el.innerHTML = '<div class="empty">กำลังโหลด...</div>';
     try {
@@ -765,9 +765,9 @@
     } catch(e) {
       el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`;
     }
-  };
+  }
 
-  window.closePoll = async function(pollId) {
+  async function closePoll(pollId) {
     if (!confirm('ปิดโพลนี้?')) return;
     try {
       const res  = await fetch(API_POLL, { method:'POST', headers:{'Content-Type':'application/json'},
@@ -776,9 +776,9 @@
       if (!data.ok) throw new Error(data.error||'Error');
       loadPolls();
     } catch(e) { alert('ไม่สำเร็จ: '+e.message); }
-  };
+  }
 
-  window.deletePoll = async function(pollId) {
+  async function deletePoll(pollId) {
     if (!confirm('ลบโพลนี้?')) return;
     try {
       const res  = await fetch(API_POLL, { method:'POST', headers:{'Content-Type':'application/json'},
@@ -787,12 +787,12 @@
       if (!data.ok) throw new Error(data.error||'Error');
       loadPolls();
     } catch(e) { alert('ไม่สำเร็จ: '+e.message); }
-  };
+  }
 
   // ════════════════════════════════════════════
   //  TAB: ไลฟ์สไตล์
   // ════════════════════════════════════════════
-  window.loadLifestyle = async function() {
+  async function loadLifestyle() {
     const el = document.getElementById('lifestyleContent');
     el.innerHTML = '<div class="empty">กำลังโหลด...</div>';
     try {
@@ -807,7 +807,7 @@
     } catch(e) {
       el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`;
     }
-  };
+  }
 
   function renderLifestyle(stats) {
     const el = document.getElementById('lifestyleContent');
@@ -865,7 +865,7 @@
   // ════════════════════════════════════════════
   //  TAB: Activity Log
   // ════════════════════════════════════════════
-  window.loadLogs = async function() {
+  async function loadLogs() {
     const el      = document.getElementById('logContent');
     const houseNo = document.getElementById('logHouse').value.trim();
     const limit   = Number(document.getElementById('logLimit').value) || 100;
@@ -894,7 +894,7 @@
     } catch(e) {
       el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`;
     }
-  };
+  }
 
   // ════════════════════════════════════════════
   //  TAB: ประกาศ  (Firebase Firestore + Storage)
@@ -989,7 +989,7 @@
     }).join('');
   }
 
-  window.saveAnnouncement = async function(e) {
+  async function saveAnnouncement(e) {
     e.preventDefault();
     const notice  = document.getElementById('annNotice');
     const id      = document.getElementById('annDocId').value;
@@ -1029,9 +1029,9 @@
     } finally {
       document.getElementById('annSaveBtn').disabled = false;
     }
-  };
+  }
 
-  window.resetAnnForm = function(msg) {
+  function resetAnnForm(msg) {
     document.getElementById('annForm').reset();
     document.getElementById('annDocId').value = '';
     document.getElementById('annDate').value  = todayISO();
@@ -1041,9 +1041,9 @@
     document.getElementById('annNotice').textContent = msg || 'ข้อมูลจะอัปเดตบนหน้าเว็บทันที';
     annPending = [];
     renderAnnPreviews();
-  };
+  }
 
-  window.editAnn = function(id) {
+  function editAnn(id) {
     const item = annItems.find(x => x.id===id);
     if (!item) return;
     document.getElementById('annDocId').value = item.id;
@@ -1061,13 +1061,13 @@
     document.getElementById('annCancelBtn').classList.remove('hidden');
     document.getElementById('tab-announce').scrollIntoView({ behavior:'smooth' });
     window.scrollTo({ top:0, behavior:'smooth' });
-  };
+  }
 
-  window.deleteAnn = async function(id, title) {
+  async function deleteAnn(id, title) {
     if (!confirm(`ลบประกาศ "${title}"?`)) return;
     try { await deleteDoc(doc(db,'announcements',id)); }
     catch(err) { alert('ลบไม่สำเร็จ: '+err.message); }
-  };
+  }
 
   // ════════════════════════════════════════════
   //  UTILS
@@ -1089,11 +1089,22 @@
   }
 
   // Expose helpers globally so onclick= attributes work
-  window.loadResidents  = loadResidents;
-  window.loadPinStatus  = loadPinStatus;
-  window.loadPolls      = loadPolls;
-  window.loadLifestyle  = loadLifestyle;
-  window.loadLogs       = loadLogs;
+  window.loadResidents    = loadResidents;
+  window.openEditResident = openEditResident;
+  window.saveResident     = saveResident;
+  window.resetPin         = resetPin;
+  window.loadPinStatus    = loadPinStatus;
+  window.addPollOption    = addPollOption;
+  window.createPoll       = createPoll;
+  window.loadPolls        = loadPolls;
+  window.closePoll        = closePoll;
+  window.deletePoll       = deletePoll;
+  window.loadLifestyle    = loadLifestyle;
+  window.loadLogs         = loadLogs;
+  window.saveAnnouncement = saveAnnouncement;
+  window.resetAnnForm     = resetAnnForm;
+  window.editAnn          = editAnn;
+  window.deleteAnn        = deleteAnn;
 </script>
 </body>
 </html>
