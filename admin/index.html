@@ -505,7 +505,7 @@
         location.href = '/'; return;
       }
     } catch { location.href = '/'; return; }
-    initDashboard();
+    queueMicrotask(initDashboard);
   })();
 
   // ── TABS ──
