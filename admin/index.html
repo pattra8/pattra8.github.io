@@ -569,7 +569,7 @@
           <td>${esc(r.name||'-')}</td>
           <td>${esc(r.phone||'-')}</td>
           <td>${r.residents||0}</td>
-          <td>${(r.cars||0) + (r.motorcycles||0)}</td>
+          <td>${(r.carCount||0) + (r.motorcycleCount||0)}</td>
           <td>${esc(r.pets||'-')}</td>
           <td><span class="pill ${r.pinSet?'green':'red'}">${r.pinSet?'ตั้งแล้ว':'ยังไม่ตั้ง'}</span></td>
           <td><button class="btn btn-outline btn-sm" onclick="openEditResident('${esc(r.houseNo||'')}')">แก้ไข</button></td>
@@ -589,8 +589,8 @@
     document.getElementById('reeLine').value      = r.lineId    || '';
     document.getElementById('reeEmail').value     = r.email     || '';
     document.getElementById('reeResidents').value = r.residents || '';
-    document.getElementById('reeCars').value      = r.cars      || '';
-    document.getElementById('reeMoto').value      = r.motorcycles || '';
+    document.getElementById('reeCars').value      = r.carCount || 0;
+    document.getElementById('reeMoto').value      = r.motorcycleCount || 0;
     document.getElementById('reePets').value      = r.pets      || '';
     document.getElementById('reeNote').value      = r.note      || '';
     document.getElementById('resEditCard').dataset.house = houseNo;
