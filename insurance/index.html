@@ -553,7 +553,7 @@
       margin-bottom: 5px;
     }
     .cell-value {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.3;
@@ -598,7 +598,7 @@
       color: var(--taupe-mid);
       text-decoration: none;
       font-weight: 500;
-      max-width: 130px;
+      max-width: 220px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -980,7 +980,7 @@
     }
     function formatThaiDate(iso) {
       if (!iso) return '';
-      return new Date(`${iso}T00:00:00`).toLocaleDateString('th-TH', {
+      return new Date(`${iso}T00:00:00`).toLocaleDateString('th-TH-u-ca-gregory', {
         timeZone: 'Asia/Bangkok',
         dateStyle: 'medium'
       });
@@ -1228,7 +1228,7 @@
               <div class="card-btns">
                 <button class="btn-ghost" data-edit="${esc(primaryDoc.id)}" data-title="${esc(primaryDoc.title)}" data-category="${esc(primaryDoc.category)}" data-notes="${esc(primaryDoc.notes || '')}">แก้ไข</button>
                 <button class="btn-ghost btn-danger-ghost" data-delete="${esc(primaryDoc.id)}">ลบ</button>
-                ${fileDocs.length === 1 ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูไฟล์</a>` : fileDocs.length > 1 ? `<button class="btn-gold" data-viewall="${esc(group.docs[0].id)}">ดูเอกสารประกัน (${fileDocs.length})</button>` : ''}
+                ${fileDocs.length === 1 ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูเอกสารรับประกัน</a>` : fileDocs.length > 1 ? `<button class="btn-gold" data-viewall="${esc(group.docs[0].id)}">ดูเอกสารรับประกัน (${fileDocs.length})</button>` : ''}
               </div>
             </div>
           </div>
