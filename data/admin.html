@@ -946,10 +946,6 @@
     <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">
       📋 ข้อมูลลูกบ้าน
     </button>
-    <button class="tab-btn" id="tabPending" onclick="switchTab('pending')">
-      📬 รอ Approve
-      <span class="tab-badge hidden" id="pendingBadge">0</span>
-    </button>
     <button class="tab-btn" id="tabPins" onclick="switchTab('pins')">
       🔑 PIN ลูกบ้าน
     </button>
@@ -998,28 +994,6 @@
 
   <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
   </div><!-- end residentsTab -->
-
-  <!-- Tab: Pending Corrections -->
-  <div id="pendingTab" style="display:none">
-    <div style="max-width:1120px;margin:24px auto 10px;padding:0 28px;">
-      <div class="section-head-row">
-        <div>
-          <h2 style="font-size:1.3rem;">📬 คำร้องรอ Approve</h2>
-          <p style="margin:0;color:var(--text-muted);font-size:.9rem;">คำร้องแก้ไขข้อมูลและทะเบียนรถจากลูกบ้าน</p>
-        </div>
-        <div class="section-actions">
-          <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 เปิดหน้าทะเบียนลูกบ้าน</a>
-          <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 เปิดหน้าข้อมูลลูกบ้าน</a>
-        </div>
-      </div>
-    </div>
-    <div class="pending-wrap" id="pendingList">
-      <div class="pending-empty">
-        <div class="big">⏳</div>
-        กำลังโหลดคำร้อง...
-      </div>
-    </div>
-  </div>
 
   <!-- Tab: Resident PIN -->
   <div id="pinsTab" style="display:none">
@@ -1371,20 +1345,18 @@
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
   function switchTab(tab) {
+    if (tab === 'pending') tab = 'residents';
     currentTab = tab;
     document.getElementById('residentsTab').style.display = tab === 'residents' ? 'block' : 'none';
-    document.getElementById('pendingTab').style.display   = tab === 'pending'   ? 'block' : 'none';
     document.getElementById('pinsTab').style.display      = tab === 'pins'      ? 'block' : 'none';
     document.getElementById('voteTab').style.display      = tab === 'vote'      ? 'block' : 'none';
     document.getElementById('surveyTab').style.display    = tab === 'survey'    ? 'block' : 'none';
     document.getElementById('logTab').style.display       = tab === 'log'       ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
-    document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
     document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
     document.getElementById('tabSurvey').classList.toggle('active', tab === 'survey');
     document.getElementById('tabLog').classList.toggle('active', tab === 'log');
-    if (tab === 'pending') loadPending();
     if (tab === 'vote') loadAdminPolls();
     if (tab === 'log') loadActivityLog();
   }
