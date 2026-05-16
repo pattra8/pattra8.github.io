@@ -209,9 +209,9 @@
     /* ── Upload form ── */
     .upload-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
-      max-width: 680px;
+      max-width: 860px;
     }
     .full { grid-column: 1 / -1; }
 
@@ -292,39 +292,182 @@
       color: var(--taupe);
       letter-spacing: 0.01em;
     }
-    .doc-list { display: grid; gap: 12px; max-width: 860px; }
+    .doc-list { display: grid; gap: 14px; max-width: 980px; }
     .doc-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px 22px;
+      padding: 22px 24px;
       box-shadow: var(--shadow);
-      transition: box-shadow 0.2s;
+      transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
     }
-    .doc-card:hover { box-shadow: var(--shadow-lg); }
+    .doc-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); border-color: #dbc9a9; }
+    .doc-card-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+    }
+    .doc-title-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
     .doc-title {
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 17px;
-      font-weight: 500;
+      font-size: 26px;
+      font-weight: 600;
       color: var(--text);
+      line-height: 1.3;
+    }
+    .doc-category-badge,
+    .doc-duration-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .doc-category-badge {
+      background: var(--bg2);
+      color: var(--taupe-mid);
+      border: 1px solid var(--border);
+    }
+    .doc-duration-badge {
+      background: var(--gold-pale);
+      color: var(--gold);
+      border: 1px solid rgba(196, 122, 44, 0.24);
+    }
+    .doc-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .summary-cell {
+      background: linear-gradient(180deg, rgba(249,243,233,0.95), rgba(243,236,221,0.8));
+      border: 1px solid rgba(230, 220, 199, 0.95);
+      border-radius: 12px;
+      padding: 11px 12px;
+      min-height: 74px;
+    }
+    .summary-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
       margin-bottom: 6px;
     }
-    .doc-meta {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 13px;
+    .summary-value {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.45;
       word-break: break-word;
-      font-weight: 300;
+    }
+    .summary-value.muted { color: var(--muted); }
+    .doc-description {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 13px;
+      margin-top: 12px;
+      word-break: break-word;
+    }
+    .doc-proof-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .proof-tile {
+      width: 56px;
+      min-height: 56px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #fff, #f6efe2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 6px;
+      text-align: center;
+      color: var(--taupe-mid);
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(60,40,20,0.05);
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .proof-tile:hover {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(60,40,20,0.08);
+    }
+    .proof-icon {
+      font-size: 18px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .proof-ext {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .proof-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
     }
     .doc-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       justify-content: flex-end;
+      align-items: flex-start;
+    }
+    .doc-files {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(230, 220, 199, 0.85);
+    }
+    .doc-file-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(249,243,233,0.7);
+      border: 1px solid rgba(230, 220, 199, 0.85);
+    }
+    .doc-file-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .doc-file-meta {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 12px;
+      margin-top: 2px;
+      word-break: break-word;
+    }
+    .doc-file-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .doc-actions {
+      margin-left: auto;
     }
     .empty {
       text-align: center;
@@ -359,8 +502,9 @@
       header { padding: 0 20px; }
       .logo-divider { display: none; }
       main { padding: 32px 18px 60px; }
-      .hero, .upload-grid, .doc-card { grid-template-columns: 1fr; }
-      .doc-actions { justify-content: flex-start; }
+      .hero, .upload-grid, .doc-summary, .doc-card-top, .doc-file-row { grid-template-columns: 1fr; }
+      .doc-title { font-size: 22px; }
+      .doc-actions, .doc-file-actions { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -398,23 +542,35 @@
           <button type="button" class="btn" onclick="cancelEdit()">ยกเลิก</button>
         </div>
         <div>
-          <label for="title">ชื่อเอกสาร</label>
-          <input id="title" required placeholder="เช่น ประกันมอเตอร์ประตูหน้าโครงการ" />
+          <label for="title">ประกันอะไร?</label>
+          <input id="title" required placeholder="เช่น มอเตอร์ประตูเหล็กหน้าโครงการ" />
         </div>
         <div>
           <label for="category">หมวดหมู่</label>
           <select id="category"></select>
         </div>
+        <div>
+          <label for="coverageDuration">รับประกันนานแค่ไหน</label>
+          <input id="coverageDuration" placeholder="เช่น 2 ปี / 6 เดือน / ถึง 17 พ.ค. 2571" />
+        </div>
+        <div>
+          <label for="contactName">ติดต่อใคร</label>
+          <input id="contactName" placeholder="เช่น ช่างเทห์ / บริษัท ABC Service" />
+        </div>
         <div class="full">
-          <label for="notes">หมายเหตุ</label>
-          <textarea id="notes" placeholder="รายละเอียดสั้น ๆ เช่น วันหมดอายุ บริษัทประกัน หรือจุดติดตั้ง"></textarea>
+          <label for="contactPhone">เบอร์ติดต่อ</label>
+          <input id="contactPhone" placeholder="เช่น 08x-xxx-xxxx" />
+        </div>
+        <div class="full">
+          <label for="notes">รายละเอียดเพิ่มเติม</label>
+          <textarea id="notes" placeholder="เช่น มอเตอร์ใหม่ 2 ตัว ล้อเหล็กรับประกัน 6 เดือน ใช้ช่องนี้สำหรับเงื่อนไขหรือรายละเอียดเสริม"></textarea>
         </div>
         <div class="drop-zone" id="dropZone">
           <input id="fileInput" type="file" multiple
             accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic" />
           <div class="drop-zone-icon">📂</div>
           <div class="drop-zone-label">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</div>
-          <div class="drop-zone-hint">รองรับหลายไฟล์พร้อมกัน · ขนาดสูงสุด 15 MB ต่อไฟล์</div>
+          <div class="drop-zone-hint">แนวแนะนำ: 1 รายการประกันอัปโหลดได้ 2 ไฟล์ เช่น ใบรับประกัน + รูปหน้างาน · ขนาดสูงสุด 15 MB ต่อไฟล์</div>
           <div class="drop-zone-types">
             <span class="drop-zone-type">PDF</span>
             <span class="drop-zone-type">Word</span>
@@ -429,7 +585,7 @@
     </section>
 
     <div class="toolbar">
-      <h2>เอกสารทั้งหมด</h2>
+      <h2>รายการประกันทั้งหมด</h2>
       <button class="btn" id="refreshBtn">โหลดใหม่</button>
     </div>
     <section class="doc-list" id="docList">
@@ -512,28 +668,165 @@
       if (n > 1024) return Math.round(n / 1024) + ' KB';
       return n + ' B';
     }
+    function normalizeDocTitle(title) {
+      return String(title || '').replace(/\s*\(\d+\)\s*$/, '').trim();
+    }
+    function fileExtension(name) {
+      const m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+      return m ? m[1] : '';
+    }
+    function isImageExt(ext) {
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext);
+    }
+    function fileIcon(ext) {
+      if (ext === 'pdf') return 'PDF';
+      if (isImageExt(ext)) return 'IMG';
+      if (['doc', 'docx'].includes(ext)) return 'DOC';
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return 'XLS';
+      return 'FILE';
+    }
+    function fileEmoji(ext) {
+      if (ext === 'pdf') return '📄';
+      if (isImageExt(ext)) return '🖼️';
+      if (['doc', 'docx'].includes(ext)) return '📝';
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
+      return '📎';
+    }
+    function buildStructuredNotes({ coverageDuration, contactName, contactPhone, extraNotes }) {
+      const lines = [];
+      if (coverageDuration) lines.push(`ระยะรับประกัน: ${coverageDuration}`);
+      if (contactName) lines.push(`ผู้ติดต่อ: ${contactName}`);
+      if (contactPhone) lines.push(`เบอร์ติดต่อ: ${contactPhone}`);
+      if (extraNotes) lines.push(`รายละเอียด: ${extraNotes}`);
+      return lines.join('\n');
+    }
+    function parseStructuredNotes(notes) {
+      const text = String(notes || '').trim();
+      const meta = {
+        coverageDuration: '',
+        contactName: '',
+        contactPhone: '',
+        extraNotes: '',
+        legacyNotes: text
+      };
+      if (!text) return meta;
+      const extra = [];
+      text.split(/\n+/).map(line => line.trim()).filter(Boolean).forEach(line => {
+        if (line.startsWith('ระยะรับประกัน:')) meta.coverageDuration = line.slice('ระยะรับประกัน:'.length).trim();
+        else if (line.startsWith('ผู้ติดต่อ:')) meta.contactName = line.slice('ผู้ติดต่อ:'.length).trim();
+        else if (line.startsWith('เบอร์ติดต่อ:')) meta.contactPhone = line.slice('เบอร์ติดต่อ:'.length).trim();
+        else if (line.startsWith('รายละเอียด:')) extra.push(line.slice('รายละเอียด:'.length).trim());
+        else extra.push(line);
+      });
+      meta.extraNotes = extra.join(' · ');
+      return meta;
+    }
+    function summarizeGroup(group) {
+      const first = group.docs[0] || {};
+      const coverageDuration = group.docs.map(doc => doc._meta.coverageDuration).find(Boolean) || '';
+      const contactName = group.docs.map(doc => doc._meta.contactName).find(Boolean) || '';
+      const contactPhone = group.docs.map(doc => doc._meta.contactPhone).find(Boolean) || '';
+      const detail = group.docs.map(doc => doc._meta.extraNotes).find(Boolean) || '';
+      const contact = [contactName, contactPhone].filter(Boolean).join(' · ');
+      return {
+        title: group.baseTitle || first.title || '-',
+        category: first.category || '-',
+        coverageDuration,
+        contact,
+        detail
+      };
+    }
+    function groupDocuments(docs) {
+      const groups = new Map();
+      docs.forEach(doc => {
+        doc._meta = parseStructuredNotes(doc.notes);
+        const key = normalizeDocTitle(doc.title) || doc.id;
+        if (!groups.has(key)) groups.set(key, { key, baseTitle: normalizeDocTitle(doc.title), docs: [] });
+        groups.get(key).docs.push(doc);
+      });
+      return [...groups.values()]
+        .map(group => ({
+          ...group,
+          docs: group.docs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        }))
+        .sort((a, b) => new Date((b.docs[0] || {}).createdAt || 0) - new Date((a.docs[0] || {}).createdAt || 0));
+    }
+    function renderProofTiles(docs) {
+      const tiles = docs.slice(0, 4).map(doc => {
+        const ext = fileExtension(doc.fileName);
+        return `
+          <a class="proof-tile" href="${esc(doc.downloadUrl || '#')}" target="_blank" rel="noopener" title="${esc(doc.fileName || doc.title || '')}">
+            <span class="proof-icon">${fileEmoji(ext)}</span>
+            <span class="proof-ext">${esc(fileIcon(ext))}</span>
+          </a>
+        `;
+      }).join('');
+      const count = `<div class="proof-count">มีหลักฐาน ${docs.length} ไฟล์</div>`;
+      return `<div class="doc-proof-strip">${tiles}</div>${count}`;
+    }
+    function renderFileRows(docs) {
+      return `
+        <div class="doc-files">
+          ${docs.map(doc => `
+            <div class="doc-file-row">
+              <div>
+                <div class="doc-file-title">${esc(doc.fileName || 'ไฟล์แนบ')}</div>
+                <div class="doc-file-meta">
+                  ${esc(doc.category || '-')} · ${formatSize(doc.size)} · อัปโหลดเมื่อ ${formatDate(doc.createdAt)}
+                </div>
+              </div>
+              <div class="doc-file-actions">
+                ${doc.downloadUrl ? `<a class="btn gold" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>` : ''}
+                <button class="btn edit-btn" data-edit="${esc(doc.id)}" data-title="${esc(doc.title)}" data-category="${esc(doc.category)}" data-notes="${esc(doc.notes || '')}">แก้ไข</button>
+                <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
     function renderDocs(docs) {
       if (!docs.length) {
-        $('docList').innerHTML = '<div class="empty">ยังไม่มีเอกสารในหมวดนี้</div>';
+        $('docList').innerHTML = '<div class="empty">ยังไม่มีรายการประกันในหมวดนี้</div>';
         return;
       }
-      $('docList').innerHTML = docs.map(doc => `
+      const groups = groupDocuments(docs);
+      $('docList').innerHTML = groups.map(group => {
+        const info = summarizeGroup(group);
+        return `
         <article class="doc-card">
-          <div>
-            <h3 class="doc-title">${esc(doc.title)}</h3>
-            <div class="doc-meta">
-              ${esc(doc.category)} · ${esc(doc.fileName)} · ${formatSize(doc.size)}<br>
-              อัปโหลดเมื่อ ${formatDate(doc.createdAt)}
-              ${doc.notes ? `<br>${esc(doc.notes)}` : ''}
+          <div class="doc-card-top">
+            <div>
+              <div class="doc-title-row">
+                <h3 class="doc-title">${esc(info.title)}</h3>
+                <span class="doc-category-badge">${esc(info.category)}</span>
+                <span class="doc-duration-badge">${esc(info.coverageDuration || 'ยังไม่ระบุระยะรับประกัน')}</span>
+              </div>
+              <div class="doc-summary">
+                <div class="summary-cell">
+                  <div class="summary-label">ประกันอะไร</div>
+                  <div class="summary-value">${esc(info.title)}</div>
+                </div>
+                <div class="summary-cell">
+                  <div class="summary-label">รับประกันนานไหม</div>
+                  <div class="summary-value ${info.coverageDuration ? '' : 'muted'}">${esc(info.coverageDuration || 'ยังไม่ระบุ')}</div>
+                </div>
+                <div class="summary-cell">
+                  <div class="summary-label">ติดต่อใคร</div>
+                  <div class="summary-value ${info.contact ? '' : 'muted'}">${esc(info.contact || 'ยังไม่ระบุ')}</div>
+                </div>
+              </div>
+              ${info.detail ? `<div class="doc-description">${esc(info.detail)}</div>` : ''}
+              ${renderProofTiles(group.docs.filter(doc => doc.downloadUrl))}
+            </div>
+            <div class="doc-actions">
+              <button class="btn edit-btn" data-edit="${esc(group.docs[0].id)}" data-title="${esc(group.docs[0].title)}" data-category="${esc(group.docs[0].category)}" data-notes="${esc(group.docs[0].notes || '')}">แก้ข้อมูลหลัก</button>
             </div>
           </div>
-          <div class="doc-actions">
-            ${doc.downloadUrl ? `<a class="btn gold" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>` : ''}
-            <button class="btn edit-btn" data-edit="${esc(doc.id)}" data-title="${esc(doc.title)}" data-category="${esc(doc.category)}" data-notes="${esc(doc.notes||'')}">แก้ไข</button>
-            <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
-          </div>
+          ${renderFileRows(group.docs)}
         </article>
-      `).join('');
+      `;
+      }).join('');
       document.querySelectorAll('[data-delete]').forEach(btn => {
         btn.addEventListener('click', () => deleteDoc(btn.dataset.delete));
       });
@@ -576,10 +869,14 @@
 
     let _editingDocId = null;
     function editDoc(data) {
+      const meta = parseStructuredNotes(data.notes || '');
       _editingDocId = data.edit;
       $('category').value = data.category || $('category').options[0].value;
       $('title').value = data.title || '';
-      $('notes').value = data.notes || '';
+      $('coverageDuration').value = meta.coverageDuration || '';
+      $('contactName').value = meta.contactName || '';
+      $('contactPhone').value = meta.contactPhone || '';
+      $('notes').value = meta.extraNotes || meta.legacyNotes || '';
       $('editModeBar').classList.add('visible');
       $('submitBtn').textContent = 'บันทึกการแก้ไข';
       $('dropZone').style.display = 'none';
@@ -603,8 +900,14 @@
       if (_editingDocId) {
         setStatus('uploadStatus', 'กำลังบันทึก...');
         try {
+          const notes = buildStructuredNotes({
+            coverageDuration: $('coverageDuration').value.trim(),
+            contactName: $('contactName').value.trim(),
+            contactPhone: $('contactPhone').value.trim(),
+            extraNotes: $('notes').value.trim()
+          });
           await api({ action: 'update', ...auth, documentId: _editingDocId,
-            category: $('category').value, title: $('title').value, notes: $('notes').value });
+            category: $('category').value, title: $('title').value, notes });
           cancelEdit();
           setStatus('uploadStatus', 'บันทึกแล้ว ✓', 'ok');
           await loadDocs();
@@ -619,8 +922,13 @@
       if (oversized.length) { setStatus('uploadStatus', `ไฟล์ใหญ่เกิน 15 MB: ${oversized.map(f => f.name).join(', ')}`, 'error'); return; }
       setStatus('uploadStatus', `กำลังอัปโหลด ${files.length} ไฟล์...`);
       const category = $('category').value;
-      const title = $('title').value;
-      const notes = $('notes').value;
+      const title = $('title').value.trim();
+      const notes = buildStructuredNotes({
+        coverageDuration: $('coverageDuration').value.trim(),
+        contactName: $('contactName').value.trim(),
+        contactPhone: $('contactPhone').value.trim(),
+        extraNotes: $('notes').value.trim()
+      });
       try {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
