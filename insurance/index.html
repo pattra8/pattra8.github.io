@@ -330,7 +330,7 @@
         </div>
         <div class="full">
           <label for="fileInput">ไฟล์แนบ</label>
-          <input id="fileInput" type="file" required multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+          <input id="fileInput" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
         </div>
         <button class="btn gold-fill full" type="submit">อัปโหลดเอกสาร</button>
         <div class="status full" id="uploadStatus"></div>
@@ -352,25 +352,11 @@
       insurance: {
         title: 'Asset Insurance',
         intro: 'จัดเก็บกรมธรรม์ เอกสารรับประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง เช่น ประตูเหล็กไฟฟ้า มอเตอร์ อุปกรณ์ฟิตเนส CCTV และระบบส่วนกลางอื่น ๆ',
-        categories: [
-          'อาคารและพื้นที่ส่วนกลาง',
-          'ระบบประตูและไม้กั้น',
-          'CCTV / Network / LPR',
-          'ระบบไฟฟ้าและแสงสว่าง',
-          'ระบบน้ำ / ปั๊มน้ำ / สปริงเกอร์',
-          'สระว่ายน้ำและอุปกรณ์',
-          'ฟิตเนสและอุปกรณ์กีฬา',
-          'สวนและภูมิทัศน์',
-          'ป้อม รปภ. และความปลอดภัย',
-          'เฟอร์นิเจอร์และอุปกรณ์สโมสร',
-          'เอกสารประกัน / สัญญาบริการ',
-          'อื่น ๆ'
-        ]
+        categories: ['ประตูเหล็กไฟฟ้า + มอเตอร์', 'อุปกรณ์ฟิตเนส', 'CCTV / Network / LPR', 'ส่วนกลาง / อาคาร / ระบบอื่น']
       }
     };
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
-    let currentDocs = [];
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -428,7 +414,6 @@
       return n + ' B';
     }
     function renderDocs(docs) {
-      currentDocs = docs;
       if (!docs.length) {
         $('docList').innerHTML = '<div class="empty">ยังไม่มีเอกสารในหมวดนี้</div>';
         return;
@@ -445,14 +430,10 @@
           </div>
           <div class="doc-actions">
             ${doc.downloadUrl ? `<a class="btn gold" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>` : ''}
-            <button class="btn" data-edit="${esc(doc.id)}">แก้ไข</button>
             <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
           </div>
         </article>
       `).join('');
-      document.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => editDoc(btn.dataset.edit));
-      });
       document.querySelectorAll('[data-delete]').forEach(btn => {
         btn.addEventListener('click', () => deleteDoc(btn.dataset.delete));
       });
@@ -470,60 +451,33 @@
     async function uploadDoc(e) {
       e.preventDefault();
       const auth = getAuthPayload();
-      const files = Array.from($('fileInput').files || []);
-      if (!files.length) return;
+      const file = $('fileInput').files[0];
+      if (!file) return;
       if (!auth) {
         setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error');
         return;
       }
-      const tooLarge = files.find(file => file.size > 15 * 1024 * 1024);
-      if (tooLarge) {
+      if (file.size > 15 * 1024 * 1024) {
         setStatus('uploadStatus', 'ไฟล์ใหญ่เกิน 15 MB', 'error');
         return;
       }
-      setStatus('uploadStatus', `กำลังอัปโหลด ${files.length} ไฟล์...`);
+      setStatus('uploadStatus', 'กำลังอัปโหลด...');
       try {
-        for (const [index, file] of files.entries()) {
-          setStatus('uploadStatus', `กำลังอัปโหลด ${index + 1}/${files.length}: ${file.name}`);
-          const dataUrl = await fileToDataUrl(file);
-          await api({
-            action: 'upload',
-            ...auth,
-            category: $('category').value,
-            title: $('title').value,
-            notes: $('notes').value,
-            fileName: file.name,
-            dataUrl
-          });
-        }
+        const dataUrl = await fileToDataUrl(file);
+        await api({
+          action: 'upload',
+          ...auth,
+          category: $('category').value,
+          title: $('title').value,
+          notes: $('notes').value,
+          fileName: file.name,
+          dataUrl
+        });
         $('uploadForm').reset();
-        setStatus('uploadStatus', `อัปโหลดแล้ว ${files.length} ไฟล์`, 'ok');
+        setStatus('uploadStatus', 'อัปโหลดแล้ว', 'ok');
         await loadDocs();
       } catch (err) {
         setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error');
-      }
-    }
-    async function editDoc(id) {
-      const doc = currentDocs.find(item => item.id === id);
-      if (!doc) return;
-      const title = prompt('ชื่อเอกสาร', doc.title || '');
-      if (title === null) return;
-      const category = prompt('หมวดหมู่', doc.category || '');
-      if (category === null) return;
-      const notes = prompt('หมายเหตุ', doc.notes || '');
-      if (notes === null) return;
-      try {
-        await api({
-          action: 'update',
-          ...getAuthPayload(),
-          documentId: id,
-          title,
-          category,
-          notes
-        });
-        await loadDocs();
-      } catch (err) {
-        alert(err.message || 'แก้ไขไม่สำเร็จ');
       }
     }
     async function deleteDoc(id) {
