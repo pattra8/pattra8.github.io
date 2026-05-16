@@ -191,10 +191,9 @@
     }
     label {
       display: block;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
       color: var(--muted);
       margin-bottom: 8px;
     }
@@ -220,7 +219,7 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
-      max-width: 860px;
+      max-width: 100%;
     }
     .full { grid-column: 1 / -1; }
     .warranty-planner {
@@ -326,10 +325,15 @@
     /* ── Toolbar + doc list ── */
     .toolbar {
       display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 32px 0 16px;
+    }
+    .toolbar-top {
+      display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin: 32px 0 16px;
       flex-wrap: wrap;
     }
     .toolbar h2 {
@@ -457,7 +461,7 @@
     /* Cells */
     .card-cells {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
       margin-bottom: 14px;
     }
@@ -468,9 +472,9 @@
       padding: 11px 13px;
     }
     .cell-label {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 5px;
@@ -521,7 +525,7 @@
       color: var(--taupe-mid);
       text-decoration: none;
       font-weight: 500;
-      max-width: 180px;
+      max-width: 130px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -649,7 +653,7 @@
       .logo-divider { display: none; }
       main { padding: 32px 18px 60px; }
       .hero, .upload-grid, .planner-grid { grid-template-columns: 1fr; }
-      .card-cells { grid-template-columns: 1fr; }
+      .card-cells { grid-template-columns: repeat(2, 1fr); }
       .card-title { font-size: 17px; }
       .toolbar-actions { justify-content: flex-start; }
       .card-footer { flex-direction: column; align-items: flex-start; }
@@ -761,15 +765,14 @@
     </div>
 
     <div class="toolbar">
-      <h2>รายการประกันทั้งหมด</h2>
-      <div class="toolbar-actions">
-        <div class="filter-pills" id="filterPills">
-          <button class="filter-pill active" type="button" data-filter="all">ทั้งหมด</button>
-          <button class="filter-pill" type="button" data-filter="warn">ใกล้หมด</button>
-          <button class="filter-pill" type="button" data-filter="bad">หมดแล้ว</button>
-        </div>
-        <button class="btn gold-fill" id="addInsuranceBtn" type="button">เพิ่มประกันใหม่</button>
-        <button class="btn" id="refreshBtn">โหลดใหม่</button>
+      <div class="toolbar-top">
+        <h2>รายการประกันทั้งหมด</h2>
+        <button class="btn gold-fill" id="addInsuranceBtn" type="button">+ เพิ่มประกันใหม่</button>
+      </div>
+      <div class="filter-pills" id="filterPills">
+        <button class="filter-pill active" type="button" data-filter="all">ทั้งหมด</button>
+        <button class="filter-pill" type="button" data-filter="warn">ใกล้หมด</button>
+        <button class="filter-pill" type="button" data-filter="bad">หมดแล้ว</button>
       </div>
     </div>
     <div class="list-summary" id="listSummary"></div>
@@ -1126,7 +1129,13 @@
               <div class="cell">
                 <div class="cell-label">วันหมดประกัน</div>
                 <div class="cell-value ${tone === 'none' ? 'muted' : (tone === 'critical' ? 'bad' : tone)}">${esc(info.endDate ? formatThaiDate(info.endDate) : 'ยังไม่ระบุ')}</div>
-                ${info.countdown ? `<div class="cell-sub">${esc(info.countdown.label)}</div>` : ''}
+              </div>
+              <div class="cell">
+                <div class="cell-label">เหลืออีก</div>
+                ${info.countdown
+                  ? `<div class="cell-value ${tone === 'critical' ? 'bad' : tone}" style="font-size:17px;font-weight:800">${esc(Math.abs(info.countdown.days) + ' วัน')}</div>
+                     <div class="cell-sub">${esc(info.countdown.label)}</div>`
+                  : `<div class="cell-value muted">—</div>`}
               </div>
               <div class="cell">
                 <div class="cell-label">ผู้รับเหมา / ติดต่อ</div>
@@ -1139,7 +1148,7 @@
               <div class="card-btns">
                 <button class="btn-ghost" data-edit="${esc(primaryDoc.id)}" data-title="${esc(primaryDoc.title)}" data-category="${esc(primaryDoc.category)}" data-notes="${esc(primaryDoc.notes || '')}">แก้ไข</button>
                 <button class="btn-ghost btn-danger-ghost" data-delete="${esc(primaryDoc.id)}">ลบ</button>
-                ${fileDocs.length ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูไฟล์</a>` : ''}
+                ${fileDocs.length === 1 ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูไฟล์</a>` : fileDocs.length > 1 ? `<button class="btn-gold" data-viewall="${esc(group.docs[0].id)}">ดูเอกสารประกัน (${fileDocs.length})</button>` : ''}
               </div>
             </div>
           </div>
@@ -1151,6 +1160,15 @@
       });
       document.querySelectorAll('[data-edit]').forEach(btn => {
         btn.addEventListener('click', () => editDoc(btn.dataset));
+      });
+      document.querySelectorAll('[data-viewall]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const groupId = btn.dataset.viewall;
+          document.querySelectorAll('.file-pill').forEach(pill => {
+            const card = btn.closest('.ins-card');
+            if (card) card.querySelectorAll('.file-pill').forEach(p => window.open(p.href, '_blank'));
+          });
+        });
       });
     }
     function filterLabel(filter) {
@@ -1377,7 +1395,6 @@
         if (e.target === $('insuranceModal')) closeInsuranceModal();
       });
       updateWarrantyPreview();
-      $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
       $('logoutBtn').addEventListener('click', logout);
       const resident = getResidentSession();
       if (!resident || resident.houseNo !== '38/8') {
