@@ -428,8 +428,33 @@
       box-shadow: var(--shadow);
       overflow: hidden;
       transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
     }
     .ins-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .card-hint { font-size: 11px; color: var(--muted); opacity: 0.7; flex-shrink: 0; }
+
+    /* ── Detail Modal ── */
+    .detail-modal { max-width: 680px; padding: 0; overflow: hidden; }
+    .detail-top-bar { height: 6px; width: 100%; border-radius: 18px 18px 0 0; }
+    .detail-inner { padding: 24px 28px 28px; }
+    .detail-title {
+      font-size: 24px; font-weight: 700; color: var(--text);
+      line-height: 1.2; margin-bottom: 10px;
+    }
+    .detail-cells { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 16px 0; }
+    .detail-notes {
+      font-size: 13px; color: var(--taupe-mid); line-height: 1.6;
+      padding: 10px 14px; background: rgba(243,236,221,0.5);
+      border-radius: 8px; border: 1px solid rgba(219,201,169,0.5);
+      margin-bottom: 14px;
+    }
+    .detail-files-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .detail-files { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .detail-actions {
+      display: flex; gap: 8px; justify-content: flex-end;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    @media (max-width: 600px) { .detail-cells { grid-template-columns: repeat(2,1fr); } }
 
     .card-status-bar { border-radius: 16px 0 0 16px; }
     .ins-card.ok   .card-status-bar { background: #3a8a62; }
@@ -823,6 +848,30 @@
     </section>
   </main>
 
+  <!-- Detail popup -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal detail-modal">
+      <div class="detail-top-bar" id="detailTopBar"></div>
+      <div class="detail-inner">
+        <div class="modal-head" style="margin-bottom:6px">
+          <div class="detail-title" id="detailTitle"></div>
+          <button class="modal-close" onclick="closeDetailModal()" aria-label="ปิด">×</button>
+        </div>
+        <div class="card-tags" id="detailTags" style="margin-bottom:14px"></div>
+        <div class="timeline-wrap" id="detailTimeline"></div>
+        <div class="detail-cells" id="detailCells"></div>
+        <div class="detail-notes hidden" id="detailNotes"></div>
+        <div class="detail-files-label">ไฟล์แนบ</div>
+        <div class="detail-files" id="detailFiles"></div>
+        <div class="detail-actions">
+          <button class="btn" onclick="closeDetailModal()">ปิด</button>
+          <button class="btn-ghost btn-danger-ghost" id="detailDeleteBtn">ลบ</button>
+          <button class="btn-gold" id="detailEditBtn">✏️ แก้ไขข้อมูล</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const VAULT_TYPE = 'insurance';
     const PAGE_CONFIG = {
@@ -1142,10 +1191,8 @@
             }).join('')
           : `<span style="font-size:12px;color:var(--muted)">ยังไม่มีไฟล์แนบ</span>`;
 
-        const primaryDoc = group.docs[0];
-
         return `
-        <article class="ins-card ${cardClass}">
+        <article class="ins-card ${cardClass}" data-group-key="${esc(group.key)}">
           <div class="card-status-bar"></div>
           <div class="card-body">
             <div class="card-top">
@@ -1184,34 +1231,21 @@
               <div class="cell">
                 <div class="cell-label">ผู้รับเหมา / ติดต่อ</div>
                 <div class="cell-value" style="font-size:14px">${esc(contactName || 'ยังไม่ระบุ')}</div>
-                ${contactPhone ? `<a class="phone-link" href="tel:${esc(phoneDigits)}">📞 ${esc(contactPhone)}</a>` : ''}
+                ${contactPhone ? `<a class="phone-link" href="tel:${esc(phoneDigits)}" onclick="event.stopPropagation()">📞 ${esc(contactPhone)}</a>` : ''}
               </div>
             </div>
             <div class="card-footer">
               <div class="file-pills">${filePillsHtml}</div>
-              <div class="card-btns">
-                <button class="btn-ghost" data-edit="${esc(primaryDoc.id)}" data-title="${esc(primaryDoc.title)}" data-category="${esc(primaryDoc.category)}" data-notes="${esc(primaryDoc.notes || '')}">แก้ไข</button>
-                <button class="btn-ghost btn-danger-ghost" data-delete="${esc(primaryDoc.id)}">ลบ</button>
-                ${fileDocs.length === 1 ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูเอกสารรับประกัน</a>` : fileDocs.length > 1 ? `<button class="btn-gold" data-viewall="${esc(group.docs[0].id)}">ดูเอกสารรับประกัน (${fileDocs.length})</button>` : ''}
-              </div>
+              <span class="card-hint">ดูรายละเอียด →</span>
             </div>
           </div>
         </article>`;
       }).join('');
 
-      document.querySelectorAll('[data-delete]').forEach(btn => {
-        btn.addEventListener('click', () => deleteDoc(btn.dataset.delete));
-      });
-      document.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => editDoc(btn.dataset));
-      });
-      document.querySelectorAll('[data-viewall]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const groupId = btn.dataset.viewall;
-          document.querySelectorAll('.file-pill').forEach(pill => {
-            const card = btn.closest('.ins-card');
-            if (card) card.querySelectorAll('.file-pill').forEach(p => window.open(p.href, '_blank'));
-          });
+      document.querySelectorAll('.ins-card[data-group-key]').forEach(card => {
+        card.addEventListener('click', e => {
+          if (e.target.closest('a')) return;
+          openDetailModal(card.dataset.groupKey);
         });
       });
     }
@@ -1360,6 +1394,88 @@
       insuranceFormSnapshot = null;
       return true;
     }
+    /* ── Detail Modal ── */
+    let _detailGroupKey = null;
+    function openDetailModal(groupKey) {
+      const group = _currentGroups.find(g => g.key === groupKey);
+      if (!group) return;
+      _detailGroupKey = groupKey;
+      const info  = group.info;
+      const tone  = info.countdown?.tone || 'none';
+      const cardClass = tone === 'critical' ? 'bad' : tone;
+      const barColors = { ok: '#3a8a62', warn: '#c47a2c', bad: '#c0392b', critical: '#c0392b', none: '#e6dcc7' };
+      const barColor  = barColors[tone] || '#e6dcc7';
+
+      $('detailTopBar').style.background = barColor;
+      $('detailTitle').textContent = info.title || '-';
+
+      // Tags
+      let tagsHtml = `<span class="tag">${esc(info.category)}</span>`;
+      if (info.countdown) {
+        const d = Math.abs(info.countdown.days);
+        if (tone === 'warn')     tagsHtml += `<span class="tag warn">⚠ ใกล้หมด ${d} วัน</span>`;
+        else if (tone === 'critical') tagsHtml += `<span class="tag critical">🔴 เร่งด่วน เหลือ ${d} วัน</span>`;
+        else if (tone === 'bad') tagsHtml += `<span class="tag bad">✕ หมดแล้ว ${d} วัน</span>`;
+        else if (tone === 'ok')  tagsHtml += `<span class="tag ok">✓ ปกติ</span>`;
+      }
+      $('detailTags').innerHTML = tagsHtml;
+
+      // Timeline
+      const pct = getWarrantyPct(info.warrantyStartDate, info.endDate);
+      $('detailTimeline').innerHTML = info.warrantyStartDate || info.endDate ? `
+        <div class="timeline-bar-bg" style="margin-bottom:5px">
+          <div style="height:100%;width:${pct}%;background:${barColor};border-radius:999px"></div>
+        </div>
+        <div class="timeline-dates" style="margin-bottom:14px">
+          <span>${info.warrantyStartDate ? 'เริ่ม ' + esc(formatThaiDate(info.warrantyStartDate)) : '—'}</span>
+          <span>${info.endDate ? 'หมด ' + esc(formatThaiDate(info.endDate)) : '—'}</span>
+        </div>` : '';
+
+      // Cells
+      const contactParts = (info.contact || '').split(' · ');
+      const cName = contactParts[0] || '';
+      const cPhone = contactParts[1] || '';
+      const phoneDigits = cPhone.replace(/[-\s]/g, '');
+      $('detailCells').innerHTML = `
+        <div class="cell"><div class="cell-label">ระยะรับประกัน</div><div class="cell-value ${info.durationLabel ? '' : 'muted'}">${esc(info.durationLabel || 'ยังไม่ระบุ')}</div></div>
+        <div class="cell"><div class="cell-label">วันหมดประกัน</div><div class="cell-value ${tone === 'none' ? 'muted' : (tone === 'critical' ? 'bad' : tone)}">${esc(info.endDate ? formatThaiDate(info.endDate) : 'ยังไม่ระบุ')}</div></div>
+        <div class="cell"><div class="cell-label">เหลืออีก</div>${info.countdown ? `<div class="cell-value ${tone === 'critical' ? 'bad' : tone}" style="font-size:20px;font-weight:800">${Math.abs(info.countdown.days)} วัน</div>` : '<div class="cell-value muted">—</div>'}</div>
+        <div class="cell"><div class="cell-label">ผู้รับเหมา</div><div class="cell-value" style="font-size:14px">${esc(cName || 'ยังไม่ระบุ')}</div>${cPhone ? `<a class="phone-link" href="tel:${esc(phoneDigits)}">📞 ${esc(cPhone)}</a>` : ''}</div>`;
+
+      // Notes
+      const notesEl = $('detailNotes');
+      if (info.detail) { notesEl.textContent = info.detail; notesEl.classList.remove('hidden'); }
+      else notesEl.classList.add('hidden');
+
+      // Files
+      const fileDocs = group.docs.filter(d => d.downloadUrl);
+      $('detailFiles').innerHTML = fileDocs.length
+        ? fileDocs.map(doc => {
+            const ext = fileExtension(doc.fileName);
+            const name = (doc.fileName || doc.title || 'ไฟล์').replace(/\s*\(\d+\)\s*$/, '');
+            return `<a class="file-pill" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">
+              <span class="file-pill-icon">${fileEmoji(ext)}</span>${esc(name)}</a>`;
+          }).join('')
+        : `<span style="font-size:13px;color:var(--muted)">ยังไม่มีไฟล์แนบ</span>`;
+
+      // Wire action buttons
+      const primaryDoc = group.docs[0];
+      $('detailEditBtn').onclick = () => {
+        closeDetailModal();
+        editDoc({ edit: primaryDoc.id, title: primaryDoc.title, category: primaryDoc.category, notes: primaryDoc.notes || '' });
+      };
+      $('detailDeleteBtn').onclick = () => {
+        closeDetailModal();
+        deleteDoc(primaryDoc.id);
+      };
+
+      $('detailModal').classList.add('open');
+    }
+    function closeDetailModal() {
+      $('detailModal').classList.remove('open');
+      _detailGroupKey = null;
+    }
+
     function resetInsuranceFormUi() {
       _editingDocId = null;
       _selectedNewFiles.forEach(f => { if (f._objUrl) URL.revokeObjectURL(f._objUrl); });
@@ -1512,6 +1628,9 @@
       $('addInsuranceBtn').addEventListener('click', openCreateForm);
       $('insuranceModal').addEventListener('click', e => {
         if (e.target === $('insuranceModal')) closeInsuranceModal();
+      });
+      $('detailModal').addEventListener('click', e => {
+        if (e.target === $('detailModal')) closeDetailModal();
       });
       updateWarrantyPreview();
       $('logoutBtn').addEventListener('click', logout);
