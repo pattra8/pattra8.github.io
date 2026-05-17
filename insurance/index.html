@@ -882,7 +882,8 @@
         <div class="card-tags" id="detailTags" style="margin-bottom:14px"></div>
         <div class="timeline-wrap" id="detailTimeline"></div>
         <div class="detail-cells" id="detailCells"></div>
-        <div class="detail-notes hidden" id="detailNotes"></div>
+        <div class="detail-files-label" id="detailNotesLabel" style="margin-top:4px">รายละเอียดเพิ่มเติม</div>
+        <div class="detail-notes" id="detailNotes"></div>
         <div class="detail-files-label">ไฟล์แนบ</div>
         <div class="detail-files" id="detailFiles"></div>
         <div class="detail-actions">
@@ -1466,8 +1467,8 @@
       // Notes
       const notesEl = $('detailNotes');
       const notesText = info.detail || group.docs.map(d => d._meta.extraNotes).find(Boolean) || '';
-      if (notesText) { notesEl.textContent = notesText; notesEl.classList.remove('hidden'); }
-      else notesEl.classList.add('hidden');
+      notesEl.textContent = notesText || '—';
+      notesEl.style.color = notesText ? '' : 'var(--muted)';
 
       // Files — large preview cards
       const fileDocs = group.docs.filter(d => d.downloadUrl);
