@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blueprints | Pattra Villa 8</title>
+  <title>Master Blueprints | Pattra Villa 8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -16,6 +16,7 @@
       --gold-pale:  #f7e6cd;
       --bg:         #f9f3e9;
       --bg2:        #f3ecdd;
+      --bg3:        #ede2cc;
       --card:       #ffffff;
       --text:       #2a2218;
       --muted:      #6b5d4a;
@@ -27,7 +28,9 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
+      background:
+        radial-gradient(circle at top left, rgba(247,230,205,0.8), transparent 28%),
+        linear-gradient(180deg, #fbf5ec 0%, var(--bg) 35%, #f7efe3 100%);
       color: var(--text);
       font-family: 'IBM Plex Sans Thai', sans-serif;
       font-size: 15px;
@@ -52,25 +55,6 @@
       gap: 14px;
       text-decoration: none;
     }
-    .logo-monogram {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15px;
-      color: var(--gold);
-      letter-spacing: 0.05em;
-      flex-shrink: 0;
-    }
-    .logo-divider {
-      width: 1px;
-      height: 26px;
-      background: var(--border);
-    }
     .brand-text h1 {
       font-family: 'Cormorant Garamond', serif;
       font-weight: 400;
@@ -85,12 +69,7 @@
       text-transform: uppercase;
       margin-top: 1px;
     }
-    .nav {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
+    .nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
     a, button { font: inherit; }
     .btn {
       border: 1px solid var(--border);
@@ -107,85 +86,37 @@
       font-family: 'IBM Plex Sans Thai', sans-serif;
     }
     .btn:hover { border-color: var(--gold); color: var(--gold); }
-    .btn.gold {
-      border-color: var(--gold);
-      color: var(--gold);
-    }
+    .btn.gold { border-color: var(--gold); color: var(--gold); }
     .btn.gold:hover { background: var(--gold); color: #fff; }
-    .btn.gold-fill {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #fff;
-    }
+    .btn.gold-fill { background: var(--gold); border-color: var(--gold); color: #fff; }
     .btn.gold-fill:hover { background: var(--gold-light); border-color: var(--gold-light); }
-    .btn.danger {
-      color: var(--danger);
-      border-color: rgba(155,44,29,.3);
-    }
+    .btn.danger { color: var(--danger); border-color: rgba(155,44,29,.3); }
     .btn.danger:hover { background: rgba(155,44,29,.06); }
 
     /* ── Layout ── */
-    main {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 48px 28px 80px;
+    main { max-width: 1000px; margin: 0 auto; padding: 40px 28px 80px; }
+    .page-hero {
+      padding-bottom: 24px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .hero {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
-      align-items: stretch;
-      margin-bottom: 28px;
-    }
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 30px;
-      box-shadow: var(--shadow);
-    }
-    .hero-title {
+    .page-hero-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(34px, 5vw, 52px);
+      font-size: clamp(36px, 5vw, 52px);
       font-weight: 300;
       color: var(--taupe);
-      letter-spacing: 0.01em;
       line-height: 1.1;
-      margin-bottom: 4px;
+      letter-spacing: 0.01em;
+      margin-bottom: 10px;
     }
-    .hero-title em { font-style: italic; color: var(--gold); }
-    .hero-copy {
-      color: var(--muted);
-      line-height: 1.75;
-      margin-top: 14px;
-      font-weight: 300;
-    }
-    .admin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(184,151,90,0.45);
-      background: var(--gold-pale);
-      color: var(--gold-light);
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-    }
-    .login-box {
-      display: grid;
-      gap: 14px;
-      align-content: center;
-    }
+    .page-hero-title em { font-style: italic; color: var(--gold); }
+    .page-hero-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
     label {
       display: block;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
       color: var(--muted);
       margin-bottom: 8px;
     }
@@ -199,168 +130,267 @@
       font: inherit;
       transition: border-color 0.2s;
     }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--gold);
-    }
-    textarea { min-height: 94px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); }
+    textarea { min-height: 80px; resize: vertical; }
     .hidden { display: none !important; }
 
     /* ── Upload form ── */
     .upload-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
-      max-width: 680px;
+      max-width: 100%;
     }
     .full { grid-column: 1 / -1; }
 
-    /* ── Toolbar + doc list ── */
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin: 32px 0 16px;
-      flex-wrap: wrap;
-    }
-    .toolbar h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 400;
-      font-size: 26px;
-      color: var(--taupe);
-      letter-spacing: 0.01em;
-    }
-    .doc-list { display: grid; gap: 12px; max-width: 860px; }
-    .doc-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 22px;
-      box-shadow: var(--shadow);
-      transition: box-shadow 0.2s;
-    }
-    .doc-card:hover { box-shadow: var(--shadow-lg); }
-    .doc-title {
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 17px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .doc-meta {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 13px;
-      word-break: break-word;
-      font-weight: 300;
-    }
-    .doc-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 48px 20px;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius);
-      background: rgba(255,255,255,0.5);
-      font-weight: 300;
-    }
-    .status { color: var(--muted); min-height: 22px; font-size: 13px; }
-    .status.error { color: var(--danger); }
-    .status.ok { color: #3a7a42; }
-    .btn.edit-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
-    .btn.edit-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .form-edit-mode-bar {
-      display: none;
-      background: var(--gold-pale);
-      border: 1px solid var(--gold);
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 13px;
-      color: var(--taupe-mid);
-      font-weight: 600;
-      margin-bottom: 4px;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .form-edit-mode-bar.visible { display: flex; }
-
-    /* ── Drop zone ── */
-    .drop-zone {
-      grid-column: 1;
+    /* ── File upload area ── */
+    .drop-area {
+      grid-column: 1 / -1;
       border: 2px dashed var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: var(--bg);
-      padding: 36px 24px;
+      padding: 22px 20px;
       text-align: center;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
       position: relative;
+      user-select: none;
     }
-    .drop-zone:hover, .drop-zone.drag-over {
-      border-color: var(--gold);
-      background: var(--gold-pale);
+    .drop-area:hover, .drop-area.drag-over { border-color: var(--gold); background: var(--gold-pale); }
+    .drop-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
-    .drop-zone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-    .drop-zone-icon { font-size: 32px; margin-bottom: 10px; }
-    .drop-zone-label {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-    .drop-zone-hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    .drop-zone-types {
+    .drop-area-icon { font-size: 26px; margin-bottom: 6px; }
+    .drop-area-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .drop-area-hint { font-size: 12px; color: var(--muted); }
+
+    /* File preview cards */
+    .file-preview-grid {
+      grid-column: 1 / -1;
       display: flex;
-      justify-content: center;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
     }
-    .drop-zone-type {
+    .file-card {
+      position: relative;
+      width: 96px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      border-radius: 12px;
+      padding: 10px 8px 8px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(60,40,20,0.05);
     }
-    .drop-zone-selected {
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--gold);
-      font-weight: 500;
-      min-height: 18px;
+    .file-card.file-card-new  { border-color: rgba(196,122,44,0.35); }
+    .file-card.file-card-existing { border-color: var(--border); }
+    .file-card-thumb {
+      width: 100%; height: 52px; object-fit: cover; border-radius: 7px; margin-bottom: 6px; display: block;
     }
+    .file-card-icon { font-size: 26px; line-height: 1; margin-bottom: 4px; }
+    .file-card-ext {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.08em;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
+    }
+    .file-card-name {
+      font-size: 10px; color: var(--taupe-mid); line-height: 1.35;
+      overflow: hidden; display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all;
+    }
+    .file-card-remove {
+      position: absolute; top: -7px; right: -7px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #e74c3c; color: #fff; border: 2px solid #fff;
+      font-size: 12px; font-weight: 700; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; padding: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: background 0.15s;
+    }
+    .file-card-remove:hover { background: #c0392b; }
+    .file-card-badge {
+      position: absolute; top: -7px; left: -7px;
+      font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 6px; color: #fff;
+    }
+    .file-card-badge.existing { background: var(--taupe-mid); }
+    .file-card-badge.new-file { background: var(--gold); }
+
+    /* Upload progress */
+    .upload-progress-wrap { grid-column: 1 / -1; display: none; margin-top: 4px; }
+    .upload-progress-wrap.visible { display: block; }
+    .upload-progress-bar-bg {
+      height: 7px; background: var(--bg3); border-radius: 999px; overflow: hidden; margin-bottom: 5px;
+    }
+    .upload-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 999px; width: 0%; transition: width 0.35s ease;
+    }
+    .upload-progress-label { font-size: 12px; color: var(--taupe-mid); }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; flex-direction: column; gap: 12px; margin: 32px 0 16px; }
+    .toolbar-top {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .toolbar h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400; font-size: 26px; color: var(--taupe); letter-spacing: 0.01em;
+    }
+    .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.72);
+      color: var(--taupe-mid);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .filter-pill:hover { border-color: var(--gold); color: var(--gold); }
+    .filter-pill.active {
+      background: var(--gold); color: #fff; border-color: var(--gold);
+      box-shadow: 0 10px 24px rgba(196,122,44,0.18);
+    }
+
+    /* ── Blueprint Cards ── */
+    .doc-list { display: grid; gap: 16px; max-width: 980px; }
+    .list-summary { margin-bottom: 14px; font-size: 13px; color: var(--muted); }
+
+    .bp-card {
+      display: grid;
+      grid-template-columns: 5px 1fr;
+      background: linear-gradient(160deg, #ffffff 0%, #fffaf4 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .bp-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .card-status-bar { border-radius: 16px 0 0 16px; }
+    .card-body { padding: 20px 22px 18px; }
+    .card-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .card-title-group { flex: 1; min-width: 0; }
+    .card-title { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.25; margin-bottom: 7px; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .tag {
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.04em; border: 1px solid var(--border);
+      background: var(--bg2); color: var(--taupe-mid); white-space: nowrap;
+    }
+
+    /* Cells */
+    .card-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .cell {
+      background: linear-gradient(180deg, rgba(251,245,236,0.9), rgba(243,236,221,0.8));
+      border: 1px solid rgba(219,201,169,0.8);
+      border-radius: 12px; padding: 11px 13px;
+    }
+    .cell-label {
+      font-size: 14px; font-weight: 600; letter-spacing: 0.03em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .cell-value { font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .cell-value.muted { color: var(--muted); font-weight: 400; }
+    .cell-notes {
+      font-size: 13px; color: var(--taupe-mid); line-height: 1.55;
+      margin-bottom: 12px; padding: 10px 12px;
+      background: rgba(243,236,221,0.5);
+      border-radius: 8px; border: 1px solid rgba(219,201,169,0.5);
+    }
+
+    /* Footer */
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .file-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+    .file-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 10px; font-size: 12px;
+      color: var(--taupe-mid); text-decoration: none; font-weight: 500;
+      max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .file-pill:hover { border-color: var(--gold); color: var(--gold); }
+    .file-pill-icon { font-size: 13px; flex-shrink: 0; }
+    .card-btns { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--taupe-mid);
+      border-radius: 8px; padding: 6px 14px; font-size: 12px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      cursor: pointer; font-weight: 500; transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-gold {
+      display: inline-flex; align-items: center;
+      background: var(--gold); border: 1px solid var(--gold);
+      color: #fff; border-radius: 8px; padding: 6px 14px; font-size: 12px;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      cursor: pointer; font-weight: 600; text-decoration: none; transition: background 0.2s;
+    }
+    .btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); }
+    .btn-danger-ghost { color: var(--danger) !important; border-color: rgba(155,44,29,.3) !important; }
+    .btn-danger-ghost:hover { background: rgba(155,44,29,.06) !important; }
+
+    .empty {
+      text-align: center; color: var(--muted); padding: 48px 20px;
+      border: 1px dashed var(--border); border-radius: var(--radius);
+      background: rgba(255,255,255,0.5); font-weight: 300;
+    }
+    .status { color: var(--muted); min-height: 22px; font-size: 13px; }
+    .status.error { color: var(--danger); }
+    .status.ok { color: #3a7a42; }
+
+    .form-edit-mode-bar {
+      display: none;
+      background: var(--gold-pale); border: 1px solid var(--gold); border-radius: 10px;
+      padding: 10px 16px; font-size: 13px; color: var(--taupe-mid); font-weight: 600;
+      margin-bottom: 4px; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .form-edit-mode-bar.visible { display: flex; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(15,22,35,.45); backdrop-filter:blur(5px);
+      z-index:220; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(255,248,240,0.98));
+      border-radius: 18px; padding: 28px; width: 100%; max-width: 760px;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+      animation: modalIn .2s ease; position: relative; border: 1px solid var(--border);
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform:scale(.96) translateY(8px); }
+      to { opacity:1; transform:scale(1) translateY(0); }
+    }
+    .modal-head {
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px;
+    }
+    .modal-title { font-size: 22px; font-weight: 700; color: var(--text); }
+    .modal-close {
+      width:40px; height:40px; border:none; border-radius:10px;
+      background:var(--bg2); color:var(--taupe-mid);
+      font-size:20px; font-weight:700; cursor:pointer; flex-shrink:0;
+    }
+    .modal-close:hover { background: var(--border); color: var(--text); }
+    .modal-actions {
+      display:flex; gap:8px; justify-content:flex-end; margin-top:22px;
+      padding-top:16px; border-top:1px solid var(--border);
+    }
+
     @media (max-width: 720px) {
       header { padding: 0 20px; }
-      .logo-divider { display: none; }
       main { padding: 32px 18px 60px; }
-      .hero, .upload-grid, .doc-card { grid-template-columns: 1fr; }
-      .doc-actions { justify-content: flex-start; }
+      .upload-grid { grid-template-columns: 1fr; }
+      .card-cells { grid-template-columns: repeat(2, 1fr); }
+      .card-title { font-size: 17px; }
+      .card-footer { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -380,58 +410,84 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="panel">
-        <div class="admin-badge">Admin Only</div>
-        <h2 class="hero-title" id="pageTitle">Blueprints</h2>
-        <p class="hero-copy" id="pageIntro">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท เช่น ไฟฟ้า ประปา ระบายน้ำ CCTV Network และ Master Plan</p>
-      </div>
-      <div class="panel login-box" id="loginPanel">
-        <div class="status" id="loginStatus">กำลังตรวจสอบสิทธิ์...</div>
-      </div>
-    </section>
-
-    <section class="panel hidden" id="vaultPanel">
-      <form id="uploadForm" class="upload-grid">
-        <div class="form-edit-mode-bar full" id="editModeBar">
-          <span id="editModeLabel">✏️ กำลังแก้ไขเอกสาร</span>
-          <button type="button" class="btn" onclick="cancelEdit()">ยกเลิก</button>
-        </div>
-        <div>
-          <label for="title">ชื่อเอกสาร</label>
-          <input id="title" required placeholder="เช่น ประกันมอเตอร์ประตูหน้าโครงการ" />
-        </div>
-        <div>
-          <label for="category">หมวดหมู่</label>
-          <select id="category"></select>
-        </div>
-        <div class="full">
-          <label for="notes">หมายเหตุ</label>
-          <textarea id="notes" placeholder="รายละเอียดสั้น ๆ เช่น วันหมดอายุ บริษัทประกัน หรือจุดติดตั้ง"></textarea>
-        </div>
-        <div class="drop-zone" id="dropZone">
-          <input id="fileInput" type="file" multiple
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic" />
-          <div class="drop-zone-icon">📂</div>
-          <div class="drop-zone-label">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</div>
-          <div class="drop-zone-hint">รองรับหลายไฟล์พร้อมกัน · ขนาดสูงสุด 15 MB ต่อไฟล์</div>
-          <div class="drop-zone-types">
-            <span class="drop-zone-type">PDF</span>
-            <span class="drop-zone-type">Word</span>
-            <span class="drop-zone-type">Excel</span>
-            <span class="drop-zone-type">JPG</span>
-          </div>
-          <div class="drop-zone-selected" id="dropZoneSelected"></div>
-        </div>
-        <button class="btn gold-fill full" type="submit" id="submitBtn">อัปโหลดเอกสาร</button>
-        <div class="status full" id="uploadStatus"></div>
-      </form>
-    </section>
-
-    <div class="toolbar">
-      <h2>เอกสารทั้งหมด</h2>
-      <button class="btn" id="refreshBtn">โหลดใหม่</button>
+    <div class="page-hero">
+      <h1 class="page-hero-title">Master Plan <em>Blueprints</em></h1>
+      <p class="page-hero-sub">คลังเก็บแบบก่อสร้าง แปลนระบบ และเอกสาร Master Plan ของทรัพย์สินส่วนกลาง</p>
     </div>
+    <div id="loginPanel" class="hidden"></div>
+    <div class="status hidden" id="loginStatus"></div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal-overlay" id="bpModal">
+      <div class="modal">
+        <div class="modal-head">
+          <div class="modal-title" id="bpModalTitle">เพิ่มเอกสารใหม่</div>
+          <button class="modal-close" type="button" onclick="closeBpModal()" aria-label="ปิด">×</button>
+        </div>
+        <section id="vaultPanel">
+          <form id="uploadForm" class="upload-grid">
+            <div class="form-edit-mode-bar full" id="editModeBar">
+              <span id="editModeLabel">✏️ กำลังแก้ไขเอกสาร</span>
+              <button type="button" class="btn" onclick="cancelEdit()">ยกเลิก</button>
+            </div>
+            <div>
+              <label for="title">ชื่อเอกสาร</label>
+              <input id="title" required placeholder="เช่น ผังระบบไฟฟ้า ชั้น 1–3" />
+            </div>
+            <div>
+              <label for="category">หมวดหมู่</label>
+              <select id="category"></select>
+            </div>
+            <div>
+              <label for="version">เวอร์ชัน / Revision</label>
+              <input id="version" placeholder="เช่น Rev.3, ฉบับ 2024, As-Built" />
+            </div>
+            <div>
+              <label for="responsible">ผู้รับผิดชอบ / บริษัท</label>
+              <input id="responsible" placeholder="เช่น บริษัท ABC Design / สถาปนิก" />
+            </div>
+            <div class="full">
+              <label for="notes">รายละเอียดเพิ่มเติม</label>
+              <textarea id="notes" placeholder="เช่น ครอบคลุมอาคาร A–C ใช้สำหรับงานซ่อมบำรุงและรีโนเวท"></textarea>
+            </div>
+            <div class="full" id="fileUploadSection">
+              <label>แนบไฟล์เอกสาร</label>
+              <div class="drop-area" id="dropArea">
+                <input id="fileInput" type="file" multiple
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.heic,.dwg,.dxf" />
+                <div class="drop-area-icon">📐</div>
+                <div class="drop-area-label">คลิกหรือลากไฟล์มาวางที่นี่</div>
+                <div class="drop-area-hint">PDF, Word, Excel, PowerPoint, รูปภาพ · สูงสุด 15 MB ต่อไฟล์</div>
+              </div>
+              <div class="file-preview-grid" id="filePreviewGrid"></div>
+              <div class="upload-progress-wrap" id="uploadProgressWrap">
+                <div class="upload-progress-bar-bg">
+                  <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                </div>
+                <div class="upload-progress-label" id="uploadProgressLabel"></div>
+              </div>
+            </div>
+            <div class="status full" id="uploadStatus"></div>
+            <div class="modal-actions full">
+              <button class="btn" type="button" onclick="requestCloseBpModal()">ยกเลิก</button>
+              <button class="btn gold-fill" type="submit" id="submitBtn">อัปโหลดเอกสาร</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-top">
+        <h2>เอกสารทั้งหมด</h2>
+        <button class="btn gold-fill" id="addBpBtn" type="button">+ เพิ่มเอกสารใหม่</button>
+      </div>
+      <div class="filter-pills" id="filterPills">
+        <button class="filter-pill active" type="button" data-filter="all">ทั้งหมด</button>
+      </div>
+    </div>
+    <div class="list-summary" id="listSummary"></div>
     <section class="doc-list" id="docList">
       <div class="empty">กรุณาเข้าสู่ระบบ admin เพื่อดูเอกสาร</div>
     </section>
@@ -439,23 +495,42 @@
 
   <script>
     const VAULT_TYPE = 'blueprints';
-    const PAGE_CONFIG = {
-      blueprints: {
-        title: 'Blueprints',
-        intro: 'เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท เช่น ไฟฟ้า ประปา ระบายน้ำ CCTV Network และ Master Plan',
-        categories: [
-  'Master Plan',
-  'ระบบไฟฟ้า',
-  'ระบบประปา',
-  'CCTV / Network',
-  'โครงสร้าง / สถาปัตยกรรม',
-  'สวน / ภูมิทัศน์',
-  'Clubhouse / ส่วนกลาง'
-]
-      }
+    const CATEGORIES = [
+      'Master Plan',
+      'ระบบไฟฟ้า',
+      'ระบบประปา',
+      'CCTV / Network',
+      'โครงสร้าง / สถาปัตยกรรม',
+      'สวน / ภูมิทัศน์',
+      'Clubhouse / ส่วนกลาง'
+    ];
+    const CATEGORY_COLORS = {
+      'Master Plan':                   '#3a5a8a',
+      'ระบบไฟฟ้า':                      '#c47a2c',
+      'ระบบประปา':                      '#1a7db5',
+      'CCTV / Network':                '#6c3483',
+      'โครงสร้าง / สถาปัตยกรรม':        '#5d6d7e',
+      'สวน / ภูมิทัศน์':                '#2e7d52',
+      'Clubhouse / ส่วนกลาง':           '#a04000',
     };
+    const CATEGORY_ICONS = {
+      'Master Plan': '🗺️',
+      'ระบบไฟฟ้า': '⚡',
+      'ระบบประปา': '💧',
+      'CCTV / Network': '📡',
+      'โครงสร้าง / สถาปัตยกรรม': '🏗️',
+      'สวน / ภูมิทัศน์': '🌿',
+      'Clubhouse / ส่วนกลาง': '🏛️',
+    };
+
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+    let activeFilter = 'all';
+    let bpFormSnapshot = null;
+    let _selectedNewFiles = [];
+    let _existingFileDocs = [];
+    let _currentGroups = [];
+    let _editingDocId = null;
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -500,10 +575,8 @@
     }
     function formatDate(iso) {
       if (!iso) return '-';
-      return new Date(iso).toLocaleString('th-TH', {
-        timeZone: 'Asia/Bangkok',
-        dateStyle: 'medium',
-        timeStyle: 'short'
+      return new Date(iso).toLocaleDateString('th-TH-u-ca-gregory', {
+        timeZone: 'Asia/Bangkok', dateStyle: 'medium'
       });
     }
     function formatSize(size) {
@@ -512,129 +585,429 @@
       if (n > 1024) return Math.round(n / 1024) + ' KB';
       return n + ' B';
     }
+    function normalizeDocTitle(title) {
+      return String(title || '').replace(/\s*\(\d+\)\s*$/, '').trim();
+    }
+    function fileExtension(name) {
+      const m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+      return m ? m[1] : '';
+    }
+    function isImageExt(ext) {
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext);
+    }
+    function fileIcon(ext) {
+      if (ext === 'pdf') return 'PDF';
+      if (isImageExt(ext)) return 'IMG';
+      if (['doc', 'docx'].includes(ext)) return 'DOC';
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return 'XLS';
+      if (['ppt', 'pptx'].includes(ext)) return 'PPT';
+      if (['dwg', 'dxf'].includes(ext)) return 'CAD';
+      return 'FILE';
+    }
+    function fileEmoji(ext) {
+      if (ext === 'pdf') return '📄';
+      if (isImageExt(ext)) return '🖼️';
+      if (['doc', 'docx'].includes(ext)) return '📝';
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
+      if (['ppt', 'pptx'].includes(ext)) return '📑';
+      if (['dwg', 'dxf'].includes(ext)) return '📐';
+      return '📎';
+    }
+
+    /* ── Structured notes ── */
+    function buildStructuredNotes({ version, responsible, extraNotes }) {
+      const lines = [];
+      if (version)     lines.push(`เวอร์ชัน: ${version}`);
+      if (responsible) lines.push(`ผู้รับผิดชอบ: ${responsible}`);
+      if (extraNotes)  lines.push(`รายละเอียด: ${extraNotes}`);
+      return lines.join('\n');
+    }
+    function parseStructuredNotes(notes) {
+      const text = String(notes || '').trim();
+      const meta = { version: '', responsible: '', extraNotes: '', legacyNotes: text };
+      if (!text) return meta;
+      const extra = [];
+      text.split(/\n+/).map(l => l.trim()).filter(Boolean).forEach(line => {
+        if (line.startsWith('เวอร์ชัน:'))       meta.version      = line.slice('เวอร์ชัน:'.length).trim();
+        else if (line.startsWith('ผู้รับผิดชอบ:')) meta.responsible  = line.slice('ผู้รับผิดชอบ:'.length).trim();
+        else if (line.startsWith('รายละเอียด:')) extra.push(line.slice('รายละเอียด:'.length).trim());
+        else extra.push(line);
+      });
+      meta.extraNotes = extra.join(' · ');
+      return meta;
+    }
+
+    /* ── Grouping ── */
+    function groupDocuments(docs) {
+      const groups = new Map();
+      docs.forEach(doc => {
+        doc._meta = parseStructuredNotes(doc.notes);
+        const key = normalizeDocTitle(doc.title) || doc.id;
+        if (!groups.has(key)) groups.set(key, { key, baseTitle: normalizeDocTitle(doc.title), docs: [] });
+        groups.get(key).docs.push(doc);
+      });
+      return [...groups.values()]
+        .map(group => ({
+          ...group,
+          docs: group.docs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        }))
+        .sort((a, b) => new Date((b.docs[0] || {}).createdAt || 0) - new Date((a.docs[0] || {}).createdAt || 0));
+    }
+
+    /* ── Render ── */
     function renderDocs(docs) {
       if (!docs.length) {
+        $('listSummary').textContent = '';
         $('docList').innerHTML = '<div class="empty">ยังไม่มีเอกสารในหมวดนี้</div>';
         return;
       }
-      $('docList').innerHTML = docs.map(doc => `
-        <article class="doc-card">
-          <div>
-            <h3 class="doc-title">${esc(doc.title)}</h3>
-            <div class="doc-meta">
-              ${esc(doc.category)} · ${esc(doc.fileName)} · ${formatSize(doc.size)}<br>
-              อัปโหลดเมื่อ ${formatDate(doc.createdAt)}
-              ${doc.notes ? `<br>${esc(doc.notes)}` : ''}
+      const groups = groupDocuments(docs);
+      _currentGroups = groups;
+
+      const filtered = groups.filter(g =>
+        activeFilter === 'all' || (g.docs[0]?.category || '') === activeFilter
+      );
+
+      $('listSummary').textContent = activeFilter === 'all'
+        ? `แสดง ${filtered.length} รายการทั้งหมด`
+        : `แสดง ${filtered.length} จาก ${groups.length} รายการ`;
+
+      if (!filtered.length) {
+        $('docList').innerHTML = '<div class="empty">ไม่มีเอกสารในหมวดหมู่นี้</div>';
+        return;
+      }
+
+      $('docList').innerHTML = filtered.map(group => {
+        const first    = group.docs[0];
+        const meta     = first._meta;
+        const category = first.category || '-';
+        const barColor = CATEGORY_COLORS[category] || '#6b5d4a';
+        const catIcon  = CATEGORY_ICONS[category] || '📁';
+        const dateAdded = formatDate(first.createdAt);
+        const fileCount = group.docs.filter(d => d.downloadUrl).length;
+
+        const version     = group.docs.map(d => d._meta.version).find(Boolean) || '';
+        const responsible = group.docs.map(d => d._meta.responsible).find(Boolean) || '';
+        const detail      = group.docs.map(d => d._meta.extraNotes).find(Boolean) || meta.legacyNotes || '';
+
+        const fileDocs = group.docs.filter(d => d.downloadUrl);
+        const filePillsHtml = fileDocs.length
+          ? fileDocs.slice(0, 5).map(doc => {
+              const ext = fileExtension(doc.fileName);
+              const name = (doc.fileName || doc.title || 'ไฟล์').replace(/\s*\(\d+\)\s*$/, '');
+              return `<a class="file-pill" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">
+                <span class="file-pill-icon">${fileEmoji(ext)}</span>${esc(name)}
+              </a>`;
+            }).join('')
+          : `<span style="font-size:12px;color:var(--muted)">ยังไม่มีไฟล์แนบ</span>`;
+
+        const metaLine = [
+          version ? `Rev: ${version}` : '',
+          responsible ? `👤 ${responsible}` : ''
+        ].filter(Boolean).join('  ·  ');
+
+        return `
+        <article class="bp-card">
+          <div class="card-status-bar" style="background:${barColor}"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <div class="card-title-group">
+                <div class="card-title">${esc(group.baseTitle || first.title || '-')}</div>
+                <div class="card-tags">
+                  <span class="tag">${catIcon} ${esc(category)}</span>
+                  ${metaLine ? `<span class="tag">${esc(metaLine)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="card-cells">
+              <div class="cell">
+                <div class="cell-label">หมวดหมู่</div>
+                <div class="cell-value" style="font-size:15px;font-weight:700">${esc(category)}</div>
+              </div>
+              <div class="cell">
+                <div class="cell-label">อัปโหลดเมื่อ</div>
+                <div class="cell-value" style="font-size:15px">${esc(dateAdded)}</div>
+              </div>
+              <div class="cell">
+                <div class="cell-label">จำนวนไฟล์</div>
+                <div class="cell-value" style="color:#3a5a8a">${fileCount} ไฟล์</div>
+              </div>
+            </div>
+            ${detail ? `<div class="cell-notes">${esc(detail)}</div>` : ''}
+            <div class="card-footer">
+              <div class="file-pills">${filePillsHtml}</div>
+              <div class="card-btns">
+                <button class="btn-ghost" data-edit="${esc(first.id)}" data-title="${esc(first.title)}" data-category="${esc(first.category)}" data-notes="${esc(first.notes || '')}">แก้ไข</button>
+                <button class="btn-ghost btn-danger-ghost" data-delete="${esc(first.id)}">ลบ</button>
+                ${fileDocs.length === 1
+                  ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูเอกสาร</a>`
+                  : fileDocs.length > 1
+                    ? `<button class="btn-gold" data-viewall="${esc(first.id)}">ดูเอกสาร (${fileDocs.length})</button>`
+                    : ''}
+              </div>
             </div>
           </div>
-          <div class="doc-actions">
-            ${doc.downloadUrl ? `<a class="btn gold" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>` : ''}
-            <button class="btn edit-btn" data-edit="${esc(doc.id)}" data-title="${esc(doc.title)}" data-category="${esc(doc.category)}" data-notes="${esc(doc.notes||'')}">แก้ไข</button>
-            <button class="btn danger" data-delete="${esc(doc.id)}">ลบ</button>
-          </div>
-        </article>
-      `).join('');
+        </article>`;
+      }).join('');
+
       document.querySelectorAll('[data-delete]').forEach(btn => {
         btn.addEventListener('click', () => deleteDoc(btn.dataset.delete));
       });
       document.querySelectorAll('[data-edit]').forEach(btn => {
         btn.addEventListener('click', () => editDoc(btn.dataset));
       });
+      document.querySelectorAll('[data-viewall]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const card = btn.closest('.bp-card');
+          if (card) card.querySelectorAll('.file-pill').forEach(p => window.open(p.href, '_blank'));
+        });
+      });
     }
+
+    function setActiveFilter(filter) {
+      activeFilter = filter;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      loadDocs().catch(err => alert(err.message || 'โหลดข้อมูลไม่สำเร็จ'));
+    }
+
+    function buildFilterPills(docs) {
+      const cats = [...new Set(docs.map(d => d.category).filter(Boolean))].sort();
+      const pills = $('filterPills');
+      pills.innerHTML = `<button class="filter-pill ${activeFilter === 'all' ? 'active' : ''}" type="button" data-filter="all">ทั้งหมด</button>`;
+      cats.forEach(cat => {
+        const icon = CATEGORY_ICONS[cat] || '';
+        const btn = document.createElement('button');
+        btn.className = 'filter-pill' + (activeFilter === cat ? ' active' : '');
+        btn.type = 'button';
+        btn.dataset.filter = cat;
+        btn.textContent = `${icon} ${cat}`.trim();
+        pills.appendChild(btn);
+      });
+      pills.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.addEventListener('click', () => setActiveFilter(btn.dataset.filter));
+      });
+    }
+
     async function loadDocs() {
       const auth = getAuthPayload();
       if (!auth) return;
-      $('vaultPanel').classList.remove('hidden');
       $('logoutBtn').classList.remove('hidden');
       $('loginPanel').classList.add('hidden');
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
       const data = await api({action: 'list', ...auth});
-      renderDocs(data.documents || []);
+      const docs = data.documents || [];
+      buildFilterPills(docs);
+      renderDocs(docs);
     }
-    // Drop zone drag events
-    function initDropZone() {
-      const zone = $('dropZone');
-      const input = $('fileInput');
-      const label = $('dropZoneSelected');
-      input.addEventListener('change', () => {
-        const files = Array.from(input.files);
-        label.textContent = files.length ? `เลือกแล้ว ${files.length} ไฟล์: ${files.map(f => f.name).join(', ')}` : '';
+
+    /* ── File preview ── */
+    function renderFilePreview() {
+      const grid = $('filePreviewGrid');
+      let html = '';
+      _existingFileDocs.forEach((doc, i) => {
+        const ext = fileExtension(doc.fileName);
+        const name = doc.fileName || 'ไฟล์';
+        const thumbHtml = isImageExt(ext)
+          ? `<img class="file-card-thumb" src="${esc(doc.downloadUrl)}" alt="${esc(name)}" />`
+          : `<div class="file-card-icon">${fileEmoji(ext)}</div><div class="file-card-ext">${esc(fileIcon(ext))}</div>`;
+        html += `<div class="file-card file-card-existing">
+          <span class="file-card-badge existing">บันทึกแล้ว</span>
+          ${thumbHtml}
+          <div class="file-card-name">${esc(name)}</div>
+          <button type="button" class="file-card-remove" data-rm-existing="${i}" title="ลบไฟล์นี้">×</button>
+        </div>`;
       });
-      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-      zone.addEventListener('drop', e => {
-        e.preventDefault();
-        zone.classList.remove('drag-over');
-        const dt = e.dataTransfer;
-        if (dt.files.length) {
-          input.files = dt.files;
-          const files = Array.from(dt.files);
-          label.textContent = `เลือกแล้ว ${files.length} ไฟล์: ${files.map(f => f.name).join(', ')}`;
-        }
+      _selectedNewFiles.forEach((file, i) => {
+        const ext = fileExtension(file.name);
+        const objUrl = file._objUrl || '';
+        const thumbHtml = isImageExt(ext) && objUrl
+          ? `<img class="file-card-thumb" src="${esc(objUrl)}" alt="${esc(file.name)}" />`
+          : `<div class="file-card-icon">${fileEmoji(ext)}</div><div class="file-card-ext">${esc(fileIcon(ext))}</div>`;
+        html += `<div class="file-card file-card-new">
+          <span class="file-card-badge new-file">ใหม่</span>
+          ${thumbHtml}
+          <div class="file-card-name">${esc(file.name)}</div>
+          <button type="button" class="file-card-remove" data-rm-new="${i}" title="ลบออก">×</button>
+        </div>`;
+      });
+      grid.innerHTML = html;
+      grid.querySelectorAll('[data-rm-existing]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const i = Number(btn.dataset.rmExisting);
+          const doc = _existingFileDocs[i];
+          if (!doc) return;
+          if (!confirm(`ลบไฟล์ "${doc.fileName}" ออกจากระบบ?`)) return;
+          try {
+            await api({ action: 'delete', ...getAuthPayload(), documentId: doc.id });
+            _existingFileDocs.splice(i, 1);
+            renderFilePreview();
+          } catch (err) { alert(err.message || 'ลบไม่สำเร็จ'); }
+        });
+      });
+      grid.querySelectorAll('[data-rm-new]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.rmNew);
+          if (_selectedNewFiles[i]?._objUrl) URL.revokeObjectURL(_selectedNewFiles[i]._objUrl);
+          _selectedNewFiles.splice(i, 1);
+          renderFilePreview();
+        });
+      });
+    }
+    function addNewFiles(fileList) {
+      Array.from(fileList).forEach(file => {
+        if (isImageExt(fileExtension(file.name))) file._objUrl = URL.createObjectURL(file);
+        _selectedNewFiles.push(file);
+      });
+      renderFilePreview();
+    }
+    function setUploadProgress(pct, label) {
+      const wrap = $('uploadProgressWrap');
+      const fill = $('uploadProgressFill');
+      const lbl  = $('uploadProgressLabel');
+      if (pct === null) { wrap.classList.remove('visible'); fill.style.width = '0%'; return; }
+      wrap.classList.add('visible');
+      fill.style.width = Math.min(100, pct) + '%';
+      lbl.textContent = label || '';
+    }
+    function initFileUpload() {
+      const area  = $('dropArea');
+      const input = $('fileInput');
+      input.addEventListener('change', () => { if (input.files.length) { addNewFiles(input.files); input.value = ''; } });
+      area.addEventListener('dragover',  e => { e.preventDefault(); area.classList.add('drag-over'); });
+      area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+      area.addEventListener('drop', e => {
+        e.preventDefault(); area.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) addNewFiles(e.dataTransfer.files);
       });
     }
 
-    let _editingDocId = null;
+    /* ── Modal ── */
+    function getBpFormState() {
+      return {
+        title: $('title').value, category: $('category').value,
+        version: $('version').value, responsible: $('responsible').value, notes: $('notes').value,
+        files: Array.from($('fileInput').files || []).map(f => `${f.name}:${f.size}`)
+      };
+    }
+    function isBpFormDirty() {
+      return bpFormSnapshot && JSON.stringify(getBpFormState()) !== bpFormSnapshot;
+    }
+    function openBpModal() { $('bpModal').classList.add('open'); }
+    function closeBpModal(force = false) {
+      if (!force && isBpFormDirty() && !confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการปิดหรือไม่?')) return false;
+      $('bpModal').classList.remove('open');
+      bpFormSnapshot = null;
+      return true;
+    }
+    function resetBpFormUi() {
+      _editingDocId = null;
+      _selectedNewFiles.forEach(f => { if (f._objUrl) URL.revokeObjectURL(f._objUrl); });
+      _selectedNewFiles = [];
+      _existingFileDocs = [];
+      $('uploadForm').reset();
+      $('filePreviewGrid').innerHTML = '';
+      setUploadProgress(null);
+      $('editModeBar').classList.remove('visible');
+      $('bpModalTitle').textContent = 'เพิ่มเอกสารใหม่';
+      $('submitBtn').textContent = 'อัปโหลดเอกสาร';
+      $('fileUploadSection').style.display = '';
+    }
+    function requestCloseBpModal() {
+      if (!closeBpModal()) return;
+      resetBpFormUi();
+    }
+    function openCreateForm() {
+      resetBpFormUi();
+      openBpModal();
+      bpFormSnapshot = JSON.stringify(getBpFormState());
+    }
+
     function editDoc(data) {
+      resetBpFormUi();
+      const meta = parseStructuredNotes(data.notes || '');
       _editingDocId = data.edit;
       $('category').value = data.category || $('category').options[0].value;
       $('title').value = data.title || '';
-      $('notes').value = data.notes || '';
+      $('version').value = meta.version || '';
+      $('responsible').value = meta.responsible || '';
+      $('notes').value = meta.extraNotes || meta.legacyNotes || '';
+      const group = _currentGroups.find(g => g.docs.some(d => d.id === data.edit));
+      if (group) {
+        _existingFileDocs = group.docs
+          .filter(d => d.downloadUrl)
+          .map(d => ({ id: d.id, fileName: d.fileName || d.title || 'ไฟล์', downloadUrl: d.downloadUrl }));
+        renderFilePreview();
+      }
       $('editModeBar').classList.add('visible');
+      $('bpModalTitle').textContent = 'แก้ไขเอกสาร';
       $('submitBtn').textContent = 'บันทึกการแก้ไข';
-      $('dropZone').style.display = 'none';
-      $('vaultPanel').scrollIntoView({behavior: 'smooth', block: 'start'});
+      openBpModal();
+      bpFormSnapshot = JSON.stringify(getBpFormState());
     }
-    function cancelEdit() {
-      _editingDocId = null;
-      $('uploadForm').reset();
-      $('dropZoneSelected').textContent = '';
-      $('editModeBar').classList.remove('visible');
-      $('submitBtn').textContent = 'อัปโหลดเอกสาร';
-      $('dropZone').style.display = '';
-    }
+    function cancelEdit() { requestCloseBpModal(); }
 
+    /* ── Upload / Edit submit ── */
     async function uploadDoc(e) {
       e.preventDefault();
       const auth = getAuthPayload();
       if (!auth) { setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error'); return; }
 
-      // Edit mode
+      const category = $('category').value;
+      const title    = $('title').value.trim();
+      const notes    = buildStructuredNotes({
+        version:     $('version').value.trim(),
+        responsible: $('responsible').value.trim(),
+        extraNotes:  $('notes').value.trim()
+      });
+
       if (_editingDocId) {
         setStatus('uploadStatus', 'กำลังบันทึก...');
         try {
-          await api({ action: 'update', ...auth, documentId: _editingDocId,
-            category: $('category').value, title: $('title').value, notes: $('notes').value });
-          cancelEdit();
+          await api({ action: 'update', ...auth, documentId: _editingDocId, category, title, notes });
+
+          // Upload any new files added during edit
+          const newFiles = _selectedNewFiles;
+          for (let i = 0; i < newFiles.length; i++) {
+            const file = newFiles[i];
+            setUploadProgress((i / newFiles.length) * 100, `กำลังอัปโหลดไฟล์ใหม่ ${i + 1}/${newFiles.length}`);
+            const dataUrl = await fileToDataUrl(file);
+            await api({ action: 'upload', ...auth, category, title: `${title} (${i + 1})`, notes, fileName: file.name, dataUrl });
+          }
+          setUploadProgress(null);
+          resetBpFormUi();
+          closeBpModal(true);
           setStatus('uploadStatus', 'บันทึกแล้ว ✓', 'ok');
           await loadDocs();
-        } catch (err) { setStatus('uploadStatus', err.message || 'บันทึกไม่สำเร็จ', 'error'); }
+        } catch (err) { setUploadProgress(null); setStatus('uploadStatus', err.message || 'บันทึกไม่สำเร็จ', 'error'); }
         return;
       }
 
-      // Upload mode
-      const files = Array.from($('fileInput').files);
-      if (!files.length) { setStatus('uploadStatus', 'กรุณาเลือกไฟล์', 'error'); return; }
+      const files = _selectedNewFiles;
+      if (!files.length) { setStatus('uploadStatus', 'กรุณาเลือกไฟล์อย่างน้อย 1 ไฟล์', 'error'); return; }
       const oversized = files.filter(f => f.size > 15 * 1024 * 1024);
       if (oversized.length) { setStatus('uploadStatus', `ไฟล์ใหญ่เกิน 15 MB: ${oversized.map(f => f.name).join(', ')}`, 'error'); return; }
-      setStatus('uploadStatus', `กำลังอัปโหลด ${files.length} ไฟล์...`);
-      const category = $('category').value;
-      const title = $('title').value;
-      const notes = $('notes').value;
+
       try {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          if (files.length > 1) setStatus('uploadStatus', `กำลังอัปโหลด ${i + 1}/${files.length}: ${file.name}`);
+          const pctBase = (i / files.length) * 100;
+          setUploadProgress(pctBase, `กำลังเตรียมไฟล์ ${i + 1}/${files.length}: ${file.name}`);
           const dataUrl = await fileToDataUrl(file);
+          setUploadProgress(pctBase + (50 / files.length), `กำลังส่ง ${file.name}...`);
           await api({ action: 'upload', ...auth, category,
             title: files.length > 1 ? `${title} (${i + 1})` : title,
             notes, fileName: file.name, dataUrl });
+          setUploadProgress(((i + 1) / files.length) * 100, `อัปโหลดแล้ว ${i + 1}/${files.length}`);
         }
-        $('uploadForm').reset();
-        $('dropZoneSelected').textContent = '';
+        await new Promise(r => setTimeout(r, 400));
+        setUploadProgress(null);
+        resetBpFormUi();
+        closeBpModal(true);
         setStatus('uploadStatus', `อัปโหลดแล้ว ${files.length} ไฟล์ ✓`, 'ok');
         await loadDocs();
-      } catch (err) { setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
+      } catch (err) { setUploadProgress(null); setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
     }
 
     async function deleteDoc(id) {
@@ -644,23 +1017,18 @@
         await loadDocs();
       } catch (err) { alert(err.message || 'ลบไม่สำเร็จ'); }
     }
-    function logout() {
-      location.href = '/';
-    }
+
     function init() {
-      const cfg = PAGE_CONFIG[VAULT_TYPE];
-      $('pageTitle').textContent = cfg.title;
-      $('pageIntro').textContent = cfg.intro;
-      $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
+      $('category').innerHTML = CATEGORIES.map(c => `<option>${esc(c)}</option>`).join('');
       $('uploadForm').addEventListener('submit', uploadDoc);
-      initDropZone();
-      $('refreshBtn').addEventListener('click', () => loadDocs().catch(err => alert(err.message)));
-      $('logoutBtn').addEventListener('click', logout);
+      initFileUpload();
+      $('addBpBtn').addEventListener('click', openCreateForm);
+      $('bpModal').addEventListener('click', e => {
+        if (e.target === $('bpModal')) closeBpModal();
+      });
+      $('logoutBtn').addEventListener('click', () => { location.href = '/'; });
       const resident = getResidentSession();
-      if (!resident || resident.houseNo !== '38/8') {
-        location.href = '/';
-        return;
-      }
+      if (!resident || resident.houseNo !== '38/8') { location.href = '/'; return; }
       loadDocs().catch(() => { location.href = '/'; });
     }
     init();
