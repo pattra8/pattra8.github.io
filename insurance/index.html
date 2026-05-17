@@ -137,57 +137,27 @@
     main {
       max-width: 1000px;
       margin: 0 auto;
-      padding: 48px 28px 80px;
+      padding: 40px 28px 80px;
     }
-    .hero {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
-      align-items: stretch;
-      margin-bottom: 28px;
+    .page-hero {
+      padding-bottom: 24px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,244,0.98));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 30px;
-      box-shadow: var(--shadow);
-    }
-    .hero-title {
+    .page-hero-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(34px, 5vw, 52px);
+      font-size: clamp(36px, 5vw, 52px);
       font-weight: 300;
       color: var(--taupe);
-      letter-spacing: 0.01em;
       line-height: 1.1;
-      margin-bottom: 4px;
+      letter-spacing: 0.01em;
+      margin-bottom: 10px;
     }
-    .hero-title em { font-style: italic; color: var(--gold); }
-    .hero-copy {
+    .page-hero-title em { font-style: italic; color: var(--gold); }
+    .page-hero-sub {
+      font-size: 14px;
       color: var(--muted);
-      line-height: 1.75;
-      margin-top: 14px;
-      font-weight: 300;
-    }
-    .admin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(184,151,90,0.45);
-      background: var(--gold-pale);
-      color: var(--gold-light);
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      font-family: 'IBM Plex Sans Thai', sans-serif;
-    }
-    .login-box {
-      display: grid;
-      gap: 14px;
-      align-content: center;
+      line-height: 1.6;
     }
     label {
       display: block;
@@ -725,7 +695,7 @@
       header { padding: 0 20px; }
       .logo-divider { display: none; }
       main { padding: 32px 18px 60px; }
-      .hero, .upload-grid, .planner-grid { grid-template-columns: 1fr; }
+      .upload-grid, .planner-grid { grid-template-columns: 1fr; }
       .card-cells { grid-template-columns: repeat(2, 1fr); }
       .card-title { font-size: 17px; }
       .toolbar-actions { justify-content: flex-start; }
@@ -749,16 +719,12 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="panel">
-        <div class="admin-badge">Admin Only</div>
-        <h2 class="hero-title" id="pageTitle">Asset Insurance</h2>
-        <p class="hero-copy" id="pageIntro">จัดเก็บกรมธรรม์ เอกสารรับประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง เช่น ประตูเหล็กไฟฟ้า มอเตอร์ อุปกรณ์ฟิตเนส CCTV และระบบส่วนกลางอื่น ๆ</p>
-      </div>
-      <div class="panel login-box" id="loginPanel">
-        <div class="status" id="loginStatus">กำลังตรวจสอบสิทธิ์...</div>
-      </div>
-    </section>
+    <div class="page-hero">
+      <h1 class="page-hero-title">Asset <em>Insurance</em></h1>
+      <p class="page-hero-sub">คลังจัดเก็บเอกสารรับประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง</p>
+    </div>
+    <div id="loginPanel" class="hidden"></div>
+    <div class="status hidden" id="loginStatus"></div>
 
     <div class="modal-overlay" id="insuranceModal">
       <div class="modal">
@@ -1533,8 +1499,6 @@
     }
     function init() {
       const cfg = PAGE_CONFIG[VAULT_TYPE];
-      $('pageTitle').textContent = cfg.title;
-      $('pageIntro').textContent = cfg.intro;
       $('category').innerHTML = cfg.categories.map(c => `<option>${esc(c)}</option>`).join('');
       $('uploadForm').addEventListener('submit', uploadDoc);
       initFileUpload();
