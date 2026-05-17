@@ -448,8 +448,30 @@
       border-radius: 8px; border: 1px solid rgba(219,201,169,0.5);
       margin-bottom: 14px;
     }
-    .detail-files-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .detail-files { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .detail-files-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .detail-files { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .detail-file-card {
+      display: flex; flex-direction: column; align-items: center;
+      width: 110px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 10px 10px; text-decoration: none;
+      box-shadow: 0 1px 4px rgba(60,40,20,0.05); transition: border-color 0.2s, box-shadow 0.2s;
+      gap: 6px;
+    }
+    .detail-file-card:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(196,122,44,0.15); }
+    .detail-file-card-thumb {
+      width: 100%; height: 64px; object-fit: cover; border-radius: 7px; display: block;
+    }
+    .detail-file-card-icon { font-size: 34px; line-height: 1; }
+    .detail-file-card-ext {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.08em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .detail-file-card-name {
+      font-size: 10px; color: var(--taupe-mid); line-height: 1.35; text-align: center;
+      overflow: hidden; display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all;
+      width: 100%;
+    }
     .detail-actions {
       display: flex; gap: 8px; justify-content: flex-end;
       padding-top: 16px; border-top: 1px solid var(--border);
@@ -1444,17 +1466,23 @@
 
       // Notes
       const notesEl = $('detailNotes');
-      if (info.detail) { notesEl.textContent = info.detail; notesEl.classList.remove('hidden'); }
+      const notesText = info.detail || group.docs.map(d => d._meta.extraNotes).find(Boolean) || '';
+      if (notesText) { notesEl.textContent = notesText; notesEl.classList.remove('hidden'); }
       else notesEl.classList.add('hidden');
 
-      // Files
+      // Files — large preview cards
       const fileDocs = group.docs.filter(d => d.downloadUrl);
       $('detailFiles').innerHTML = fileDocs.length
         ? fileDocs.map(doc => {
             const ext = fileExtension(doc.fileName);
             const name = (doc.fileName || doc.title || 'ไฟล์').replace(/\s*\(\d+\)\s*$/, '');
-            return `<a class="file-pill" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">
-              <span class="file-pill-icon">${fileEmoji(ext)}</span>${esc(name)}</a>`;
+            const thumbHtml = isImageExt(ext)
+              ? `<img class="detail-file-card-thumb" src="${esc(doc.downloadUrl)}" alt="${esc(name)}" />`
+              : `<div class="detail-file-card-icon">${fileEmoji(ext)}</div><div class="detail-file-card-ext">${esc(fileIcon(ext))}</div>`;
+            return `<a class="detail-file-card" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">
+              ${thumbHtml}
+              <div class="detail-file-card-name">${esc(name)}</div>
+            </a>`;
           }).join('')
         : `<span style="font-size:13px;color:var(--muted)">ยังไม่มีไฟล์แนบ</span>`;
 
@@ -1512,7 +1540,7 @@
       $('warrantyMonths').value = meta.warrantyMonths || '';
       $('contactName').value = meta.contactName || '';
       $('contactPhone').value = meta.contactPhone || '';
-      $('notes').value = meta.extraNotes || meta.legacyNotes || '';
+      $('notes').value = meta.extraNotes || '';
       // Load existing files for this group
       const group = _currentGroups.find(g => g.docs.some(d => d.id === data.edit));
       if (group) {
