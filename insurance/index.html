@@ -473,7 +473,7 @@
       width: 100%;
     }
     .detail-actions {
-      display: flex; gap: 8px; justify-content: flex-end;
+      display: flex; gap: 8px; justify-content: space-between;
       padding-top: 16px; border-top: 1px solid var(--border);
     }
     @media (max-width: 600px) { .detail-cells { grid-template-columns: repeat(2,1fr); } }
@@ -886,7 +886,6 @@
         <div class="detail-files-label">ไฟล์แนบ</div>
         <div class="detail-files" id="detailFiles"></div>
         <div class="detail-actions">
-          <button class="btn" onclick="closeDetailModal()">ปิด</button>
           <button class="btn-ghost btn-danger-ghost" id="detailDeleteBtn">ลบ</button>
           <button class="btn-gold" id="detailEditBtn">✏️ แก้ไขข้อมูล</button>
         </div>
