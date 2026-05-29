@@ -1073,10 +1073,8 @@
         <select id="pickupStatusFilter" onchange="loadPickupRequests()"
           style="border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card);outline:none;">
           <option value="">ทุกสถานะ</option>
-          <option value="submitted">รอรับเรื่อง</option>
-          <option value="scheduled">นัดรับแล้ว</option>
-          <option value="completed">รับแล้ว</option>
-          <option value="cancelled">ยกเลิก</option>
+          <option value="submitted">ส่งคำขอมา</option>
+          <option value="completed">รับของไปแล้ว</option>
         </select>
         <button class="toolbar-btn" onclick="loadPickupRequests()">↺ รีโหลด</button>
         <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintAll()"
@@ -1235,12 +1233,33 @@
 <div id="pickupPrintArea" style="display:none"></div>
 
 <style>
+  /* pickup modal: override the 2-col grid used by the resident form so
+     content fills the full width (was leaving the right half empty) */
+  #pickupModal .modal { max-width: 620px; }
+  #pickupModalBody { display: block !important; padding: 24px 28px; }
+
+  /* quick status toggle on list card */
+  .card-status-btn {
+    border: 1.5px solid; border-radius: 9px;
+    padding: 8px 14px; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+    transition: all .12s;
+  }
+  .card-status-btn.to-done {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  .card-status-btn.to-done:hover { opacity: .88; }
+  .card-status-btn.to-undo {
+    background: #fff; color: var(--text-soft); border-color: var(--border);
+  }
+  .card-status-btn.to-undo:hover { border-color: var(--accent); color: var(--accent-deep); }
+
   /* pickup card */
   .pickup-card {
     background: var(--card); border: 1px solid var(--border-soft);
     border-radius: 12px; padding: 16px;
     display: grid; grid-template-columns: 1fr auto;
-    gap: 10px; align-items: start;
+    gap: 14px; align-items: start;
     cursor: pointer; transition: background .12s;
   }
   .pickup-card:hover { background: var(--bg-soft); }
@@ -3146,9 +3165,10 @@ let currentPickupId = null;
 let pickupModalCollected = [];  // per-item collected flags for the open modal
 
 const PICKUP_STATUS_LABELS = {
-  submitted: 'รอรับเรื่อง',
+  submitted: 'ส่งคำขอมา',
+  completed: 'รับของไปแล้ว',
+  // legacy values (older docs)
   scheduled: 'นัดรับแล้ว',
-  completed: 'รับแล้ว',
   cancelled: 'ยกเลิก',
 };
 
@@ -3193,14 +3213,13 @@ async function loadPickupRequests() {
 }
 
 function renderPickupStats(requests) {
-  const counts = { submitted: 0, scheduled: 0, completed: 0, cancelled: 0 };
-  requests.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+  // treat any non-completed (incl. legacy scheduled) as "ส่งคำขอมา"
+  const done = requests.filter(r => r.status === 'completed').length;
+  const pending = requests.length - done;
   document.getElementById('pickupStats').innerHTML = [
     ['ทั้งหมด', requests.length, ''],
-    ['รอรับเรื่อง', counts.submitted, 'color:var(--status-pending)'],
-    ['นัดรับแล้ว', counts.scheduled, 'color:#1e40af'],
-    ['รับแล้ว', counts.completed, 'color:var(--status-ok)'],
-    ['ยกเลิก', counts.cancelled, 'color:var(--text-muted)'],
+    ['ส่งคำขอมา', pending, 'color:var(--status-pending)'],
+    ['รับของไปแล้ว', done, 'color:var(--status-ok)'],
   ].map(([label, num, style]) => `
     <div class="stat-card">
       <div class="stat-card-num" style="${style}">${num}</div>
@@ -3243,18 +3262,40 @@ function renderPickupList(requests) {
             ${all.length > 5 ? `<div style="width:150px;height:150px;background:var(--bg-soft);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:var(--text-muted)">+${all.length - 5}</div>` : ''}
           </div>` : ''; })()}
       </div>
-      <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;text-align:right;">
-        ${req.items.length} รายการ<br>
-        <span style="font-size:11px;">${pickupAllPhotos(req).length} รูป</span>
-        ${(() => {
-          const done = (req.items || []).filter(it => it.collected).length;
-          const total = (req.items || []).length;
-          if (!done) return '';
-          const allDone = done === total;
-          return `<br><span style="font-size:11px;font-weight:700;color:${allDone ? '#3f6431' : 'var(--accent-deep)'};">ทิ้งแล้ว ${done}/${total}</span>`;
-        })()}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;white-space:nowrap;">
+        <div style="font-size:12px;color:var(--text-muted);text-align:right;">
+          ${req.items.length} รายการ · ${pickupAllPhotos(req).length} รูป
+        </div>
+        ${req.status === 'completed'
+          ? `<button class="card-status-btn to-undo" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','submitted')">↩ กลับเป็นรอดำเนินการ</button>`
+          : `<button class="card-status-btn to-done" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','completed')">✓ รับของไปแล้ว</button>`}
       </div>
     </div>`).join('');
+}
+
+// Change a request's status straight from the list card (no modal).
+async function quickSetStatus(id, newStatus) {
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const req = pickupRequests.find(r => r.id === id);
+  if (req) req.status = newStatus; // optimistic
+  renderPickupStats(pickupRequests);
+  renderPickupList(pickupRequests);
+  try {
+    const resp = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminHouseNo, adminPin, action: 'update',
+        requestId: id, status: newStatus,
+      }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error);
+    loadPickupRequests();
+  } catch (err) {
+    alert('เปลี่ยนสถานะไม่สำเร็จ: ' + err.message);
+    loadPickupRequests();
+  }
 }
 
 function openPickupModal(id) {
@@ -3335,10 +3376,8 @@ function openPickupModal(id) {
             <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">สถานะ</label>
             <select id="pickupEditStatus"
               style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;">
-              <option value="submitted" ${req.status==='submitted'?'selected':''}>รอรับเรื่อง</option>
-              <option value="scheduled" ${req.status==='scheduled'?'selected':''}>นัดรับแล้ว</option>
-              <option value="completed" ${req.status==='completed'?'selected':''}>รับแล้ว</option>
-              <option value="cancelled" ${req.status==='cancelled'?'selected':''}>ยกเลิก</option>
+              <option value="submitted" ${req.status!=='completed'?'selected':''}>ส่งคำขอมา</option>
+              <option value="completed" ${req.status==='completed'?'selected':''}>รับของไปแล้ว</option>
             </select>
           </div>
           <div>

@@ -711,18 +711,19 @@ function closeLightbox() {
 
 // ── Status labels ─────────────────────────────────────────────────────────────
 const STATUS_LABELS = {
-  submitted: 'รอรับเรื่อง',
-  scheduled: 'นัดรับแล้ว',
-  completed: 'รับแล้ว',
+  submitted: 'ส่งคำขอแล้ว',
+  completed: 'รับของไปแล้ว',
+  // legacy
+  scheduled: 'ส่งคำขอแล้ว',
   cancelled: 'ยกเลิก',
 };
 const STATUS_ICON = {
-  submitted: '🕒', scheduled: '📅', completed: '✅', cancelled: '✖️',
+  submitted: '🕒', completed: '✅', scheduled: '🕒', cancelled: '✖️',
 };
 const STATUS_DESC = {
-  submitted: 'นิติบุคคลได้รับเรื่องแล้ว กำลังรวบรวมและจะนัดวันเข้ารับ',
-  scheduled: 'นัดวันเข้ารับแล้ว กรุณาเตรียมของไว้ตามวันที่นัด',
+  submitted: 'นิติบุคคลได้รับเรื่องแล้ว ช่างจะติดต่อกลับเพื่อนัดวันเข้ารับ',
   completed: 'เข้ารับของเรียบร้อยแล้ว ขอบคุณครับ',
+  scheduled: 'นิติบุคคลได้รับเรื่องแล้ว ช่างจะติดต่อกลับเพื่อนัดวันเข้ารับ',
   cancelled: 'คำขอนี้ถูกยกเลิก หากต้องการแจ้งใหม่ กรุณาส่งคำขอใหม่',
 };
 function statusPill(status) {
