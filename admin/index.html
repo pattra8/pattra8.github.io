@@ -842,6 +842,9 @@
     <button class="tab-btn" id="tabAnnounce" onclick="switchTab('announce')">
       📢 ประกาศ
     </button>
+    <button class="tab-btn" id="tabPickup" onclick="switchTab('pickup')">
+      🗑 ทิ้งของใหญ่
+    </button>
   </div>
 
   <!-- Tab: Residents -->
@@ -1058,6 +1061,38 @@
     </div>
   </div>
 
+  <!-- Tab: Bulky Waste Pickup -->
+  <div id="pickupTab" style="display:none">
+    <div style="max-width:1080px;margin:36px auto;padding:0 24px;">
+
+      <!-- Summary cards -->
+      <div id="pickupStats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px;"></div>
+
+      <!-- Toolbar -->
+      <div class="pickup-toolbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <select id="pickupStatusFilter" onchange="loadPickupRequests()"
+          style="border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card);outline:none;">
+          <option value="">ทุกสถานะ</option>
+          <option value="submitted">รอรับเรื่อง</option>
+          <option value="scheduled">นัดรับแล้ว</option>
+          <option value="completed">รับแล้ว</option>
+          <option value="cancelled">ยกเลิก</option>
+        </select>
+        <button class="toolbar-btn" onclick="loadPickupRequests()">↺ รีโหลด</button>
+        <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintScheduled()"
+          style="background:var(--accent-pale);color:var(--accent-deep);border-color:var(--accent);">
+          🖨 พิมพ์รายการนัดรับ
+        </button>
+        <span id="pickupRecordCount" class="record-count pickup-toolbar-count" style="margin-left:auto;"></span>
+      </div>
+
+      <!-- Request list -->
+      <div id="pickupList" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="color:var(--text-muted);padding:40px;text-align:center;">กดแท็บเพื่อโหลด...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Tab: Announcements -->
   <div id="announceTab" style="display:none">
     <div style="max-width:1080px;margin:36px auto;padding:0 24px;display:grid;grid-template-columns:0.9fr 1.1fr;gap:20px;align-items:start;">
@@ -1172,6 +1207,161 @@
 </div>
 
 
+<!-- ─── PICKUP DETAIL MODAL ─── -->
+<div class="modal-overlay" id="pickupModal" style="display:none" onclick="if(event.target===this)closePickupModal()">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <div>
+        <h2>รายละเอียดคำขอ</h2>
+        <div id="pickupModalId" style="font-size:0.82rem;opacity:0.7;margin-top:4px;font-family:monospace;"></div>
+      </div>
+      <button class="modal-close" onclick="closePickupModal()">✕</button>
+    </div>
+    <div class="modal-body" id="pickupModalBody" style="max-height:65vh;overflow-y:auto;"></div>
+    <div class="modal-footer">
+      <div class="modal-actions" style="flex-wrap:wrap;gap:8px;">
+        <button class="ghost-btn" onclick="closePickupModal()">ปิด</button>
+        <button class="ghost-btn" onclick="printPickupRequest()" style="border-color:var(--accent);color:var(--accent-deep);">🖨 พิมพ์</button>
+        <button class="primary-btn" onclick="savePickupUpdate()" id="pickupSaveBtn">💾 บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PICKUP PRINT AREA ─── -->
+<div id="pickupPrintArea" style="display:none"></div>
+
+<style>
+  /* pickup card */
+  .pickup-card {
+    background: var(--card); border: 1px solid var(--border-soft);
+    border-radius: 12px; padding: 16px;
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 10px; align-items: start;
+    cursor: pointer; transition: background .12s;
+  }
+  .pickup-card:hover { background: var(--bg-soft); }
+  .pickup-house { font-size: 15px; font-weight: 700; color: var(--text); }
+  .pickup-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .pickup-items { font-size: 13px; color: var(--text-body); margin-top: 6px; }
+  .pickup-items li { margin-left: 18px; }
+  .pickup-thumbs { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .pickup-thumb {
+    width: 40px; height: 40px; border-radius: 6px;
+    object-fit: cover; border: 1px solid var(--border-soft);
+  }
+  .status-pill {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 999px; letter-spacing: .04em; white-space: nowrap;
+  }
+  .status-submitted  { background: #f7e6cd; color: #855015; }
+  .status-scheduled  { background: #dbeafe; color: #1e40af; }
+  .status-completed  { background: #e8efd9; color: #3f6431; }
+  .status-cancelled  { background: #f3f4f6; color: #6b7280; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border-soft);
+    border-radius: 12px; padding: 14px 18px; text-align: center;
+  }
+  .stat-card-num  { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-card-label{ font-size: 12px; color: var(--text-soft); margin-top: 2px; }
+
+  /* ─── mobile: pickup tab ─── */
+  @media (max-width: 600px) {
+    .pickup-card { grid-template-columns: 1fr; gap: 8px; }
+    #pickupTab > div { padding: 0 12px !important; margin: 16px auto !important; }
+    #pickupTab .pickup-toolbar {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    #pickupTab .pickup-toolbar select { grid-column: 1 / -1; }
+    #pickupTab .pickup-toolbar-count { grid-column: 1 / -1; text-align: right; }
+    #pickupTab .pickup-toolbar-print { grid-column: 1 / -1; }
+    #pickupStats { grid-template-columns: 1fr 1fr !important; }
+  }
+
+  /* ─── print / PDF ─── */
+  #pickupPrintArea {
+    display: none;
+    font-family: 'IBM Plex Sans Thai', 'Sarabun', sans-serif;
+  }
+  .pp { /* print page */
+    width: 210mm;
+    min-height: 297mm;
+    padding: 14mm 16mm 14mm;
+    page-break-after: always;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .pp:last-child { page-break-after: auto; }
+  .pp-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 14px;
+  }
+  .pp-org { font-size: 11px; color: #555; }
+  .pp-house {
+    font-size: 36px; font-weight: 900; color: #1a1a1a;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .pp-house-label { font-size: 11px; color: #666; margin-top: 2px; text-align: right; }
+  .pp-meta-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 14px;
+    background: #f5f5f5; border-radius: 6px; padding: 10px 12px;
+  }
+  .pp-meta-cell { }
+  .pp-meta-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: #888; }
+  .pp-meta-value { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-top: 2px; }
+  .pp-section { margin-bottom: 14px; }
+  .pp-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: #666;
+    border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 8px;
+  }
+  .pp-items { margin: 0; padding: 0 0 0 18px; }
+  .pp-items li {
+    font-size: 14px; line-height: 1.8; color: #1a1a1a;
+    border-bottom: 1px dotted #e0e0e0; padding-bottom: 2px;
+  }
+  .pp-items li:last-child { border-bottom: none; }
+  .pp-notes {
+    font-size: 13px; color: #333; background: #fffbf0;
+    border-left: 3px solid #c47a2c; padding: 8px 10px;
+    border-radius: 0 4px 4px 0;
+  }
+  .pp-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pp-photos img {
+    width: 100%; aspect-ratio: 4/3; object-fit: cover;
+    border: 1px solid #ccc; border-radius: 6px;
+    display: block;
+  }
+  .pp-photo-cap {
+    font-size: 9px; color: #888; text-align: center;
+    margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .pp-sig {
+    margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; border-top: 1px solid #ccc; padding-top: 12px;
+  }
+  .pp-sig-box { text-align: center; }
+  .pp-sig-line {
+    border-bottom: 1px solid #333; height: 30px; margin-bottom: 6px;
+  }
+  .pp-sig-label { font-size: 10px; color: #666; }
+  .pp-footer {
+    position: absolute; bottom: 10mm; left: 16mm; right: 16mm;
+    font-size: 9px; color: #aaa; text-align: center;
+    border-top: 1px solid #eee; padding-top: 4px;
+  }
+
+  @media print {
+    body > *:not(#pickupPrintArea) { display: none !important; }
+    #pickupPrintArea { display: block !important; }
+    @page { size: A4; margin: 0; }
+    .pp { box-shadow: none; }
+  }
+</style>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
@@ -1238,15 +1428,18 @@
     document.getElementById('surveyTab').style.display     = tab === 'survey'    ? 'block' : 'none';
     document.getElementById('logTab').style.display        = tab === 'log'       ? 'block' : 'none';
     document.getElementById('announceTab').style.display   = tab === 'announce'  ? 'block' : 'none';
+    document.getElementById('pickupTab').style.display     = tab === 'pickup'    ? 'block' : 'none';
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
     document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
     document.getElementById('tabSurvey').classList.toggle('active', tab === 'survey');
     document.getElementById('tabLog').classList.toggle('active', tab === 'log');
     document.getElementById('tabAnnounce').classList.toggle('active', tab === 'announce');
+    document.getElementById('tabPickup').classList.toggle('active', tab === 'pickup');
     if (tab === 'vote') loadAdminPolls();
     if (tab === 'log') loadActivityLog();
     if (tab === 'announce') initAnnounceTab();
+    if (tab === 'pickup') loadPickupRequests();
   }
 
   // ── Lifestyle Survey Stats ───────────────────────────────────────────────
@@ -2917,6 +3110,378 @@
     } catch { location.href = '/'; return; }
     showDashboard();
   })();
+</script>
+
+<script>
+// ── Bulky Waste / Pickup admin ────────────────────────────────────────────────
+const MANAGE_PICKUP_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/manageBulkyWasteRequests';
+const escH = typeof escHtml === 'function' ? escHtml : (s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])));
+
+let pickupRequests = [];
+let currentPickupId = null;
+
+const PICKUP_STATUS_LABELS = {
+  submitted: 'รอรับเรื่อง',
+  scheduled: 'นัดรับแล้ว',
+  completed: 'รับแล้ว',
+  cancelled: 'ยกเลิก',
+};
+
+function pickupStatusPill(status) {
+  const label = PICKUP_STATUS_LABELS[status] || status;
+  return `<span class="status-pill status-${escH(status)}">${label}</span>`;
+}
+
+function pickupFormatDate(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleString('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+async function loadPickupRequests() {
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const listEl = document.getElementById('pickupList');
+  const countEl = document.getElementById('pickupRecordCount');
+  const statusFilter = document.getElementById('pickupStatusFilter').value;
+
+  listEl.innerHTML = '<div style="color:var(--text-muted);padding:40px;text-align:center;">กำลังโหลด…</div>';
+
+  try {
+    const resp = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminHouseNo, adminPin, action: 'list', status: statusFilter }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error);
+
+    pickupRequests = data.requests || [];
+    countEl.textContent = `${pickupRequests.length} รายการ`;
+    renderPickupStats(pickupRequests);
+    renderPickupList(pickupRequests);
+  } catch (err) {
+    listEl.innerHTML = `<div style="color:var(--status-error);padding:24px;">โหลดไม่สำเร็จ: ${escH(err.message)}</div>`;
+  }
+}
+
+function renderPickupStats(requests) {
+  const counts = { submitted: 0, scheduled: 0, completed: 0, cancelled: 0 };
+  requests.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+  document.getElementById('pickupStats').innerHTML = [
+    ['ทั้งหมด', requests.length, ''],
+    ['รอรับเรื่อง', counts.submitted, 'color:var(--status-pending)'],
+    ['นัดรับแล้ว', counts.scheduled, 'color:#1e40af'],
+    ['รับแล้ว', counts.completed, 'color:var(--status-ok)'],
+    ['ยกเลิก', counts.cancelled, 'color:var(--text-muted)'],
+  ].map(([label, num, style]) => `
+    <div class="stat-card">
+      <div class="stat-card-num" style="${style}">${num}</div>
+      <div class="stat-card-label">${label}</div>
+    </div>`).join('');
+}
+
+function renderPickupList(requests) {
+  const listEl = document.getElementById('pickupList');
+  if (!requests.length) {
+    listEl.innerHTML = '<div style="color:var(--text-muted);padding:40px;text-align:center;">ไม่มีรายการ</div>';
+    return;
+  }
+  listEl.innerHTML = requests.map(req => `
+    <div class="pickup-card" onclick="openPickupModal('${escH(req.id)}')">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+          <span class="pickup-house">🏠 บ้าน ${escH(req.houseNo)}</span>
+          ${req.residentName ? `<span style="font-size:13px;color:var(--text-soft)">${escH(req.residentName)}</span>` : ''}
+          ${pickupStatusPill(req.status)}
+        </div>
+        <div class="pickup-meta">${pickupFormatDate(req.createdAt)}
+          ${req.pickupDate ? ` · 📅 นัดรับ: ${escH(req.pickupDate)}` : ''}
+        </div>
+        <ul class="pickup-items">
+          ${req.items.slice(0, 3).map(it =>
+            `<li>${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}</li>`
+          ).join('')}
+          ${req.items.length > 3 ? `<li style="color:var(--text-muted)">+${req.items.length - 3} รายการ</li>` : ''}
+        </ul>
+        ${req.notes ? `<div style="font-size:12px;color:var(--text-soft);margin-top:4px;font-style:italic;">${escH(req.notes)}</div>` : ''}
+        ${req.photos.length ? `
+          <div class="pickup-thumbs">
+            ${req.photos.slice(0, 4).map(p =>
+              `<img class="pickup-thumb" src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />`
+            ).join('')}
+            ${req.photos.length > 4 ? `<div style="width:40px;height:40px;background:var(--bg-soft);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)">+${req.photos.length - 4}</div>` : ''}
+          </div>` : ''}
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;">
+        ${req.items.length} รายการ
+      </div>
+    </div>`).join('');
+}
+
+function openPickupModal(id) {
+  const req = pickupRequests.find(r => r.id === id);
+  if (!req) return;
+  currentPickupId = id;
+
+  document.getElementById('pickupModalId').textContent = `ID: ${req.id}`;
+  document.getElementById('pickupModalBody').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:18px;font-weight:700;">🏠 บ้าน ${escH(req.houseNo)}</span>
+        ${req.residentName ? `<span style="color:var(--text-soft)">${escH(req.residentName)}</span>` : ''}
+        ${pickupStatusPill(req.status)}
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);">
+        แจ้งเมื่อ: ${pickupFormatDate(req.createdAt)}
+        ${req.updatedAt !== req.createdAt ? ` · อัปเดต: ${pickupFormatDate(req.updatedAt)}` : ''}
+      </div>
+
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">รายการสิ่งของ</div>
+        <ol style="margin-left:20px;font-size:14px;line-height:1.8;">
+          ${req.items.map(it =>
+            `<li>${escH(it.name)}${it.qty > 1 ? ` <span style="color:var(--text-muted)">× ${it.qty}</span>` : ''}${it.note ? ` — <em style="color:var(--text-soft)">${escH(it.note)}</em>` : ''}</li>`
+          ).join('')}
+        </ol>
+      </div>
+
+      ${req.notes ? `
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">หมายเหตุ</div>
+        <div style="font-size:13.5px;color:var(--text-body);font-style:italic;">${escH(req.notes)}</div>
+      </div>` : ''}
+
+      ${req.photos.length ? `
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">รูปถ่าย (${req.photos.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${req.photos.map(p => `
+            <a href="${escH(p.downloadUrl)}" target="_blank">
+              <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}"
+                   style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border-soft);" />
+            </a>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <div style="border-top:1px solid var(--border-soft);padding-top:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">จัดการคำขอ</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">สถานะ</label>
+            <select id="pickupEditStatus"
+              style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;">
+              <option value="submitted" ${req.status==='submitted'?'selected':''}>รอรับเรื่อง</option>
+              <option value="scheduled" ${req.status==='scheduled'?'selected':''}>นัดรับแล้ว</option>
+              <option value="completed" ${req.status==='completed'?'selected':''}>รับแล้ว</option>
+              <option value="cancelled" ${req.status==='cancelled'?'selected':''}>ยกเลิก</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">วันที่นัดรับ</label>
+            <input type="date" id="pickupEditDate" value="${escH(req.pickupDate || '')}"
+              style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;" />
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">โน้ต admin</label>
+          <textarea id="pickupEditNote" rows="3"
+            style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;resize:vertical;"
+            placeholder="โน้ตภายใน หรือข้อความแจ้งลูกบ้าน..."
+          >${escH(req.adminNote || '')}</textarea>
+        </div>
+        <div id="pickupSaveMsg" style="margin-top:8px;font-size:13px;min-height:18px;"></div>
+      </div>
+    </div>`;
+
+  document.getElementById('pickupModal').style.display = 'flex';
+}
+
+function closePickupModal() {
+  document.getElementById('pickupModal').style.display = 'none';
+  currentPickupId = null;
+}
+
+async function savePickupUpdate() {
+  if (!currentPickupId) return;
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const btn = document.getElementById('pickupSaveBtn');
+  const msgEl = document.getElementById('pickupSaveMsg');
+
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+  msgEl.textContent = '';
+
+  try {
+    const resp = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminHouseNo, adminPin,
+        action: 'update',
+        requestId: currentPickupId,
+        status: document.getElementById('pickupEditStatus').value,
+        pickupDate: document.getElementById('pickupEditDate').value || null,
+        adminNote: document.getElementById('pickupEditNote').value.trim(),
+      }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error);
+    msgEl.style.color = 'var(--status-ok)';
+    msgEl.textContent = '✅ บันทึกเรียบร้อย';
+    loadPickupRequests();
+  } catch (err) {
+    msgEl.style.color = 'var(--status-error)';
+    msgEl.textContent = `❌ ${err.message}`;
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 บันทึก';
+  }
+}
+
+// ── Print single request ──────────────────────────────────────────────────────
+function buildPrintPage(req) {
+  const statusLabel = PICKUP_STATUS_LABELS[req.status] || req.status;
+  const printedAt = new Date().toLocaleString('th-TH', {
+    timeZone: 'Asia/Bangkok', year: 'numeric',
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+
+  // split photos into pairs for 2-column grid
+  const photoRows = [];
+  for (let i = 0; i < req.photos.length; i += 2) {
+    photoRows.push(req.photos.slice(i, i + 2));
+  }
+
+  return `
+    <div class="pp">
+      <!-- TOP: org + house number -->
+      <div class="pp-top">
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#1a1a1a;">Pattra Villa 8</div>
+          <div class="pp-org">ใบแจ้งทิ้งของใหญ่ / Bulky Waste Request</div>
+          <div class="pp-org" style="margin-top:3px;">พิมพ์เมื่อ ${printedAt}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="pp-house">${escH(req.houseNo)}</div>
+          <div class="pp-house-label">บ้านเลขที่</div>
+          ${req.residentName ? `<div style="font-size:12px;color:#555;margin-top:3px;">${escH(req.residentName)}</div>` : ''}
+        </div>
+      </div>
+
+      <!-- META ROW -->
+      <div class="pp-meta-row">
+        <div class="pp-meta-cell">
+          <div class="pp-meta-label">วันที่แจ้ง</div>
+          <div class="pp-meta-value">${pickupFormatDate(req.createdAt)}</div>
+        </div>
+        <div class="pp-meta-cell">
+          <div class="pp-meta-label">วันนัดรับ</div>
+          <div class="pp-meta-value" style="color:${req.pickupDate ? '#1a1a1a' : '#aaa'};">
+            ${req.pickupDate ? escH(req.pickupDate) : 'ยังไม่นัด'}
+          </div>
+        </div>
+        <div class="pp-meta-cell">
+          <div class="pp-meta-label">สถานะ</div>
+          <div class="pp-meta-value">${statusLabel}</div>
+        </div>
+      </div>
+
+      <!-- ITEMS -->
+      <div class="pp-section">
+        <div class="pp-section-title">รายการสิ่งของ (${req.items.length} รายการ)</div>
+        <ol class="pp-items">
+          ${req.items.map(it =>
+            `<li><strong>${escH(it.name)}</strong>${it.qty > 1 ? `<span style="color:#666;"> จำนวน ${it.qty} ชิ้น</span>` : ''}${it.note ? `<span style="color:#666;"> — ${escH(it.note)}</span>` : ''}</li>`
+          ).join('')}
+        </ol>
+      </div>
+
+      <!-- NOTES -->
+      ${(req.notes || req.adminNote) ? `
+      <div class="pp-section">
+        <div class="pp-section-title">หมายเหตุ</div>
+        ${req.notes ? `<div class="pp-notes">${escH(req.notes)}</div>` : ''}
+        ${req.adminNote ? `<div style="font-size:12px;color:#555;margin-top:6px;padding:6px 10px;background:#f0f7ff;border-radius:4px;border-left:3px solid #3b82f6;">Admin: ${escH(req.adminNote)}</div>` : ''}
+      </div>` : ''}
+
+      <!-- PHOTOS — 2 col, large -->
+      ${req.photos.length ? `
+      <div class="pp-section">
+        <div class="pp-section-title">รูปถ่ายสิ่งของ (${req.photos.length} รูป)</div>
+        <div class="pp-photos">
+          ${req.photos.map(p => `
+            <div>
+              <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />
+              <div class="pp-photo-cap">${escH(p.fileName)}</div>
+            </div>`).join('')}
+        </div>
+      </div>` : `
+      <div class="pp-section">
+        <div class="pp-section-title">รูปถ่ายสิ่งของ</div>
+        <div style="font-size:12px;color:#aaa;padding:10px 0;">ไม่มีรูปถ่าย</div>
+      </div>`}
+
+      <!-- SIGNATURE ROW -->
+      <div class="pp-sig">
+        <div class="pp-sig-box">
+          <div class="pp-sig-line"></div>
+          <div class="pp-sig-label">ผู้ตรวจรับ (รถรับของ) / วันที่</div>
+        </div>
+        <div class="pp-sig-box">
+          <div class="pp-sig-line"></div>
+          <div class="pp-sig-label">ผู้แจ้ง (ลูกบ้าน) / วันที่</div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="pp-footer">
+        Pattra Villa 8 · ID: ${escH(req.id)} · เอกสารนี้ออกโดยระบบอัตโนมัติ ใช้สำหรับประสานงานรถรับของใหญ่เท่านั้น
+      </div>
+    </div>`;
+}
+
+async function preloadImages(urls) {
+  await Promise.all(urls.map(url => new Promise(resolve => {
+    const img = new Image();
+    img.onload = img.onerror = resolve;
+    img.src = url;
+  })));
+}
+
+async function printPickupRequest() {
+  if (!currentPickupId) return;
+  const req = pickupRequests.find(r => r.id === currentPickupId);
+  if (!req) return;
+
+  const printBtn = document.querySelector('button[onclick="printPickupRequest()"]');
+  if (printBtn) { printBtn.disabled = true; printBtn.textContent = '⏳ กำลังโหลดรูป…'; }
+
+  const urls = req.photos.map(p => p.downloadUrl);
+  await preloadImages(urls);
+
+  document.getElementById('pickupPrintArea').innerHTML = buildPrintPage(req);
+  if (printBtn) { printBtn.disabled = false; printBtn.textContent = '🖨 พิมพ์'; }
+  window.print();
+}
+
+async function batchPrintScheduled() {
+  const scheduled = pickupRequests.filter(r => r.status === 'scheduled');
+  if (!scheduled.length) {
+    alert('ไม่มีรายการที่นัดรับแล้ว (status = scheduled)'); return;
+  }
+
+  const batchBtn = document.querySelector('button[onclick="batchPrintScheduled()"]');
+  if (batchBtn) { batchBtn.disabled = true; batchBtn.textContent = '⏳ กำลังโหลดรูป…'; }
+
+  const urls = scheduled.flatMap(r => r.photos.map(p => p.downloadUrl));
+  await preloadImages(urls);
+
+  document.getElementById('pickupPrintArea').innerHTML =
+    scheduled.map(req => buildPrintPage(req)).join('');
+  if (batchBtn) { batchBtn.disabled = false; batchBtn.textContent = '🖨 พิมพ์รายการนัดรับ'; }
+  window.print();
+}
 </script>
 </body>
 </html>

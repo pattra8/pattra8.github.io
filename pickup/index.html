@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แจ้งทิ้งของใหญ่ — Pattra Villa 8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:           #f9f3e9;
+      --bg-soft:      #f3ecdd;
+      --bg-warm:      #ede2cc;
+      --card:         #ffffff;
+      --border:       #e6dcc7;
+      --border-soft:  #efe8d6;
+      --text:         #2a2218;
+      --text-body:    #3a3024;
+      --text-soft:    #6b5d4a;
+      --text-muted:   #8a7960;
+      --accent:       #c47a2c;
+      --accent-text:  #9a5c1f;
+      --accent-deep:  #855015;
+      --accent-pale:  #f7e6cd;
+      --status-ok:    #3f6431;
+      --status-ok-bg: #e8efd9;
+      --status-err:   #86341e;
+      --status-err-bg:#f7dfd5;
+      --status-warn:  #855015;
+      --status-warn-bg:#f7e6cd;
+      --shadow-card:  0 1px 2px rgba(60,40,20,.04), 0 8px 24px rgba(60,40,20,.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'IBM Plex Sans Thai', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent-text); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── HEADER ─── */
+    header {
+      background: rgba(249,243,233,.92);
+      backdrop-filter: saturate(140%) blur(8px);
+      -webkit-backdrop-filter: saturate(140%) blur(8px);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; font-weight: 600; color: var(--text);
+      text-decoration: none;
+    }
+    .header-sep { color: var(--border); font-size: 18px; }
+    .header-title { font-size: 13.5px; font-weight: 600; color: var(--text-soft); }
+    .header-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-body);
+      border-radius: 9px;
+      padding: 7px 14px;
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: all .15s;
+    }
+    .header-btn:hover { border-color: var(--accent); color: var(--accent-deep); }
+    .identity-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--accent-pale);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 14px 5px 6px;
+      cursor: pointer; user-select: none;
+    }
+    .pill-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pill-house { font-size: 12px; font-weight: 700; color: var(--text); }
+    .pill-name  { font-size: 11px; color: var(--text-soft); }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: linear-gradient(135deg, #f7e6cc 0%, #f3ecdd 100%);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 40px 28px 36px;
+      text-align: center;
+    }
+    .hero-icon { font-size: 40px; margin-bottom: 12px; }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 600;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .hero p { font-size: 14px; color: var(--text-soft); max-width: 480px; margin: 0 auto; }
+
+    /* ─── LAYOUT ─── */
+    .page-wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 60px; }
+
+    /* ─── SECTION ─── */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .section-title {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ─── FORM ─── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 12.5px; font-weight: 600;
+      color: var(--text-soft); margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+      font-family: inherit; font-size: 14px;
+      color: var(--text); background: var(--card);
+      outline: none; transition: border-color .15s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input[readonly] { background: var(--bg-soft); color: var(--text-soft); }
+    textarea.form-input { resize: vertical; min-height: 80px; }
+
+    /* ─── ITEM ROWS ─── */
+    .items-list { display: flex; flex-direction: column; gap: 10px; }
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr 72px auto;
+      gap: 8px; align-items: center;
+    }
+    .item-row input { margin: 0; }
+    .item-qty { width: 72px; text-align: center; }
+    .remove-btn {
+      width: 32px; height: 32px;
+      background: var(--status-err-bg); color: var(--status-err);
+      border: none; border-radius: 8px;
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity .15s;
+    }
+    .remove-btn:hover { opacity: .75; }
+    .add-item-btn {
+      margin-top: 10px;
+      background: var(--bg-soft); border: 1.5px dashed var(--border);
+      color: var(--text-soft); border-radius: 10px;
+      padding: 9px 16px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit; width: 100%;
+      transition: border-color .15s, color .15s;
+    }
+    .add-item-btn:hover { border-color: var(--accent); color: var(--accent-deep); }
+
+    /* ─── PHOTO UPLOAD ─── */
+    .photo-drop {
+      border: 2px dashed var(--border);
+      border-radius: 12px; padding: 24px;
+      text-align: center; cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .photo-drop.drag-over { border-color: var(--accent); background: var(--accent-pale); }
+    .photo-drop input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .photo-drop-icon { font-size: 28px; margin-bottom: 8px; }
+    .photo-drop-text { font-size: 13px; color: var(--text-soft); }
+    .photo-drop-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px; margin-top: 12px;
+    }
+    .photo-thumb {
+      position: relative; border-radius: 10px;
+      overflow: hidden; aspect-ratio: 1;
+      background: var(--bg-soft); border: 1px solid var(--border-soft);
+    }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-thumb-remove {
+      position: absolute; top: 4px; right: 4px;
+      width: 22px; height: 22px;
+      background: rgba(0,0,0,.55); color: #fff;
+      border: none; border-radius: 50%;
+      font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-count { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ─── SUBMIT ─── */
+    .submit-btn {
+      width: 100%; background: var(--accent); color: #fff;
+      border: none; border-radius: 12px;
+      padding: 14px; font-size: 15px; font-weight: 700;
+      font-family: inherit; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .submit-btn:hover { opacity: .88; }
+    .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .submit-msg {
+      margin-top: 14px; padding: 12px 16px;
+      border-radius: 10px; font-size: 13.5px; font-weight: 600;
+      display: none;
+    }
+    .submit-msg.ok  { background: var(--status-ok-bg);  color: var(--status-ok);  display: block; }
+    .submit-msg.err { background: var(--status-err-bg); color: var(--status-err); display: block; }
+
+    /* ─── REQUESTS HISTORY ─── */
+    .req-list { display: flex; flex-direction: column; gap: 12px; }
+    .req-card {
+      border: 1px solid var(--border-soft); border-radius: 12px;
+      padding: 16px; background: var(--bg-soft);
+    }
+    .req-card-head {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .req-id { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+    .req-date { font-size: 12px; color: var(--text-soft); }
+    .status-pill {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; letter-spacing: .04em;
+    }
+    .status-submitted { background: var(--status-warn-bg); color: var(--status-warn); }
+    .status-scheduled { background: #dbeafe; color: #1e40af; }
+    .status-completed { background: var(--status-ok-bg); color: var(--status-ok); }
+    .status-cancelled { background: #f3f4f6; color: #6b7280; }
+    .req-items { font-size: 13px; color: var(--text-body); margin-bottom: 6px; }
+    .req-items li { margin-left: 18px; }
+    .req-photos { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .req-photo-thumb {
+      width: 48px; height: 48px; object-fit: cover;
+      border-radius: 7px; border: 1px solid var(--border-soft);
+      cursor: pointer;
+    }
+    .req-note { font-size: 12px; color: var(--text-soft); margin-top: 6px; font-style: italic; }
+    .req-admin-note {
+      font-size: 12px; color: var(--accent-text);
+      background: var(--accent-pale); border-radius: 8px;
+      padding: 6px 10px; margin-top: 8px;
+    }
+    .req-pickup { font-size: 12.5px; color: var(--text-soft); margin-top: 4px; }
+    .empty-state {
+      text-align: center; padding: 40px 0;
+      color: var(--text-muted); font-size: 13px;
+    }
+
+    /* ─── LOGIN GATE ─── */
+    .login-gate {
+      background: var(--card); border: 1px solid var(--border-soft);
+      border-radius: 16px; padding: 32px; text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .login-gate h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .login-gate p  { font-size: 13.5px; color: var(--text-soft); margin-bottom: 20px; }
+    .login-gate-btn {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      padding: 12px 28px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+
+    /* ─── LOGIN MODAL ─── */
+    .login-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.35);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .login-overlay.open { display: flex; }
+    .login-modal {
+      background: var(--card); border-radius: 16px;
+      padding: 28px; width: 100%; max-width: 360px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.18);
+      position: relative;
+    }
+    .login-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; font-size: 18px;
+      color: var(--text-muted); cursor: pointer;
+    }
+    .login-modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: var(--text-soft); margin-bottom: 20px; }
+    .login-fg { margin-bottom: 14px; }
+    .login-fg label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-soft); margin-bottom: 6px; }
+    .login-house-row { display: flex; align-items: center; gap: 0; }
+    .login-prefix {
+      background: var(--bg-soft); border: 1.5px solid var(--border);
+      border-right: none; border-radius: 10px 0 0 10px;
+      padding: 10px 12px; font-size: 14px; color: var(--text-soft);
+      font-weight: 600; white-space: nowrap;
+    }
+    .login-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 10px 14px; font-family: inherit; font-size: 14px;
+      color: var(--text); background: var(--card); outline: none;
+      transition: border-color .15s;
+    }
+    .login-house-row .login-input { border-radius: 0 10px 10px 0; }
+    .login-input:focus { border-color: var(--accent); }
+    .login-error {
+      font-size: 12px; color: var(--status-err);
+      margin-top: 5px; display: none;
+    }
+    .login-error.show { display: block; }
+    .login-submit {
+      width: 100%; background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      padding: 12px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit; margin-top: 4px;
+      transition: opacity .15s;
+    }
+    .login-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ─── LIGHTBOX ─── */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,.85);
+      display: none; align-items: center; justify-content: center;
+    }
+    .lightbox-overlay.open { display: flex; }
+    .lightbox-img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+    .lightbox-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none;
+      font-size: 28px; color: #fff; cursor: pointer;
+    }
+
+    /* ─── PRINT ─── */
+    @media print { header, .hero, .login-gate, #historySection { display: none; } }
+
+    @media (max-width: 480px) {
+      header { padding: 12px 16px; }
+      .page-wrap { padding: 20px 14px 48px; }
+      .section { padding: 18px 16px; }
+      .item-row { grid-template-columns: 1fr 60px auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="header-left">
+    <a class="header-logo" href="/">Pattra Villa 8</a>
+    <span class="header-sep">/</span>
+    <span class="header-title">แจ้งทิ้งของใหญ่</span>
+  </div>
+  <div id="headerIdentity"></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <div class="hero-icon">🗑️</div>
+  <h1>แจ้งทิ้งของใหญ่</h1>
+  <p>แจ้งสิ่งของขนาดใหญ่ที่ต้องการทิ้ง นิติบุคคลจะประสานรถรับและแจ้งนัดหมายให้</p>
+</div>
+
+<!-- ─── MAIN ─── -->
+<main class="page-wrap">
+
+  <!-- Login gate — shown when not logged in -->
+  <div id="loginGate" class="login-gate" style="display:none">
+    <h2>เข้าสู่ระบบก่อนแจ้ง</h2>
+    <p>กรุณาล็อกอินด้วยบ้านเลขที่และ PIN ของคุณ<br>เพื่อส่งคำขอและดูประวัติ</p>
+    <button class="login-gate-btn" onclick="showLoginModal()">เข้าสู่ระบบ</button>
+  </div>
+
+  <!-- Form section — shown when logged in -->
+  <div id="formSection" style="display:none">
+
+    <div class="section">
+      <div class="section-title">🏠 ข้อมูลบ้าน</div>
+      <div class="form-group">
+        <label>บ้านเลขที่</label>
+        <input class="form-input" id="fieldHouseNo" readonly />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📦 รายการสิ่งของ</div>
+      <div class="items-list" id="itemsList"></div>
+      <button class="add-item-btn" onclick="addItemRow()">+ เพิ่มรายการ</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📷 รูปถ่ายสิ่งของ</div>
+      <div class="photo-drop" id="photoDrop">
+        <input type="file" id="photoInput" accept="image/jpeg,image/png,image/heic,image/heif"
+               multiple onchange="handlePhotoSelect(this.files)" />
+        <div class="photo-drop-icon">📸</div>
+        <div class="photo-drop-text">แตะหรือลากรูปมาวางที่นี่</div>
+        <div class="photo-drop-hint">รองรับ JPG, PNG, HEIC · สูงสุด 10 รูป · ไม่เกิน 8 MB ต่อรูป</div>
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
+      <div class="photo-count" id="photoCount"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📝 หมายเหตุเพิ่มเติม</div>
+      <textarea class="form-input" id="fieldNotes"
+        placeholder="เช่น ขนาดโดยประมาณ, ตำแหน่งที่วางไว้, เวลาที่สะดวก..."
+        maxlength="1000"></textarea>
+    </div>
+
+    <div class="section">
+      <button class="submit-btn" id="submitBtn" onclick="submitRequest()">
+        ส่งคำขอแจ้งทิ้งของใหญ่
+      </button>
+      <div class="submit-msg" id="submitMsg"></div>
+    </div>
+  </div>
+
+  <!-- History section -->
+  <div id="historySection" style="display:none">
+    <div class="section">
+      <div class="section-title">📋 คำขอล่าสุดของฉัน</div>
+      <div id="historyList"><div class="empty-state">กำลังโหลด…</div></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ─── LOGIN MODAL ─── -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-modal">
+    <button class="login-close" onclick="closeLoginModal()">✕</button>
+    <h3>เข้าสู่ระบบลูกบ้าน</h3>
+    <p class="login-sub">กรอกเลขบ้านและ PIN เพื่อเข้าถึงบริการ</p>
+    <div class="login-fg">
+      <label>บ้านเลขที่</label>
+      <div class="login-house-row">
+        <div class="login-prefix">38/</div>
+        <input class="login-input" type="number" id="loginSuffix"
+               placeholder="เช่น 8" min="1" max="99" />
+      </div>
+    </div>
+    <div class="login-fg">
+      <label>PIN (6 หลัก)</label>
+      <input class="login-input" type="password" id="loginPin"
+             maxlength="6" placeholder="••••••" />
+      <div class="login-error" id="loginError"></div>
+    </div>
+    <button class="login-submit" id="loginSubmit" onclick="handleLoginSubmit()">
+      เข้าสู่ระบบ
+    </button>
+  </div>
+</div>
+
+<!-- ─── LIGHTBOX ─── -->
+<div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+const RESIDENT_TTL_MS      = 30 * 24 * 60 * 60 * 1000;
+const RESIDENT_AUTH_URL    = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
+const SUBMIT_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/submitBulkyWasteRequest';
+const MY_REQUESTS_URL      = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getMyBulkyWasteRequests';
+const MAX_PHOTOS           = 10;
+const MAX_PHOTO_BYTES      = 8 * 1024 * 1024;
+
+// ── Session helpers ───────────────────────────────────────────────────────────
+function getResidentSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+    if (!s || Number(s.expiresAt) <= Date.now()) {
+      localStorage.removeItem(RESIDENT_SESSION_KEY); return null;
+    }
+    return s;
+  } catch { return null; }
+}
+function storeResidentSession(houseNo, pin, residentName) {
+  localStorage.setItem(RESIDENT_SESSION_KEY, JSON.stringify({
+    houseNo, pin, residentName: residentName || '',
+    expiresAt: Date.now() + RESIDENT_TTL_MS
+  }));
+}
+function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
+
+// ── Header identity ───────────────────────────────────────────────────────────
+function escH(s) {
+  return String(s || '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function renderHeaderIdentity(session) {
+  const el = document.getElementById('headerIdentity');
+  if (!el) return;
+  if (!session) {
+    el.innerHTML = `<button class="header-btn" onclick="showLoginModal()">เข้าสู่ระบบ</button>`;
+    return;
+  }
+  const initial = (session.residentName || session.houseNo).charAt(0).toUpperCase();
+  el.innerHTML = `
+    <div class="identity-pill" onclick="doLogout()" title="กดเพื่อออกจากระบบ">
+      <div class="pill-avatar">${escH(initial)}</div>
+      <div>
+        <div class="pill-house">บ้าน ${escH(session.houseNo)}</div>
+        ${session.residentName ? `<div class="pill-name">${escH(session.residentName)}</div>` : ''}
+      </div>
+    </div>`;
+}
+function doLogout() {
+  if (!confirm('ออกจากระบบ?')) return;
+  clearResidentSession();
+  renderPage();
+}
+
+// ── Item rows ─────────────────────────────────────────────────────────────────
+function addItemRow(name = '', qty = 1) {
+  const list = document.getElementById('itemsList');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <input class="form-input item-name" type="text"
+           placeholder="ชื่อสิ่งของ เช่น โซฟา, ตู้เย็น" value="${escH(name)}" maxlength="200" />
+    <input class="form-input item-qty" type="number"
+           min="1" max="999" value="${escH(String(qty))}" />
+    <button class="remove-btn" onclick="removeItemRow(this)" title="ลบ">✕</button>`;
+  list.appendChild(row);
+}
+function removeItemRow(btn) {
+  const list = document.getElementById('itemsList');
+  if (list.children.length <= 1) return;
+  btn.closest('.item-row').remove();
+}
+
+// ── Photo upload ──────────────────────────────────────────────────────────────
+const photos = [];  // [{file, dataUrl, fileName}]
+
+function handlePhotoSelect(fileList) {
+  const remaining = MAX_PHOTOS - photos.length;
+  const files = Array.from(fileList).slice(0, remaining);
+  files.forEach(file => {
+    if (file.size > MAX_PHOTO_BYTES) {
+      alert(`"${file.name}" มีขนาดเกิน 8 MB กรุณาลดขนาดก่อน`); return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      photos.push({ file, dataUrl: e.target.result, fileName: file.name });
+      renderPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('photoInput').value = '';
+}
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photoGrid');
+  const count = document.getElementById('photoCount');
+  grid.innerHTML = photos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" alt="${escH(p.fileName)}"
+           onclick="openLightbox('${p.dataUrl}')" />
+      <button class="photo-thumb-remove" onclick="removePhoto(${i})" title="ลบ">✕</button>
+    </div>`).join('');
+  count.textContent = photos.length > 0
+    ? `${photos.length} / ${MAX_PHOTOS} รูป`
+    : '';
+}
+
+function removePhoto(index) {
+  photos.splice(index, 1);
+  renderPhotoGrid();
+}
+
+// drag-and-drop
+document.addEventListener('DOMContentLoaded', () => {
+  const drop = document.getElementById('photoDrop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('drag-over');
+    handlePhotoSelect(e.dataTransfer.files);
+  });
+});
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightboxOverlay').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightboxOverlay').classList.remove('open');
+  document.getElementById('lightboxImg').src = '';
+}
+
+// ── Status labels ─────────────────────────────────────────────────────────────
+const STATUS_LABELS = {
+  submitted: 'รอรับเรื่อง',
+  scheduled: 'นัดรับแล้ว',
+  completed: 'รับแล้ว',
+  cancelled: 'ยกเลิก',
+};
+function statusPill(status) {
+  const label = STATUS_LABELS[status] || status;
+  return `<span class="status-pill status-${escH(status)}">${label}</span>`;
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+function formatDate(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleString('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+async function loadHistory(session) {
+  const el = document.getElementById('historyList');
+  el.innerHTML = '<div class="empty-state">กำลังโหลด…</div>';
+  try {
+    const resp = await fetch(MY_REQUESTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ houseNo: session.houseNo, pin: session.pin }),
+    });
+    const data = await resp.json();
+    if (!data.ok || !data.requests.length) {
+      el.innerHTML = '<div class="empty-state">ยังไม่มีคำขอ</div>';
+      return;
+    }
+    el.innerHTML = `<div class="req-list">${data.requests.map(req => `
+      <div class="req-card">
+        <div class="req-card-head">
+          <div>
+            <span class="req-date">${formatDate(req.createdAt)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${statusPill(req.status)}
+          </div>
+        </div>
+        <div class="req-id">ID: ${escH(req.id)}</div>
+        <ul class="req-items">
+          ${req.items.map(it =>
+            `<li>${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}${it.note ? ` — ${escH(it.note)}` : ''}</li>`
+          ).join('')}
+        </ul>
+        ${req.notes ? `<div class="req-note">${escH(req.notes)}</div>` : ''}
+        ${req.pickupDate ? `<div class="req-pickup">📅 นัดรับ: ${escH(req.pickupDate)}</div>` : ''}
+        ${req.adminNote ? `<div class="req-admin-note">📌 ${escH(req.adminNote)}</div>` : ''}
+        ${req.photos.length ? `
+          <div class="req-photos">
+            ${req.photos.map(p =>
+              `<img class="req-photo-thumb" src="${escH(p.downloadUrl)}"
+                    alt="${escH(p.fileName)}" onclick="openLightbox('${escH(p.downloadUrl)}')" />`
+            ).join('')}
+          </div>` : ''}
+      </div>`).join('')}
+    </div>`;
+  } catch {
+    el.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
+  }
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+async function submitRequest() {
+  const session = getResidentSession();
+  if (!session) { showLoginModal(); return; }
+
+  const items = [...document.querySelectorAll('.item-row')].map(row => ({
+    name: row.querySelector('.item-name').value.trim(),
+    qty:  Number(row.querySelector('.item-qty').value) || 1,
+    note: '',
+  })).filter(it => it.name);
+
+  if (!items.length) {
+    showMsg('err', 'กรุณาระบุรายการสิ่งของอย่างน้อย 1 รายการ'); return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่ง…';
+  hideMsg();
+
+  try {
+    const resp = await fetch(SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        houseNo: session.houseNo,
+        pin: session.pin,
+        residentName: session.residentName || '',
+        items,
+        notes: document.getElementById('fieldNotes').value.trim(),
+        photos: photos.map(p => ({ dataUrl: p.dataUrl, fileName: p.fileName })),
+      }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'เกิดข้อผิดพลาด');
+
+    showMsg('ok', `✅ ส่งคำขอเรียบร้อย — หมายเลขอ้างอิง: ${data.requestId}`);
+    resetForm();
+    loadHistory(session);
+  } catch (err) {
+    showMsg('err', `❌ ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ส่งคำขอแจ้งทิ้งของใหญ่';
+  }
+}
+
+function resetForm() {
+  document.getElementById('itemsList').innerHTML = '';
+  addItemRow();
+  photos.length = 0;
+  renderPhotoGrid();
+  document.getElementById('fieldNotes').value = '';
+}
+
+function showMsg(type, text) {
+  const el = document.getElementById('submitMsg');
+  el.textContent = text;
+  el.className = `submit-msg ${type}`;
+}
+function hideMsg() {
+  const el = document.getElementById('submitMsg');
+  el.className = 'submit-msg';
+}
+
+// ── Login modal ───────────────────────────────────────────────────────────────
+function showLoginModal() {
+  document.getElementById('loginSuffix').value = '';
+  document.getElementById('loginPin').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('loginOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('loginSuffix').focus(), 80);
+}
+function closeLoginModal() {
+  document.getElementById('loginOverlay').classList.remove('open');
+}
+
+async function handleLoginSubmit() {
+  const suffix = String(document.getElementById('loginSuffix').value).trim();
+  const pin    = String(document.getElementById('loginPin').value).trim();
+  const errEl  = document.getElementById('loginError');
+  const btn    = document.getElementById('loginSubmit');
+  errEl.classList.remove('show');
+
+  if (!suffix || !/^\d{1,2}$/.test(suffix)) {
+    errEl.textContent = 'กรุณากรอกเลขบ้านให้ถูกต้อง (ตัวเลข 1–99)';
+    errEl.classList.add('show'); return;
+  }
+  if (pin.length !== 6) {
+    errEl.textContent = 'PIN ต้องมี 6 หลัก';
+    errEl.classList.add('show'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ…';
+  try {
+    const houseNo = '38/' + suffix;
+    const resp = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ houseNo, pin }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      const msg = (data.error || '').toLowerCase();
+      errEl.textContent =
+        msg.includes('pin') ? 'PIN ไม่ถูกต้อง' :
+        (msg.includes('house') || resp.status === 404) ? 'ไม่พบบ้านเลขที่นี้' :
+        'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+      errEl.classList.add('show'); return;
+    }
+    const residentName = (data.resident && data.resident.name) || '';
+    storeResidentSession(houseNo, pin, residentName);
+    closeLoginModal();
+    renderPage();
+  } catch {
+    errEl.textContent = 'เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ';
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+  }
+}
+
+// ── Page render ───────────────────────────────────────────────────────────────
+function renderPage() {
+  const session = getResidentSession();
+  renderHeaderIdentity(session);
+
+  const gate    = document.getElementById('loginGate');
+  const formSec = document.getElementById('formSection');
+  const histSec = document.getElementById('historySection');
+
+  if (!session) {
+    gate.style.display    = 'block';
+    formSec.style.display = 'none';
+    histSec.style.display = 'none';
+    return;
+  }
+
+  gate.style.display    = 'none';
+  formSec.style.display = 'block';
+  histSec.style.display = 'block';
+
+  document.getElementById('fieldHouseNo').value = session.houseNo;
+  loadHistory(session);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  addItemRow();
+  renderPage();
+
+  document.getElementById('loginOverlay').addEventListener('click', e => {
+    if (e.target.id === 'loginOverlay') closeLoginModal();
+  });
+  document.getElementById('loginPin').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLoginSubmit();
+  });
+  document.getElementById('loginSuffix').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginPin').focus();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeLoginModal(); closeLightbox(); }
+  });
+});
+</script>
+</body>
+</html>
