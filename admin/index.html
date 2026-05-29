@@ -3138,6 +3138,7 @@ function pickupAllPhotos(req) {
 
 let pickupRequests = [];
 let currentPickupId = null;
+let pickupModalCollected = [];  // per-item collected flags for the open modal
 
 const PICKUP_STATUS_LABELS = {
   submitted: 'รอรับเรื่อง',
@@ -3221,7 +3222,7 @@ function renderPickupList(requests) {
         </div>
         <ul class="pickup-items">
           ${req.items.slice(0, 3).map(it =>
-            `<li>${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}</li>`
+            `<li${it.collected ? ' style="color:var(--text-muted);text-decoration:line-through;"' : ''}>${it.collected ? '✅ ' : ''}${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}</li>`
           ).join('')}
           ${req.items.length > 3 ? `<li style="color:var(--text-muted)">+${req.items.length - 3} รายการ</li>` : ''}
         </ul>
@@ -3237,6 +3238,13 @@ function renderPickupList(requests) {
       <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;text-align:right;">
         ${req.items.length} รายการ<br>
         <span style="font-size:11px;">${pickupAllPhotos(req).length} รูป</span>
+        ${(() => {
+          const done = (req.items || []).filter(it => it.collected).length;
+          const total = (req.items || []).length;
+          if (!done) return '';
+          const allDone = done === total;
+          return `<br><span style="font-size:11px;font-weight:700;color:${allDone ? '#3f6431' : 'var(--accent-deep)'};">ทิ้งแล้ว ${done}/${total}</span>`;
+        })()}
       </div>
     </div>`).join('');
 }
@@ -3245,6 +3253,8 @@ function openPickupModal(id) {
   const req = pickupRequests.find(r => r.id === id);
   if (!req) return;
   currentPickupId = id;
+
+  pickupModalCollected = req.items.map(it => !!it.collected);
 
   document.getElementById('pickupModalId').textContent = `ID: ${req.id}`;
   document.getElementById('pickupModalBody').innerHTML = `
@@ -3260,14 +3270,31 @@ function openPickupModal(id) {
       </div>
 
       <div>
-        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">รายการสิ่งของ (${req.items.length})</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;">
+            รายการสิ่งของ — <span id="collectProgress"></span>
+          </span>
+          <button type="button" onclick="setAllCollected()" class="toolbar-btn" style="padding:5px 10px;font-size:11.5px;">
+            ✅ ทำเครื่องหมายว่าทิ้งครบทุกชิ้น
+          </button>
+        </div>
+        <p style="font-size:11.5px;color:var(--text-muted);margin:-4px 0 12px;">
+          กดปุ่มข้างแต่ละชิ้นเพื่อระบุว่าขนไปทิ้งแล้วหรือยัง (เผื่อขนไม่หมดในรอบเดียว)
+        </p>
         <div style="display:flex;flex-direction:column;gap:14px;">
           ${req.items.map((it, i) => `
-            <div style="border:1px solid var(--border-soft);border-radius:10px;padding:12px 14px;background:var(--bg-soft);">
-              <div style="font-size:14px;font-weight:700;color:var(--text);">
-                ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` <span style="color:var(--text-muted);font-weight:500;">× ${it.qty}</span>` : ''}
+            <div class="item-block" data-idx="${i}"
+                 style="border:1px solid var(--border-soft);border-radius:10px;padding:12px 14px;background:var(--bg-soft);${pickupModalCollected[i] ? 'opacity:.62;' : ''}">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:14px;font-weight:700;color:var(--text);">
+                    ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` <span style="color:var(--text-muted);font-weight:500;">× ${it.qty}</span>` : ''}
+                  </div>
+                  ${it.note ? `<div style="font-size:12.5px;color:var(--text-soft);font-style:italic;margin-top:2px;">${escH(it.note)}</div>` : ''}
+                </div>
+                <button type="button" class="collect-toggle" data-idx="${i}"
+                        onclick="toggleItemCollected(${i})"></button>
               </div>
-              ${it.note ? `<div style="font-size:12.5px;color:var(--text-soft);font-style:italic;margin-top:2px;">${escH(it.note)}</div>` : ''}
               ${(it.photos && it.photos.length) ? `
                 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
                   ${it.photos.map(p => `
@@ -3317,7 +3344,54 @@ function openPickupModal(id) {
       </div>
     </div>`;
 
+  renderCollectButtons();
   document.getElementById('pickupModal').style.display = 'flex';
+}
+
+// ── Per-item collected toggles ───────────────────────────────────────────────
+function applyCollectBtn(btn, on) {
+  btn.textContent = on ? '✅ ทิ้งแล้ว' : '⏳ ยังไม่ทิ้ง';
+  btn.style.cssText =
+    'flex-shrink:0;border:1.5px solid;border-radius:999px;padding:5px 12px;' +
+    'font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;' +
+    'white-space:nowrap;transition:all .12s;' + (on
+      ? 'background:#e8efd9;color:#3f6431;border-color:#bcd29a;'
+      : 'background:#fff;color:#8a7960;border-color:var(--border);');
+}
+
+function renderCollectButtons() {
+  document.querySelectorAll('.collect-toggle').forEach(btn => {
+    applyCollectBtn(btn, pickupModalCollected[Number(btn.dataset.idx)]);
+  });
+  updateCollectProgress();
+}
+
+function updateCollectProgress() {
+  const el = document.getElementById('collectProgress');
+  if (!el) return;
+  const total = pickupModalCollected.length;
+  const done = pickupModalCollected.filter(Boolean).length;
+  const allDone = done === total && total > 0;
+  el.innerHTML = `<span style="color:${allDone ? '#3f6431' : 'var(--accent-deep)'};">` +
+    `ทิ้งแล้ว ${done}/${total} ชิ้น</span>`;
+}
+
+function toggleItemCollected(i) {
+  pickupModalCollected[i] = !pickupModalCollected[i];
+  const btn = document.querySelector(`.collect-toggle[data-idx="${i}"]`);
+  applyCollectBtn(btn, pickupModalCollected[i]);
+  const block = document.querySelector(`.item-block[data-idx="${i}"]`);
+  if (block) block.style.opacity = pickupModalCollected[i] ? '.62' : '1';
+  updateCollectProgress();
+}
+
+function setAllCollected() {
+  const allDone = pickupModalCollected.every(Boolean) && pickupModalCollected.length > 0;
+  pickupModalCollected = pickupModalCollected.map(() => !allDone);
+  document.querySelectorAll('.item-block').forEach(b => {
+    b.style.opacity = !allDone ? '.62' : '1';
+  });
+  renderCollectButtons();
 }
 
 function closePickupModal() {
@@ -3345,6 +3419,7 @@ async function savePickupUpdate() {
         status: document.getElementById('pickupEditStatus').value,
         pickupDate: document.getElementById('pickupEditDate').value || null,
         adminNote: document.getElementById('pickupEditNote').value.trim(),
+        collected: pickupModalCollected,
       }),
     });
     const data = await resp.json();
@@ -3408,10 +3483,11 @@ function buildPrintPage(req) {
       <div class="pp-section">
         <div class="pp-section-title">รายการสิ่งของ (${req.items.length} รายการ · ${totalPhotos} รูป)</div>
         ${req.items.map((it, i) => `
-          <div class="pp-item">
+          <div class="pp-item"${it.collected ? ' style="opacity:.55;"' : ''}>
             <div class="pp-item-head">
               <span class="pp-item-num">${i + 1}</span>
               <strong>${escH(it.name)}</strong>${it.qty > 1 ? `<span style="color:#666;font-weight:400;"> จำนวน ${it.qty} ชิ้น</span>` : ''}${it.note ? `<span style="color:#666;font-weight:400;"> — ${escH(it.note)}</span>` : ''}
+              ${it.collected ? '<span style="font-size:11px;font-weight:700;color:#3f6431;border:1px solid #3f6431;border-radius:4px;padding:1px 7px;margin-left:8px;">ขนแล้ว</span>' : ''}
             </div>
             ${(it.photos && it.photos.length) ? `
               <div class="pp-photos">

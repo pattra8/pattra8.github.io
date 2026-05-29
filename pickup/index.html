@@ -251,13 +251,47 @@
       border: 1px solid var(--border-soft); border-radius: 12px;
       padding: 16px; background: var(--bg-soft);
     }
+    /* status banner */
+    .req-status-banner {
+      display: flex; align-items: center; gap: 12px;
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+    }
+    .req-status-banner.status-submitted { background: var(--status-warn-bg); }
+    .req-status-banner.status-scheduled { background: #dbeafe; }
+    .req-status-banner.status-completed { background: var(--status-ok-bg); }
+    .req-status-banner.status-cancelled { background: #f3f4f6; }
+    .req-status-icon { font-size: 24px; line-height: 1; flex-shrink: 0; }
+    .req-status-label { font-size: 15px; font-weight: 700; color: var(--text); }
+    .req-status-desc { font-size: 12px; color: var(--text-soft); margin-top: 2px; }
     .req-card-head {
       display: flex; align-items: center;
       justify-content: space-between; gap: 12px;
-      margin-bottom: 8px; flex-wrap: wrap;
+      margin-bottom: 10px; flex-wrap: wrap;
     }
-    .req-id { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+    .req-id {
+      font-size: 11px; color: var(--text-muted);
+      font-family: monospace; margin-top: 10px;
+    }
     .req-date { font-size: 12px; color: var(--text-soft); }
+    .req-pickup-chip {
+      font-size: 12px; font-weight: 700; color: #1e40af;
+      background: #dbeafe; border-radius: 999px; padding: 3px 10px;
+    }
+    .req-progress {
+      font-size: 12.5px; font-weight: 600; color: var(--accent-deep);
+      background: var(--accent-pale); border-radius: 8px;
+      padding: 7px 12px; margin-bottom: 10px;
+    }
+    .req-progress.all { background: var(--status-ok-bg); color: var(--status-ok); }
+    .req-item-name.collected {
+      color: var(--text-muted); text-decoration: line-through;
+    }
+    .item-done-tag {
+      font-size: 10px; font-weight: 700; color: var(--status-ok);
+      background: var(--status-ok-bg); border-radius: 4px;
+      padding: 1px 6px; margin-left: 6px;
+      text-decoration: none; display: inline-block; vertical-align: middle;
+    }
     .status-pill {
       font-size: 11px; font-weight: 700; padding: 3px 10px;
       border-radius: 999px; letter-spacing: .04em;
@@ -448,7 +482,7 @@
   <!-- History section -->
   <div id="historySection" style="display:none">
     <div class="section">
-      <div class="section-title">📋 คำขอล่าสุดของฉัน</div>
+      <div class="section-title">📋 ติดตามสถานะคำขอของฉัน</div>
       <div id="historyList"><div class="empty-state">กำลังโหลด…</div></div>
     </div>
   </div>
@@ -665,6 +699,15 @@ const STATUS_LABELS = {
   completed: 'รับแล้ว',
   cancelled: 'ยกเลิก',
 };
+const STATUS_ICON = {
+  submitted: '🕒', scheduled: '📅', completed: '✅', cancelled: '✖️',
+};
+const STATUS_DESC = {
+  submitted: 'นิติบุคคลได้รับเรื่องแล้ว กำลังรวบรวมและจะนัดวันเข้ารับ',
+  scheduled: 'นัดวันเข้ารับแล้ว กรุณาเตรียมของไว้ตามวันที่นัด',
+  completed: 'เข้ารับของเรียบร้อยแล้ว ขอบคุณครับ',
+  cancelled: 'คำขอนี้ถูกยกเลิก หากต้องการแจ้งใหม่ กรุณาส่งคำขอใหม่',
+};
 function statusPill(status) {
   const label = STATUS_LABELS[status] || status;
   return `<span class="status-pill status-${escH(status)}">${label}</span>`;
@@ -694,22 +737,36 @@ async function loadHistory(session) {
       el.innerHTML = '<div class="empty-state">ยังไม่มีคำขอ</div>';
       return;
     }
-    el.innerHTML = `<div class="req-list">${data.requests.map(req => `
+    el.innerHTML = `<div class="req-list">${data.requests.map(req => {
+      const collectedCount = (req.items || []).filter(it => it.collected).length;
+      const totalCount = (req.items || []).length;
+      return `
       <div class="req-card">
-        <div class="req-card-head">
+        <!-- clear status banner -->
+        <div class="req-status-banner status-${escH(req.status)}">
+          <div class="req-status-icon">${STATUS_ICON[req.status] || '•'}</div>
           <div>
-            <span class="req-date">${formatDate(req.createdAt)}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            ${statusPill(req.status)}
+            <div class="req-status-label">${STATUS_LABELS[req.status] || req.status}</div>
+            <div class="req-status-desc">${STATUS_DESC[req.status] || ''}</div>
           </div>
         </div>
-        <div class="req-id">ID: ${escH(req.id)}</div>
+
+        <div class="req-card-head">
+          <span class="req-date">แจ้งเมื่อ ${formatDate(req.createdAt)}</span>
+          ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
+        </div>
+
+        ${collectedCount > 0 ? `
+          <div class="req-progress ${collectedCount === totalCount ? 'all' : ''}">
+            🚚 ขนไปแล้ว ${collectedCount}/${totalCount} ชิ้น${collectedCount < totalCount ? ' · ที่เหลือรอเก็บรอบถัดไป' : ''}
+          </div>` : ''}
+
         <div class="req-items">
           ${req.items.map((it, i) => `
             <div class="req-item">
-              <div class="req-item-name">
-                ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
+              <div class="req-item-name ${it.collected ? 'collected' : ''}">
+                ${it.collected ? '✅' : `${i + 1}.`} ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
+                ${it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
               </div>
               ${(it.photos && it.photos.length) ? `
                 <div class="req-photos">
@@ -721,10 +778,11 @@ async function loadHistory(session) {
                 </div>` : ''}
             </div>`).join('')}
         </div>
-        ${req.notes ? `<div class="req-note">${escH(req.notes)}</div>` : ''}
-        ${req.pickupDate ? `<div class="req-pickup">📅 นัดรับ: ${escH(req.pickupDate)}</div>` : ''}
-        ${req.adminNote ? `<div class="req-admin-note">📌 ${escH(req.adminNote)}</div>` : ''}
-      </div>`).join('')}
+        ${req.notes ? `<div class="req-note">📝 ${escH(req.notes)}</div>` : ''}
+        ${req.adminNote ? `<div class="req-admin-note">📌 จากนิติบุคคล: ${escH(req.adminNote)}</div>` : ''}
+        <div class="req-id">เลขอ้างอิง: ${escH(req.id)}</div>
+      </div>`;
+    }).join('')}
     </div>`;
   } catch {
     el.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
@@ -771,9 +829,11 @@ async function submitRequest() {
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error || 'เกิดข้อผิดพลาด');
 
-    showMsg('ok', `✅ ส่งคำขอเรียบร้อย — หมายเลขอ้างอิง: ${data.requestId}`);
+    showMsg('ok', `✅ ส่งคำขอเรียบร้อย! ดูสถานะคำขอด้านล่าง ↓`);
     resetForm();
-    loadHistory(session);
+    await loadHistory(session);
+    // close the journey: bring the resident straight to their status
+    document.getElementById('historySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     showMsg('err', `❌ ${err.message}`);
   } finally {
