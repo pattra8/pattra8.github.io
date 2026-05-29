@@ -1128,6 +1128,13 @@
           <input type="date" id="annDate"
             style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:14px;color:var(--text);outline:none;background:#fff;box-sizing:border-box;" />
         </div>
+        <div style="margin-bottom:18px;">
+          <label style="font-size:13px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">ไฟล์แนบ</label>
+          <input type="file" id="annFiles" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+            style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:var(--text);outline:none;background:#fff;box-sizing:border-box;" />
+          <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">รองรับหลายไฟล์: รูปภาพ, PDF, DOC/DOCX, XLS/XLSX</div>
+          <div id="annFilesPreview" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
+        </div>
         <div style="display:flex;gap:10px;">
           <button id="annSaveBtn" onclick="saveAnnouncement()"
             style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">
@@ -1416,19 +1423,44 @@
     margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .pp-sig {
-    margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr;
+    margin-top: 18px; display: grid; grid-template-columns: 1fr;
     gap: 20px; border-top: 1px solid #ccc; padding-top: 12px;
+  }
+  .pp-contact {
+    margin-top: 18px;
+    border-top: 1px solid #ccc;
+    padding-top: 12px;
+  }
+  .pp-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .pp-contact-card {
+    background: #f8f8f8;
+    border: 1px solid #e4e4e4;
+    border-radius: 6px;
+    padding: 10px 12px;
+    min-height: 56px;
+  }
+  .pp-contact-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #888;
+  }
+  .pp-contact-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 4px;
+    word-break: break-word;
   }
   .pp-sig-box { text-align: center; }
   .pp-sig-line {
     border-bottom: 1px solid #333; height: 30px; margin-bottom: 6px;
   }
   .pp-sig-label { font-size: 10px; color: #666; }
-  .pp-footer {
-    position: absolute; bottom: 10mm; left: 16mm; right: 16mm;
-    font-size: 9px; color: #aaa; text-align: center;
-    border-top: 1px solid #eee; padding-top: 4px;
-  }
 
   @media print {
     body > *:not(#pickupPrintArea) { display: none !important; }
@@ -3045,6 +3077,19 @@
   let _annColRef = null;
   let _annUnsubscribe = null;
   let _annEditId = null;
+  let _annFiles = [];
+  let _annOriginalFiles = [];
+
+  const ANN_MAX_FILES = 10;
+  const ANN_MAX_FILE_BYTES = 10 * 1024 * 1024;
+  const ANN_FILE_ICONS = {
+    pdf: '📄',
+    doc: '📝',
+    docx: '📝',
+    xls: '📊',
+    xlsx: '📊',
+    image: '🖼️'
+  };
 
   const ANN_TYPE_LABELS = {
     general: '📣 ทั่วไป',
@@ -3053,6 +3098,148 @@
     event: '🎉 กิจกรรม'
   };
 
+  function getAnnFileExt(name) {
+    const ext = String(name || '').split('.').pop().toLowerCase();
+    return ext || 'file';
+  }
+
+  function isAnnImageExt(ext) {
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'].includes(ext);
+  }
+
+  function normaliseAnnStoredFile(file, idx = 0) {
+    const name = file.name || file.fileName || `file-${idx + 1}`;
+    const ext = (file.ext || getAnnFileExt(name)).toLowerCase();
+    const isImage = file.isImage !== undefined ? !!file.isImage : isAnnImageExt(ext);
+    return {
+      name,
+      ext,
+      url: file.url || file.downloadUrl || '',
+      storagePath: file.storagePath || '',
+      contentType: file.contentType || '',
+      sizeBytes: file.sizeBytes || null,
+      isImage,
+      cat: isImage ? 'image' : 'file'
+    };
+  }
+
+  function formatAnnFileSize(bytes) {
+    if (!bytes || Number.isNaN(Number(bytes))) return '';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) return `${mb.toFixed(1)} MB`;
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  }
+
+  function revokeAnnPreviewUrls() {
+    _annFiles.forEach(file => {
+      if (file.previewUrl && file.file) URL.revokeObjectURL(file.previewUrl);
+    });
+  }
+
+  function renderAnnouncementFilesPreview() {
+    const el = document.getElementById('annFilesPreview');
+    if (!el) return;
+    if (!_annFiles.length) {
+      el.innerHTML = '';
+      return;
+    }
+    el.innerHTML = _annFiles.map((file, idx) => {
+      const icon = file.isImage ? ANN_FILE_ICONS.image :
+        (ANN_FILE_ICONS[file.ext] || '📎');
+      const meta = [file.ext ? file.ext.toUpperCase() : '', formatAnnFileSize(file.sizeBytes)]
+        .filter(Boolean).join(' · ');
+      const thumb = file.isImage ?
+        `<img src="${escHtml(file.previewUrl || file.url)}" alt="${escHtml(file.name)}"
+          style="width:100%;height:100%;object-fit:cover;display:block;" />` :
+        `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px;">${icon}</div>`;
+      return `<div style="width:108px;">
+        <div style="position:relative;width:108px;height:108px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-soft);">
+          ${thumb}
+          <button type="button" onclick="removeAnnouncementFile(${idx})"
+            style="position:absolute;top:6px;right:6px;width:24px;height:24px;border:none;border-radius:999px;background:rgba(42,34,24,.78);color:#fff;font-size:12px;cursor:pointer;">✕</button>
+        </div>
+        <div style="margin-top:6px;font-size:11.5px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word;">${escHtml(file.name)}</div>
+        <div style="margin-top:2px;font-size:10.5px;color:var(--text-muted);">${escHtml(meta)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function removeAnnouncementFile(index) {
+    const [removed] = _annFiles.splice(index, 1);
+    if (removed && removed.previewUrl && removed.file) {
+      URL.revokeObjectURL(removed.previewUrl);
+    }
+    renderAnnouncementFilesPreview();
+  }
+
+  function buildAnnouncementAttachmentMarkup(files) {
+    if (!files || !files.length) return '';
+    return `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
+      ${files.map(file => {
+        const icon = file.isImage ? ANN_FILE_ICONS.image :
+          (ANN_FILE_ICONS[file.ext] || '📎');
+        const thumb = file.isImage ?
+          `<img src="${escHtml(file.url)}" alt="${escHtml(file.name)}"
+            style="width:100%;height:100%;object-fit:cover;display:block;" />` :
+          `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;">${icon}</div>`;
+        return `<a href="${escHtml(file.url)}" target="_blank" rel="noopener"
+          style="display:block;width:88px;text-decoration:none;color:inherit;">
+          <div style="width:88px;height:88px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-soft);">
+            ${thumb}
+          </div>
+          <div style="margin-top:5px;font-size:10.5px;color:var(--text-soft);line-height:1.35;word-break:break-word;">${escHtml(file.name)}</div>
+        </a>`;
+      }).join('')}
+    </div>`;
+  }
+
+  async function uploadAnnouncementFiles(docId) {
+    const uploaded = [];
+    for (const file of _annFiles) {
+      if (!file.file) {
+        uploaded.push({
+          name: file.name,
+          ext: file.ext,
+          url: file.url,
+          storagePath: file.storagePath || '',
+          contentType: file.contentType || '',
+          sizeBytes: file.sizeBytes || null,
+          isImage: !!file.isImage,
+          cat: file.isImage ? 'image' : 'file'
+        });
+        continue;
+      }
+
+      const objectPath = `announcements/${docId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      const storageRef = window._annStorage.ref(window._annStorageRoot, objectPath);
+      await window._annStorage.uploadBytes(storageRef, file.file, {
+        contentType: file.file.type || undefined
+      });
+      const url = await window._annStorage.getDownloadURL(storageRef);
+      uploaded.push({
+        name: file.name,
+        ext: file.ext,
+        url,
+        storagePath: objectPath,
+        contentType: file.file.type || '',
+        sizeBytes: file.file.size || null,
+        isImage: !!file.isImage,
+        cat: file.isImage ? 'image' : 'file'
+      });
+    }
+    return uploaded;
+  }
+
+  async function deleteAnnouncementFiles(files) {
+    const deletions = (files || [])
+      .filter(file => file && file.storagePath)
+      .map(file => {
+        const storageRef = window._annStorage.ref(window._annStorageRoot, file.storagePath);
+        return window._annStorage.deleteObject(storageRef).catch(() => null);
+      });
+    await Promise.all(deletions);
+  }
+
   async function initAnnounceTab() {
     if (_annLoaded) return;
     _annLoaded = true;
@@ -3060,8 +3247,10 @@
     listEl.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">กำลังเชื่อมต่อ Firebase...</div>';
     try {
       const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-      const { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } =
+      const { getFirestore, collection, updateDoc, deleteDoc, doc, setDoc, onSnapshot, query, orderBy, serverTimestamp } =
         await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } =
+        await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js');
       const existingApp = getApps().find(a => a.name === 'announce-console');
       const app = existingApp || initializeApp({
         apiKey: 'AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y',
@@ -3073,6 +3262,7 @@
       }, 'announce-console');
       _annDb = getFirestore(app);
       _annColRef = collection(_annDb, 'announcements');
+      const storage = getStorage(app);
       const q = query(_annColRef, orderBy('createdAt', 'desc'));
       if (_annUnsubscribe) _annUnsubscribe();
       _annUnsubscribe = onSnapshot(q, snap => {
@@ -3084,12 +3274,14 @@
           const a = d.data();
           const typeLabel = ANN_TYPE_LABELS[a.type] || a.type || '📣';
           const dateStr = a.effectiveDate ? `<span style="font-size:12px;color:var(--text-muted);">📅 ${escHtml(a.effectiveDate)}</span>` : '';
+          const files = (a.photos || []).map(normaliseAnnStoredFile);
           return `<div style="border-bottom:1px solid var(--border);padding:14px 0;last-child:border-bottom:none;">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;">${escHtml(a.title||'')}</div>
                 <div style="font-size:12px;color:var(--text-soft);margin-bottom:4px;">${typeLabel} ${dateStr}</div>
                 ${a.body ? `<div style="font-size:13px;color:var(--text-soft);white-space:pre-wrap;">${escHtml(a.body)}</div>` : ''}
+                ${buildAnnouncementAttachmentMarkup(files)}
               </div>
               <div style="display:flex;gap:6px;flex-shrink:0;">
                 <button onclick="editAnnouncement('${d.id}')" style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;">✏️</button>
@@ -3103,12 +3295,46 @@
       });
 
       // Store Firestore functions for save/delete
-      window._annFirestore = { addDoc, updateDoc, deleteDoc, doc, serverTimestamp };
+      window._annFirestore = { updateDoc, deleteDoc, doc, setDoc, serverTimestamp };
+      window._annStorage = { getDownloadURL, uploadBytes, deleteObject, ref };
+      window._annStorageRoot = storage;
     } catch(err) {
       _annLoaded = false;
       listEl.innerHTML = `<div style="color:#b91c1c;padding:20px;">เชื่อมต่อ Firebase ไม่สำเร็จ: ${escHtml(err.message)}</div>`;
     }
   }
+
+  document.getElementById('annFiles').addEventListener('change', event => {
+    const picked = Array.from(event.target.files || []);
+    const status = document.getElementById('annStatus');
+    status.textContent = '';
+
+    for (const file of picked) {
+      if (_annFiles.length >= ANN_MAX_FILES) {
+        status.textContent = `⚠️ แนบไฟล์ได้สูงสุด ${ANN_MAX_FILES} ไฟล์`;
+        break;
+      }
+      if (file.size > ANN_MAX_FILE_BYTES) {
+        status.textContent = `⚠️ ไฟล์ ${file.name} ใหญ่เกิน 10 MB`;
+        continue;
+      }
+      const ext = getAnnFileExt(file.name);
+      const isImage = file.type.startsWith('image/') || isAnnImageExt(ext);
+      _annFiles.push({
+        file,
+        name: file.name,
+        ext,
+        sizeBytes: file.size,
+        contentType: file.type || '',
+        isImage,
+        cat: isImage ? 'image' : 'file',
+        previewUrl: isImage ? URL.createObjectURL(file) : ''
+      });
+    }
+
+    event.target.value = '';
+    renderAnnouncementFilesPreview();
+  });
 
   async function saveAnnouncement() {
     const title = document.getElementById('annTitle').value.trim();
@@ -3121,16 +3347,28 @@
     btn.disabled = true;
     status.textContent = 'กำลังบันทึก...';
     try {
-      const { addDoc, updateDoc, doc, serverTimestamp } = window._annFirestore;
+      const { updateDoc, doc, setDoc, serverTimestamp } = window._annFirestore;
       const docId = document.getElementById('annDocId').value;
+      const originalFiles = _annOriginalFiles.slice();
       if (docId) {
-        await updateDoc(doc(_annDb, 'announcements', docId), { title, body, type, effectiveDate, updatedAt: serverTimestamp() });
+        const photos = await uploadAnnouncementFiles(docId);
+        await updateDoc(doc(_annDb, 'announcements', docId), {
+          title, body, type, effectiveDate, photos, updatedAt: serverTimestamp()
+        });
+        const keptPaths = new Set(photos.map(file => file.storagePath).filter(Boolean));
+        await deleteAnnouncementFiles(originalFiles.filter(file => file.storagePath && !keptPaths.has(file.storagePath)));
+        cancelAnnEdit();
         status.textContent = '✅ อัปเดตแล้ว';
       } else {
-        await addDoc(_annColRef, { title, body, type, effectiveDate, createdAt: serverTimestamp() });
+        const newRef = doc(_annColRef);
+        const photos = await uploadAnnouncementFiles(newRef.id);
+        await setDoc(newRef, {
+          title, body, type, effectiveDate, photos,
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        cancelAnnEdit();
         status.textContent = '✅ เพิ่มประกาศแล้ว';
       }
-      cancelAnnEdit();
     } catch(err) {
       status.textContent = '❌ ' + err.message;
     } finally {
@@ -3139,14 +3377,19 @@
   }
 
   function cancelAnnEdit() {
+    revokeAnnPreviewUrls();
+    _annFiles = [];
+    _annOriginalFiles = [];
     document.getElementById('annDocId').value = '';
     document.getElementById('annTitle').value = '';
     document.getElementById('annBody').value = '';
     document.getElementById('annType').value = 'general';
     document.getElementById('annDate').value = '';
+    document.getElementById('annFiles').value = '';
     document.getElementById('annFormTitle').textContent = 'เพิ่มประกาศ';
     document.getElementById('annCancelBtn').style.display = 'none';
     document.getElementById('annStatus').textContent = '';
+    renderAnnouncementFilesPreview();
   }
 
   function editAnnouncement(docId) {
@@ -3158,14 +3401,19 @@
       getDoc(doc(_annDb, 'announcements', docId)).then(snap => {
         if (!snap.exists()) return;
         const a = snap.data();
+        revokeAnnPreviewUrls();
+        _annOriginalFiles = (a.photos || []).map(normaliseAnnStoredFile);
+        _annFiles = _annOriginalFiles.map(file => ({ ...file }));
         document.getElementById('annDocId').value = docId;
         document.getElementById('annTitle').value = a.title || '';
         document.getElementById('annBody').value = a.body || '';
         document.getElementById('annType').value = a.type || 'general';
         document.getElementById('annDate').value = a.effectiveDate || '';
+        document.getElementById('annFiles').value = '';
         document.getElementById('annFormTitle').textContent = 'แก้ไขประกาศ';
         document.getElementById('annCancelBtn').style.display = 'block';
         document.getElementById('annStatus').textContent = '';
+        renderAnnouncementFilesPreview();
       });
     });
   }
@@ -3174,7 +3422,11 @@
     if (!confirm('ลบประกาศนี้?')) return;
     try {
       const { deleteDoc, doc } = window._annFirestore;
+      const { getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const snap = await getDoc(doc(_annDb, 'announcements', docId));
+      const files = snap.exists() ? (snap.data().photos || []).map(normaliseAnnStoredFile) : [];
       await deleteDoc(doc(_annDb, 'announcements', docId));
+      await deleteAnnouncementFiles(files);
     } catch(err) {
       alert('ลบไม่สำเร็จ: ' + err.message);
     }
@@ -3599,6 +3851,7 @@ async function savePickupUpdate() {
   const { adminHouseNo, adminPin } = getAdminAuth();
   const btn = document.getElementById('pickupSaveBtn');
   const msgEl = document.getElementById('pickupSaveMsg');
+  const requestId = currentPickupId;
 
   btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
   msgEl.textContent = '';
@@ -3610,7 +3863,7 @@ async function savePickupUpdate() {
       body: JSON.stringify({
         adminHouseNo, adminPin,
         action: 'update',
-        requestId: currentPickupId,
+        requestId,
         status: document.getElementById('pickupEditStatus').value,
         pickupDate: document.getElementById('pickupEditDate').value || null,
         adminNote: document.getElementById('pickupEditNote').value.trim(),
@@ -3619,9 +3872,15 @@ async function savePickupUpdate() {
     });
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error);
-    msgEl.style.color = 'var(--status-ok)';
-    msgEl.textContent = '✅ บันทึกเรียบร้อย';
-    loadPickupRequests();
+    await loadPickupRequests();
+    if (currentPickupId === requestId) {
+      openPickupModal(requestId);
+      const refreshedMsgEl = document.getElementById('pickupSaveMsg');
+      if (refreshedMsgEl) {
+        refreshedMsgEl.style.color = 'var(--status-ok)';
+        refreshedMsgEl.textContent = '✅ บันทึกเรียบร้อย';
+      }
+    }
   } catch (err) {
     msgEl.style.color = 'var(--status-error)';
     msgEl.textContent = `❌ ${err.message}`;
@@ -3653,9 +3912,6 @@ function buildPrintPage(req) {
         <div style="text-align:right;">
           <div class="pp-house">${escH(req.houseNo)}</div>
           <div class="pp-house-label">บ้านเลขที่</div>
-          ${req.residentName ? `<div style="font-size:12px;color:#555;margin-top:3px;">${escH(req.residentName)}</div>` : ''}
-          ${req.phone ? `<div style="font-size:13px;color:#1a1a1a;font-weight:700;margin-top:4px;">📞 ${escH(req.phone)}</div>` : ''}
-          ${req.lineId ? `<div style="font-size:12px;color:#555;">LINE: ${escH(req.lineId)}</div>` : ''}
         </div>
       </div>
 
@@ -3704,21 +3960,34 @@ function buildPrintPage(req) {
         ${req.adminNote ? `<div style="font-size:12px;color:#555;margin-top:6px;padding:6px 10px;background:#f0f7ff;border-radius:4px;border-left:3px solid #3b82f6;">Admin: ${escH(req.adminNote)}</div>` : ''}
       </div>` : ''}
 
+      ${(req.residentName || req.phone || req.lineId) ? `
+      <div class="pp-contact">
+        <div class="pp-section-title">ข้อมูลติดต่อ</div>
+        <div class="pp-contact-grid">
+          ${req.residentName ? `
+            <div class="pp-contact-card">
+              <div class="pp-contact-label">ชื่อผู้ติดต่อ</div>
+              <div class="pp-contact-value">${escH(req.residentName)}</div>
+            </div>` : ''}
+          ${req.phone ? `
+            <div class="pp-contact-card">
+              <div class="pp-contact-label">โทรศัพท์</div>
+              <div class="pp-contact-value">${escH(req.phone)}</div>
+            </div>` : ''}
+          ${req.lineId ? `
+            <div class="pp-contact-card">
+              <div class="pp-contact-label">LINE</div>
+              <div class="pp-contact-value">${escH(req.lineId)}</div>
+            </div>` : ''}
+        </div>
+      </div>` : ''}
+
       <!-- SIGNATURE ROW -->
       <div class="pp-sig">
         <div class="pp-sig-box">
           <div class="pp-sig-line"></div>
           <div class="pp-sig-label">ผู้ตรวจรับ (รถรับของ) / วันที่</div>
         </div>
-        <div class="pp-sig-box">
-          <div class="pp-sig-line"></div>
-          <div class="pp-sig-label">ผู้แจ้ง (ลูกบ้าน) / วันที่</div>
-        </div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="pp-footer">
-        Pattra Villa 8 · ID: ${escH(req.id)} · เอกสารนี้ออกโดยระบบอัตโนมัติ ใช้สำหรับประสานงานรถรับของใหญ่เท่านั้น
       </div>
     </div>`;
 }
