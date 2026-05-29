@@ -302,14 +302,14 @@
       background: var(--bg-soft); border-radius: 14px; padding: 12px;
     }
     .req-item-thumb {
-      width: 92px; height: 92px; border-radius: 12px;
+      width: 128px; height: 128px; border-radius: 14px;
       object-fit: cover; flex-shrink: 0; cursor: pointer;
       border: 1px solid var(--border-soft); transition: transform .12s;
     }
     .req-item-thumb:hover { transform: scale(1.03); }
     .req-item-thumb.placeholder {
       display: flex; align-items: center; justify-content: center;
-      font-size: 30px; background: var(--bg-warm); cursor: default;
+      font-size: 40px; background: var(--bg-warm); cursor: default;
     }
     .req-item-body { flex: 1; min-width: 0; }
     .req-item-name { font-size: 16px; font-weight: 700; color: var(--text); }
@@ -321,10 +321,13 @@
       padding: 2px 8px; margin-left: 6px;
       text-decoration: none; display: inline-block; vertical-align: middle;
     }
-    .req-extra-thumbs { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .req-extra-thumbs { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
     .req-extra-thumbs img {
-      width: 40px; height: 40px; border-radius: 7px;
+      width: 60px; height: 60px; border-radius: 9px;
       object-fit: cover; cursor: pointer; border: 1px solid var(--border-soft);
+    }
+    @media (max-width: 480px) {
+      .req-item-thumb { width: 96px; height: 96px; }
     }
 
     .req-note {
@@ -479,10 +482,24 @@
       border-radius: 14px; padding: 14px; margin-bottom: 12px;
     }
     .detail-item-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-    .detail-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-photos { display: grid; grid-template-columns: 1fr; gap: 10px; }
     .detail-photos img {
-      width: 100%; aspect-ratio: 4/3; object-fit: cover;
-      border-radius: 10px; cursor: pointer; border: 1px solid var(--border-soft);
+      width: 100%; max-height: 420px; object-fit: cover;
+      border-radius: 12px; cursor: pointer; border: 1px solid var(--border-soft);
+    }
+    .detail-delete-btn {
+      width: 100%; margin-top: 20px;
+      background: #fff; color: var(--status-err);
+      border: 1.5px solid var(--status-err);
+      border-radius: 11px; padding: 12px;
+      font-family: inherit; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    .detail-delete-btn:hover { background: var(--status-err); color: #fff; }
+    .detail-delete-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .detail-delete-hint {
+      font-size: 11.5px; color: var(--text-muted);
+      text-align: center; margin-top: 8px; line-height: 1.4;
     }
     .detail-contact {
       display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
@@ -661,6 +678,7 @@ const RESIDENT_TTL_MS      = 30 * 24 * 60 * 60 * 1000;
 const RESIDENT_AUTH_URL    = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
 const SUBMIT_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/submitBulkyWasteRequest';
 const MY_REQUESTS_URL      = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getMyBulkyWasteRequests';
+const DELETE_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/deleteBulkyWasteRequest';
 const MAX_PHOTOS_PER_ITEM  = 8;
 const MAX_PHOTO_BYTES      = 8 * 1024 * 1024;
 
@@ -882,10 +900,40 @@ function openMyRequest(id) {
       <div class="detail-meta-row"><span>แจ้งเมื่อ</span><span class="v">${formatDate(req.createdAt)}</span></div>
       <div class="detail-meta-row"><span>สถานะ</span><span class="v">${STATUS_LABELS[req.status] || req.status}</span></div>
       <div class="detail-meta-row"><span>เลขอ้างอิง</span><span class="v" style="font-family:monospace;font-weight:500;">#${escH(req.id)}</span></div>
+
+      ${req.status === 'submitted' ? `
+        <button class="detail-delete-btn" onclick="deleteMyRequest('${escH(req.id)}')">
+          🗑 ยกเลิก / ลบคำขอนี้
+        </button>
+        <div class="detail-delete-hint">ลบได้เฉพาะตอนที่ยังไม่ถูกเข้ารับ — หากเปลี่ยนใจไม่ทิ้งแล้ว</div>
+      ` : ''}
     </div>`;
 
   document.getElementById('detailOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+async function deleteMyRequest(id) {
+  const session = getResidentSession();
+  if (!session) { showLoginModal(); return; }
+  if (!confirm('ยืนยันลบคำขอนี้? — ลูกบ้านจะไม่ทิ้งของรายการนี้แล้ว')) return;
+
+  const btn = document.querySelector('.detail-delete-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'กำลังลบ…'; }
+  try {
+    const resp = await fetch(DELETE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ houseNo: session.houseNo, pin: session.pin, requestId: id }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'ลบไม่สำเร็จ');
+    closeMyRequest();
+    await loadHistory(session, true);
+  } catch (err) {
+    alert('❌ ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🗑 ยกเลิก / ลบคำขอนี้'; }
+  }
 }
 function closeMyRequest() {
   document.getElementById('detailOverlay').classList.remove('open');
