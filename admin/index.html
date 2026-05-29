@@ -1077,12 +1077,10 @@
           <option value="completed">🟢 ทิ้งแล้ว</option>
         </select>
         <button class="toolbar-btn" onclick="loadPickupRequests()">↺ รีโหลด</button>
+        <button class="toolbar-btn" id="pickupSelectAllBtn" onclick="togglePickupSelectAll()">☑ เลือกทั้งหมด</button>
         <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintAll()"
           style="background:var(--accent);color:#fff;border-color:var(--accent);">
-          🖨 พิมพ์ทั้งหมด (PDF)
-        </button>
-        <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintScheduled()">
-          🚚 พิมพ์เฉพาะนัดรับ
+          📄 Export to PDF
         </button>
         <span id="pickupRecordCount" class="record-count pickup-toolbar-count" style="margin-left:auto;"></span>
       </div>
@@ -1091,6 +1089,16 @@
       <div id="pickupList" style="display:flex;flex-direction:column;gap:10px;">
         <div style="color:var(--text-muted);padding:40px;text-align:center;">กดแท็บเพื่อโหลด...</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Floating bulk-action bar (multi-select) -->
+  <div id="pickupBulkBar" style="display:none;">
+    <span id="pickupBulkCount" class="pbb-count"></span>
+    <div class="pbb-actions">
+      <button class="pbb-btn pbb-done" onclick="bulkSetStatus('completed')">🟢 ทิ้งแล้ว</button>
+      <button class="pbb-btn pbb-undo" onclick="bulkSetStatus('submitted')">🟡 ยังไม่ทิ้ง</button>
+      <button class="pbb-btn pbb-cancel" onclick="clearPickupSelection()">✕ ยกเลิก</button>
     </div>
   </div>
 
@@ -1258,10 +1266,33 @@
   .pickup-card {
     background: var(--card); border: 1px solid var(--border-soft);
     border-radius: 12px; padding: 16px;
-    display: grid; grid-template-columns: 1fr auto;
+    display: grid; grid-template-columns: auto 1fr auto;
     gap: 14px; align-items: start;
     cursor: pointer; transition: background .12s;
   }
+  .pickup-card.is-selected {
+    background: #fbf3e6; border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  .pickup-check { display: flex; align-items: center; padding-top: 2px; }
+  .pickup-check input { width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent); }
+  #pickupBulkBar {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 50; background: var(--text); color: #fff;
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    box-shadow: 0 12px 32px rgba(0,0,0,.28); max-width: calc(100vw - 24px);
+  }
+  .pbb-count { font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .pbb-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pbb-btn {
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    border: none; border-radius: 9px; padding: 9px 14px; cursor: pointer;
+  }
+  .pbb-done { background: var(--status-ok, #4f8038); color: #fff; }
+  .pbb-undo { background: var(--status-pending, #c9842f); color: #fff; }
+  .pbb-cancel { background: rgba(255,255,255,.16); color: #fff; }
+  .pbb-btn:hover { opacity: .9; }
   .pickup-card:hover { background: var(--bg-soft); }
   .pickup-house { font-size: 15px; font-weight: 700; color: var(--text); }
   .pickup-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
@@ -1291,7 +1322,7 @@
 
   /* ─── mobile: pickup tab ─── */
   @media (max-width: 600px) {
-    .pickup-card { grid-template-columns: 1fr; gap: 8px; }
+    .pickup-card { grid-template-columns: auto 1fr; gap: 8px 10px; }
     #pickupTab > div { padding: 0 12px !important; margin: 16px auto !important; }
     #pickupTab .pickup-toolbar {
       display: grid !important;
@@ -1467,6 +1498,11 @@
     document.getElementById('logTab').style.display        = tab === 'log'       ? 'block' : 'none';
     document.getElementById('announceTab').style.display   = tab === 'announce'  ? 'block' : 'none';
     document.getElementById('pickupTab').style.display     = tab === 'pickup'    ? 'block' : 'none';
+    if (tab !== 'pickup') {
+      pickupSelected.clear();
+      const bb = document.getElementById('pickupBulkBar');
+      if (bb) bb.style.display = 'none';
+    }
     document.getElementById('tabResidents').classList.toggle('active', tab === 'residents');
     document.getElementById('tabPins').classList.toggle('active', tab === 'pins');
     document.getElementById('tabVote').classList.toggle('active', tab === 'vote');
@@ -3162,6 +3198,78 @@ function pickupAllPhotos(req) {
 
 let pickupRequests = [];
 let currentPickupId = null;
+const pickupSelected = new Set();
+
+// ── Multi-select (bulk status change) ───────────────────────────────────────
+function togglePickupSelect(id, checked) {
+  if (checked) pickupSelected.add(id); else pickupSelected.delete(id);
+  const card = document.querySelector(
+    `.pickup-card input[onchange*="'${id}'"]`)?.closest('.pickup-card');
+  if (card) card.classList.toggle('is-selected', checked);
+  updatePickupBulkBar();
+}
+
+function togglePickupSelectAll() {
+  const visibleIds = pickupRequests.map(r => r.id);
+  const allSelected = visibleIds.length > 0 &&
+    visibleIds.every(id => pickupSelected.has(id));
+  if (allSelected) {
+    visibleIds.forEach(id => pickupSelected.delete(id));
+  } else {
+    visibleIds.forEach(id => pickupSelected.add(id));
+  }
+  renderPickupList(pickupRequests);
+  updatePickupBulkBar();
+}
+
+function clearPickupSelection() {
+  pickupSelected.clear();
+  renderPickupList(pickupRequests);
+  updatePickupBulkBar();
+}
+
+function updatePickupBulkBar() {
+  const bar = document.getElementById('pickupBulkBar');
+  const n = pickupSelected.size;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  if (n > 0) {
+    document.getElementById('pickupBulkCount').textContent =
+      `เลือกแล้ว ${n} รายการ`;
+  }
+  const visibleIds = pickupRequests.map(r => r.id);
+  const allSelected = visibleIds.length > 0 &&
+    visibleIds.every(id => pickupSelected.has(id));
+  const btn = document.getElementById('pickupSelectAllBtn');
+  if (btn) btn.textContent = allSelected ? '☐ ยกเลิกเลือกทั้งหมด' : '☑ เลือกทั้งหมด';
+}
+
+async function bulkSetStatus(newStatus) {
+  const ids = [...pickupSelected];
+  if (!ids.length) return;
+  const label = PICKUP_STATUS_LABELS[newStatus] || newStatus;
+  if (!confirm(`เปลี่ยน ${ids.length} รายการ เป็น "${label}" ?`)) return;
+
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const bar = document.getElementById('pickupBulkBar');
+  bar.style.opacity = '.6';
+  try {
+    const resp = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminHouseNo, adminPin, action: 'bulkUpdate', ids, status: newStatus,
+      }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'อัปเดตไม่สำเร็จ');
+    pickupSelected.clear();
+    await loadPickupRequests();
+  } catch (err) {
+    alert('❌ ' + err.message);
+  } finally {
+    bar.style.opacity = '1';
+  }
+}
 let pickupModalCollected = [];  // per-item collected flags for the open modal
 
 const PICKUP_STATUS_LABELS = {
@@ -3211,9 +3319,13 @@ async function loadPickupRequests() {
     if (!data.ok) throw new Error(data.error);
 
     pickupRequests = data.requests || [];
+    // Drop selections that are no longer in the current list.
+    const liveIds = new Set(pickupRequests.map(r => r.id));
+    [...pickupSelected].forEach(id => { if (!liveIds.has(id)) pickupSelected.delete(id); });
     countEl.textContent = `${pickupRequests.length} รายการ`;
     renderPickupStats(pickupRequests);
     renderPickupList(pickupRequests);
+    updatePickupBulkBar();
   } catch (err) {
     listEl.innerHTML = `<div style="color:var(--status-error);padding:24px;">โหลดไม่สำเร็จ: ${escH(err.message)}</div>`;
   }
@@ -3241,7 +3353,11 @@ function renderPickupList(requests) {
     return;
   }
   listEl.innerHTML = requests.map(req => `
-    <div class="pickup-card" onclick="openPickupModal('${escH(req.id)}')">
+    <div class="pickup-card ${pickupSelected.has(req.id) ? 'is-selected' : ''}" onclick="openPickupModal('${escH(req.id)}')">
+      <label class="pickup-check" onclick="event.stopPropagation();">
+        <input type="checkbox" ${pickupSelected.has(req.id) ? 'checked' : ''}
+          onchange="togglePickupSelect('${escH(req.id)}', this.checked)">
+      </label>
       <div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
           <span class="pickup-house">🏠 บ้าน ${escH(req.houseNo)}</span>
@@ -3274,8 +3390,8 @@ function renderPickupList(requests) {
           ${req.items.length} รายการ · ${pickupAllPhotos(req).length} รูป
         </div>
         ${req.status === 'completed'
-          ? `<button class="card-status-btn to-undo" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','submitted')">↩ กลับเป็น 🟡 ยังไม่ทิ้ง</button>`
-          : `<button class="card-status-btn to-done" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','completed')">✓ ทำเป็น 🟢 ทิ้งแล้ว</button>`}
+          ? `<button class="card-status-btn to-undo" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','submitted')">↩ เปลี่ยนกลับเป็นยังไม่ทิ้ง</button>`
+          : `<button class="card-status-btn to-done" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','completed')">✓ ทำเครื่องหมายว่าทิ้งแล้ว</button>`}
       </div>
     </div>`).join('');
 }
@@ -3612,24 +3728,6 @@ async function printPickupRequest() {
   window.print();
 }
 
-async function batchPrintScheduled() {
-  const scheduled = pickupRequests.filter(r => r.status === 'scheduled');
-  if (!scheduled.length) {
-    alert('ไม่มีรายการที่นัดรับแล้ว (status = scheduled)'); return;
-  }
-
-  const batchBtn = document.querySelector('button[onclick="batchPrintScheduled()"]');
-  if (batchBtn) { batchBtn.disabled = true; batchBtn.textContent = '⏳ กำลังโหลดรูป…'; }
-
-  const urls = scheduled.flatMap(r => pickupAllPhotos(r).map(p => p.downloadUrl));
-  await preloadImages(urls);
-
-  document.getElementById('pickupPrintArea').innerHTML =
-    scheduled.map(req => buildPrintPage(req)).join('');
-  if (batchBtn) { batchBtn.disabled = false; batchBtn.textContent = '🚚 พิมพ์เฉพาะนัดรับ'; }
-  window.print();
-}
-
 // Print every request currently shown (respects the status filter).
 async function batchPrintAll() {
   if (!pickupRequests.length) {
@@ -3644,7 +3742,7 @@ async function batchPrintAll() {
 
   document.getElementById('pickupPrintArea').innerHTML =
     pickupRequests.map(req => buildPrintPage(req)).join('');
-  if (btn) { btn.disabled = false; btn.textContent = '🖨 พิมพ์ทั้งหมด (PDF)'; }
+  if (btn) { btn.disabled = false; btn.textContent = '📄 Export to PDF'; }
   window.print();
 }
 </script>

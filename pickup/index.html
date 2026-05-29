@@ -541,8 +541,16 @@
       width: 100%; max-height: 420px; object-fit: cover;
       border-radius: 12px; cursor: pointer; border: 1px solid var(--border-soft);
     }
-    .detail-delete-btn {
+    .detail-edit-btn {
       width: 100%; margin-top: 20px;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 11px; padding: 13px;
+      font-family: inherit; font-size: 14.5px; font-weight: 700;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .detail-edit-btn:hover { opacity: .9; }
+    .detail-delete-btn {
+      width: 100%; margin-top: 10px;
       background: #fff; color: var(--status-err);
       border: 1.5px solid var(--status-err);
       border-radius: 11px; padding: 12px;
@@ -555,6 +563,49 @@
       font-size: 11.5px; color: var(--text-muted);
       text-align: center; margin-top: 8px; line-height: 1.4;
     }
+    .edit-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap;
+      background: var(--accent-pale); border: 1px solid var(--accent);
+      color: var(--accent-deep); border-radius: 11px;
+      padding: 11px 14px; margin-bottom: 16px;
+      font-size: 13.5px; font-weight: 700;
+    }
+    .edit-banner button {
+      background: none; border: none; color: var(--status-err);
+      font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; text-decoration: underline; padding: 0;
+    }
+    /* upload progress overlay */
+    .upload-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(40,28,16,.55); backdrop-filter: blur(2px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .upload-overlay.open { display: flex; }
+    .upload-box {
+      background: #fff; border-radius: 20px; padding: 30px 36px;
+      text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,.3);
+      min-width: 240px;
+    }
+    .upload-ring { position: relative; width: 120px; height: 120px; margin: 0 auto; }
+    .upload-ring svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+    .upload-ring .ring-track {
+      fill: none; stroke: var(--border-soft); stroke-width: 8;
+    }
+    .upload-ring .ring-fill {
+      fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
+      transition: stroke-dashoffset .2s ease;
+    }
+    .upload-pct {
+      position: absolute; inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 800; color: var(--accent-deep);
+    }
+    .upload-label {
+      margin-top: 18px; font-size: 15px; font-weight: 700; color: var(--text);
+    }
+    .upload-sub { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
     .detail-contact {
       display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
     }
@@ -620,6 +671,11 @@
       ← กลับไปดูสถานะคำขอ
     </button>
 
+    <div id="editBanner" class="edit-banner" style="display:none;">
+      <span>✏️ กำลังแก้ไขคำขอเดิม</span>
+      <button onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
+    </div>
+
     <div class="section">
       <div class="section-title">🏠 ข้อมูลบ้าน</div>
       <div class="form-group">
@@ -674,7 +730,7 @@
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
         <div class="section-title" style="margin-bottom:0;">📋 สถานะคำขอของฉัน</div>
-        <button onclick="showFormView()"
+        <button onclick="startNewRequest();showFormView();"
           style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
           ➕ แจ้งทิ้งของเพิ่ม
         </button>
@@ -719,6 +775,21 @@
   </div>
 </div>
 
+<!-- ─── UPLOAD PROGRESS OVERLAY ─── -->
+<div class="upload-overlay" id="uploadOverlay">
+  <div class="upload-box">
+    <div class="upload-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+        <circle class="ring-fill" id="uploadRing" cx="50" cy="50" r="42"></circle>
+      </svg>
+      <span class="upload-pct" id="uploadPct">0%</span>
+    </div>
+    <div class="upload-label" id="uploadLabel">กำลังส่งคำขอ…</div>
+    <div class="upload-sub">กรุณาอย่าปิดหน้านี้</div>
+  </div>
+</div>
+
 <!-- ─── LIGHTBOX ─── -->
 <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -733,6 +804,7 @@ const RESIDENT_AUTH_URL    = 'https://asia-southeast1-pattra8-54c3f.cloudfunctio
 const SUBMIT_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/submitBulkyWasteRequest';
 const MY_REQUESTS_URL      = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getMyBulkyWasteRequests';
 const DELETE_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/deleteBulkyWasteRequest';
+const EDIT_URL             = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/editBulkyWasteRequest';
 const MAX_PHOTOS_PER_ITEM  = 8;
 const MAX_PHOTO_BYTES      = 8 * 1024 * 1024;
 
@@ -787,11 +859,15 @@ function doLogout() {
 // ── Items + per-item photos ─────────────────────────────────────────────────
 // Each item card has a stable numeric id. Photos are stored per item id.
 let itemSeq = 0;
-const itemPhotos = {};  // { [itemId]: [{ dataUrl, fileName }] }
+const itemPhotos = {};  // { [itemId]: [{ dataUrl, fileName } | existing photo] }
+let editingRequestId = null;  // non-null = editing an existing request
 
-function addItemRow() {
+function addItemRow(prefill) {
   const id = ++itemSeq;
-  itemPhotos[id] = [];
+  // prefill.photos may mix existing photos ({storagePath,downloadUrl,...})
+  // and new ones ({dataUrl,...}); both are kept in itemPhotos[id].
+  itemPhotos[id] = (prefill && Array.isArray(prefill.photos)) ?
+    prefill.photos.map(p => ({ ...p })) : [];
   const list = document.getElementById('itemsList');
   const card = document.createElement('div');
   card.className = 'item-card';
@@ -828,6 +904,11 @@ function addItemRow() {
     handleItemPhotoSelect(id, e.dataTransfer.files);
   });
 
+  if (prefill) {
+    card.querySelector('.item-name').value = prefill.name || '';
+    card.querySelector('.item-qty').value = prefill.qty || 1;
+    renderItemPhotos(id);
+  }
   renumberItems();
 }
 
@@ -874,19 +955,45 @@ function handleItemPhotoSelect(itemId, fileList) {
 function renderItemPhotos(itemId) {
   const grid = document.getElementById(`photos-${itemId}`);
   const arr = itemPhotos[itemId] || [];
-  grid.innerHTML = arr.map((p, i) => `
+  grid.innerHTML = arr.map((p, i) => {
+    const src = p.downloadUrl || p.dataUrl;
+    return `
     <div class="photo-thumb">
-      <img src="${p.dataUrl}" alt="${escH(p.fileName)}"
-           onclick="openLightbox('${p.dataUrl}')" />
+      <img src="${escH(src)}" alt="${escH(p.fileName)}"
+           onclick="openLightbox('${escH(src)}')" />
       <button class="photo-thumb-remove"
               onclick="removeItemPhoto(${itemId}, ${i})" title="ลบ">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function removeItemPhoto(itemId, index) {
   if (!itemPhotos[itemId]) return;
   itemPhotos[itemId].splice(index, 1);
   renderItemPhotos(itemId);
+}
+
+// ── Upload progress overlay ─────────────────────────────────────────────────
+const UPLOAD_RING_CIRC = 2 * Math.PI * 42;  // r=42
+function showUploadProgress(label) {
+  const ov = document.getElementById('uploadOverlay');
+  document.getElementById('uploadLabel').textContent = label || 'กำลังส่งคำขอ…';
+  setUploadProgress(0);
+  ov.classList.add('open');
+}
+function setUploadProgress(frac) {
+  const pct = Math.max(0, Math.min(100, Math.round(frac * 100)));
+  const ring = document.getElementById('uploadRing');
+  ring.style.strokeDasharray = UPLOAD_RING_CIRC;
+  ring.style.strokeDashoffset = UPLOAD_RING_CIRC * (1 - pct / 100);
+  document.getElementById('uploadPct').textContent = pct + '%';
+  // After the body finishes uploading, the server is still saving photos.
+  if (pct >= 100) {
+    document.getElementById('uploadLabel').textContent = 'กำลังบันทึก…';
+  }
+}
+function hideUploadProgress() {
+  document.getElementById('uploadOverlay').classList.remove('open');
 }
 
 // ── Lightbox ──────────────────────────────────────────────────────────────────
@@ -906,11 +1013,9 @@ function openMyRequest(id) {
   const collected = (req.items || []).filter(it => it.collected).length;
   const total = (req.items || []).length;
 
-  const names = (req.items || []).map(it => it.name).filter(Boolean);
-  const firstName = names[0] || 'รายการทิ้งของ';
-  const itemSummary = names.length > 1
-    ? `${escH(firstName)} <span class="detail-head-more">+ อีก ${names.length - 1} รายการ</span>`
-    : escH(firstName);
+  const sum = summarizeItemNames(req.items, 3);
+  const itemSummary = escH(sum.main) +
+    (sum.extra ? ` <span class="detail-head-more">${escH(sum.extra)}</span>` : '');
 
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-head status-${escH(req.status)}">
@@ -962,10 +1067,13 @@ function openMyRequest(id) {
       <div class="detail-meta-row"><span>เลขอ้างอิง</span><span class="v" style="font-family:monospace;font-weight:500;">#${escH(req.id)}</span></div>
 
       ${req.status === 'submitted' ? `
+        <button class="detail-edit-btn" onclick="startEditRequest('${escH(req.id)}')">
+          ✏️ แก้ไขคำขอนี้
+        </button>
         <button class="detail-delete-btn" onclick="deleteMyRequest('${escH(req.id)}')">
           🗑 ยกเลิก / ลบคำขอนี้
         </button>
-        <div class="detail-delete-hint">ลบได้เฉพาะตอนที่ยังไม่ถูกเข้ารับ — หากเปลี่ยนใจไม่ทิ้งแล้ว</div>
+        <div class="detail-delete-hint">แก้ไข/ลบได้เฉพาะตอนที่ยังไม่ถูกเข้ารับ</div>
       ` : ''}
     </div>`;
 
@@ -1038,6 +1146,18 @@ function formatDateShort(iso) {
   });
 }
 
+// Summarise items as real names joined, capping at `cap` then "+N".
+// Returns { main, extra } where extra is "" or " +N รายการ".
+function summarizeItemNames(items, cap) {
+  const names = (items || []).map(it => String(it.name || '').trim())
+    .filter(Boolean);
+  if (!names.length) return { main: 'รายการทิ้งของ', extra: '' };
+  const limit = cap || 2;
+  const shown = names.slice(0, limit).join(', ');
+  const rest = names.length - limit;
+  return { main: shown, extra: rest > 0 ? ` +${rest} รายการ` : '' };
+}
+
 async function loadHistory(session, decideView) {
   const el = document.getElementById('historyList');
   el.innerHTML = '<div class="empty-state">กำลังโหลด…</div>';
@@ -1064,9 +1184,9 @@ async function loadHistory(session, decideView) {
       const totalCount = items.length;
       const totalPhotos = items.reduce((n, it) => n + ((it.photos || []).length), 0);
       const main = items.flatMap(it => it.photos || [])[0];
-      const moreItems = totalCount - 1;
-      const title = (items[0] ? escH(items[0].name) : 'คำขอ') +
-        (moreItems > 0 ? ` <span class="muted">+อีก ${moreItems}</span>` : '');
+      const sum = summarizeItemNames(items, 2);
+      const title = escH(sum.main) +
+        (sum.extra ? ` <span class="muted">${escH(sum.extra)}</span>` : '');
       const metaBits = [];
       if (totalPhotos) metaBits.push(`📷 ${totalPhotos}`);
       metaBits.push(formatDateShort(req.createdAt));
@@ -1104,22 +1224,52 @@ function showStatusView() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Submit ────────────────────────────────────────────────────────────────────
+// Collect items from the form. Existing photos keep their storage metadata;
+// new photos are sent as dataUrl for upload.
+function collectFormItems() {
+  return [...document.querySelectorAll('.item-card')].map(card => {
+    const id = card.dataset.itemId;
+    const photos = (itemPhotos[id] || []).map(p =>
+      p.storagePath ? {
+        storagePath: p.storagePath,
+        downloadUrl: p.downloadUrl,
+        fileName: p.fileName,
+        mimeType: p.mimeType || '',
+        size: p.size || 0,
+      } : { dataUrl: p.dataUrl, fileName: p.fileName });
+    return {
+      name: card.querySelector('.item-name').value.trim(),
+      qty: Number(card.querySelector('.item-qty').value) || 1,
+      note: '',
+      photos,
+    };
+  }).filter(it => it.name);
+}
+
+// POST JSON with real upload-progress reporting (for the % overlay).
+function uploadWithProgress(url, payload, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+    };
+    xhr.onload = () => {
+      try { resolve(JSON.parse(xhr.responseText)); }
+      catch { reject(new Error('การตอบกลับจากเซิร์ฟเวอร์ผิดพลาด')); }
+    };
+    xhr.onerror = () => reject(new Error('เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'));
+    xhr.send(JSON.stringify(payload));
+  });
+}
+
+// ── Submit (create or edit) ────────────────────────────────────────────────────
 async function submitRequest() {
   const session = getResidentSession();
   if (!session) { showLoginModal(); return; }
 
-  const items = [...document.querySelectorAll('.item-card')].map(card => {
-    const id = card.dataset.itemId;
-    return {
-      name: card.querySelector('.item-name').value.trim(),
-      qty:  Number(card.querySelector('.item-qty').value) || 1,
-      note: '',
-      photos: (itemPhotos[id] || []).map(p =>
-        ({ dataUrl: p.dataUrl, fileName: p.fileName })),
-    };
-  }).filter(it => it.name);
-
+  const items = collectFormItems();
   if (!items.length) {
     showMsg('err', 'กรุณาระบุรายการสิ่งของอย่างน้อย 1 รายการ'); return;
   }
@@ -1133,9 +1283,9 @@ async function submitRequest() {
     return;
   }
 
+  const isEdit = !!editingRequestId;
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = 'กำลังส่ง…';
   hideMsg();
 
   // remember contact for next time
@@ -1143,42 +1293,86 @@ async function submitRequest() {
     localStorage.setItem('pattra_pickup_contact', JSON.stringify({ phone, lineId }));
   } catch {}
 
+  const payload = {
+    houseNo: session.houseNo,
+    pin: session.pin,
+    residentName: session.residentName || '',
+    phone,
+    lineId,
+    items,
+    notes: document.getElementById('fieldNotes').value.trim(),
+  };
+  if (isEdit) payload.requestId = editingRequestId;
+
+  showUploadProgress(isEdit ? 'กำลังบันทึกการแก้ไข…' : 'กำลังส่งคำขอ…');
   try {
-    const resp = await fetch(SUBMIT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        houseNo: session.houseNo,
-        pin: session.pin,
-        residentName: session.residentName || '',
-        phone,
-        lineId,
-        items,
-        notes: document.getElementById('fieldNotes').value.trim(),
-      }),
-    });
-    const data = await resp.json();
+    const data = await uploadWithProgress(
+      isEdit ? EDIT_URL : SUBMIT_URL, payload, setUploadProgress);
     if (!data.ok) throw new Error(data.error || 'เกิดข้อผิดพลาด');
 
+    hideUploadProgress();
     hideMsg();
-    resetForm();
+    startNewRequest();        // reset form + clear edit mode
     await loadHistory(session);
-    // close the journey: switch to the full-page status view
     showStatusView();
   } catch (err) {
+    hideUploadProgress();
     showMsg('err', `❌ ${err.message}`);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'ส่งคำขอแจ้งทิ้งของใหญ่';
+    updateSubmitButton();
   }
 }
 
-function resetForm() {
+// ── Edit mode ───────────────────────────────────────────────────────────────
+function updateSubmitButton() {
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = editingRequestId ?
+    '💾 บันทึกการแก้ไข' : 'ส่งคำขอแจ้งทิ้งของใหญ่';
+  document.getElementById('editBanner').style.display =
+    editingRequestId ? 'flex' : 'none';
+}
+
+function startEditRequest(id) {
+  const req = myRequests.find(r => r.id === id);
+  if (!req) return;
+  if (req.status !== 'submitted') {
+    alert('แก้ไขไม่ได้ เนื่องจากนิติบุคคลดำเนินการกับคำขอนี้แล้ว'); return;
+  }
+  closeMyRequest();
+  editingRequestId = id;
+  document.getElementById('itemsList').innerHTML = '';
+  Object.keys(itemPhotos).forEach(k => delete itemPhotos[k]);
+  document.getElementById('fieldPhone').value = req.phone || '';
+  document.getElementById('fieldLineId').value = req.lineId || '';
+  document.getElementById('fieldNotes').value = req.notes || '';
+  (req.items || []).forEach(it => addItemRow({
+    name: it.name, qty: it.qty, photos: it.photos || [],
+  }));
+  if (!document.querySelectorAll('.item-card').length) addItemRow();
+  updateSubmitButton();
+  hideMsg();
+  showFormView();
+}
+
+function startNewRequest() {
+  editingRequestId = null;
   document.getElementById('itemsList').innerHTML = '';
   Object.keys(itemPhotos).forEach(k => delete itemPhotos[k]);
   addItemRow();
   document.getElementById('fieldNotes').value = '';
+  // keep saved contact prefilled; clear nothing else
+  updateSubmitButton();
+  hideMsg();
 }
+
+function cancelEdit() {
+  startNewRequest();
+  showStatusView();
+}
+
+// kept for backwards-compat (older callers)
+function resetForm() { startNewRequest(); }
 
 function showMsg(type, text) {
   const el = document.getElementById('submitMsg');
