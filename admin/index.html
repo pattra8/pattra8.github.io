@@ -3933,6 +3933,28 @@ function buildPrintPage(req) {
         </div>
       </div>
 
+      ${(req.residentName || req.phone || req.lineId) ? `
+      <div class="pp-contact">
+        <div class="pp-section-title">ข้อมูลติดต่อ</div>
+        <div class="pp-contact-grid">
+          ${req.residentName ? `
+            <div class="pp-contact-card">
+              <div class="pp-contact-label">ชื่อผู้ติดต่อ</div>
+              <div class="pp-contact-value">${escH(req.residentName)}</div>
+            </div>` : ''}
+          ${req.phone ? `
+            <div class="pp-contact-card">
+              <div class="pp-contact-label">โทรศัพท์</div>
+              <div class="pp-contact-value">${escH(req.phone)}</div>
+            </div>` : ''}
+          ${req.lineId ? `
+            <div class="pp-contact-card">
+              <div class="pp-contact-label">LINE</div>
+              <div class="pp-contact-value">${escH(req.lineId)}</div>
+            </div>` : ''}
+        </div>
+      </div>` : ''}
+
       <!-- ITEMS — each with its own photos -->
       <div class="pp-section">
         <div class="pp-section-title">รายการสิ่งของ (${req.items.length} รายการ · ${totalPhotos} รูป)</div>
@@ -3958,28 +3980,6 @@ function buildPrintPage(req) {
         <div class="pp-section-title">หมายเหตุ</div>
         ${req.notes ? `<div class="pp-notes">${escH(req.notes)}</div>` : ''}
         ${req.adminNote ? `<div style="font-size:12px;color:#555;margin-top:6px;padding:6px 10px;background:#f0f7ff;border-radius:4px;border-left:3px solid #3b82f6;">Admin: ${escH(req.adminNote)}</div>` : ''}
-      </div>` : ''}
-
-      ${(req.residentName || req.phone || req.lineId) ? `
-      <div class="pp-contact">
-        <div class="pp-section-title">ข้อมูลติดต่อ</div>
-        <div class="pp-contact-grid">
-          ${req.residentName ? `
-            <div class="pp-contact-card">
-              <div class="pp-contact-label">ชื่อผู้ติดต่อ</div>
-              <div class="pp-contact-value">${escH(req.residentName)}</div>
-            </div>` : ''}
-          ${req.phone ? `
-            <div class="pp-contact-card">
-              <div class="pp-contact-label">โทรศัพท์</div>
-              <div class="pp-contact-value">${escH(req.phone)}</div>
-            </div>` : ''}
-          ${req.lineId ? `
-            <div class="pp-contact-card">
-              <div class="pp-contact-label">LINE</div>
-              <div class="pp-contact-value">${escH(req.lineId)}</div>
-            </div>` : ''}
-        </div>
       </div>` : ''}
 
       <!-- SIGNATURE ROW -->
