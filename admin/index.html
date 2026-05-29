@@ -1361,47 +1361,78 @@
     page-break-after: always;
     box-sizing: border-box;
     position: relative;
+    background: #fff;
   }
   .pp:last-child { page-break-after: auto; }
   .pp-top {
     display: flex; justify-content: space-between; align-items: flex-start;
-    border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 14px;
+    border-bottom: 3px solid #1a1a1a; padding-bottom: 12px; margin-bottom: 12px;
   }
-  .pp-org { font-size: 11px; color: #555; }
+  .pp-brand { font-size: 17px; font-weight: 900; color: #171717; line-height: 1.1; }
+  .pp-org { font-size: 11px; color: #6b645d; }
+  .pp-printed { margin-top: 8px; font-size: 10px; color: #8a8177; }
   .pp-house {
-    font-size: 36px; font-weight: 900; color: #1a1a1a;
+    font-size: 38px; font-weight: 900; color: #1a1a1a;
     letter-spacing: -0.02em; line-height: 1;
   }
-  .pp-house-label { font-size: 11px; color: #666; margin-top: 2px; text-align: right; }
+  .pp-house-label {
+    font-size: 10px; color: #8a8177; margin-top: 4px; text-align: right;
+    text-transform: uppercase; letter-spacing: .08em;
+  }
   .pp-meta-row {
     display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 8px; margin-bottom: 14px;
-    background: #f5f5f5; border-radius: 6px; padding: 10px 12px;
+    gap: 10px; margin-bottom: 12px;
   }
   .pp-resident-row {
-    margin-bottom: 10px;
-    padding: 2px 0 6px;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #fbf5eb 0%, #f7efe2 100%);
+    border: 1px solid #ecdcc2;
+    border-radius: 12px;
+    padding: 12px 14px 11px;
   }
   .pp-resident-label {
     font-size: 9px;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #888;
+    color: #9b7a46;
   }
   .pp-resident-value {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 800;
     color: #1a1a1a;
-    margin-top: 3px;
+    margin-top: 5px;
   }
-  .pp-meta-cell { }
-  .pp-meta-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: #888; }
-  .pp-meta-value { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-top: 2px; }
-  .pp-section { margin-bottom: 14px; }
+  .pp-meta-cell,
+  .pp-contact-card {
+    background: #f8f7f4;
+    border: 1px solid #e8e1d6;
+    border-radius: 10px;
+    padding: 11px 12px;
+    min-height: 62px;
+  }
+  .pp-meta-label,
+  .pp-contact-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #8a8177;
+  }
+  .pp-meta-value,
+  .pp-contact-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-top: 5px;
+    line-height: 1.25;
+  }
+  .pp-meta-value.status {
+    color: #6f4a16;
+  }
+  .pp-section { margin-bottom: 16px; }
   .pp-section-title {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: #666;
-    border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 8px;
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .1em; color: #6d6256;
+    border-bottom: 1px solid #ddd4c7; padding-bottom: 6px; margin-bottom: 10px;
   }
   .pp-items { margin: 0; padding: 0 0 0 18px; }
   .pp-items li {
@@ -1411,66 +1442,81 @@
   .pp-items li:last-child { border-bottom: none; }
   /* per-item block with photos (print) */
   .pp-item {
-    margin-bottom: 12px; padding-bottom: 12px;
-    border-bottom: 1px solid #eee; page-break-inside: avoid;
+    margin-bottom: 14px;
+    padding: 12px 12px 14px;
+    border: 1px solid #ebe3d6;
+    border-radius: 14px;
+    background: #fffdfa;
+    page-break-inside: avoid;
   }
   .pp-item:last-child { border-bottom: none; }
-  .pp-item-head { font-size: 14px; color: #1a1a1a; margin-bottom: 8px; }
+  .pp-item-head { color: #1a1a1a; margin-bottom: 10px; }
+  .pp-item-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .pp-item-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+  }
+  .pp-item-title {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+  .pp-item-sub {
+    font-size: 11px;
+    color: #766c62;
+    margin-top: 4px;
+    line-height: 1.35;
+  }
   .pp-item-num {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 700;
-    margin-right: 6px; vertical-align: middle;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #1f1f1f; color: #fff; font-size: 11px; font-weight: 800;
+    flex-shrink: 0;
   }
   .pp-nophoto { font-size: 11px; color: #aaa; padding: 2px 0 0 26px; }
   .pp-notes {
     font-size: 13px; color: #333; background: #fffbf0;
-    border-left: 3px solid #c47a2c; padding: 8px 10px;
-    border-radius: 0 4px 4px 0;
+    border-left: 4px solid #c47a2c; padding: 10px 12px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.5;
   }
   .pp-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pp-photos.single { grid-template-columns: minmax(0, 1fr); }
   .pp-photos img {
     width: 100%; aspect-ratio: 4/3; object-fit: cover;
-    border: 1px solid #ccc; border-radius: 6px;
+    border: 1px solid #d7d1c7; border-radius: 10px;
     display: block;
-  }
-  .pp-photo-cap {
-    font-size: 9px; color: #888; text-align: center;
-    margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .pp-sig {
     margin-top: 18px; display: grid; grid-template-columns: 1fr;
     gap: 20px; border-top: 1px solid #ccc; padding-top: 12px;
   }
   .pp-contact {
-    margin-top: 18px;
-    border-top: 1px solid #ccc;
-    padding-top: 12px;
+    margin-top: 2px;
+    margin-bottom: 16px;
   }
   .pp-contact-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
-  .pp-contact-card {
-    background: #f8f8f8;
-    border: 1px solid #e4e4e4;
-    border-radius: 6px;
-    padding: 10px 12px;
-    min-height: 56px;
-  }
-  .pp-contact-label {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: #888;
-  }
-  .pp-contact-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-top: 4px;
-    word-break: break-word;
+  .pp-contact-value { word-break: break-word; }
+  .pp-done-badge {
+    font-size: 10px;
+    font-weight: 800;
+    color: #3f6431;
+    border: 1px solid #aac38b;
+    background: #edf6df;
+    border-radius: 999px;
+    padding: 3px 8px;
+    white-space: nowrap;
   }
   .pp-sig-box { text-align: center; }
   .pp-sig-line {
@@ -3911,9 +3957,9 @@ function buildPrintPage(req) {
       <!-- TOP: org + house number -->
       <div class="pp-top">
         <div>
-          <div style="font-size:15px;font-weight:800;color:#1a1a1a;">Pattra Villa 8</div>
+          <div class="pp-brand">Pattra Villa 8</div>
           <div class="pp-org">ใบแจ้งทิ้งของใหญ่ / Bulky Waste Request</div>
-          <div class="pp-org" style="margin-top:3px;">พิมพ์เมื่อ ${printedAt}</div>
+          <div class="pp-printed">พิมพ์เมื่อ ${printedAt}</div>
         </div>
         <div style="text-align:right;">
           <div class="pp-house">${escH(req.houseNo)}</div>
@@ -3935,7 +3981,7 @@ function buildPrintPage(req) {
         </div>
         <div class="pp-meta-cell">
           <div class="pp-meta-label">สถานะ</div>
-          <div class="pp-meta-value">${statusLabel}</div>
+          <div class="pp-meta-value status">${statusLabel}</div>
         </div>
         <div class="pp-meta-cell">
           <div class="pp-meta-label">อัปเดตล่าสุด</div>
@@ -3970,12 +4016,22 @@ function buildPrintPage(req) {
         ${req.items.map((it, i) => `
           <div class="pp-item"${it.collected ? ' style="opacity:.55;"' : ''}>
             <div class="pp-item-head">
-              <span class="pp-item-num">${i + 1}</span>
-              <strong>${escH(it.name)}</strong>${it.qty > 1 ? `<span style="color:#666;font-weight:400;"> จำนวน ${it.qty} ชิ้น</span>` : ''}${it.note ? `<span style="color:#666;font-weight:400;"> — ${escH(it.note)}</span>` : ''}
-              ${it.collected ? '<span style="font-size:11px;font-weight:700;color:#3f6431;border:1px solid #3f6431;border-radius:4px;padding:1px 7px;margin-left:8px;">ขนแล้ว</span>' : ''}
+              <div class="pp-item-title-row">
+                <div class="pp-item-main">
+                  <span class="pp-item-num">${i + 1}</span>
+                  <div>
+                    <div class="pp-item-title">${escH(it.name)}</div>
+                    <div class="pp-item-sub">
+                      ${it.qty > 1 ? `จำนวน ${it.qty} ชิ้น` : 'จำนวน 1 ชิ้น'}
+                      ${it.note ? ` · ${escH(it.note)}` : ''}
+                    </div>
+                  </div>
+                </div>
+                ${it.collected ? '<span class="pp-done-badge">ขนแล้ว</span>' : ''}
+              </div>
             </div>
             ${(it.photos && it.photos.length) ? `
-              <div class="pp-photos">
+              <div class="pp-photos${it.photos.length === 1 ? ' single' : ''}">
                 ${it.photos.map(p =>
                   `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />`
                 ).join('')}
