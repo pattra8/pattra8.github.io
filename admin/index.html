@@ -1222,7 +1222,6 @@
     <div class="modal-header">
       <div>
         <h2>รายละเอียดคำขอ</h2>
-        <div id="pickupModalId" style="font-size:0.82rem;opacity:0.7;margin-top:4px;font-family:monospace;"></div>
       </div>
       <button class="modal-close" onclick="closePickupModal()">✕</button>
     </div>
@@ -3428,7 +3427,6 @@ function openPickupModal(id) {
 
   pickupModalCollected = req.items.map(it => !!it.collected);
 
-  document.getElementById('pickupModalId').textContent = `ID: ${req.id}`;
   document.getElementById('pickupModalBody').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:18px;">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -3474,11 +3472,11 @@ function openPickupModal(id) {
                         onclick="toggleItemCollected(${i})"></button>
               </div>
               ${(it.photos && it.photos.length) ? `
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+                <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;">
                   ${it.photos.map(p => `
                     <a href="${escH(p.downloadUrl)}" target="_blank">
                       <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}"
-                           style="width:74px;height:74px;object-fit:cover;border-radius:8px;border:1px solid var(--border-soft);" />
+                           style="width:100%;max-height:420px;object-fit:cover;border-radius:12px;border:1px solid var(--border-soft);display:block;" />
                     </a>`).join('')}
                 </div>`
                 : `<div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">— ไม่มีรูป —</div>`}
