@@ -456,6 +456,23 @@
     </div>
 
     <div class="section">
+      <div class="section-title">📞 ข้อมูลติดต่อ (สำหรับช่างนัดรับของ)</div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:-8px 0 16px;">
+        ช่างจะใช้ติดต่อนัดวัน-เวลาเข้ารับของ
+      </p>
+      <div class="form-group">
+        <label>เบอร์โทรศัพท์ *</label>
+        <input class="form-input" id="fieldPhone" type="tel" inputmode="tel"
+          placeholder="เช่น 081-234-5678" maxlength="20" />
+      </div>
+      <div class="form-group">
+        <label>LINE ID <span style="color:var(--text-muted);font-weight:400;">(ถ้ามี)</span></label>
+        <input class="form-input" id="fieldLineId" type="text"
+          placeholder="เช่น @pattra8 หรือ ไอดีไลน์ของคุณ" maxlength="100" />
+      </div>
+    </div>
+
+    <div class="section">
       <div class="section-title">📦 รายการที่จะทิ้ง</div>
       <p style="font-size:12.5px;color:var(--text-muted);margin:-8px 0 16px;">
         แต่ละรายการ ใส่ชื่อของ แล้วแนบรูปของชิ้นนั้น (ถ่ายหลายมุมได้)
@@ -809,10 +826,24 @@ async function submitRequest() {
     showMsg('err', 'กรุณาระบุรายการสิ่งของอย่างน้อย 1 รายการ'); return;
   }
 
+  const phone = document.getElementById('fieldPhone').value.trim();
+  const lineId = document.getElementById('fieldLineId').value.trim();
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 9) {
+    showMsg('err', 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (สำหรับช่างติดต่อนัดรับ)');
+    document.getElementById('fieldPhone').focus();
+    return;
+  }
+
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = 'กำลังส่ง…';
   hideMsg();
+
+  // remember contact for next time
+  try {
+    localStorage.setItem('pattra_pickup_contact', JSON.stringify({ phone, lineId }));
+  } catch {}
 
   try {
     const resp = await fetch(SUBMIT_URL, {
@@ -822,6 +853,8 @@ async function submitRequest() {
         houseNo: session.houseNo,
         pin: session.pin,
         residentName: session.residentName || '',
+        phone,
+        lineId,
         items,
         notes: document.getElementById('fieldNotes').value.trim(),
       }),
@@ -937,6 +970,20 @@ function renderPage() {
   histSec.style.display = 'block';
 
   document.getElementById('fieldHouseNo').value = session.houseNo;
+
+  // prefill saved contact for convenience
+  try {
+    const c = JSON.parse(localStorage.getItem('pattra_pickup_contact') || 'null');
+    if (c) {
+      if (c.phone && !document.getElementById('fieldPhone').value) {
+        document.getElementById('fieldPhone').value = c.phone;
+      }
+      if (c.lineId && !document.getElementById('fieldLineId').value) {
+        document.getElementById('fieldLineId').value = c.lineId;
+      }
+    }
+  } catch {}
+
   loadHistory(session);
 }
 

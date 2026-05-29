@@ -3225,6 +3225,9 @@ function renderPickupList(requests) {
         <div class="pickup-meta">${pickupFormatDate(req.createdAt)}
           ${req.pickupDate ? ` · 📅 นัดรับ: ${escH(req.pickupDate)}` : ''}
         </div>
+        ${(req.phone || req.lineId) ? `<div class="pickup-meta" style="margin-top:2px;">
+          ${req.phone ? `📞 ${escH(req.phone)}` : ''}${req.phone && req.lineId ? ' · ' : ''}${req.lineId ? `💬 ${escH(req.lineId)}` : ''}
+        </div>` : ''}
         <ul class="pickup-items">
           ${req.items.slice(0, 3).map(it =>
             `<li${it.collected ? ' style="color:var(--text-muted);text-decoration:line-through;"' : ''}>${it.collected ? '✅ ' : ''}${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}</li>`
@@ -3273,6 +3276,12 @@ function openPickupModal(id) {
         แจ้งเมื่อ: ${pickupFormatDate(req.createdAt)}
         ${req.updatedAt !== req.createdAt ? ` · อัปเดต: ${pickupFormatDate(req.updatedAt)}` : ''}
       </div>
+
+      ${(req.phone || req.lineId) ? `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${req.phone ? `<a href="tel:${escH(req.phone)}" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent-pale);color:var(--accent-deep);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;text-decoration:none;">📞 ${escH(req.phone)}</a>` : ''}
+        ${req.lineId ? `<span style="display:inline-flex;align-items:center;gap:6px;background:#e8efd9;color:#3f6431;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;">💬 LINE: ${escH(req.lineId)}</span>` : ''}
+      </div>` : `<div style="font-size:12px;color:var(--status-error);">⚠️ ไม่มีข้อมูลติดต่อ</div>`}
 
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
@@ -3463,6 +3472,8 @@ function buildPrintPage(req) {
           <div class="pp-house">${escH(req.houseNo)}</div>
           <div class="pp-house-label">บ้านเลขที่</div>
           ${req.residentName ? `<div style="font-size:12px;color:#555;margin-top:3px;">${escH(req.residentName)}</div>` : ''}
+          ${req.phone ? `<div style="font-size:13px;color:#1a1a1a;font-weight:700;margin-top:4px;">📞 ${escH(req.phone)}</div>` : ''}
+          ${req.lineId ? `<div style="font-size:12px;color:#555;">LINE: ${escH(req.lineId)}</div>` : ''}
         </div>
       </div>
 
