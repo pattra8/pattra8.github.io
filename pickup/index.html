@@ -245,8 +245,48 @@
     .submit-msg.ok  { background: var(--status-ok-bg);  color: var(--status-ok);  display: block; }
     .submit-msg.err { background: var(--status-err-bg); color: var(--status-err); display: block; }
 
-    /* ─── REQUESTS / STATUS CARDS (e-commerce order style) ─── */
-    .req-list { display: flex; flex-direction: column; gap: 18px; }
+    /* ─── STATUS LIST (compact rows — tap for detail) ─── */
+    .req-list { display: flex; flex-direction: column; gap: 10px; }
+    .req-row {
+      display: flex; align-items: center; gap: 14px;
+      background: #fff; border: 1px solid var(--border-soft);
+      border-radius: 14px; padding: 12px 14px; cursor: pointer;
+      transition: box-shadow .12s, transform .12s, border-color .12s;
+    }
+    .req-row:hover {
+      transform: translateY(-1px); border-color: var(--border);
+      box-shadow: 0 2px 4px rgba(60,40,20,.04), 0 10px 24px rgba(60,40,20,.08);
+    }
+    .req-row-thumb {
+      width: 60px; height: 60px; border-radius: 11px;
+      object-fit: cover; flex-shrink: 0; background: var(--bg-soft);
+    }
+    .req-row-thumb.placeholder {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; background: var(--bg-warm);
+    }
+    .req-row-mid { flex: 1; min-width: 0; }
+    .req-row-title {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .req-row-title .muted { color: var(--text-muted); font-weight: 500; font-size: 13px; }
+    .req-row-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .req-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .req-pill {
+      font-size: 11.5px; font-weight: 700; padding: 5px 11px;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .status-submitted .req-pill,
+    .status-scheduled .req-pill { background: var(--status-warn-bg); color: var(--status-warn); }
+    .status-completed .req-pill { background: var(--status-ok-bg); color: var(--status-ok); }
+    .status-cancelled .req-pill { background: #f1f1f1; color: #777; }
+    .req-row .chev { color: var(--text-muted); font-size: 18px; line-height: 1; }
+    @media (max-width: 480px) {
+      .req-row-right .req-pill { display: none; } /* keep rows tidy on mobile */
+    }
+
+    /* ─── DETAIL MODAL: order-style content ─── */
     .req-card {
       background: #fff;
       border: 1px solid var(--border-soft);
@@ -976,6 +1016,12 @@ function formatDate(iso) {
     hour: '2-digit', minute: '2-digit',
   });
 }
+function formatDateShort(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleDateString('th-TH', {
+    timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', year: '2-digit',
+  });
+}
 
 async function loadHistory(session, decideView) {
   const el = document.getElementById('historyList');
@@ -999,65 +1045,28 @@ async function loadHistory(session, decideView) {
     }
     if (decideView) showStatusView();
     el.innerHTML = `<div class="req-list">${data.requests.map(req => {
-      const collectedCount = (req.items || []).filter(it => it.collected).length;
-      const totalCount = (req.items || []).length;
+      const items = req.items || [];
+      const totalCount = items.length;
+      const totalPhotos = items.reduce((n, it) => n + ((it.photos || []).length), 0);
+      const main = items.flatMap(it => it.photos || [])[0];
+      const moreItems = totalCount - 1;
+      const title = (items[0] ? escH(items[0].name) : 'คำขอ') +
+        (moreItems > 0 ? ` <span class="muted">+อีก ${moreItems}</span>` : '');
+      const metaBits = [];
+      if (totalPhotos) metaBits.push(`📷 ${totalPhotos}`);
+      metaBits.push(formatDateShort(req.createdAt));
       return `
-      <div class="req-card status-${escH(req.status)}" onclick="openMyRequest('${escH(req.id)}')">
-        <!-- colored status header -->
-        <div class="req-status-bar">
-          <div class="req-status-main">
-            <div class="req-status-emoji">${STATUS_ICON[req.status] || '•'}</div>
-            <div>
-              <div class="req-status-label">${STATUS_LABELS[req.status] || req.status}</div>
-              <div class="req-status-sub">${STATUS_DESC[req.status] || ''}</div>
-            </div>
-          </div>
-          <span class="req-date">${formatDate(req.createdAt)}</span>
+      <div class="req-row status-${escH(req.status)}" onclick="openMyRequest('${escH(req.id)}')">
+        ${main
+          ? `<img class="req-row-thumb" src="${escH(main.downloadUrl)}" alt="" />`
+          : `<div class="req-row-thumb placeholder">📦</div>`}
+        <div class="req-row-mid">
+          <div class="req-row-title">${title}</div>
+          <div class="req-row-meta">${metaBits.join(' · ')}</div>
         </div>
-
-        <div class="req-body">
-          ${(req.pickupDate || collectedCount > 0) ? `
-            <div class="req-chips">
-              ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
-              ${collectedCount > 0 ? `<span class="req-progress-chip ${collectedCount === totalCount ? 'all' : ''}">🚚 ขนแล้ว ${collectedCount}/${totalCount} ชิ้น</span>` : ''}
-            </div>` : ''}
-
-          <div class="req-section-label">รายการที่แจ้งทิ้ง (${totalCount})</div>
-          <div class="req-items">
-            ${req.items.map((it, i) => {
-              const ph = it.photos || [];
-              const main = ph[0];
-              const extra = ph.slice(1);
-              return `
-              <div class="req-item">
-                ${main
-                  ? `<img class="req-item-thumb" src="${escH(main.downloadUrl)}" alt="${escH(it.name)}" onclick="event.stopPropagation();openLightbox('${escH(main.downloadUrl)}')" />`
-                  : `<div class="req-item-thumb placeholder">📦</div>`}
-                <div class="req-item-body">
-                  <div class="req-item-name ${it.collected ? 'collected' : ''}">
-                    ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
-                    ${it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
-                  </div>
-                  <div class="req-item-meta">${ph.length ? `📷 ${ph.length} รูป` : 'ไม่มีรูป'}</div>
-                  ${extra.length ? `
-                    <div class="req-extra-thumbs">
-                      ${extra.map(p =>
-                        `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" onclick="event.stopPropagation();openLightbox('${escH(p.downloadUrl)}')" />`
-                      ).join('')}
-                    </div>` : ''}
-                </div>
-              </div>`;
-            }).join('')}
-          </div>
-
-          ${req.notes ? `<div class="req-note">📝 ${escH(req.notes)}</div>` : ''}
-          ${req.adminNote ? `<div class="req-admin-note">📌 จากนิติบุคคล: ${escH(req.adminNote)}</div>` : ''}
-
-          <div class="req-foot">
-            <span class="ref">#${escH(req.id)}</span>
-            ${req.phone ? `<span>· 📞 ${escH(req.phone)}</span>` : ''}
-            <span class="req-tap-hint">แตะเพื่อดูรายละเอียด ›</span>
-          </div>
+        <div class="req-row-right">
+          <span class="req-pill">${STATUS_ICON[req.status] || ''} ${STATUS_LABELS[req.status] || req.status}</span>
+          <span class="chev">›</span>
         </div>
       </div>`;
     }).join('')}
