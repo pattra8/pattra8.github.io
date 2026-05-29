@@ -615,6 +615,20 @@
     }
     .detail-contact .c-phone { background: var(--accent-pale); color: var(--accent-deep); }
     .detail-contact .c-line { background: var(--status-ok-bg); color: var(--status-ok); }
+    .detail-info {
+      background: #fff; border: 1px solid var(--border-soft);
+      border-radius: 12px; padding: 6px 14px; margin-bottom: 18px;
+    }
+    .detail-info-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 10px 0;
+      border-bottom: 1px dashed var(--border-soft);
+    }
+    .detail-info-row:last-child { border-bottom: none; }
+    .detail-info-row .k { font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+    .detail-info-row .v { font-size: 14.5px; font-weight: 700; color: var(--text); text-align: right; }
+    .detail-info-row .muted-v { color: var(--text-muted); font-weight: 400; }
+    .detail-info-row .c-phone-inline { color: var(--accent-deep); text-decoration: none; }
     .detail-meta-row {
       display: flex; justify-content: space-between; gap: 10px;
       font-size: 12px; color: var(--text-soft);
@@ -689,6 +703,11 @@
       <p style="font-size:12.5px;color:var(--text-muted);margin:-8px 0 16px;">
         ช่างจะใช้ติดต่อนัดวัน-เวลาเข้ารับของ
       </p>
+      <div class="form-group">
+        <label>ผู้แจ้ง (ชื่อผู้ติดต่อ) *</label>
+        <input class="form-input" id="fieldReporter" type="text"
+          placeholder="เช่น คุณสมชาย" maxlength="200" />
+      </div>
       <div class="form-group">
         <label>เบอร์โทรศัพท์ *</label>
         <input class="form-input" id="fieldPhone" type="tel" inputmode="tel"
@@ -1020,7 +1039,7 @@ function openMyRequest(id) {
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-head status-${escH(req.status)}">
       <div class="detail-head-row">
-        <span class="detail-eyebrow">คำขอทิ้งของใหญ่ · บ้าน ${escH(req.houseNo)}</span>
+        <span class="detail-eyebrow">แจ้งทิ้งของใหญ่ · บ้าน ${escH(req.houseNo)}</span>
         <span class="req-pill">${STATUS_ICON[req.status] || '•'} ${STATUS_LABELS[req.status] || req.status}</span>
       </div>
       <div class="detail-head-title">${itemSummary}</div>
@@ -1032,13 +1051,21 @@ function openMyRequest(id) {
     </div>
 
     <div class="detail-section">
+      <div class="detail-label">ข้อมูลผู้แจ้ง / ติดต่อ</div>
+      <div class="detail-info">
+        <div class="detail-info-row"><span class="k">บ้านเลขที่</span><span class="v">${escH(req.houseNo)}</span></div>
+        <div class="detail-info-row"><span class="k">ผู้แจ้ง</span><span class="v">${req.residentName ? escH(req.residentName) : '<span class="muted-v">—</span>'}</span></div>
+        <div class="detail-info-row"><span class="k">โทร</span><span class="v">${req.phone ? `<a class="c-phone-inline" href="tel:${escH(req.phone)}">📞 ${escH(req.phone)}</a>` : '<span class="muted-v">—</span>'}</span></div>
+        <div class="detail-info-row"><span class="k">LINE</span><span class="v">${req.lineId ? `💬 ${escH(req.lineId)}` : '<span class="muted-v">—</span>'}</span></div>
+      </div>
+
       ${(req.pickupDate || collected > 0) ? `
         <div class="req-chips">
           ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
           ${collected > 0 ? `<span class="req-progress-chip ${collected === total ? 'all' : ''}">🚚 ขนแล้ว ${collected}/${total} ชิ้น</span>` : ''}
         </div>` : ''}
 
-      <div class="detail-label">รายการที่แจ้งทิ้ง (${total})</div>
+      <div class="detail-label" style="margin-top:18px;">รูปของที่จะทิ้ง (${total} รายการ)</div>
       ${req.items.map((it, i) => `
         <div class="detail-item">
           <div class="detail-item-name ${it.collected ? 'collected' : ''}">
@@ -1055,13 +1082,6 @@ function openMyRequest(id) {
 
       ${req.notes ? `<div class="req-note">📝 ${escH(req.notes)}</div>` : ''}
       ${req.adminNote ? `<div class="req-admin-note">📌 จากนิติบุคคล: ${escH(req.adminNote)}</div>` : ''}
-
-      ${(req.phone || req.lineId) ? `
-        <div class="detail-label" style="margin-top:18px;">ข้อมูลติดต่อ</div>
-        <div class="detail-contact">
-          ${req.phone ? `<a class="c-phone" href="tel:${escH(req.phone)}">📞 ${escH(req.phone)}</a>` : ''}
-          ${req.lineId ? `<span class="c-line">💬 LINE: ${escH(req.lineId)}</span>` : ''}
-        </div>` : ''}
 
       <div class="detail-label" style="margin-top:18px;">ข้อมูลคำขอ</div>
       <div class="detail-meta-row"><span>เลขอ้างอิง</span><span class="v" style="font-family:monospace;font-weight:500;">#${escH(req.id)}</span></div>
@@ -1274,6 +1294,12 @@ async function submitRequest() {
     showMsg('err', 'กรุณาระบุรายการสิ่งของอย่างน้อย 1 รายการ'); return;
   }
 
+  const reporter = document.getElementById('fieldReporter').value.trim();
+  if (!reporter) {
+    showMsg('err', 'กรุณากรอกชื่อผู้แจ้ง (สำหรับช่างติดต่อนัดรับ)');
+    document.getElementById('fieldReporter').focus();
+    return;
+  }
   const phone = document.getElementById('fieldPhone').value.trim();
   const lineId = document.getElementById('fieldLineId').value.trim();
   const digits = phone.replace(/\D/g, '');
@@ -1290,13 +1316,14 @@ async function submitRequest() {
 
   // remember contact for next time
   try {
-    localStorage.setItem('pattra_pickup_contact', JSON.stringify({ phone, lineId }));
+    localStorage.setItem('pattra_pickup_contact',
+      JSON.stringify({ reporter, phone, lineId }));
   } catch {}
 
   const payload = {
     houseNo: session.houseNo,
     pin: session.pin,
-    residentName: session.residentName || '',
+    residentName: reporter,
     phone,
     lineId,
     items,
@@ -1343,6 +1370,7 @@ function startEditRequest(id) {
   editingRequestId = id;
   document.getElementById('itemsList').innerHTML = '';
   Object.keys(itemPhotos).forEach(k => delete itemPhotos[k]);
+  document.getElementById('fieldReporter').value = req.residentName || '';
   document.getElementById('fieldPhone').value = req.phone || '';
   document.getElementById('fieldLineId').value = req.lineId || '';
   document.getElementById('fieldNotes').value = req.notes || '';
@@ -1469,6 +1497,8 @@ function renderPage() {
   try {
     const c = JSON.parse(localStorage.getItem('pattra_pickup_contact') || 'null');
     if (c) {
+      const rep = document.getElementById('fieldReporter');
+      if (c.reporter && rep && !rep.value) rep.value = c.reporter;
       if (c.phone && !document.getElementById('fieldPhone').value) {
         document.getElementById('fieldPhone').value = c.phone;
       }
