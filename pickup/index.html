@@ -245,88 +245,101 @@
     .submit-msg.ok  { background: var(--status-ok-bg);  color: var(--status-ok);  display: block; }
     .submit-msg.err { background: var(--status-err-bg); color: var(--status-err); display: block; }
 
-    /* ─── REQUESTS / STATUS CARDS ─── */
-    .req-list { display: flex; flex-direction: column; gap: 16px; }
+    /* ─── REQUESTS / STATUS CARDS (e-commerce order style) ─── */
+    .req-list { display: flex; flex-direction: column; gap: 18px; }
     .req-card {
       background: #fff;
       border: 1px solid var(--border-soft);
-      border-left: 5px solid var(--accent);
-      border-radius: 14px;
-      padding: 18px 20px;
-      box-shadow: var(--shadow-card);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(60,40,20,.04), 0 14px 36px rgba(60,40,20,.09);
     }
-    .req-card.status-completed { border-left-color: var(--status-ok); }
-    .req-card.status-submitted,
-    .req-card.status-scheduled { border-left-color: var(--accent); }
-    .req-card.status-cancelled { border-left-color: #b9b9b9; }
 
-    /* top row: status pill (focal point) + date */
-    .req-top {
+    /* colored status header bar — the focal point */
+    .req-status-bar {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+      gap: 12px; flex-wrap: wrap;
+      padding: 16px 22px; color: #fff;
     }
-    .req-status-pill {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-size: 15px; font-weight: 800;
-      padding: 7px 15px; border-radius: 999px; line-height: 1;
+    .status-submitted .req-status-bar,
+    .status-scheduled .req-status-bar { background: linear-gradient(135deg, #c9842f, #a8641f); }
+    .status-completed .req-status-bar { background: linear-gradient(135deg, #4f8038, #3f6431); }
+    .status-cancelled .req-status-bar { background: linear-gradient(135deg, #9a9a9a, #7a7a7a); }
+    .req-status-main { display: flex; align-items: center; gap: 12px; }
+    .req-status-emoji {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
     }
-    .status-submitted .req-status-pill,
-    .status-scheduled .req-status-pill { background: var(--status-warn-bg); color: var(--status-warn); }
-    .status-completed .req-status-pill { background: var(--status-ok-bg); color: var(--status-ok); }
-    .status-cancelled .req-status-pill { background: #f1f1f1; color: #777; }
-    .req-status-icon { font-size: 17px; line-height: 1; }
-    .req-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .req-status-label { font-size: 17px; font-weight: 800; line-height: 1.15; }
+    .req-status-sub { font-size: 12px; opacity: .9; margin-top: 1px; }
+    .req-date { font-size: 12px; color: rgba(255,255,255,.92); white-space: nowrap; }
 
-    .req-desc { font-size: 12.5px; color: var(--text-soft); line-height: 1.5; margin-bottom: 12px; }
+    .req-body { padding: 18px 22px 20px; }
 
-    .req-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .req-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .req-pickup-chip {
       font-size: 12px; font-weight: 700; color: #1e40af;
-      background: #dbeafe; border-radius: 999px; padding: 4px 12px;
+      background: #dbeafe; border-radius: 999px; padding: 5px 13px;
     }
     .req-progress-chip {
       font-size: 12px; font-weight: 700;
-      border-radius: 999px; padding: 4px 12px;
+      border-radius: 999px; padding: 5px 13px;
       background: var(--accent-pale); color: var(--accent-deep);
     }
     .req-progress-chip.all { background: var(--status-ok-bg); color: var(--status-ok); }
 
-    .req-divider { height: 1px; background: var(--border-soft); margin: 4px 0 14px; }
     .req-section-label {
       font-size: 11px; font-weight: 700; letter-spacing: .07em;
-      text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
     }
     .req-items { display: flex; flex-direction: column; gap: 12px; }
-    .req-item { display: flex; flex-direction: column; gap: 8px; }
-    .req-item-name { font-size: 14px; font-weight: 600; color: var(--text); }
+
+    /* each item = order line: prominent photo + info */
+    .req-item {
+      display: flex; gap: 14px; align-items: center;
+      background: var(--bg-soft); border-radius: 14px; padding: 12px;
+    }
+    .req-item-thumb {
+      width: 92px; height: 92px; border-radius: 12px;
+      object-fit: cover; flex-shrink: 0; cursor: pointer;
+      border: 1px solid var(--border-soft); transition: transform .12s;
+    }
+    .req-item-thumb:hover { transform: scale(1.03); }
+    .req-item-thumb.placeholder {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; background: var(--bg-warm); cursor: default;
+    }
+    .req-item-body { flex: 1; min-width: 0; }
+    .req-item-name { font-size: 16px; font-weight: 700; color: var(--text); }
     .req-item-name.collected { color: var(--text-muted); text-decoration: line-through; }
+    .req-item-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
     .item-done-tag {
-      font-size: 10px; font-weight: 700; color: var(--status-ok);
-      background: var(--status-ok-bg); border-radius: 5px;
-      padding: 2px 7px; margin-left: 6px;
+      font-size: 10px; font-weight: 700; color: #fff;
+      background: var(--status-ok); border-radius: 5px;
+      padding: 2px 8px; margin-left: 6px;
       text-decoration: none; display: inline-block; vertical-align: middle;
     }
-    .req-photos { display: flex; gap: 8px; flex-wrap: wrap; }
-    .req-photo-thumb {
-      width: 70px; height: 70px; object-fit: cover;
-      border-radius: 9px; border: 1px solid var(--border-soft);
-      cursor: pointer; transition: transform .12s;
+    .req-extra-thumbs { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .req-extra-thumbs img {
+      width: 40px; height: 40px; border-radius: 7px;
+      object-fit: cover; cursor: pointer; border: 1px solid var(--border-soft);
     }
-    .req-photo-thumb:hover { transform: scale(1.04); }
 
     .req-note {
       font-size: 12.5px; color: var(--text-soft);
-      background: var(--bg-soft); border-radius: 8px;
-      padding: 8px 12px; margin-top: 12px;
+      background: var(--bg-soft); border-radius: 10px;
+      padding: 10px 14px; margin-top: 14px;
     }
     .req-admin-note {
       font-size: 12.5px; color: var(--accent-text);
-      background: var(--accent-pale); border-radius: 8px;
-      padding: 8px 12px; margin-top: 8px; font-weight: 500;
+      background: var(--accent-pale); border-radius: 10px;
+      padding: 10px 14px; margin-top: 8px; font-weight: 500;
     }
     .req-foot {
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-      margin-top: 14px; padding-top: 12px;
+      margin-top: 16px; padding-top: 14px;
       border-top: 1px dashed var(--border-soft);
       font-size: 11px; color: var(--text-muted);
     }
@@ -796,49 +809,60 @@ async function loadHistory(session, decideView) {
       const totalCount = (req.items || []).length;
       return `
       <div class="req-card status-${escH(req.status)}">
-        <div class="req-top">
-          <span class="req-status-pill">
-            <span class="req-status-icon">${STATUS_ICON[req.status] || '•'}</span>
-            ${STATUS_LABELS[req.status] || req.status}
-          </span>
+        <!-- colored status header -->
+        <div class="req-status-bar">
+          <div class="req-status-main">
+            <div class="req-status-emoji">${STATUS_ICON[req.status] || '•'}</div>
+            <div>
+              <div class="req-status-label">${STATUS_LABELS[req.status] || req.status}</div>
+              <div class="req-status-sub">${STATUS_DESC[req.status] || ''}</div>
+            </div>
+          </div>
           <span class="req-date">${formatDate(req.createdAt)}</span>
         </div>
 
-        <div class="req-desc">${STATUS_DESC[req.status] || ''}</div>
+        <div class="req-body">
+          ${(req.pickupDate || collectedCount > 0) ? `
+            <div class="req-chips">
+              ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
+              ${collectedCount > 0 ? `<span class="req-progress-chip ${collectedCount === totalCount ? 'all' : ''}">🚚 ขนแล้ว ${collectedCount}/${totalCount} ชิ้น</span>` : ''}
+            </div>` : ''}
 
-        ${(req.pickupDate || collectedCount > 0) ? `
-          <div class="req-chips">
-            ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
-            ${collectedCount > 0 ? `<span class="req-progress-chip ${collectedCount === totalCount ? 'all' : ''}">🚚 ขนแล้ว ${collectedCount}/${totalCount} ชิ้น</span>` : ''}
-          </div>` : ''}
+          <div class="req-section-label">รายการที่แจ้งทิ้ง (${totalCount})</div>
+          <div class="req-items">
+            ${req.items.map((it, i) => {
+              const ph = it.photos || [];
+              const main = ph[0];
+              const extra = ph.slice(1);
+              return `
+              <div class="req-item">
+                ${main
+                  ? `<img class="req-item-thumb" src="${escH(main.downloadUrl)}" alt="${escH(it.name)}" onclick="openLightbox('${escH(main.downloadUrl)}')" />`
+                  : `<div class="req-item-thumb placeholder">📦</div>`}
+                <div class="req-item-body">
+                  <div class="req-item-name ${it.collected ? 'collected' : ''}">
+                    ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
+                    ${it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
+                  </div>
+                  <div class="req-item-meta">${ph.length ? `📷 ${ph.length} รูป` : 'ไม่มีรูป'}</div>
+                  ${extra.length ? `
+                    <div class="req-extra-thumbs">
+                      ${extra.map(p =>
+                        `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" onclick="openLightbox('${escH(p.downloadUrl)}')" />`
+                      ).join('')}
+                    </div>` : ''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
 
-        <div class="req-divider"></div>
+          ${req.notes ? `<div class="req-note">📝 ${escH(req.notes)}</div>` : ''}
+          ${req.adminNote ? `<div class="req-admin-note">📌 จากนิติบุคคล: ${escH(req.adminNote)}</div>` : ''}
 
-        <div class="req-section-label">รายการที่แจ้งทิ้ง (${totalCount})</div>
-        <div class="req-items">
-          ${req.items.map((it, i) => `
-            <div class="req-item">
-              <div class="req-item-name ${it.collected ? 'collected' : ''}">
-                ${it.collected ? '✅' : `${i + 1}.`} ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
-                ${it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
-              </div>
-              ${(it.photos && it.photos.length) ? `
-                <div class="req-photos">
-                  ${it.photos.map(p =>
-                    `<img class="req-photo-thumb" src="${escH(p.downloadUrl)}"
-                          alt="${escH(p.fileName)}"
-                          onclick="openLightbox('${escH(p.downloadUrl)}')" />`
-                  ).join('')}
-                </div>` : ''}
-            </div>`).join('')}
-        </div>
-
-        ${req.notes ? `<div class="req-note">📝 ${escH(req.notes)}</div>` : ''}
-        ${req.adminNote ? `<div class="req-admin-note">📌 จากนิติบุคคล: ${escH(req.adminNote)}</div>` : ''}
-
-        <div class="req-foot">
-          <span class="ref">#${escH(req.id)}</span>
-          ${req.phone ? `<span>· 📞 ${escH(req.phone)}</span>` : ''}
+          <div class="req-foot">
+            <span class="ref">#${escH(req.id)}</span>
+            ${req.phone ? `<span>· 📞 ${escH(req.phone)}</span>` : ''}
+          </div>
         </div>
       </div>`;
     }).join('')}
