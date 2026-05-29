@@ -436,6 +436,71 @@
       font-size: 28px; color: #fff; cursor: pointer;
     }
 
+    /* tappable status card */
+    .req-card { cursor: pointer; transition: transform .12s, box-shadow .12s; }
+    .req-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(60,40,20,.06), 0 18px 44px rgba(60,40,20,.13);
+    }
+    .req-tap-hint {
+      font-size: 11px; color: var(--text-muted);
+      margin-left: auto; display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* ─── REQUEST DETAIL MODAL ─── */
+    .detail-overlay {
+      position: fixed; inset: 0; z-index: 280;
+      background: rgba(30,24,20,.55);
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 24px; overflow-y: auto;
+    }
+    .detail-overlay.open { display: flex; }
+    .detail-modal {
+      background: var(--bg); border-radius: 18px;
+      width: 100%; max-width: 540px; margin: auto;
+      position: relative; overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,.32);
+    }
+    .detail-close {
+      position: absolute; top: 14px; right: 14px; z-index: 2;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,.25); color: #fff;
+      border: none; font-size: 15px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .detail-section { padding: 18px 22px; }
+    .detail-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+    }
+    .detail-item {
+      background: #fff; border: 1px solid var(--border-soft);
+      border-radius: 14px; padding: 14px; margin-bottom: 12px;
+    }
+    .detail-item-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .detail-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-photos img {
+      width: 100%; aspect-ratio: 4/3; object-fit: cover;
+      border-radius: 10px; cursor: pointer; border: 1px solid var(--border-soft);
+    }
+    .detail-contact {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+    }
+    .detail-contact a, .detail-contact span {
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      border-radius: 9px; padding: 8px 14px;
+    }
+    .detail-contact .c-phone { background: var(--accent-pale); color: var(--accent-deep); }
+    .detail-contact .c-line { background: var(--status-ok-bg); color: var(--status-ok); }
+    .detail-meta-row {
+      display: flex; justify-content: space-between; gap: 10px;
+      font-size: 12px; color: var(--text-soft);
+      padding: 6px 0; border-bottom: 1px dashed var(--border-soft);
+    }
+    .detail-meta-row:last-child { border-bottom: none; }
+    .detail-meta-row .v { color: var(--text); font-weight: 600; text-align: right; }
+
     /* ─── PRINT ─── */
     @media print { header, .hero, .login-gate, #historySection { display: none; } }
 
@@ -575,6 +640,14 @@
   </div>
 </div>
 
+<!-- ─── REQUEST DETAIL MODAL ─── -->
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeMyRequest()">
+  <div class="detail-modal">
+    <button class="detail-close" onclick="closeMyRequest()" aria-label="ปิด">✕</button>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
 <!-- ─── LIGHTBOX ─── -->
 <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -590,6 +663,8 @@ const SUBMIT_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctio
 const MY_REQUESTS_URL      = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getMyBulkyWasteRequests';
 const MAX_PHOTOS_PER_ITEM  = 8;
 const MAX_PHOTO_BYTES      = 8 * 1024 * 1024;
+
+let myRequests = [];  // last loaded requests (for detail view)
 
 // ── Session helpers ───────────────────────────────────────────────────────────
 function getResidentSession() {
@@ -752,6 +827,76 @@ function closeLightbox() {
   document.getElementById('lightboxImg').src = '';
 }
 
+// ── Request detail modal ──────────────────────────────────────────────────────
+function openMyRequest(id) {
+  const req = myRequests.find(r => r.id === id);
+  if (!req) return;
+  const collected = (req.items || []).filter(it => it.collected).length;
+  const total = (req.items || []).length;
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="req-status-bar status-${escH(req.status)}"
+         style="background:${statusBarGradient(req.status)};">
+      <div class="req-status-main">
+        <div class="req-status-emoji">${STATUS_ICON[req.status] || '•'}</div>
+        <div>
+          <div class="req-status-label">${STATUS_LABELS[req.status] || req.status}</div>
+          <div class="req-status-sub">${STATUS_DESC[req.status] || ''}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      ${(req.pickupDate || collected > 0) ? `
+        <div class="req-chips">
+          ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
+          ${collected > 0 ? `<span class="req-progress-chip ${collected === total ? 'all' : ''}">🚚 ขนแล้ว ${collected}/${total} ชิ้น</span>` : ''}
+        </div>` : ''}
+
+      <div class="detail-label">รายการที่แจ้งทิ้ง (${total})</div>
+      ${req.items.map((it, i) => `
+        <div class="detail-item">
+          <div class="detail-item-name ${it.collected ? 'collected' : ''}">
+            ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
+            ${it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
+          </div>
+          ${(it.photos && it.photos.length) ? `
+            <div class="detail-photos">
+              ${it.photos.map(p =>
+                `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" onclick="openLightbox('${escH(p.downloadUrl)}')" />`
+              ).join('')}
+            </div>` : `<div class="req-item-meta">ไม่มีรูป</div>`}
+        </div>`).join('')}
+
+      ${req.notes ? `<div class="req-note">📝 ${escH(req.notes)}</div>` : ''}
+      ${req.adminNote ? `<div class="req-admin-note">📌 จากนิติบุคคล: ${escH(req.adminNote)}</div>` : ''}
+
+      ${(req.phone || req.lineId) ? `
+        <div class="detail-label" style="margin-top:18px;">ข้อมูลติดต่อ</div>
+        <div class="detail-contact">
+          ${req.phone ? `<a class="c-phone" href="tel:${escH(req.phone)}">📞 ${escH(req.phone)}</a>` : ''}
+          ${req.lineId ? `<span class="c-line">💬 LINE: ${escH(req.lineId)}</span>` : ''}
+        </div>` : ''}
+
+      <div class="detail-label" style="margin-top:18px;">ข้อมูลคำขอ</div>
+      <div class="detail-meta-row"><span>แจ้งเมื่อ</span><span class="v">${formatDate(req.createdAt)}</span></div>
+      <div class="detail-meta-row"><span>สถานะ</span><span class="v">${STATUS_LABELS[req.status] || req.status}</span></div>
+      <div class="detail-meta-row"><span>เลขอ้างอิง</span><span class="v" style="font-family:monospace;font-weight:500;">#${escH(req.id)}</span></div>
+    </div>`;
+
+  document.getElementById('detailOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMyRequest() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function statusBarGradient(status) {
+  if (status === 'completed') return 'linear-gradient(135deg,#4f8038,#3f6431)';
+  if (status === 'cancelled') return 'linear-gradient(135deg,#9a9a9a,#7a7a7a)';
+  return 'linear-gradient(135deg,#c9842f,#a8641f)';
+}
+
 // ── Status labels ─────────────────────────────────────────────────────────────
 const STATUS_LABELS = {
   submitted: 'ส่งคำขอแล้ว',
@@ -795,6 +940,7 @@ async function loadHistory(session, decideView) {
     });
     const data = await resp.json();
     const hasReqs = data.ok && data.requests && data.requests.length;
+    myRequests = hasReqs ? data.requests : [];
     // back-to-status link only makes sense when there are requests
     document.getElementById('backToStatusBtn').style.display =
       hasReqs ? 'inline-block' : 'none';
@@ -808,7 +954,7 @@ async function loadHistory(session, decideView) {
       const collectedCount = (req.items || []).filter(it => it.collected).length;
       const totalCount = (req.items || []).length;
       return `
-      <div class="req-card status-${escH(req.status)}">
+      <div class="req-card status-${escH(req.status)}" onclick="openMyRequest('${escH(req.id)}')">
         <!-- colored status header -->
         <div class="req-status-bar">
           <div class="req-status-main">
@@ -837,7 +983,7 @@ async function loadHistory(session, decideView) {
               return `
               <div class="req-item">
                 ${main
-                  ? `<img class="req-item-thumb" src="${escH(main.downloadUrl)}" alt="${escH(it.name)}" onclick="openLightbox('${escH(main.downloadUrl)}')" />`
+                  ? `<img class="req-item-thumb" src="${escH(main.downloadUrl)}" alt="${escH(it.name)}" onclick="event.stopPropagation();openLightbox('${escH(main.downloadUrl)}')" />`
                   : `<div class="req-item-thumb placeholder">📦</div>`}
                 <div class="req-item-body">
                   <div class="req-item-name ${it.collected ? 'collected' : ''}">
@@ -848,7 +994,7 @@ async function loadHistory(session, decideView) {
                   ${extra.length ? `
                     <div class="req-extra-thumbs">
                       ${extra.map(p =>
-                        `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" onclick="openLightbox('${escH(p.downloadUrl)}')" />`
+                        `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" onclick="event.stopPropagation();openLightbox('${escH(p.downloadUrl)}')" />`
                       ).join('')}
                     </div>` : ''}
                 </div>
@@ -862,6 +1008,7 @@ async function loadHistory(session, decideView) {
           <div class="req-foot">
             <span class="ref">#${escH(req.id)}</span>
             ${req.phone ? `<span>· 📞 ${escH(req.phone)}</span>` : ''}
+            <span class="req-tap-hint">แตะเพื่อดูรายละเอียด ›</span>
           </div>
         </div>
       </div>`;
@@ -1083,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('loginPin').focus();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeLoginModal(); closeLightbox(); }
+    if (e.key === 'Escape') { closeLoginModal(); closeLightbox(); closeMyRequest(); }
   });
 });
 </script>
