@@ -1450,7 +1450,12 @@
       let lprCell = '—';
       if (lpr) {
         if (lpr.ok) {
-          lprCell = `<span style="color:#22c55e">✓ Synced</span>`;
+          const hasChanges = (lpr.toAdd || []).length || (lpr.toRemove || []).length;
+          if (hasChanges) {
+            lprCell = `<span style="color:#22c55e">✓ Synced</span>`;
+          } else {
+            lprCell = `<span style="color:#a16207" title="ไม่มีรายการ add/remove ไปที่ LPR">No LPR change</span>`;
+          }
         } else {
           // Errors live in lpr.results[].errors, not lpr.errors
           const allErrors = [];
