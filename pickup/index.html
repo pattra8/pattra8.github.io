@@ -295,26 +295,39 @@
       box-shadow: 0 2px 4px rgba(60,40,20,.04), 0 14px 36px rgba(60,40,20,.09);
     }
 
-    /* colored status header bar — the focal point */
-    .req-status-bar {
+    /* detail header — item summary is the focal point, status is secondary */
+    .detail-head {
+      background: #fff; padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .detail-head-row {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; flex-wrap: wrap;
-      padding: 16px 22px; color: #fff;
+      gap: 10px; margin-bottom: 11px; padding-right: 44px;
     }
-    .status-submitted .req-status-bar,
-    .status-scheduled .req-status-bar { background: linear-gradient(135deg, #c9842f, #a8641f); }
-    .status-completed .req-status-bar { background: linear-gradient(135deg, #4f8038, #3f6431); }
-    .status-cancelled .req-status-bar { background: linear-gradient(135deg, #9a9a9a, #7a7a7a); }
-    .req-status-main { display: flex; align-items: center; gap: 12px; }
-    .req-status-emoji {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: rgba(255,255,255,.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
+    .detail-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--text-muted);
     }
-    .req-status-label { font-size: 17px; font-weight: 800; line-height: 1.15; }
-    .req-status-sub { font-size: 12px; opacity: .9; margin-top: 1px; }
-    .req-date { font-size: 12px; color: rgba(255,255,255,.92); white-space: nowrap; }
+    .detail-head-title {
+      font-size: 21px; font-weight: 800; color: var(--text);
+      line-height: 1.28; padding-right: 30px;
+    }
+    .detail-head-more { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+    .detail-head-meta { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+
+    /* slim status strip under the header */
+    .detail-status-note {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 22px; font-size: 13px; font-weight: 600;
+    }
+    .detail-status-note.status-submitted,
+    .detail-status-note.status-scheduled {
+      background: var(--status-warn-bg); color: var(--status-warn);
+    }
+    .detail-status-note.status-completed {
+      background: var(--status-ok-bg); color: var(--status-ok);
+    }
+    .detail-status-note.status-cancelled { background: #f1f1f1; color: #777; }
 
     .req-body { padding: 18px 22px 20px; }
 
@@ -506,12 +519,13 @@
       box-shadow: 0 24px 64px rgba(0,0,0,.32);
     }
     .detail-close {
-      position: absolute; top: 14px; right: 14px; z-index: 2;
-      width: 34px; height: 34px; border-radius: 50%;
-      background: rgba(255,255,255,.25); color: #fff;
-      border: none; font-size: 15px; cursor: pointer;
+      position: absolute; top: 16px; right: 16px; z-index: 2;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0,0,0,.06); color: var(--text-muted);
+      border: none; font-size: 14px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
     }
+    .detail-close:hover { background: rgba(0,0,0,.1); }
     .detail-section { padding: 18px 22px; }
     .detail-label {
       font-size: 11px; font-weight: 700; letter-spacing: .07em;
@@ -892,16 +906,24 @@ function openMyRequest(id) {
   const collected = (req.items || []).filter(it => it.collected).length;
   const total = (req.items || []).length;
 
+  const names = (req.items || []).map(it => it.name).filter(Boolean);
+  const firstName = names[0] || 'รายการทิ้งของ';
+  const itemSummary = names.length > 1
+    ? `${escH(firstName)} <span class="detail-head-more">+ อีก ${names.length - 1} รายการ</span>`
+    : escH(firstName);
+
   document.getElementById('detailBody').innerHTML = `
-    <div class="req-status-bar status-${escH(req.status)}"
-         style="background:${statusBarGradient(req.status)};">
-      <div class="req-status-main">
-        <div class="req-status-emoji">${STATUS_ICON[req.status] || '•'}</div>
-        <div>
-          <div class="req-status-label">${STATUS_LABELS[req.status] || req.status}</div>
-          <div class="req-status-sub">${STATUS_DESC[req.status] || ''}</div>
-        </div>
+    <div class="detail-head status-${escH(req.status)}">
+      <div class="detail-head-row">
+        <span class="detail-eyebrow">คำขอทิ้งของใหญ่ · บ้าน ${escH(req.houseNo)}</span>
+        <span class="req-pill">${STATUS_ICON[req.status] || '•'} ${STATUS_LABELS[req.status] || req.status}</span>
       </div>
+      <div class="detail-head-title">${itemSummary}</div>
+      <div class="detail-head-meta">📅 แจ้งเมื่อ ${formatDate(req.createdAt)} · ${total} รายการ</div>
+    </div>
+    <div class="detail-status-note status-${escH(req.status)}">
+      <span>${STATUS_ICON[req.status] || '•'}</span>
+      <span>${STATUS_DESC[req.status] || ''}</span>
     </div>
 
     <div class="detail-section">
@@ -937,8 +959,6 @@ function openMyRequest(id) {
         </div>` : ''}
 
       <div class="detail-label" style="margin-top:18px;">ข้อมูลคำขอ</div>
-      <div class="detail-meta-row"><span>แจ้งเมื่อ</span><span class="v">${formatDate(req.createdAt)}</span></div>
-      <div class="detail-meta-row"><span>สถานะ</span><span class="v">${STATUS_LABELS[req.status] || req.status}</span></div>
       <div class="detail-meta-row"><span>เลขอ้างอิง</span><span class="v" style="font-family:monospace;font-weight:500;">#${escH(req.id)}</span></div>
 
       ${req.status === 'submitted' ? `
@@ -978,11 +998,6 @@ async function deleteMyRequest(id) {
 function closeMyRequest() {
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
-}
-function statusBarGradient(status) {
-  if (status === 'completed') return 'linear-gradient(135deg,#4f8038,#3f6431)';
-  if (status === 'cancelled') return 'linear-gradient(135deg,#9a9a9a,#7a7a7a)';
-  return 'linear-gradient(135deg,#c9842f,#a8641f)';
 }
 
 // ── Status labels ─────────────────────────────────────────────────────────────
