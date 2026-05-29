@@ -447,6 +447,11 @@
   <!-- Form section — shown when logged in -->
   <div id="formSection" style="display:none">
 
+    <button id="backToStatusBtn" onclick="showStatusView()"
+      style="display:none;background:none;border:none;color:var(--accent-text);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;padding:0 0 14px;">
+      ← กลับไปดูสถานะคำขอ
+    </button>
+
     <div class="section">
       <div class="section-title">🏠 ข้อมูลบ้าน</div>
       <div class="form-group">
@@ -496,10 +501,16 @@
     </div>
   </div>
 
-  <!-- History section -->
+  <!-- Status view — full page after submitting -->
   <div id="historySection" style="display:none">
     <div class="section">
-      <div class="section-title">📋 ติดตามสถานะคำขอของฉัน</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
+        <div class="section-title" style="margin-bottom:0;">📋 สถานะคำขอของฉัน</div>
+        <button onclick="showFormView()"
+          style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
+          ➕ แจ้งทิ้งของเพิ่ม
+        </button>
+      </div>
       <div id="historyList"><div class="empty-state">กำลังโหลด…</div></div>
     </div>
   </div>
@@ -741,7 +752,7 @@ function formatDate(iso) {
   });
 }
 
-async function loadHistory(session) {
+async function loadHistory(session, decideView) {
   const el = document.getElementById('historyList');
   el.innerHTML = '<div class="empty-state">กำลังโหลด…</div>';
   try {
@@ -751,10 +762,16 @@ async function loadHistory(session) {
       body: JSON.stringify({ houseNo: session.houseNo, pin: session.pin }),
     });
     const data = await resp.json();
-    if (!data.ok || !data.requests.length) {
+    const hasReqs = data.ok && data.requests && data.requests.length;
+    // back-to-status link only makes sense when there are requests
+    document.getElementById('backToStatusBtn').style.display =
+      hasReqs ? 'inline-block' : 'none';
+    if (!hasReqs) {
       el.innerHTML = '<div class="empty-state">ยังไม่มีคำขอ</div>';
+      if (decideView) showFormView();
       return;
     }
+    if (decideView) showStatusView();
     el.innerHTML = `<div class="req-list">${data.requests.map(req => {
       const collectedCount = (req.items || []).filter(it => it.collected).length;
       const totalCount = (req.items || []).length;
@@ -804,7 +821,20 @@ async function loadHistory(session) {
     </div>`;
   } catch {
     el.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
+    if (decideView) showFormView();
   }
+}
+
+// ── View toggle: form vs status ───────────────────────────────────────────────
+function showFormView() {
+  document.getElementById('formSection').style.display = 'block';
+  document.getElementById('historySection').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function showStatusView() {
+  document.getElementById('formSection').style.display = 'none';
+  document.getElementById('historySection').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── Submit ────────────────────────────────────────────────────────────────────
@@ -863,11 +893,11 @@ async function submitRequest() {
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error || 'เกิดข้อผิดพลาด');
 
-    showMsg('ok', `✅ ส่งคำขอเรียบร้อย! ดูสถานะคำขอด้านล่าง ↓`);
+    hideMsg();
     resetForm();
     await loadHistory(session);
-    // close the journey: bring the resident straight to their status
-    document.getElementById('historySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // close the journey: switch to the full-page status view
+    showStatusView();
   } catch (err) {
     showMsg('err', `❌ ${err.message}`);
   } finally {
@@ -966,9 +996,11 @@ function renderPage() {
     return;
   }
 
-  gate.style.display    = 'none';
+  gate.style.display = 'none';
+  // start on the form; loadHistory(decideView=true) flips to the status
+  // view if this house already has requests
   formSec.style.display = 'block';
-  histSec.style.display = 'block';
+  histSec.style.display = 'none';
 
   document.getElementById('fieldHouseNo').value = session.houseNo;
 
@@ -985,7 +1017,7 @@ function renderPage() {
     }
   } catch {}
 
-  loadHistory(session);
+  loadHistory(session, /* decideView */ true);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
