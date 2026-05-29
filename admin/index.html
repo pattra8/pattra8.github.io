@@ -1070,12 +1070,6 @@
 
       <!-- Toolbar -->
       <div class="pickup-toolbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <select id="pickupStatusFilter" onchange="loadPickupRequests()"
-          style="border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card);outline:none;">
-          <option value="">ทุกสถานะ</option>
-          <option value="submitted">🟡 ยังไม่ทิ้ง</option>
-          <option value="completed">🟢 ทิ้งแล้ว</option>
-        </select>
         <button class="toolbar-btn" onclick="loadPickupRequests()">↺ รีโหลด</button>
         <button class="toolbar-btn" id="pickupSelectAllBtn" onclick="togglePickupSelectAll()">☑ เลือกทั้งหมด</button>
         <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintAll()"
@@ -1316,6 +1310,21 @@
     background: var(--card); border: 1px solid var(--border-soft);
     border-radius: 12px; padding: 14px 18px; text-align: center;
   }
+  .stat-card.is-filter {
+    cursor: pointer;
+    transition: transform .15s, border-color .15s, box-shadow .15s,
+      background .15s;
+  }
+  .stat-card.is-filter:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 18px rgba(60,40,20,0.08);
+  }
+  .stat-card.is-active {
+    background: var(--accent-pale);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(196,122,44,0.12);
+  }
   .stat-card-num  { font-size: 24px; font-weight: 700; color: var(--accent); }
   .stat-card-label{ font-size: 12px; color: var(--text-soft); margin-top: 2px; }
 
@@ -1328,7 +1337,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
-    #pickupTab .pickup-toolbar select { grid-column: 1 / -1; }
     #pickupTab .pickup-toolbar-count { grid-column: 1 / -1; text-align: right; }
     #pickupTab .pickup-toolbar-print { grid-column: 1 / -1; }
     #pickupStats { grid-template-columns: 1fr 1fr !important; }
@@ -3197,6 +3205,7 @@ function pickupAllPhotos(req) {
 
 let pickupRequests = [];
 let currentPickupId = null;
+let currentPickupFilter = 'all';
 const pickupSelected = new Set();
 
 // ── Multi-select (bulk status change) ───────────────────────────────────────
@@ -3209,7 +3218,7 @@ function togglePickupSelect(id, checked) {
 }
 
 function togglePickupSelectAll() {
-  const visibleIds = pickupRequests.map(r => r.id);
+  const visibleIds = getFilteredPickupRequests().map(r => r.id);
   const allSelected = visibleIds.length > 0 &&
     visibleIds.every(id => pickupSelected.has(id));
   if (allSelected) {
@@ -3217,13 +3226,13 @@ function togglePickupSelectAll() {
   } else {
     visibleIds.forEach(id => pickupSelected.add(id));
   }
-  renderPickupList(pickupRequests);
+  renderPickupList(getFilteredPickupRequests());
   updatePickupBulkBar();
 }
 
 function clearPickupSelection() {
   pickupSelected.clear();
-  renderPickupList(pickupRequests);
+  renderPickupList(getFilteredPickupRequests());
   updatePickupBulkBar();
 }
 
@@ -3235,7 +3244,7 @@ function updatePickupBulkBar() {
     document.getElementById('pickupBulkCount').textContent =
       `เลือกแล้ว ${n} รายการ`;
   }
-  const visibleIds = pickupRequests.map(r => r.id);
+  const visibleIds = getFilteredPickupRequests().map(r => r.id);
   const allSelected = visibleIds.length > 0 &&
     visibleIds.every(id => pickupSelected.has(id));
   const btn = document.getElementById('pickupSelectAllBtn');
@@ -3300,11 +3309,26 @@ function pickupFormatDate(iso) {
   });
 }
 
+function getFilteredPickupRequests() {
+  if (currentPickupFilter === 'completed') {
+    return pickupRequests.filter(r => r.status === 'completed');
+  }
+  if (currentPickupFilter === 'submitted') {
+    return pickupRequests.filter(r => r.status !== 'completed');
+  }
+  return pickupRequests;
+}
+
+function setPickupFilter(nextFilter) {
+  currentPickupFilter = nextFilter;
+  renderPickupStats(pickupRequests);
+  renderPickupList(getFilteredPickupRequests());
+  updatePickupBulkBar();
+}
+
 async function loadPickupRequests() {
   const { adminHouseNo, adminPin } = getAdminAuth();
   const listEl = document.getElementById('pickupList');
-  const countEl = document.getElementById('pickupRecordCount');
-  const statusFilter = document.getElementById('pickupStatusFilter').value;
 
   listEl.innerHTML = '<div style="color:var(--text-muted);padding:40px;text-align:center;">กำลังโหลด…</div>';
 
@@ -3312,7 +3336,7 @@ async function loadPickupRequests() {
     const resp = await fetch(MANAGE_PICKUP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminHouseNo, adminPin, action: 'list', status: statusFilter }),
+      body: JSON.stringify({ adminHouseNo, adminPin, action: 'list' }),
     });
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error);
@@ -3321,9 +3345,8 @@ async function loadPickupRequests() {
     // Drop selections that are no longer in the current list.
     const liveIds = new Set(pickupRequests.map(r => r.id));
     [...pickupSelected].forEach(id => { if (!liveIds.has(id)) pickupSelected.delete(id); });
-    countEl.textContent = `${pickupRequests.length} รายการ`;
     renderPickupStats(pickupRequests);
-    renderPickupList(pickupRequests);
+    renderPickupList(getFilteredPickupRequests());
     updatePickupBulkBar();
   } catch (err) {
     listEl.innerHTML = `<div style="color:var(--status-error);padding:24px;">โหลดไม่สำเร็จ: ${escH(err.message)}</div>`;
@@ -3335,11 +3358,12 @@ function renderPickupStats(requests) {
   const done = requests.filter(r => r.status === 'completed').length;
   const pending = requests.length - done;
   document.getElementById('pickupStats').innerHTML = [
-    ['ทั้งหมด', requests.length, ''],
-    ['🟡 ยังไม่ทิ้ง', pending, 'color:var(--status-pending)'],
-    ['🟢 ทิ้งแล้ว', done, 'color:var(--status-ok)'],
-  ].map(([label, num, style]) => `
-    <div class="stat-card">
+    ['all', 'ทั้งหมด', requests.length, ''],
+    ['submitted', '🟡 ยังไม่ทิ้ง', pending, 'color:var(--status-pending)'],
+    ['completed', '🟢 ทิ้งแล้ว', done, 'color:var(--status-ok)'],
+  ].map(([filter, label, num, style]) => `
+    <div class="stat-card is-filter ${currentPickupFilter === filter ? 'is-active' : ''}"
+      onclick="setPickupFilter('${filter}')">
       <div class="stat-card-num" style="${style}">${num}</div>
       <div class="stat-card-label">${label}</div>
     </div>`).join('');
@@ -3347,6 +3371,8 @@ function renderPickupStats(requests) {
 
 function renderPickupList(requests) {
   const listEl = document.getElementById('pickupList');
+  const countEl = document.getElementById('pickupRecordCount');
+  countEl.textContent = `${requests.length} รายการ`;
   if (!requests.length) {
     listEl.innerHTML = '<div style="color:var(--text-muted);padding:40px;text-align:center;">ไม่มีรายการ</div>';
     return;
@@ -3396,7 +3422,7 @@ async function quickSetStatus(id, newStatus) {
   const req = pickupRequests.find(r => r.id === id);
   if (req) req.status = newStatus; // optimistic
   renderPickupStats(pickupRequests);
-  renderPickupList(pickupRequests);
+  renderPickupList(getFilteredPickupRequests());
   try {
     const resp = await fetch(MANAGE_PICKUP_URL, {
       method: 'POST',
