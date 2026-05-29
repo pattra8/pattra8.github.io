@@ -1079,9 +1079,12 @@
           <option value="cancelled">ยกเลิก</option>
         </select>
         <button class="toolbar-btn" onclick="loadPickupRequests()">↺ รีโหลด</button>
-        <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintScheduled()"
-          style="background:var(--accent-pale);color:var(--accent-deep);border-color:var(--accent);">
-          🖨 พิมพ์รายการนัดรับ
+        <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintAll()"
+          style="background:var(--accent);color:#fff;border-color:var(--accent);">
+          🖨 พิมพ์ทั้งหมด (PDF)
+        </button>
+        <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintScheduled()">
+          🚚 พิมพ์เฉพาะนัดรับ
         </button>
         <span id="pickupRecordCount" class="record-count pickup-toolbar-count" style="margin-left:auto;"></span>
       </div>
@@ -3565,7 +3568,25 @@ async function batchPrintScheduled() {
 
   document.getElementById('pickupPrintArea').innerHTML =
     scheduled.map(req => buildPrintPage(req)).join('');
-  if (batchBtn) { batchBtn.disabled = false; batchBtn.textContent = '🖨 พิมพ์รายการนัดรับ'; }
+  if (batchBtn) { batchBtn.disabled = false; batchBtn.textContent = '🚚 พิมพ์เฉพาะนัดรับ'; }
+  window.print();
+}
+
+// Print every request currently shown (respects the status filter).
+async function batchPrintAll() {
+  if (!pickupRequests.length) {
+    alert('ไม่มีรายการให้พิมพ์'); return;
+  }
+
+  const btn = document.querySelector('button[onclick="batchPrintAll()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังโหลดรูป…'; }
+
+  const urls = pickupRequests.flatMap(r => pickupAllPhotos(r).map(p => p.downloadUrl));
+  await preloadImages(urls);
+
+  document.getElementById('pickupPrintArea').innerHTML =
+    pickupRequests.map(req => buildPrintPage(req)).join('');
+  if (btn) { btn.disabled = false; btn.textContent = '🖨 พิมพ์ทั้งหมด (PDF)'; }
   window.print();
 }
 </script>
