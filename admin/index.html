@@ -1324,6 +1324,20 @@
     border-bottom: 1px dotted #e0e0e0; padding-bottom: 2px;
   }
   .pp-items li:last-child { border-bottom: none; }
+  /* per-item block with photos (print) */
+  .pp-item {
+    margin-bottom: 12px; padding-bottom: 12px;
+    border-bottom: 1px solid #eee; page-break-inside: avoid;
+  }
+  .pp-item:last-child { border-bottom: none; }
+  .pp-item-head { font-size: 14px; color: #1a1a1a; margin-bottom: 8px; }
+  .pp-item-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 700;
+    margin-right: 6px; vertical-align: middle;
+  }
+  .pp-nophoto { font-size: 11px; color: #aaa; padding: 2px 0 0 26px; }
   .pp-notes {
     font-size: 13px; color: #333; background: #fffbf0;
     border-left: 3px solid #c47a2c; padding: 8px 10px;
@@ -3117,6 +3131,11 @@
 const MANAGE_PICKUP_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/manageBulkyWasteRequests';
 const escH = typeof escHtml === 'function' ? escHtml : (s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])));
 
+// Flatten every photo across all items (photos are now stored per item)
+function pickupAllPhotos(req) {
+  return (req.items || []).flatMap(it => it.photos || []);
+}
+
 let pickupRequests = [];
 let currentPickupId = null;
 
@@ -3207,16 +3226,17 @@ function renderPickupList(requests) {
           ${req.items.length > 3 ? `<li style="color:var(--text-muted)">+${req.items.length - 3} รายการ</li>` : ''}
         </ul>
         ${req.notes ? `<div style="font-size:12px;color:var(--text-soft);margin-top:4px;font-style:italic;">${escH(req.notes)}</div>` : ''}
-        ${req.photos.length ? `
+        ${(() => { const all = pickupAllPhotos(req); return all.length ? `
           <div class="pickup-thumbs">
-            ${req.photos.slice(0, 4).map(p =>
+            ${all.slice(0, 4).map(p =>
               `<img class="pickup-thumb" src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />`
             ).join('')}
-            ${req.photos.length > 4 ? `<div style="width:40px;height:40px;background:var(--bg-soft);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)">+${req.photos.length - 4}</div>` : ''}
-          </div>` : ''}
+            ${all.length > 4 ? `<div style="width:40px;height:40px;background:var(--bg-soft);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)">+${all.length - 4}</div>` : ''}
+          </div>` : ''; })()}
       </div>
-      <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;">
-        ${req.items.length} รายการ
+      <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;text-align:right;">
+        ${req.items.length} รายการ<br>
+        <span style="font-size:11px;">${pickupAllPhotos(req).length} รูป</span>
       </div>
     </div>`).join('');
 }
@@ -3240,30 +3260,31 @@ function openPickupModal(id) {
       </div>
 
       <div>
-        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">รายการสิ่งของ</div>
-        <ol style="margin-left:20px;font-size:14px;line-height:1.8;">
-          ${req.items.map(it =>
-            `<li>${escH(it.name)}${it.qty > 1 ? ` <span style="color:var(--text-muted)">× ${it.qty}</span>` : ''}${it.note ? ` — <em style="color:var(--text-soft)">${escH(it.note)}</em>` : ''}</li>`
-          ).join('')}
-        </ol>
+        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">รายการสิ่งของ (${req.items.length})</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          ${req.items.map((it, i) => `
+            <div style="border:1px solid var(--border-soft);border-radius:10px;padding:12px 14px;background:var(--bg-soft);">
+              <div style="font-size:14px;font-weight:700;color:var(--text);">
+                ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` <span style="color:var(--text-muted);font-weight:500;">× ${it.qty}</span>` : ''}
+              </div>
+              ${it.note ? `<div style="font-size:12.5px;color:var(--text-soft);font-style:italic;margin-top:2px;">${escH(it.note)}</div>` : ''}
+              ${(it.photos && it.photos.length) ? `
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+                  ${it.photos.map(p => `
+                    <a href="${escH(p.downloadUrl)}" target="_blank">
+                      <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}"
+                           style="width:74px;height:74px;object-fit:cover;border-radius:8px;border:1px solid var(--border-soft);" />
+                    </a>`).join('')}
+                </div>`
+                : `<div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">— ไม่มีรูป —</div>`}
+            </div>`).join('')}
+        </div>
       </div>
 
       ${req.notes ? `
       <div>
         <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">หมายเหตุ</div>
         <div style="font-size:13.5px;color:var(--text-body);font-style:italic;">${escH(req.notes)}</div>
-      </div>` : ''}
-
-      ${req.photos.length ? `
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;">รูปถ่าย (${req.photos.length})</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          ${req.photos.map(p => `
-            <a href="${escH(p.downloadUrl)}" target="_blank">
-              <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}"
-                   style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border-soft);" />
-            </a>`).join('')}
-        </div>
       </div>` : ''}
 
       <div style="border-top:1px solid var(--border-soft);padding-top:16px;">
@@ -3347,11 +3368,7 @@ function buildPrintPage(req) {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 
-  // split photos into pairs for 2-column grid
-  const photoRows = [];
-  for (let i = 0; i < req.photos.length; i += 2) {
-    photoRows.push(req.photos.slice(i, i + 2));
-  }
+  const totalPhotos = pickupAllPhotos(req).length;
 
   return `
     <div class="pp">
@@ -3387,14 +3404,22 @@ function buildPrintPage(req) {
         </div>
       </div>
 
-      <!-- ITEMS -->
+      <!-- ITEMS — each with its own photos -->
       <div class="pp-section">
-        <div class="pp-section-title">รายการสิ่งของ (${req.items.length} รายการ)</div>
-        <ol class="pp-items">
-          ${req.items.map(it =>
-            `<li><strong>${escH(it.name)}</strong>${it.qty > 1 ? `<span style="color:#666;"> จำนวน ${it.qty} ชิ้น</span>` : ''}${it.note ? `<span style="color:#666;"> — ${escH(it.note)}</span>` : ''}</li>`
-          ).join('')}
-        </ol>
+        <div class="pp-section-title">รายการสิ่งของ (${req.items.length} รายการ · ${totalPhotos} รูป)</div>
+        ${req.items.map((it, i) => `
+          <div class="pp-item">
+            <div class="pp-item-head">
+              <span class="pp-item-num">${i + 1}</span>
+              <strong>${escH(it.name)}</strong>${it.qty > 1 ? `<span style="color:#666;font-weight:400;"> จำนวน ${it.qty} ชิ้น</span>` : ''}${it.note ? `<span style="color:#666;font-weight:400;"> — ${escH(it.note)}</span>` : ''}
+            </div>
+            ${(it.photos && it.photos.length) ? `
+              <div class="pp-photos">
+                ${it.photos.map(p =>
+                  `<img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />`
+                ).join('')}
+              </div>` : `<div class="pp-nophoto">— ไม่มีรูป —</div>`}
+          </div>`).join('')}
       </div>
 
       <!-- NOTES -->
@@ -3404,23 +3429,6 @@ function buildPrintPage(req) {
         ${req.notes ? `<div class="pp-notes">${escH(req.notes)}</div>` : ''}
         ${req.adminNote ? `<div style="font-size:12px;color:#555;margin-top:6px;padding:6px 10px;background:#f0f7ff;border-radius:4px;border-left:3px solid #3b82f6;">Admin: ${escH(req.adminNote)}</div>` : ''}
       </div>` : ''}
-
-      <!-- PHOTOS — 2 col, large -->
-      ${req.photos.length ? `
-      <div class="pp-section">
-        <div class="pp-section-title">รูปถ่ายสิ่งของ (${req.photos.length} รูป)</div>
-        <div class="pp-photos">
-          ${req.photos.map(p => `
-            <div>
-              <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />
-              <div class="pp-photo-cap">${escH(p.fileName)}</div>
-            </div>`).join('')}
-        </div>
-      </div>` : `
-      <div class="pp-section">
-        <div class="pp-section-title">รูปถ่ายสิ่งของ</div>
-        <div style="font-size:12px;color:#aaa;padding:10px 0;">ไม่มีรูปถ่าย</div>
-      </div>`}
 
       <!-- SIGNATURE ROW -->
       <div class="pp-sig">
@@ -3457,7 +3465,7 @@ async function printPickupRequest() {
   const printBtn = document.querySelector('button[onclick="printPickupRequest()"]');
   if (printBtn) { printBtn.disabled = true; printBtn.textContent = '⏳ กำลังโหลดรูป…'; }
 
-  const urls = req.photos.map(p => p.downloadUrl);
+  const urls = pickupAllPhotos(req).map(p => p.downloadUrl);
   await preloadImages(urls);
 
   document.getElementById('pickupPrintArea').innerHTML = buildPrintPage(req);
@@ -3474,7 +3482,7 @@ async function batchPrintScheduled() {
   const batchBtn = document.querySelector('button[onclick="batchPrintScheduled()"]');
   if (batchBtn) { batchBtn.disabled = true; batchBtn.textContent = '⏳ กำลังโหลดรูป…'; }
 
-  const urls = scheduled.flatMap(r => r.photos.map(p => p.downloadUrl));
+  const urls = scheduled.flatMap(r => pickupAllPhotos(r).map(p => p.downloadUrl));
   await preloadImages(urls);
 
   document.getElementById('pickupPrintArea').innerHTML =

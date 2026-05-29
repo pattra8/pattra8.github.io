@@ -142,15 +142,36 @@
     .form-input[readonly] { background: var(--bg-soft); color: var(--text-soft); }
     textarea.form-input { resize: vertical; min-height: 80px; }
 
-    /* ─── ITEM ROWS ─── */
-    .items-list { display: flex; flex-direction: column; gap: 10px; }
-    .item-row {
-      display: grid;
-      grid-template-columns: 1fr 72px auto;
-      gap: 8px; align-items: center;
+    /* ─── ITEM CARDS ─── */
+    .items-list { display: flex; flex-direction: column; gap: 14px; }
+    .item-card {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: var(--bg-soft);
     }
-    .item-row input { margin: 0; }
-    .item-qty { width: 72px; text-align: center; }
+    .item-card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .item-card-num {
+      font-size: 13px; font-weight: 700; color: var(--accent-deep);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .item-card-num .num-badge {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 12px; display: flex; align-items: center; justify-content: center;
+    }
+    .item-name-row {
+      display: grid; grid-template-columns: 1fr 70px;
+      gap: 8px; margin-bottom: 12px;
+    }
+    .item-name-row input { margin: 0; }
+    .item-qty { text-align: center; }
+    /* compact photo drop inside item card */
+    .item-card .photo-drop { padding: 16px; background: var(--card); }
+    .item-card .photo-drop-icon { font-size: 22px; margin-bottom: 4px; }
     .remove-btn {
       width: 32px; height: 32px;
       background: var(--status-err-bg); color: var(--status-err);
@@ -247,6 +268,9 @@
     .status-cancelled { background: #f3f4f6; color: #6b7280; }
     .req-items { font-size: 13px; color: var(--text-body); margin-bottom: 6px; }
     .req-items li { margin-left: 18px; }
+    .req-item { padding: 6px 0; border-bottom: 1px dashed var(--border-soft); }
+    .req-item:last-child { border-bottom: none; }
+    .req-item-name { font-size: 13px; font-weight: 600; color: var(--text-body); }
     .req-photos { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .req-photo-thumb {
       width: 48px; height: 48px; object-fit: cover;
@@ -398,22 +422,12 @@
     </div>
 
     <div class="section">
-      <div class="section-title">📦 รายการสิ่งของ</div>
+      <div class="section-title">📦 รายการที่จะทิ้ง</div>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:-8px 0 16px;">
+        แต่ละรายการ ใส่ชื่อของ แล้วแนบรูปของชิ้นนั้น (ถ่ายหลายมุมได้)
+      </p>
       <div class="items-list" id="itemsList"></div>
       <button class="add-item-btn" onclick="addItemRow()">+ เพิ่มรายการ</button>
-    </div>
-
-    <div class="section">
-      <div class="section-title">📷 รูปถ่ายสิ่งของ</div>
-      <div class="photo-drop" id="photoDrop">
-        <input type="file" id="photoInput" accept="image/jpeg,image/png,image/heic,image/heif"
-               multiple onchange="handlePhotoSelect(this.files)" />
-        <div class="photo-drop-icon">📸</div>
-        <div class="photo-drop-text">แตะหรือลากรูปมาวางที่นี่</div>
-        <div class="photo-drop-hint">รองรับ JPG, PNG, HEIC · สูงสุด 10 รูป · ไม่เกิน 8 MB ต่อรูป</div>
-      </div>
-      <div class="photo-grid" id="photoGrid"></div>
-      <div class="photo-count" id="photoCount"></div>
     </div>
 
     <div class="section">
@@ -480,7 +494,7 @@ const RESIDENT_TTL_MS      = 30 * 24 * 60 * 60 * 1000;
 const RESIDENT_AUTH_URL    = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
 const SUBMIT_URL           = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/submitBulkyWasteRequest';
 const MY_REQUESTS_URL      = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getMyBulkyWasteRequests';
-const MAX_PHOTOS           = 10;
+const MAX_PHOTOS_PER_ITEM  = 8;
 const MAX_PHOTO_BYTES      = 8 * 1024 * 1024;
 
 // ── Session helpers ───────────────────────────────────────────────────────────
@@ -529,30 +543,77 @@ function doLogout() {
   renderPage();
 }
 
-// ── Item rows ─────────────────────────────────────────────────────────────────
-function addItemRow(name = '', qty = 1) {
+// ── Items + per-item photos ─────────────────────────────────────────────────
+// Each item card has a stable numeric id. Photos are stored per item id.
+let itemSeq = 0;
+const itemPhotos = {};  // { [itemId]: [{ dataUrl, fileName }] }
+
+function addItemRow() {
+  const id = ++itemSeq;
+  itemPhotos[id] = [];
   const list = document.getElementById('itemsList');
-  const row = document.createElement('div');
-  row.className = 'item-row';
-  row.innerHTML = `
-    <input class="form-input item-name" type="text"
-           placeholder="ชื่อสิ่งของ เช่น โซฟา, ตู้เย็น" value="${escH(name)}" maxlength="200" />
-    <input class="form-input item-qty" type="number"
-           min="1" max="999" value="${escH(String(qty))}" />
-    <button class="remove-btn" onclick="removeItemRow(this)" title="ลบ">✕</button>`;
-  list.appendChild(row);
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.dataset.itemId = id;
+  card.innerHTML = `
+    <div class="item-card-head">
+      <span class="item-card-num">
+        <span class="num-badge"></span> รายการที่ <span class="item-card-n"></span>
+      </span>
+      <button class="remove-btn" onclick="removeItemRow(this)" title="ลบรายการนี้">✕</button>
+    </div>
+    <div class="item-name-row">
+      <input class="form-input item-name" type="text"
+             placeholder="ชื่อสิ่งของ เช่น โซฟา, ตู้เย็น" maxlength="200" />
+      <input class="form-input item-qty" type="number"
+             min="1" max="999" value="1" title="จำนวนชิ้น" />
+    </div>
+    <div class="photo-drop" data-drop-for="${id}">
+      <input type="file" accept="image/jpeg,image/png,image/heic,image/heif"
+             multiple onchange="handleItemPhotoSelect(${id}, this.files)" />
+      <div class="photo-drop-icon">📷</div>
+      <div class="photo-drop-text">เพิ่มรูปของรายการนี้ (ถ่ายหลายมุมได้)</div>
+      <div class="photo-drop-hint">JPG, PNG, HEIC · สูงสุด ${MAX_PHOTOS_PER_ITEM} รูป · ไม่เกิน 8 MB</div>
+    </div>
+    <div class="photo-grid" id="photos-${id}"></div>`;
+  list.appendChild(card);
+
+  // wire drag-and-drop for this card's drop zone
+  const drop = card.querySelector('.photo-drop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('drag-over');
+    handleItemPhotoSelect(id, e.dataTransfer.files);
+  });
+
+  renumberItems();
 }
+
 function removeItemRow(btn) {
   const list = document.getElementById('itemsList');
   if (list.children.length <= 1) return;
-  btn.closest('.item-row').remove();
+  const card = btn.closest('.item-card');
+  delete itemPhotos[card.dataset.itemId];
+  card.remove();
+  renumberItems();
 }
 
-// ── Photo upload ──────────────────────────────────────────────────────────────
-const photos = [];  // [{file, dataUrl, fileName}]
+// keep the visible "รายการที่ N" labels sequential
+function renumberItems() {
+  [...document.querySelectorAll('.item-card')].forEach((card, i) => {
+    card.querySelector('.item-card-n').textContent = i + 1;
+    card.querySelector('.num-badge').textContent = i + 1;
+  });
+}
 
-function handlePhotoSelect(fileList) {
-  const remaining = MAX_PHOTOS - photos.length;
+function handleItemPhotoSelect(itemId, fileList) {
+  const arr = itemPhotos[itemId];
+  if (!arr) return;
+  const remaining = MAX_PHOTOS_PER_ITEM - arr.length;
+  if (remaining <= 0) {
+    alert(`รายการนี้แนบรูปได้สูงสุด ${MAX_PHOTOS_PER_ITEM} รูป`); return;
+  }
   const files = Array.from(fileList).slice(0, remaining);
   files.forEach(file => {
     if (file.size > MAX_PHOTO_BYTES) {
@@ -560,43 +621,32 @@ function handlePhotoSelect(fileList) {
     }
     const reader = new FileReader();
     reader.onload = e => {
-      photos.push({ file, dataUrl: e.target.result, fileName: file.name });
-      renderPhotoGrid();
+      arr.push({ dataUrl: e.target.result, fileName: file.name });
+      renderItemPhotos(itemId);
     };
     reader.readAsDataURL(file);
   });
-  document.getElementById('photoInput').value = '';
+  const input = document.querySelector(`[data-drop-for="${itemId}"] input[type=file]`);
+  if (input) input.value = '';
 }
 
-function renderPhotoGrid() {
-  const grid = document.getElementById('photoGrid');
-  const count = document.getElementById('photoCount');
-  grid.innerHTML = photos.map((p, i) => `
+function renderItemPhotos(itemId) {
+  const grid = document.getElementById(`photos-${itemId}`);
+  const arr = itemPhotos[itemId] || [];
+  grid.innerHTML = arr.map((p, i) => `
     <div class="photo-thumb">
       <img src="${p.dataUrl}" alt="${escH(p.fileName)}"
            onclick="openLightbox('${p.dataUrl}')" />
-      <button class="photo-thumb-remove" onclick="removePhoto(${i})" title="ลบ">✕</button>
+      <button class="photo-thumb-remove"
+              onclick="removeItemPhoto(${itemId}, ${i})" title="ลบ">✕</button>
     </div>`).join('');
-  count.textContent = photos.length > 0
-    ? `${photos.length} / ${MAX_PHOTOS} รูป`
-    : '';
 }
 
-function removePhoto(index) {
-  photos.splice(index, 1);
-  renderPhotoGrid();
+function removeItemPhoto(itemId, index) {
+  if (!itemPhotos[itemId]) return;
+  itemPhotos[itemId].splice(index, 1);
+  renderItemPhotos(itemId);
 }
-
-// drag-and-drop
-document.addEventListener('DOMContentLoaded', () => {
-  const drop = document.getElementById('photoDrop');
-  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
-  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
-  drop.addEventListener('drop', e => {
-    e.preventDefault(); drop.classList.remove('drag-over');
-    handlePhotoSelect(e.dataTransfer.files);
-  });
-});
 
 // ── Lightbox ──────────────────────────────────────────────────────────────────
 function openLightbox(src) {
@@ -655,21 +705,25 @@ async function loadHistory(session) {
           </div>
         </div>
         <div class="req-id">ID: ${escH(req.id)}</div>
-        <ul class="req-items">
-          ${req.items.map(it =>
-            `<li>${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}${it.note ? ` — ${escH(it.note)}` : ''}</li>`
-          ).join('')}
-        </ul>
+        <div class="req-items">
+          ${req.items.map((it, i) => `
+            <div class="req-item">
+              <div class="req-item-name">
+                ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
+              </div>
+              ${(it.photos && it.photos.length) ? `
+                <div class="req-photos">
+                  ${it.photos.map(p =>
+                    `<img class="req-photo-thumb" src="${escH(p.downloadUrl)}"
+                          alt="${escH(p.fileName)}"
+                          onclick="openLightbox('${escH(p.downloadUrl)}')" />`
+                  ).join('')}
+                </div>` : ''}
+            </div>`).join('')}
+        </div>
         ${req.notes ? `<div class="req-note">${escH(req.notes)}</div>` : ''}
         ${req.pickupDate ? `<div class="req-pickup">📅 นัดรับ: ${escH(req.pickupDate)}</div>` : ''}
         ${req.adminNote ? `<div class="req-admin-note">📌 ${escH(req.adminNote)}</div>` : ''}
-        ${req.photos.length ? `
-          <div class="req-photos">
-            ${req.photos.map(p =>
-              `<img class="req-photo-thumb" src="${escH(p.downloadUrl)}"
-                    alt="${escH(p.fileName)}" onclick="openLightbox('${escH(p.downloadUrl)}')" />`
-            ).join('')}
-          </div>` : ''}
       </div>`).join('')}
     </div>`;
   } catch {
@@ -682,11 +736,16 @@ async function submitRequest() {
   const session = getResidentSession();
   if (!session) { showLoginModal(); return; }
 
-  const items = [...document.querySelectorAll('.item-row')].map(row => ({
-    name: row.querySelector('.item-name').value.trim(),
-    qty:  Number(row.querySelector('.item-qty').value) || 1,
-    note: '',
-  })).filter(it => it.name);
+  const items = [...document.querySelectorAll('.item-card')].map(card => {
+    const id = card.dataset.itemId;
+    return {
+      name: card.querySelector('.item-name').value.trim(),
+      qty:  Number(card.querySelector('.item-qty').value) || 1,
+      note: '',
+      photos: (itemPhotos[id] || []).map(p =>
+        ({ dataUrl: p.dataUrl, fileName: p.fileName })),
+    };
+  }).filter(it => it.name);
 
   if (!items.length) {
     showMsg('err', 'กรุณาระบุรายการสิ่งของอย่างน้อย 1 รายการ'); return;
@@ -707,7 +766,6 @@ async function submitRequest() {
         residentName: session.residentName || '',
         items,
         notes: document.getElementById('fieldNotes').value.trim(),
-        photos: photos.map(p => ({ dataUrl: p.dataUrl, fileName: p.fileName })),
       }),
     });
     const data = await resp.json();
@@ -726,9 +784,8 @@ async function submitRequest() {
 
 function resetForm() {
   document.getElementById('itemsList').innerHTML = '';
+  Object.keys(itemPhotos).forEach(k => delete itemPhotos[k]);
   addItemRow();
-  photos.length = 0;
-  renderPhotoGrid();
   document.getElementById('fieldNotes').value = '';
 }
 
