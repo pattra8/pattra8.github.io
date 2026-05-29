@@ -1073,8 +1073,8 @@
         <select id="pickupStatusFilter" onchange="loadPickupRequests()"
           style="border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;color:var(--text);background:var(--card);outline:none;">
           <option value="">ทุกสถานะ</option>
-          <option value="submitted">ส่งคำขอมา</option>
-          <option value="completed">รับของไปแล้ว</option>
+          <option value="submitted">🟡 ยังไม่ทิ้ง</option>
+          <option value="completed">🟢 ทิ้งแล้ว</option>
         </select>
         <button class="toolbar-btn" onclick="loadPickupRequests()">↺ รีโหลด</button>
         <button class="toolbar-btn pickup-toolbar-print" onclick="batchPrintAll()"
@@ -3165,16 +3165,23 @@ let currentPickupId = null;
 let pickupModalCollected = [];  // per-item collected flags for the open modal
 
 const PICKUP_STATUS_LABELS = {
-  submitted: 'ส่งคำขอมา',
-  completed: 'รับของไปแล้ว',
+  submitted: 'ยังไม่ทิ้ง',
+  completed: 'ทิ้งแล้ว',
   // legacy values (older docs)
-  scheduled: 'นัดรับแล้ว',
+  scheduled: 'ยังไม่ทิ้ง',
   cancelled: 'ยกเลิก',
+};
+const PICKUP_STATUS_ICON = {
+  submitted: '🟡',
+  completed: '🟢',
+  scheduled: '🟡',
+  cancelled: '⚪',
 };
 
 function pickupStatusPill(status) {
   const label = PICKUP_STATUS_LABELS[status] || status;
-  return `<span class="status-pill status-${escH(status)}">${label}</span>`;
+  const icon = PICKUP_STATUS_ICON[status] || '⚪';
+  return `<span class="status-pill status-${escH(status)}">${icon} ${label}</span>`;
 }
 
 function pickupFormatDate(iso) {
@@ -3213,13 +3220,13 @@ async function loadPickupRequests() {
 }
 
 function renderPickupStats(requests) {
-  // treat any non-completed (incl. legacy scheduled) as "ส่งคำขอมา"
+  // treat any non-completed (incl. legacy scheduled) as "ยังไม่ทิ้ง"
   const done = requests.filter(r => r.status === 'completed').length;
   const pending = requests.length - done;
   document.getElementById('pickupStats').innerHTML = [
     ['ทั้งหมด', requests.length, ''],
-    ['ส่งคำขอมา', pending, 'color:var(--status-pending)'],
-    ['รับของไปแล้ว', done, 'color:var(--status-ok)'],
+    ['🟡 ยังไม่ทิ้ง', pending, 'color:var(--status-pending)'],
+    ['🟢 ทิ้งแล้ว', done, 'color:var(--status-ok)'],
   ].map(([label, num, style]) => `
     <div class="stat-card">
       <div class="stat-card-num" style="${style}">${num}</div>
@@ -3267,8 +3274,8 @@ function renderPickupList(requests) {
           ${req.items.length} รายการ · ${pickupAllPhotos(req).length} รูป
         </div>
         ${req.status === 'completed'
-          ? `<button class="card-status-btn to-undo" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','submitted')">↩ กลับเป็นรอดำเนินการ</button>`
-          : `<button class="card-status-btn to-done" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','completed')">✓ รับของไปแล้ว</button>`}
+          ? `<button class="card-status-btn to-undo" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','submitted')">↩ กลับเป็น 🟡 ยังไม่ทิ้ง</button>`
+          : `<button class="card-status-btn to-done" onclick="event.stopPropagation();quickSetStatus('${escH(req.id)}','completed')">✓ ทำเป็น 🟢 ทิ้งแล้ว</button>`}
       </div>
     </div>`).join('');
 }
@@ -3376,8 +3383,8 @@ function openPickupModal(id) {
             <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">สถานะ</label>
             <select id="pickupEditStatus"
               style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;">
-              <option value="submitted" ${req.status!=='completed'?'selected':''}>ส่งคำขอมา</option>
-              <option value="completed" ${req.status==='completed'?'selected':''}>รับของไปแล้ว</option>
+              <option value="submitted" ${req.status!=='completed'?'selected':''}>🟡 ยังไม่ทิ้ง</option>
+              <option value="completed" ${req.status==='completed'?'selected':''}>🟢 ทิ้งแล้ว</option>
             </select>
           </div>
           <div>
@@ -3490,7 +3497,8 @@ async function savePickupUpdate() {
 
 // ── Print single request ──────────────────────────────────────────────────────
 function buildPrintPage(req) {
-  const statusLabel = PICKUP_STATUS_LABELS[req.status] || req.status;
+  const statusLabel = (PICKUP_STATUS_ICON[req.status] || '') + ' ' +
+    (PICKUP_STATUS_LABELS[req.status] || req.status);
   const printedAt = new Date().toLocaleString('th-TH', {
     timeZone: 'Asia/Bangkok', year: 'numeric',
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
