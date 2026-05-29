@@ -1059,9 +1059,8 @@ function openMyRequest(id) {
         <div class="detail-info-row"><span class="k">LINE</span><span class="v">${req.lineId ? `💬 ${escH(req.lineId)}` : '<span class="muted-v">—</span>'}</span></div>
       </div>
 
-      ${(req.pickupDate || collected > 0) ? `
+      ${collected > 0 ? `
         <div class="req-chips">
-          ${req.pickupDate ? `<span class="req-pickup-chip">📅 นัดรับ ${escH(req.pickupDate)}</span>` : ''}
           ${collected > 0 ? `<span class="req-progress-chip ${collected === total ? 'all' : ''}">🚚 ขนแล้ว ${collected}/${total} ชิ้น</span>` : ''}
         </div>` : ''}
 
