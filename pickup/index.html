@@ -380,6 +380,13 @@
       padding: 2px 8px; margin-left: 6px;
       display: inline-block; vertical-align: middle;
     }
+    .req-row-reject {
+      font-size: 11.5px; font-weight: 700; color: #b02a1c; margin-top: 3px;
+    }
+    .detail-reject-summary {
+      margin: 0; padding: 12px 22px; font-size: 13px; font-weight: 700;
+      background: #fbe5e2; color: #b02a1c;
+    }
     .detail-item.rejected { border-color: #e3b9b0; background: #fdf3f1; }
     .item-reject-reason {
       font-size: 12.5px; font-weight: 600; color: #b02a1c;
@@ -1094,6 +1101,10 @@ function openMyRequest(id) {
       <span>${STATUS_ICON[req.status] || '•'}</span>
       <span>${STATUS_DESC[req.status] || ''}</span>
     </div>
+    ${rejectCount(req) ? `
+    <div class="detail-reject-summary">
+      ⚠️ นิติบุคคลไม่รับทิ้ง ${rejectCount(req)} รายการ — ดูเหตุผลที่รายการด้านล่าง
+    </div>` : ''}
 
     <div class="detail-section">
       <div class="detail-label">ข้อมูลผู้แจ้ง / ติดต่อ</div>
@@ -1176,10 +1187,10 @@ function closeMyRequest() {
 
 // ── Status labels ─────────────────────────────────────────────────────────────
 const STATUS_LABELS = {
-  submitted: 'ยังไม่ทิ้ง',
-  completed: 'ทิ้งแล้ว',
+  submitted: 'รอดำเนินการ',
+  completed: 'เสร็จสิ้น',
   // legacy
-  scheduled: 'ยังไม่ทิ้ง',
+  scheduled: 'รอดำเนินการ',
   cancelled: 'ยกเลิก',
 };
 const STATUS_ICON = {
@@ -1187,10 +1198,13 @@ const STATUS_ICON = {
 };
 const STATUS_DESC = {
   submitted: 'นิติบุคคลได้รับเรื่องแล้ว ช่างจะติดต่อกลับเพื่อนัดวันเข้ารับ',
-  completed: 'เข้ารับของเรียบร้อยแล้ว ขอบคุณครับ',
+  completed: 'นิติบุคคลจัดการคำขอนี้เรียบร้อยแล้ว',
   scheduled: 'นิติบุคคลได้รับเรื่องแล้ว ช่างจะติดต่อกลับเพื่อนัดวันเข้ารับ',
   cancelled: 'คำขอนี้ถูกยกเลิก หากต้องการแจ้งใหม่ กรุณาส่งคำขอใหม่',
 };
+function rejectCount(req) {
+  return (req.items || []).filter(it => it.rejected).length;
+}
 function statusPill(status) {
   const label = STATUS_LABELS[status] || status;
   return `<span class="status-pill status-${escH(status)}">${label}</span>`;
@@ -1266,6 +1280,7 @@ async function loadHistory(session, decideView) {
       const metaBits = [];
       if (totalPhotos) metaBits.push(`📷 ${totalPhotos}`);
       metaBits.push(formatDateShort(req.createdAt));
+      const rejN = rejectCount(req);
       return `
       <div class="req-row status-${escH(req.status)}" onclick="openMyRequest('${escH(req.id)}')">
         ${main
@@ -1274,6 +1289,7 @@ async function loadHistory(session, decideView) {
         <div class="req-row-mid">
           <div class="req-row-title">${title}</div>
           <div class="req-row-meta">${metaBits.join(' · ')}</div>
+          ${rejN ? `<div class="req-row-reject">✕ นิติบุคคลไม่รับ ${rejN} รายการ</div>` : ''}
         </div>
         <div class="req-row-right">
           <span class="req-pill">${STATUS_ICON[req.status] || ''} ${STATUS_LABELS[req.status] || req.status}</span>

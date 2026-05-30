@@ -1107,8 +1107,8 @@
   <div id="pickupBulkBar" style="display:none;">
     <span id="pickupBulkCount" class="pbb-count"></span>
     <div class="pbb-actions">
-      <button class="pbb-btn pbb-done" onclick="bulkSetStatus('completed')">🟢 ทิ้งแล้ว</button>
-      <button class="pbb-btn pbb-undo" onclick="bulkSetStatus('submitted')">🟡 ยังไม่ทิ้ง</button>
+      <button class="pbb-btn pbb-done" onclick="bulkSetStatus('completed')">✅ เก็บครบ (เสร็จสิ้น)</button>
+      <button class="pbb-btn pbb-undo" onclick="bulkSetStatus('submitted')">↩ รอดำเนินการ</button>
       <button class="pbb-btn pbb-cancel" onclick="clearPickupSelection()">✕ ยกเลิก</button>
     </div>
   </div>
@@ -1320,6 +1320,10 @@
   .round-toggle-btn:disabled { opacity: .5; cursor: not-allowed; }
   .stale-badge {
     font-size: 11px; font-weight: 700; background: #fff3cd; color: #856404;
+    border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+  }
+  .reject-count-badge {
+    font-size: 11px; font-weight: 700; background: #fbe5e2; color: #b02a1c;
     border-radius: 999px; padding: 2px 8px; white-space: nowrap;
   }
 
@@ -3686,12 +3690,20 @@ let pickupModalRejected = [];   // per-item rejected flags
 let pickupModalRejectReasons = []; // per-item reject reasons
 
 const PICKUP_STATUS_LABELS = {
-  submitted: 'ยังไม่ทิ้ง',
-  completed: 'ทิ้งแล้ว',
+  submitted: 'รอดำเนินการ',
+  completed: 'เสร็จสิ้น',
   // legacy values (older docs)
-  scheduled: 'ยังไม่ทิ้ง',
+  scheduled: 'รอดำเนินการ',
   cancelled: 'ยกเลิก',
 };
+// Count rejected items in a request (for the red "ไม่รับ N" badge).
+function pickupRejectCount(req) {
+  return (req.items || []).filter(it => it.rejected).length;
+}
+function pickupRejectBadge(req) {
+  const n = pickupRejectCount(req);
+  return n ? `<span class="reject-count-badge">✕ ไม่รับ ${n}</span>` : '';
+}
 const PICKUP_STATUS_ICON = {
   submitted: '🟡',
   completed: '🟢',
@@ -3772,13 +3784,13 @@ async function loadPickupRequests() {
 }
 
 function renderPickupStats(requests) {
-  // treat any non-completed (incl. legacy scheduled) as "ยังไม่ทิ้ง"
+  // status is derived server-side; non-completed = still has pending items
   const done = requests.filter(r => r.status === 'completed').length;
   const pending = requests.length - done;
   document.getElementById('pickupStats').innerHTML = [
     ['all', 'ทั้งหมด', requests.length, ''],
-    ['submitted', '🟡 ยังไม่ทิ้ง', pending, 'color:var(--status-pending)'],
-    ['completed', '🟢 ทิ้งแล้ว', done, 'color:var(--status-ok)'],
+    ['submitted', '🟡 รอดำเนินการ', pending, 'color:var(--status-pending)'],
+    ['completed', '🟢 เสร็จสิ้น', done, 'color:var(--status-ok)'],
   ].map(([filter, label, num, style]) => `
     <div class="stat-card is-filter ${currentPickupFilter === filter ? 'is-active' : ''}"
       onclick="setPickupFilter('${filter}')">
@@ -3806,6 +3818,7 @@ function renderPickupList(requests) {
           <span class="pickup-house">🏠 บ้าน ${escH(req.houseNo)}</span>
           ${req.residentName ? `<span style="font-size:13px;color:var(--text-soft)">${escH(req.residentName)}</span>` : ''}
           ${pickupStatusPill(req.status)}
+          ${pickupRejectBadge(req)}
           ${(pickupRoundConfig && req.roundId > 0 && req.roundId < pickupRoundConfig.currentRoundId)
             ? `<span class="stale-badge">⚠️ ค้างรอบที่แล้ว</span>` : ''}
         </div>
@@ -3874,6 +3887,7 @@ function openPickupModal(id) {
         <span style="font-size:18px;font-weight:700;">🏠 บ้าน ${escH(req.houseNo)}</span>
         ${req.residentName ? `<span style="color:var(--text-soft)">${escH(req.residentName)}</span>` : ''}
         ${pickupStatusPill(req.status)}
+        ${pickupRejectBadge(req)}
         ${(pickupRoundConfig && req.roundId > 0 && req.roundId < pickupRoundConfig.currentRoundId)
           ? `<span class="stale-badge">⚠️ ค้างรอบที่แล้ว</span>` : ''}
       </div>
@@ -3894,11 +3908,11 @@ function openPickupModal(id) {
             รายการสิ่งของ — <span id="collectProgress"></span>
           </span>
           <button type="button" onclick="setAllCollected()" class="toolbar-btn" style="padding:5px 10px;font-size:11.5px;">
-            ✅ ทำเครื่องหมายว่าทิ้งครบทุกชิ้น
+            ✅ เก็บครบทุกชิ้น
           </button>
         </div>
         <p style="font-size:11.5px;color:var(--text-muted);margin:-4px 0 12px;">
-          กดปุ่มข้างแต่ละชิ้นเพื่อระบุว่าขนไปทิ้งแล้วหรือยัง (เผื่อขนไม่หมดในรอบเดียว)
+          แต่ละชิ้นเลือกได้ว่า <b>เก็บแล้ว</b> หรือ <b>ปฏิเสธ</b> (พร้อมเหตุผล) — สถานะคำขอจะอัปเดตให้อัตโนมัติ
         </p>
         <div style="display:flex;flex-direction:column;gap:14px;">
           ${req.items.map((it, i) => `
@@ -3947,13 +3961,9 @@ function openPickupModal(id) {
 
       <div style="border-top:1px solid var(--border-soft);padding-top:16px;">
         <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">จัดการคำขอ</div>
-        <div>
-          <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">สถานะ</label>
-          <select id="pickupEditStatus"
-            style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;">
-            <option value="submitted" ${req.status!=='completed'?'selected':''}>🟡 ยังไม่ทิ้ง</option>
-            <option value="completed" ${req.status==='completed'?'selected':''}>🟢 ทิ้งแล้ว</option>
-          </select>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:9px;padding:10px 14px;">
+          <span style="font-size:12.5px;color:var(--text-soft);">สถานะคำขอ (อัตโนมัติ):</span>
+          <span id="pickupDerivedStatus" style="font-size:13.5px;font-weight:700;"></span>
         </div>
         <div style="margin-top:12px;">
           <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">โน้ต admin</label>
@@ -3977,7 +3987,7 @@ function openPickupModal(id) {
 
 // ── Per-item collected toggles ───────────────────────────────────────────────
 function applyCollectBtn(btn, on) {
-  btn.textContent = on ? '✅ ทิ้งแล้ว' : '⏳ ยังไม่ทิ้ง';
+  btn.textContent = on ? '✅ เก็บแล้ว' : '⏳ รอเก็บ';
   btn.style.cssText =
     'flex-shrink:0;border:1.5px solid;border-radius:999px;padding:5px 12px;' +
     'font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;' +
@@ -4028,13 +4038,27 @@ function toggleItemRejected(i) {
 }
 
 function updateCollectProgress() {
-  const el = document.getElementById('collectProgress');
-  if (!el) return;
   const total = pickupModalCollected.length;
-  const done = pickupModalCollected.filter(Boolean).length;
-  const allDone = done === total && total > 0;
-  el.innerHTML = `<span style="color:${allDone ? '#3f6431' : 'var(--accent-deep)'};">` +
-    `ทิ้งแล้ว ${done}/${total} ชิ้น</span>`;
+  const collected = pickupModalCollected.filter(Boolean).length;
+  const rejected = pickupModalRejected.filter(Boolean).length;
+  const resolved = pickupModalCollected
+    .map((c, i) => c || pickupModalRejected[i]).filter(Boolean).length;
+  const allResolved = resolved === total && total > 0;
+
+  const el = document.getElementById('collectProgress');
+  if (el) {
+    const parts = [`เก็บ ${collected}`];
+    if (rejected) parts.push(`ไม่รับ ${rejected}`);
+    el.innerHTML = `<span style="color:${allResolved ? '#3f6431' : 'var(--accent-deep)'};">` +
+      `จัดการแล้ว ${resolved}/${total} ชิ้น (${parts.join(' · ')})</span>`;
+  }
+  // Live-update the derived request status indicator.
+  const ds = document.getElementById('pickupDerivedStatus');
+  if (ds) {
+    ds.innerHTML = allResolved
+      ? '<span style="color:var(--status-ok)">🟢 เสร็จสิ้น</span>'
+      : '<span style="color:var(--status-pending)">🟡 รอดำเนินการ</span>';
+  }
 }
 
 function toggleItemCollected(i) {
@@ -4088,7 +4112,6 @@ async function savePickupUpdate() {
         adminHouseNo, adminPin,
         action: 'update',
         requestId,
-        status: document.getElementById('pickupEditStatus').value,
         adminNote: document.getElementById('pickupEditNote').value.trim(),
         collected: pickupModalCollected,
         rejected: pickupModalRejected,
