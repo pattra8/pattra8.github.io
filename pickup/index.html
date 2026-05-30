@@ -374,6 +374,18 @@
       padding: 2px 8px; margin-left: 6px;
       text-decoration: none; display: inline-block; vertical-align: middle;
     }
+    .item-reject-tag {
+      font-size: 10px; font-weight: 700; color: #fff;
+      background: #b02a1c; border-radius: 5px;
+      padding: 2px 8px; margin-left: 6px;
+      display: inline-block; vertical-align: middle;
+    }
+    .detail-item.rejected { border-color: #e3b9b0; background: #fdf3f1; }
+    .item-reject-reason {
+      font-size: 12.5px; font-weight: 600; color: #b02a1c;
+      background: #fbe5e2; border-radius: 8px;
+      padding: 8px 11px; margin-bottom: 10px; line-height: 1.4;
+    }
     .req-extra-thumbs { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
     .req-extra-thumbs img {
       width: 60px; height: 60px; border-radius: 9px;
@@ -1099,11 +1111,13 @@ function openMyRequest(id) {
 
       <div class="detail-label" style="margin-top:18px;">รูปของที่จะทิ้ง (${total} รายการ)</div>
       ${req.items.map((it, i) => `
-        <div class="detail-item">
-          <div class="detail-item-name ${it.collected ? 'collected' : ''}">
+        <div class="detail-item ${it.rejected ? 'rejected' : ''}">
+          <div class="detail-item-name ${it.collected || it.rejected ? 'collected' : ''}">
             ${i + 1}. ${escH(it.name)}${it.qty > 1 ? ` × ${it.qty}` : ''}
-            ${it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
+            ${it.rejected ? '<span class="item-reject-tag">✕ ไม่รับทิ้ง</span>' :
+              it.collected ? '<span class="item-done-tag">ขนแล้ว</span>' : ''}
           </div>
+          ${it.rejected && it.rejectReason ? `<div class="item-reject-reason">⚠️ เหตุผล: ${escH(it.rejectReason)}</div>` : ''}
           ${(it.photos && it.photos.length) ? `
             <div class="detail-photos">
               ${it.photos.map(p =>

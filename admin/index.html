@@ -1513,6 +1513,17 @@
     border: 1px solid #aac38b; background: #edf6df;
     border-radius: 999px; padding: 3px 9px; white-space: nowrap; flex-shrink: 0;
   }
+  .pp-reject-badge {
+    font-size: 10px; font-weight: 800; color: #b02a1c;
+    border: 1px solid #e3b9b0; background: #fbe5e2;
+    border-radius: 999px; padding: 3px 9px; white-space: nowrap; flex-shrink: 0;
+  }
+  .pp-item.rejected .pp-item-num { background: #b02a1c; }
+  .pp-item.rejected .pp-item-name { text-decoration: line-through; color: #8a8177; }
+  .pp-reject-reason {
+    font-size: 11.5px; color: #b02a1c; margin-top: 5px;
+    background: #fdf3f1; border-radius: 6px; padding: 5px 9px;
+  }
   .pp-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 11px; }
   .pp-photos.one { grid-template-columns: minmax(0, 60%); }
   .pp-photos.two { grid-template-columns: repeat(2, 1fr); }
@@ -3671,6 +3682,8 @@ async function bulkSetStatus(newStatus) {
   }
 }
 let pickupModalCollected = [];  // per-item collected flags for the open modal
+let pickupModalRejected = [];   // per-item rejected flags
+let pickupModalRejectReasons = []; // per-item reject reasons
 
 const PICKUP_STATUS_LABELS = {
   submitted: 'ยังไม่ทิ้ง',
@@ -3852,6 +3865,8 @@ function openPickupModal(id) {
   currentPickupId = id;
 
   pickupModalCollected = req.items.map(it => !!it.collected);
+  pickupModalRejected = req.items.map(it => !!it.rejected);
+  pickupModalRejectReasons = req.items.map(it => it.rejectReason || '');
 
   document.getElementById('pickupModalBody').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:18px;">
@@ -3888,7 +3903,7 @@ function openPickupModal(id) {
         <div style="display:flex;flex-direction:column;gap:14px;">
           ${req.items.map((it, i) => `
             <div class="item-block" data-idx="${i}"
-                 style="border:1px solid var(--border-soft);border-radius:10px;padding:12px 14px;background:var(--bg-soft);${pickupModalCollected[i] ? 'opacity:.62;' : ''}">
+                 style="border:1px solid var(--border-soft);border-radius:10px;padding:12px 14px;background:${pickupModalRejected[i] ? '#fdf3f1' : 'var(--bg-soft)'};${pickupModalCollected[i] ? 'opacity:.62;' : ''}">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
                 <div style="flex:1;min-width:0;">
                   <div style="font-size:14px;font-weight:700;color:var(--text);">
@@ -3896,8 +3911,20 @@ function openPickupModal(id) {
                   </div>
                   ${it.note ? `<div style="font-size:12.5px;color:var(--text-soft);font-style:italic;margin-top:2px;">${escH(it.note)}</div>` : ''}
                 </div>
-                <button type="button" class="collect-toggle" data-idx="${i}"
-                        onclick="toggleItemCollected(${i})"></button>
+                <div style="display:flex;gap:6px;flex-shrink:0;">
+                  <button type="button" class="collect-toggle" data-idx="${i}"
+                          onclick="toggleItemCollected(${i})"></button>
+                  <button type="button" class="reject-toggle" data-idx="${i}"
+                          onclick="toggleItemRejected(${i})"></button>
+                </div>
+              </div>
+              <div class="reject-reason-wrap" data-idx="${i}"
+                   style="margin-top:10px;${pickupModalRejected[i] ? '' : 'display:none;'}">
+                <input type="text" class="reject-reason-input" data-idx="${i}"
+                       oninput="pickupModalRejectReasons[${i}]=this.value"
+                       value="${escH(pickupModalRejectReasons[i] || '')}" maxlength="300"
+                       placeholder="เหตุผลที่ไม่รับทิ้งชิ้นนี้ (ลูกบ้านจะเห็น)"
+                       style="width:100%;border:1.5px solid #e3b9b0;border-radius:9px;padding:8px 11px;font-family:inherit;font-size:13px;color:var(--text);background:#fff;outline:none;" />
               </div>
               ${(it.photos && it.photos.length) ? `
                 <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;">
@@ -3936,6 +3963,11 @@ function openPickupModal(id) {
           >${escH(req.adminNote || '')}</textarea>
         </div>
         <div id="pickupSaveMsg" style="margin-top:8px;font-size:13px;min-height:18px;"></div>
+        <button type="button" onclick="deletePickupRequest()"
+          style="margin-top:10px;width:100%;background:#fff;color:#b02a1c;border:1.5px solid #e3b9b0;border-radius:9px;padding:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">
+          🗑 ลบคำขอนี้ถาวร
+        </button>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">ลบทั้งคำขอออกจากระบบ (กู้คืนไม่ได้)</div>
       </div>
     </div>`;
 
@@ -3954,10 +3986,44 @@ function applyCollectBtn(btn, on) {
       : 'background:#fff;color:#8a7960;border-color:var(--border);');
 }
 
+function applyRejectBtn(btn, on) {
+  btn.textContent = on ? '🚫 ไม่รับทิ้ง' : 'ปฏิเสธ';
+  btn.style.cssText =
+    'flex-shrink:0;border:1.5px solid;border-radius:999px;padding:5px 12px;' +
+    'font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;' +
+    'white-space:nowrap;transition:all .12s;' + (on
+      ? 'background:#fbe5e2;color:#b02a1c;border-color:#e3b9b0;'
+      : 'background:#fff;color:#a08a86;border-color:var(--border);');
+}
+
 function renderCollectButtons() {
   document.querySelectorAll('.collect-toggle').forEach(btn => {
     applyCollectBtn(btn, pickupModalCollected[Number(btn.dataset.idx)]);
   });
+  document.querySelectorAll('.reject-toggle').forEach(btn => {
+    applyRejectBtn(btn, pickupModalRejected[Number(btn.dataset.idx)]);
+  });
+  updateCollectProgress();
+}
+
+function toggleItemRejected(i) {
+  pickupModalRejected[i] = !pickupModalRejected[i];
+  // Rejected and collected are mutually exclusive.
+  if (pickupModalRejected[i]) {
+    pickupModalCollected[i] = false;
+    const cb = document.querySelector(`.collect-toggle[data-idx="${i}"]`);
+    if (cb) applyCollectBtn(cb, false);
+  }
+  const btn = document.querySelector(`.reject-toggle[data-idx="${i}"]`);
+  applyRejectBtn(btn, pickupModalRejected[i]);
+  const wrap = document.querySelector(`.reject-reason-wrap[data-idx="${i}"]`);
+  if (wrap) {
+    wrap.style.display = pickupModalRejected[i] ? 'block' : 'none';
+    if (pickupModalRejected[i]) wrap.querySelector('input')?.focus();
+  }
+  const block = document.querySelector(`.item-block[data-idx="${i}"]`);
+  if (block) block.style.background = pickupModalRejected[i] ?
+    '#fdf3f1' : 'var(--bg-soft)';
   updateCollectProgress();
 }
 
@@ -3973,6 +4039,16 @@ function updateCollectProgress() {
 
 function toggleItemCollected(i) {
   pickupModalCollected[i] = !pickupModalCollected[i];
+  // Collected and rejected are mutually exclusive.
+  if (pickupModalCollected[i] && pickupModalRejected[i]) {
+    pickupModalRejected[i] = false;
+    const rb = document.querySelector(`.reject-toggle[data-idx="${i}"]`);
+    if (rb) applyRejectBtn(rb, false);
+    const wrap = document.querySelector(`.reject-reason-wrap[data-idx="${i}"]`);
+    if (wrap) wrap.style.display = 'none';
+    const blk = document.querySelector(`.item-block[data-idx="${i}"]`);
+    if (blk) blk.style.background = 'var(--bg-soft)';
+  }
   const btn = document.querySelector(`.collect-toggle[data-idx="${i}"]`);
   applyCollectBtn(btn, pickupModalCollected[i]);
   const block = document.querySelector(`.item-block[data-idx="${i}"]`);
@@ -4015,6 +4091,8 @@ async function savePickupUpdate() {
         status: document.getElementById('pickupEditStatus').value,
         adminNote: document.getElementById('pickupEditNote').value.trim(),
         collected: pickupModalCollected,
+        rejected: pickupModalRejected,
+        rejectReasons: pickupModalRejectReasons,
       }),
     });
     const data = await resp.json();
@@ -4033,6 +4111,35 @@ async function savePickupUpdate() {
     msgEl.textContent = `❌ ${err.message}`;
   } finally {
     btn.disabled = false; btn.textContent = '💾 บันทึก';
+  }
+}
+
+async function deletePickupRequest() {
+  if (!currentPickupId) return;
+  const req = pickupRequests.find(r => r.id === currentPickupId);
+  const houseLabel = req ? `บ้าน ${req.houseNo}` : 'คำขอนี้';
+  if (!confirm(`ยืนยันลบคำขอของ ${houseLabel}? — ลบถาวร กู้คืนไม่ได้`)) return;
+
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const requestId = currentPickupId;
+  const msgEl = document.getElementById('pickupSaveMsg');
+  try {
+    const resp = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminHouseNo, adminPin, action: 'delete', requestId,
+      }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'ลบไม่สำเร็จ');
+    closePickupModal();
+    await loadPickupRequests();
+  } catch (err) {
+    if (msgEl) {
+      msgEl.style.color = 'var(--status-error)';
+      msgEl.textContent = `❌ ${err.message}`;
+    }
   }
 }
 
@@ -4109,7 +4216,7 @@ function buildPrintPage(req) {
           const n = (it.photos || []).length;
           const grid = n === 1 ? ' one' : n === 2 ? ' two' : '';
           return `
-          <div class="pp-item${it.collected ? ' done' : ''}">
+          <div class="pp-item${it.collected ? ' done' : ''}${it.rejected ? ' rejected' : ''}">
             <div class="pp-item-num">${i + 1}</div>
             <div class="pp-item-body">
               <div class="pp-item-titlerow">
@@ -4117,8 +4224,10 @@ function buildPrintPage(req) {
                   <div class="pp-item-name">${escH(it.name)}</div>
                   <div class="pp-item-qty">จำนวน ${it.qty > 1 ? it.qty : 1} ชิ้น${it.note ? ` · ${escH(it.note)}` : ''}</div>
                 </div>
-                ${it.collected ? '<span class="pp-done-badge">✓ ขนแล้ว</span>' : ''}
+                ${it.rejected ? '<span class="pp-reject-badge">✕ ไม่รับทิ้ง</span>' :
+                  it.collected ? '<span class="pp-done-badge">✓ ขนแล้ว</span>' : ''}
               </div>
+              ${it.rejected && it.rejectReason ? `<div class="pp-reject-reason">เหตุผล: ${escH(it.rejectReason)}</div>` : ''}
               ${n ? `
                 <div class="pp-photos${grid}">
                   ${it.photos.map(p =>
