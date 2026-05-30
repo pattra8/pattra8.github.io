@@ -1065,6 +1065,23 @@
   <div id="pickupTab" style="display:none">
     <div style="max-width:1080px;margin:36px auto;padding:0 24px;">
 
+      <!-- Round control banner -->
+      <div id="pickupRoundBanner" class="round-banner">
+        <div id="pickupRoundStatusDot" class="round-dot"></div>
+        <div>
+          <div id="pickupRoundStatusText" class="round-status-text">กำลังโหลด…</div>
+          <div id="pickupRoundDateText" class="round-date-text"></div>
+        </div>
+        <div class="round-controls">
+          <input id="pickupRoundLabelInput" class="round-input" type="text"
+            placeholder="ชื่อรอบ เช่น รอบ มี.ค.–พ.ค. 2569" maxlength="80" />
+          <input id="pickupRoundDateInput" class="round-input" type="text"
+            placeholder="วันนัดรับ เช่น 15 พ.ค. 2569" maxlength="50" />
+          <button id="pickupRoundToggleBtn" class="round-toggle-btn"
+            onclick="togglePickupRound()">…</button>
+        </div>
+      </div>
+
       <!-- Summary cards -->
       <div id="pickupStats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px;"></div>
 
@@ -1261,6 +1278,50 @@
     background: #fff; color: var(--text-soft); border-color: var(--border);
   }
   .card-status-btn.to-undo:hover { border-color: var(--accent); color: var(--accent-deep); }
+
+  /* ── Round banner ── */
+  .round-banner {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+    background: var(--card); border: 1px solid var(--border-soft);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;
+  }
+  .round-dot {
+    width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+    background: var(--text-muted);
+  }
+  .round-dot.open  { background: var(--status-ok, #4f8038); }
+  .round-dot.closed { background: var(--status-err, #c0392b); }
+  .round-status-text { font-size: 14px; font-weight: 700; color: var(--text); }
+  .round-date-text { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .round-controls {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .round-input {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-family: inherit; font-size: 13px;
+    color: var(--text); background: var(--bg); outline: none; width: 190px;
+  }
+  .round-input:focus { border-color: var(--accent); }
+  .round-toggle-btn {
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    border-radius: 9px; padding: 8px 16px; cursor: pointer;
+    border: 2px solid transparent; white-space: nowrap;
+    transition: opacity .12s;
+  }
+  .round-toggle-btn.btn-open {
+    background: var(--status-ok, #4f8038); color: #fff;
+    border-color: var(--status-ok, #4f8038);
+  }
+  .round-toggle-btn.btn-close {
+    background: #fff; color: var(--status-err, #c0392b);
+    border-color: var(--status-err, #c0392b);
+  }
+  .round-toggle-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .stale-badge {
+    font-size: 11px; font-weight: 700; background: #fff3cd; color: #856404;
+    border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+  }
 
   /* pickup card */
   .pickup-card {
@@ -3510,6 +3571,7 @@
 <script>
 // ── Bulky Waste / Pickup admin ────────────────────────────────────────────────
 const MANAGE_PICKUP_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/manageBulkyWasteRequests';
+const MANAGE_ROUND_URL  = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/managePickupRound';
 const escH = typeof escHtml === 'function' ? escHtml : (s => String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])));
 
 // Flatten every photo across all items (photos are now stored per item)
@@ -3521,6 +3583,74 @@ let pickupRequests = [];
 let currentPickupId = null;
 let currentPickupFilter = 'all';
 const pickupSelected = new Set();
+let pickupRoundConfig = null;  // { isOpen, roundLabel, nextPickupDate, currentRoundId }
+
+// ── Round open/close ─────────────────────────────────────────────────────────
+function applyRoundBanner(round) {
+  pickupRoundConfig = round;
+  const dot  = document.getElementById('pickupRoundStatusDot');
+  const txt  = document.getElementById('pickupRoundStatusText');
+  const dtxt = document.getElementById('pickupRoundDateText');
+  const btn  = document.getElementById('pickupRoundToggleBtn');
+  const li   = document.getElementById('pickupRoundLabelInput');
+  const di   = document.getElementById('pickupRoundDateInput');
+  if (!dot) return;
+
+  if (round.isOpen) {
+    dot.className = 'round-dot open';
+    txt.textContent = '🟢 เปิดรับคำขออยู่' +
+      (round.roundLabel ? ' · ' + round.roundLabel : '');
+    dtxt.textContent = round.nextPickupDate ?
+      '📅 นัดรับ: ' + round.nextPickupDate : '';
+    btn.textContent = 'ปิดรอบ';
+    btn.className = 'round-toggle-btn btn-close';
+  } else {
+    dot.className = 'round-dot closed';
+    txt.textContent = '🔴 ปิดรับคำขอ' +
+      (round.roundLabel ? ' · ' + round.roundLabel : '');
+    dtxt.textContent = round.nextPickupDate ?
+      '📅 รอบถัดไป: ' + round.nextPickupDate : '';
+    btn.textContent = '🔓 เปิดรอบรับคำขอ';
+    btn.className = 'round-toggle-btn btn-open';
+  }
+  // Prefill inputs only if blank
+  if (li && !li.value && round.roundLabel) li.value = round.roundLabel;
+  if (di && !di.value && round.nextPickupDate) di.value = round.nextPickupDate;
+}
+
+async function togglePickupRound() {
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const btn  = document.getElementById('pickupRoundToggleBtn');
+  const li   = document.getElementById('pickupRoundLabelInput');
+  const di   = document.getElementById('pickupRoundDateInput');
+  const isOpen = pickupRoundConfig && pickupRoundConfig.isOpen;
+  const action = isOpen ? 'close' : 'open';
+
+  if (!isOpen) {
+    const label = li ? li.value.trim() : '';
+    if (!label) {
+      alert('กรุณากรอกชื่อรอบก่อนเปิดรับคำขอ'); li && li.focus(); return;
+    }
+  }
+
+  btn.disabled = true;
+  try {
+    const body = { adminHouseNo, adminPin, action,
+      roundLabel: li ? li.value.trim() : '',
+      nextPickupDate: di ? di.value.trim() : '' };
+    const resp = await fetch(MANAGE_ROUND_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'ไม่สำเร็จ');
+    await loadPickupRequests(); // reloads round config + list together
+  } catch (err) {
+    alert('❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
 
 // ── Multi-select (bulk status change) ───────────────────────────────────────
 function togglePickupSelect(id, checked) {
@@ -3656,6 +3786,7 @@ async function loadPickupRequests() {
     if (!data.ok) throw new Error(data.error);
 
     pickupRequests = data.requests || [];
+    if (data.round) applyRoundBanner(data.round);
     // Drop selections that are no longer in the current list.
     const liveIds = new Set(pickupRequests.map(r => r.id));
     [...pickupSelected].forEach(id => { if (!liveIds.has(id)) pickupSelected.delete(id); });
@@ -3702,6 +3833,8 @@ function renderPickupList(requests) {
           <span class="pickup-house">🏠 บ้าน ${escH(req.houseNo)}</span>
           ${req.residentName ? `<span style="font-size:13px;color:var(--text-soft)">${escH(req.residentName)}</span>` : ''}
           ${pickupStatusPill(req.status)}
+          ${(pickupRoundConfig && req.roundId > 0 && req.roundId < pickupRoundConfig.currentRoundId)
+            ? `<span class="stale-badge">⚠️ ค้างรอบที่แล้ว</span>` : ''}
         </div>
         <div class="pickup-meta">${pickupFormatDate(req.createdAt)}</div>
         ${(req.phone || req.lineId) ? `<div class="pickup-meta" style="margin-top:2px;">
@@ -3766,6 +3899,8 @@ function openPickupModal(id) {
         <span style="font-size:18px;font-weight:700;">🏠 บ้าน ${escH(req.houseNo)}</span>
         ${req.residentName ? `<span style="color:var(--text-soft)">${escH(req.residentName)}</span>` : ''}
         ${pickupStatusPill(req.status)}
+        ${(pickupRoundConfig && req.roundId > 0 && req.roundId < pickupRoundConfig.currentRoundId)
+          ? `<span class="stale-badge">⚠️ ค้างรอบที่แล้ว</span>` : ''}
       </div>
       <div style="font-size:12px;color:var(--text-muted);">
         แจ้งเมื่อ: ${pickupFormatDate(req.createdAt)}

@@ -563,6 +563,19 @@
       font-size: 11.5px; color: var(--text-muted);
       text-align: center; margin-top: 8px; line-height: 1.4;
     }
+    /* round-closed notice */
+    .round-closed-card {
+      text-align: center; padding: 40px 24px 36px;
+      background: #fff; border: 1px solid var(--border-soft);
+      border-radius: 18px;
+    }
+    .round-closed-icon { font-size: 52px; margin-bottom: 14px; }
+    .round-closed-title {
+      font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 10px;
+    }
+    .round-closed-sub { font-size: 15px; color: var(--text-soft); margin-bottom: 6px; }
+    .round-closed-date { font-size: 13.5px; color: var(--text-muted); }
+
     .edit-banner {
       display: flex; align-items: center; justify-content: space-between;
       gap: 10px; flex-wrap: wrap;
@@ -744,12 +757,31 @@
     </div>
   </div>
 
+  <!-- Round closed notice -->
+  <div id="roundClosedSection" style="display:none">
+    <div class="section">
+      <div class="round-closed-card">
+        <div class="round-closed-icon">🔒</div>
+        <div class="round-closed-title">ปิดรับคำขอชั่วคราว</div>
+        <div id="roundClosedLabel" class="round-closed-sub"></div>
+        <div id="roundClosedDate" class="round-closed-date"></div>
+      </div>
+      <div id="roundClosedHistoryBtn" style="display:none;margin-top:18px;text-align:center;">
+        <button onclick="showStatusView()"
+          style="background:none;border:1.5px solid var(--accent);color:var(--accent-deep);border-radius:10px;padding:10px 20px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;">
+          📋 ดูสถานะคำขอเดิมของฉัน
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Status view — full page after submitting -->
   <div id="historySection" style="display:none">
     <div class="section">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
         <div class="section-title" style="margin-bottom:0;">📋 สถานะคำขอของฉัน</div>
-        <button onclick="startNewRequest();showFormView();"
+        <button onclick="tryShowFormView()"
+          id="addMoreBtn"
           style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
           ➕ แจ้งทิ้งของเพิ่ม
         </button>
@@ -827,7 +859,8 @@ const EDIT_URL             = 'https://asia-southeast1-pattra8-54c3f.cloudfunctio
 const MAX_PHOTOS_PER_ITEM  = 8;
 const MAX_PHOTO_BYTES      = 8 * 1024 * 1024;
 
-let myRequests = [];  // last loaded requests (for detail view)
+let myRequests = [];   // last loaded requests (for detail view)
+let currentRound = null; // { isOpen, roundLabel, nextPickupDate, currentRoundId }
 
 // ── Session helpers ───────────────────────────────────────────────────────────
 function getResidentSession() {
@@ -1187,6 +1220,8 @@ async function loadHistory(session, decideView) {
       body: JSON.stringify({ houseNo: session.houseNo, pin: session.pin }),
     });
     const data = await resp.json();
+    // Capture round config so the form gate and view logic can use it.
+    if (data.round) currentRound = data.round;
     const hasReqs = data.ok && data.requests && data.requests.length;
     myRequests = hasReqs ? data.requests : [];
     // back-to-status link only makes sense when there are requests
@@ -1194,10 +1229,18 @@ async function loadHistory(session, decideView) {
       hasReqs ? 'inline-block' : 'none';
     if (!hasReqs) {
       el.innerHTML = '<div class="empty-state">ยังไม่มีคำขอ</div>';
-      if (decideView) showFormView();
+      if (decideView) {
+        // If round is closed and no requests, show the closed notice
+        currentRound && !currentRound.isOpen
+          ? showRoundClosedView(false) : showFormView();
+      }
       return;
     }
-    if (decideView) showStatusView();
+    if (decideView) {
+      // If round is closed, show the closed notice (with history button)
+      currentRound && !currentRound.isOpen
+        ? showRoundClosedView(true) : showStatusView();
+    }
     el.innerHTML = `<div class="req-list">${data.requests.map(req => {
       const items = req.items || [];
       const totalCount = items.length;
@@ -1231,15 +1274,48 @@ async function loadHistory(session, decideView) {
   }
 }
 
-// ── View toggle: form vs status ───────────────────────────────────────────────
-function showFormView() {
-  document.getElementById('formSection').style.display = 'block';
+// ── View toggle: form / status / round-closed ─────────────────────────────────
+function hideAllViews() {
+  document.getElementById('formSection').style.display = 'none';
   document.getElementById('historySection').style.display = 'none';
+  document.getElementById('roundClosedSection').style.display = 'none';
+}
+function showFormView() {
+  hideAllViews();
+  document.getElementById('formSection').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+// Call this instead of showFormView() when initiating a new request
+function tryShowFormView() {
+  if (currentRound && !currentRound.isOpen) {
+    showRoundClosedView(myRequests.length > 0); return;
+  }
+  startNewRequest(); showFormView();
+}
+function showRoundClosedView(hasExistingRequests) {
+  hideAllViews();
+  const sec = document.getElementById('roundClosedSection');
+  sec.style.display = 'block';
+  const r = currentRound || {};
+  document.getElementById('roundClosedLabel').textContent =
+    r.roundLabel ? r.roundLabel : 'นิติบุคคลจะประกาศเปิดรับในครั้งถัดไป';
+  document.getElementById('roundClosedDate').textContent =
+    r.nextPickupDate ? '📅 รอบถัดไป: ' + r.nextPickupDate : '';
+  const hBtn = document.getElementById('roundClosedHistoryBtn');
+  hBtn.style.display = hasExistingRequests ? 'block' : 'none';
+  // Also hide the "add more" button in history (it should redirect here anyway)
+  const addBtn = document.getElementById('addMoreBtn');
+  if (addBtn) addBtn.style.display =
+    currentRound && !currentRound.isOpen ? 'none' : '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function showStatusView() {
-  document.getElementById('formSection').style.display = 'none';
+  hideAllViews();
   document.getElementById('historySection').style.display = 'block';
+  // Hide "แจ้งเพิ่ม" button when round is closed
+  const addBtn = document.getElementById('addMoreBtn');
+  if (addBtn) addBtn.style.display =
+    currentRound && !currentRound.isOpen ? 'none' : '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1287,6 +1363,12 @@ function uploadWithProgress(url, payload, onProgress) {
 async function submitRequest() {
   const session = getResidentSession();
   if (!session) { showLoginModal(); return; }
+
+  // Round gate (client-side; backend also enforces this)
+  if (!editingRequestId && currentRound && !currentRound.isOpen) {
+    showMsg('err', '🔒 ปิดรับคำขอชั่วคราว ไม่สามารถส่งคำขอใหม่ได้ในขณะนี้');
+    return;
+  }
 
   const items = collectFormItems();
   if (!items.length) {
