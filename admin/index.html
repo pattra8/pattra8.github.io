@@ -1478,6 +1478,7 @@
   .pp-cb-k { font-size: 10px; color: #8a8177; letter-spacing: .03em; }
   .pp-cb-v { font-size: 14px; font-weight: 700; color: #1f1d1a; line-height: 1.2; }
   .pp-cb-v.big { font-size: 18px; font-weight: 800; letter-spacing: .01em; }
+  .pp-cb-time { font-size: 11px; font-weight: 500; color: #8a8177; margin-left: 3px; }
   .pp-cb-phone { flex: 1.3; }
 
   /* ── Section ── */
@@ -3707,6 +3708,18 @@ function pickupFormatDate(iso) {
     hour: '2-digit', minute: '2-digit',
   });
 }
+function pickupDateOnly(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleDateString('th-TH', {
+    timeZone: 'Asia/Bangkok', year: 'numeric', month: 'short', day: 'numeric',
+  });
+}
+function pickupTimeOnly(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString('th-TH', {
+    timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit',
+  }) + ' น.';
+}
 
 function getFilteredPickupRequests() {
   if (currentPickupFilter === 'completed') {
@@ -4035,10 +4048,6 @@ async function savePickupUpdate() {
 function buildPrintPage(req) {
   const statusLabel = (PICKUP_STATUS_ICON[req.status] || '') + ' ' +
     (PICKUP_STATUS_LABELS[req.status] || req.status);
-  const printedAt = new Date().toLocaleString('th-TH', {
-    timeZone: 'Asia/Bangkok', year: 'numeric',
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
 
   const totalPhotos = pickupAllPhotos(req).length;
 
@@ -4052,7 +4061,7 @@ function buildPrintPage(req) {
       <!-- HEADER -->
       <div class="pp-header">
         <div class="pp-header-left">
-          <div class="pp-brand">ภัทรา วิลล่า 8 · PATTRA VILLA 8</div>
+          <div class="pp-brand">Pattra Villa 8</div>
           <div class="pp-doctitle">ใบแจ้งทิ้งของใหญ่</div>
           ${roundLabel ? `<div class="pp-round">${escH(roundLabel)}</div>` : ''}
           <span class="pp-status-chip ${stCls}">${statusLabel}</span>
@@ -4091,7 +4100,9 @@ function buildPrintPage(req) {
           <div class="pp-cb-ico">📅</div>
           <div>
             <div class="pp-cb-k">วันที่แจ้ง</div>
-            <div class="pp-cb-v">${pickupFormatDate(req.createdAt)}</div>
+            <div class="pp-cb-v">${pickupDateOnly(req.createdAt)}
+              <span class="pp-cb-time">${pickupTimeOnly(req.createdAt)}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -4138,10 +4149,6 @@ function buildPrintPage(req) {
       <!-- FOOTER -->
       <div class="pp-foot">
         <div class="pp-sign">ผู้รับของ ............................ วันที่ ................</div>
-        <div class="pp-foot-meta">
-          ภัทรา วิลล่า 8 · พิมพ์เมื่อ ${printedAt}<br>
-          เอกสารสำหรับประสานงานรถรับของใหญ่
-        </div>
       </div>
     </div>`;
 }
