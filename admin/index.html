@@ -1247,7 +1247,6 @@
     <div class="modal-footer">
       <div class="modal-actions" style="flex-wrap:wrap;gap:8px;">
         <button class="ghost-btn" onclick="closePickupModal()">ปิด</button>
-        <button class="ghost-btn" onclick="printPickupRequest()" style="border-color:var(--accent);color:var(--accent-deep);">🖨 พิมพ์</button>
         <button class="primary-btn" onclick="savePickupUpdate()" id="pickupSaveBtn">💾 บันทึก</button>
       </div>
     </div>
@@ -3936,6 +3935,7 @@ function openPickupModal(id) {
                    style="margin-top:10px;${pickupModalRejected[i] ? '' : 'display:none;'}">
                 <input type="text" class="reject-reason-input" data-idx="${i}"
                        oninput="pickupModalRejectReasons[${i}]=this.value"
+                       onchange="autoSavePickup()"
                        value="${escH(pickupModalRejectReasons[i] || '')}" maxlength="300"
                        placeholder="เหตุผลที่ไม่รับทิ้งชิ้นนี้ (ลูกบ้านจะเห็น)"
                        style="width:100%;border:1.5px solid #e3b9b0;border-radius:9px;padding:8px 11px;font-family:inherit;font-size:13px;color:var(--text);background:#fff;outline:none;" />
@@ -3967,7 +3967,7 @@ function openPickupModal(id) {
         </div>
         <div style="margin-top:12px;">
           <label style="font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">โน้ต admin</label>
-          <textarea id="pickupEditNote" rows="3"
+          <textarea id="pickupEditNote" rows="3" onchange="autoSavePickup()"
             style="width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--text);background:var(--card);outline:none;resize:vertical;"
             placeholder="โน้ตภายใน หรือข้อความแจ้งลูกบ้าน..."
           >${escH(req.adminNote || '')}</textarea>
@@ -4035,6 +4035,7 @@ function toggleItemRejected(i) {
   if (block) block.style.background = pickupModalRejected[i] ?
     '#fdf3f1' : 'var(--bg-soft)';
   updateCollectProgress();
+  autoSavePickup();
 }
 
 function updateCollectProgress() {
@@ -4078,20 +4079,68 @@ function toggleItemCollected(i) {
   const block = document.querySelector(`.item-block[data-idx="${i}"]`);
   if (block) block.style.opacity = pickupModalCollected[i] ? '.62' : '1';
   updateCollectProgress();
+  autoSavePickup();
 }
 
 function setAllCollected() {
-  const allDone = pickupModalCollected.every(Boolean) && pickupModalCollected.length > 0;
-  pickupModalCollected = pickupModalCollected.map(() => !allDone);
+  // Collect every non-rejected item; toggle off if already all collected.
+  const targets = pickupModalCollected
+    .map((_, i) => i).filter(i => !pickupModalRejected[i]);
+  const allDone = targets.length > 0 && targets.every(i => pickupModalCollected[i]);
+  targets.forEach(i => { pickupModalCollected[i] = !allDone; });
   document.querySelectorAll('.item-block').forEach(b => {
-    b.style.opacity = !allDone ? '.62' : '1';
+    const i = Number(b.dataset.idx);
+    if (!pickupModalRejected[i]) b.style.opacity = !allDone ? '.62' : '1';
   });
   renderCollectButtons();
+  autoSavePickup();
 }
 
 function closePickupModal() {
   document.getElementById('pickupModal').style.display = 'none';
   currentPickupId = null;
+}
+
+// Silent auto-save (per-item toggles / reasons / note) — no modal reopen.
+async function autoSavePickup() {
+  if (!currentPickupId) return;
+  const { adminHouseNo, adminPin } = getAdminAuth();
+  const requestId = currentPickupId;
+  const ind = document.getElementById('pickupSaveMsg');
+  if (ind) { ind.style.color = 'var(--text-muted)'; ind.textContent = 'กำลังบันทึก…'; }
+  try {
+    const resp = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminHouseNo, adminPin, action: 'update', requestId,
+        adminNote: (document.getElementById('pickupEditNote')?.value || '').trim(),
+        collected: pickupModalCollected,
+        rejected: pickupModalRejected,
+        rejectReasons: pickupModalRejectReasons,
+      }),
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'บันทึกไม่สำเร็จ');
+    // Update local copy + refresh list/stats without disturbing the modal.
+    const req = pickupRequests.find(r => r.id === requestId);
+    if (req) {
+      req.items = (req.items || []).map((it, i) => ({
+        ...it,
+        collected: !!pickupModalCollected[i],
+        rejected: !!pickupModalRejected[i],
+        rejectReason: pickupModalRejected[i] ? (pickupModalRejectReasons[i] || '') : '',
+      }));
+      const allResolved = req.items.length > 0 &&
+        req.items.every(it => it.collected || it.rejected);
+      req.status = allResolved ? 'completed' : 'submitted';
+    }
+    renderPickupStats(pickupRequests);
+    renderPickupList(getFilteredPickupRequests());
+    if (ind) { ind.style.color = 'var(--status-ok)'; ind.textContent = '✓ บันทึกอัตโนมัติแล้ว'; }
+  } catch (err) {
+    if (ind) { ind.style.color = 'var(--status-error)'; ind.textContent = `❌ ${err.message}`; }
+  }
 }
 
 async function savePickupUpdate() {
