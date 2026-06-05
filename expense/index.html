@@ -442,6 +442,7 @@
   .detail-section { margin-bottom:18px; }
   .detail-label { font-size:11px; font-weight:600; color:var(--text-lo); text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; }
   .detail-value { font-size:14px; color:var(--text-hi); }
+  .detail-value-multiline { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.55; }
 
   /* ── LIGHTBOX ── */
   .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,.94); z-index:300; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:16px; }
@@ -1914,6 +1915,8 @@ function removeSlip(i){currentSlips.splice(i,1);renderPreview();}
 function openDetail(id) {
   const e=expenses.find(x=>x.id===id); if(!e)return;
   const slipsHtml=e.slips&&e.slips.length?`<div class="detail-section"><div class="detail-label">ไฟล์แนบ</div>${attachmentsHtml(e.slips,true)}</div>`:'';
+  const detailHtml = e.detail ? escapeHtml(e.detail) : '';
+  const noteHtml = e.note ? escapeHtml(e.note) : '';
   document.getElementById('detailContent').innerHTML=`
     <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px">
       <span class="expense-type-badge ${typeBadgeClass(e.type)}" style="flex-shrink:0;margin-top:3px">${typeLabel(e.type)}</span>
@@ -1930,8 +1933,8 @@ function openDetail(id) {
       <div class="detail-section"><div class="detail-label">วันที่</div><div class="detail-value">${fmtDate(e.date)}</div></div>
       <div class="detail-section"><div class="detail-label">สถานะ</div><div class="detail-value">${e.status==='paid'?'✅ จ่ายแล้ว':'⏳ รอดำเนินการ'}</div></div>
     </div>
-    ${e.detail?`<div class="detail-section"><div class="detail-label">รายละเอียด</div><div class="detail-value">${e.detail}</div></div>`:''}
-    ${e.note?`<div class="detail-section"><div class="detail-label">หมายเหตุ</div><div class="detail-value">${e.note}</div></div>`:''}
+    ${detailHtml?`<div class="detail-section"><div class="detail-label">รายละเอียด</div><div class="detail-value detail-value-multiline">${detailHtml}</div></div>`:''}
+    ${noteHtml?`<div class="detail-section"><div class="detail-label">หมายเหตุ</div><div class="detail-value detail-value-multiline">${noteHtml}</div></div>`:''}
     ${slipsHtml}`;
   document.getElementById('detailActions').innerHTML=isAdmin
     ?`<button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">ลบ</button><button class="btn btn-ghost" onclick="closeModal('detailModal');openEditModal('${e.id}')">แก้ไข</button>`
