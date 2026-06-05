@@ -605,22 +605,6 @@
     <div class="stats-grid" id="statCards"></div>
     <div id="dashboardFacilitiesCard"></div>
 
-    <div class="cap-card">
-      <div class="cap-header">
-        <div class="cap-title">วงเงินลงทุน</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <button class="cap-set-btn" id="capSetBtn" onclick="openCapModal()">⚙️ ตั้งค่าวงเงิน</button>
-          <div class="cap-pct" id="capAmountLabel">—</div>
-        </div>
-      </div>
-      <div class="cap-bar-bg"><div class="cap-bar-fill" id="capBarFill" style="width:0%"></div></div>
-      <div class="cap-labels">
-        <span id="capSpentLabel">ใช้ไป: ฿0</span>
-        <span id="capRemainingLabel" class="cap-remaining">คงเหลือ: ฿0</span>
-        <span id="capMaxLabel">วงเงิน: ยังไม่กำหนด</span>
-      </div>
-    </div>
-
     <div class="section-header">
       <div class="section-title" id="txnSectionTitle">รายจ่ายเดือน —</div>
       <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
@@ -789,22 +773,6 @@
 
 <!-- FAB — admin only -->
 <button class="fab" id="fabAdd" onclick="openAddModal()">+</button>
-
-<!-- CAP MAX SETTINGS MODAL -->
-<div class="modal-overlay" id="capModal">
-  <div class="modal" style="max-width:400px">
-    <div class="modal-title">ตั้งค่าวงเงิน Cap Max</div>
-    <p style="font-size:13px;color:var(--text-mid);margin-bottom:20px;line-height:1.6">วงเงินนี้ใช้สำหรับรายจ่าย <strong>ลงทุน</strong> เท่านั้น ระบบจะคำนวณจากรายการลงทุนทั้งหมดโดยไม่รวมซ่อมบำรุงหรือค่าใช้จ่ายทั่วไป</p>
-    <div class="form-group">
-      <label class="form-label">วงเงินอนุมัติสูงสุด (บาท)</label>
-      <input class="form-input" type="number" id="fCapMaxGlobal" placeholder="เช่น 200000" style="font-size:18px;font-weight:600;padding:12px 14px">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('capModal')">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="saveCapMax()">บันทึกวงเงิน</button>
-    </div>
-  </div>
-</div>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -1066,11 +1034,6 @@ function renderDashboard() {
   const inv = monthly.filter(e=>e.type==='investment').reduce((s,e)=>s+Number(e.amount||0),0);
   const mnt = monthly.filter(e=>e.type==='maintenance').reduce((s,e)=>s+Number(e.amount||0),0);
   const gen = monthly.filter(e=>e.type==='general').reduce((s,e)=>s+Number(e.amount||0),0);
-  const currentYear = new Date().getFullYear();
-  const currentYearInvestment = expenses
-    .filter(e => new Date(e.date).getFullYear() === currentYear && e.type === 'investment')
-    .reduce((sum, e) => sum + Number(e.amount || 0), 0);
-
   document.getElementById('statCards').innerHTML = `
     <div class="stat-card${activeDashboardType === 'recurring' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('recurring')">
       <div class="stat-icon" style="background:var(--ok-bg)">🔄</div>
@@ -1097,25 +1060,6 @@ function renderDashboard() {
       <div class="stat-sub">${monthly.filter(e=>e.type==='maintenance').length} รายการ</div>
     </div>`;
 
-  // Global cap max from localStorage
-  const capMax = getGlobalCapMax();
-  const used   = currentYearInvestment;
-  const remaining = Math.max(capMax - used, 0);
-  if (capMax>0) {
-    const pct=Math.min((used/capMax)*100,100), over=used>capMax;
-    document.getElementById('capBarFill').style.width   = pct+'%';
-    document.getElementById('capBarFill').className     = 'cap-bar-fill'+(over?' over':'');
-    document.getElementById('capAmountLabel').textContent = `${Math.round(pct)}%${over?' ⚠️':''}`;
-    document.getElementById('capSpentLabel').textContent  = `ใช้ไป: ${fmt(used)}`;
-    document.getElementById('capRemainingLabel').textContent = `คงเหลือ: ${fmt(remaining)}`;
-    document.getElementById('capMaxLabel').textContent    = `วงเงิน: ${fmt(capMax)}`;
-  } else {
-    document.getElementById('capBarFill').style.width    = '0%';
-    document.getElementById('capAmountLabel').textContent = 'ยังไม่กำหนดวงเงิน';
-    document.getElementById('capSpentLabel').textContent  = `ใช้ไป: ${fmt(used)}`;
-    document.getElementById('capRemainingLabel').textContent = 'คงเหลือ: ยังไม่กำหนด';
-    document.getElementById('capMaxLabel').textContent    = 'วงเงิน: ยังไม่กำหนด';
-  }
   renderDashboardFacilities();
   renderMonthHero(); renderMonthTxn();
 }
@@ -2004,7 +1948,6 @@ function openCapModal() {
 // ── ADMIN UI VISIBILITY ──
 function setAdminUI(on) {
   document.getElementById('fabAdd').classList.toggle('visible', on);
-  document.getElementById('capSetBtn').classList.toggle('visible', on);
 }
 
 
