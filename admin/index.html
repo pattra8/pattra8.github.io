@@ -828,6 +828,37 @@
       font-weight: 600;
       margin-top: 10px;
     }
+    .ann-progress {
+      display: none;
+      margin-top: 12px;
+    }
+    .ann-progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+    }
+    .ann-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #e0a254);
+      transition: width 0.22s ease;
+    }
+    .ann-progress-meta {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+    .ann-progress-label {
+      font-weight: 600;
+      color: var(--accent-text);
+    }
 
     /* ─── FOOTER ─── */
     footer {
@@ -1247,6 +1278,15 @@
           <button id="annCancelBtn" onclick="cancelAnnEdit()" style="display:none;flex:1;background:var(--bg-soft);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">
             ยกเลิก
           </button>
+        </div>
+        <div id="annProgress" class="ann-progress" aria-live="polite">
+          <div class="ann-progress-track">
+            <div id="annProgressFill" class="ann-progress-fill"></div>
+          </div>
+          <div class="ann-progress-meta">
+            <span id="annProgressLabel" class="ann-progress-label">กำลังบันทึก...</span>
+            <span id="annProgressValue">0%</span>
+          </div>
         </div>
         <div id="annStatus" style="margin-top:12px;font-size:13px;min-height:20px;"></div>
       </div>
@@ -3308,6 +3348,31 @@
     });
   }
 
+  function setAnnouncementProgress(percent, label = 'กำลังบันทึก...') {
+    const wrap = document.getElementById('annProgress');
+    const fill = document.getElementById('annProgressFill');
+    const value = document.getElementById('annProgressValue');
+    const text = document.getElementById('annProgressLabel');
+    if (!wrap || !fill || !value || !text) return;
+    const safePercent = Math.max(0, Math.min(100, Math.round(percent)));
+    wrap.style.display = 'block';
+    fill.style.width = `${safePercent}%`;
+    value.textContent = `${safePercent}%`;
+    text.textContent = label;
+  }
+
+  function hideAnnouncementProgress() {
+    const wrap = document.getElementById('annProgress');
+    const fill = document.getElementById('annProgressFill');
+    const value = document.getElementById('annProgressValue');
+    const text = document.getElementById('annProgressLabel');
+    if (!wrap || !fill || !value || !text) return;
+    wrap.style.display = 'none';
+    fill.style.width = '0%';
+    value.textContent = '0%';
+    text.textContent = 'กำลังบันทึก...';
+  }
+
   function renderAnnouncementDropzoneSummary() {
     const el = document.getElementById('annDropzoneSummary');
     if (!el) return;
@@ -3379,8 +3444,10 @@
     </div>`;
   }
 
-  async function uploadAnnouncementFiles(docId) {
+  async function uploadAnnouncementFiles(docId, onProgress = null) {
     const uploaded = [];
+    const uploadableCount = _annFiles.filter(file => !!file.file).length;
+    let uploadedCount = 0;
     for (const file of _annFiles) {
       if (!file.file) {
         uploaded.push({
@@ -3402,6 +3469,10 @@
         contentType: file.file.type || undefined
       });
       const url = await window._annStorage.getDownloadURL(storageRef);
+      uploadedCount += 1;
+      if (onProgress && uploadableCount > 0) {
+        onProgress(uploadedCount / uploadableCount, file);
+      }
       uploaded.push({
         name: file.name,
         ext: file.ext,
@@ -3575,30 +3646,50 @@
     const status = document.getElementById('annStatus');
     btn.disabled = true;
     status.textContent = 'กำลังบันทึก...';
+    setAnnouncementProgress(8, 'เริ่มเตรียมข้อมูล...');
     try {
       const { updateDoc, doc, setDoc, serverTimestamp } = window._annFirestore;
       const docId = document.getElementById('annDocId').value;
       const originalFiles = _annOriginalFiles.slice();
+      const newUploadCount = _annFiles.filter(file => !!file.file).length;
+      const uploadProgress = ratio => {
+        const percent = 18 + Math.round(ratio * 56);
+        const label = newUploadCount > 0
+          ? `กำลังอัปโหลดไฟล์ ${Math.min(newUploadCount, Math.max(1, Math.round(ratio * newUploadCount)))}/${newUploadCount}`
+          : 'กำลังเตรียมไฟล์แนบ...';
+        setAnnouncementProgress(percent, label);
+      };
+      if (newUploadCount > 0) {
+        setAnnouncementProgress(18, `กำลังอัปโหลดไฟล์ 0/${newUploadCount}`);
+      } else {
+        setAnnouncementProgress(28, 'ไม่มีไฟล์ใหม่ กำลังข้ามขั้นตอนอัปโหลด...');
+      }
       if (docId) {
-        const photos = await uploadAnnouncementFiles(docId);
+        const photos = await uploadAnnouncementFiles(docId, uploadProgress);
+        setAnnouncementProgress(82, 'กำลังอัปเดตประกาศ...');
         await updateDoc(doc(_annDb, 'announcements', docId), {
           title, body, type, effectiveDate, photos, updatedAt: serverTimestamp()
         });
         const keptPaths = new Set(photos.map(file => file.storagePath).filter(Boolean));
+        setAnnouncementProgress(92, 'กำลังจัดการไฟล์เก่า...');
         await deleteAnnouncementFiles(originalFiles.filter(file => file.storagePath && !keptPaths.has(file.storagePath)));
+        setAnnouncementProgress(100, 'อัปเดตเสร็จแล้ว');
         cancelAnnEdit();
         status.textContent = '✅ อัปเดตแล้ว';
       } else {
         const newRef = doc(_annColRef);
-        const photos = await uploadAnnouncementFiles(newRef.id);
+        const photos = await uploadAnnouncementFiles(newRef.id, uploadProgress);
+        setAnnouncementProgress(84, 'กำลังบันทึกประกาศ...');
         await setDoc(newRef, {
           title, body, type, effectiveDate, photos,
           createdAt: serverTimestamp(), updatedAt: serverTimestamp()
         });
+        setAnnouncementProgress(100, 'เพิ่มประกาศเสร็จแล้ว');
         cancelAnnEdit();
         status.textContent = '✅ เพิ่มประกาศแล้ว';
       }
     } catch(err) {
+      hideAnnouncementProgress();
       status.textContent = '❌ ' + err.message;
     } finally {
       btn.disabled = false;
@@ -3618,6 +3709,7 @@
     document.getElementById('annFormTitle').textContent = 'เพิ่มประกาศ';
     document.getElementById('annCancelBtn').style.display = 'none';
     document.getElementById('annStatus').textContent = '';
+    hideAnnouncementProgress();
     renderAnnouncementFilesPreview();
   }
 
