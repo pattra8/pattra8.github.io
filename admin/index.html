@@ -751,6 +751,84 @@
     }
     .reject-btn:hover { background: var(--status-error-bg); }
 
+    /* ─── ANNOUNCEMENT ATTACHMENTS ─── */
+    .ann-dropzone {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fff 0%, #fcf8f1 100%);
+      padding: 20px 18px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.16s, background 0.16s, transform 0.16s, box-shadow 0.16s;
+    }
+    .ann-dropzone:hover {
+      border-color: var(--accent);
+      background: #fffaf1;
+      box-shadow: 0 10px 24px rgba(60,40,20,0.06);
+    }
+    .ann-dropzone:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(196,122,44,0.14);
+    }
+    .ann-dropzone.is-dragover {
+      border-color: var(--accent);
+      background: var(--accent-pale);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(60,40,20,0.08);
+    }
+    .ann-dropzone-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ann-dropzone-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--accent-text);
+      margin-bottom: 12px;
+    }
+    .ann-dropzone-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .ann-dropzone-subtitle {
+      font-size: 13px;
+      color: var(--text-soft);
+      margin-top: 6px;
+      line-height: 1.55;
+      max-width: 420px;
+    }
+    .ann-dropzone-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      line-height: 1.55;
+    }
+    .ann-dropzone-summary {
+      font-size: 12px;
+      color: var(--accent-text);
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
     /* ─── FOOTER ─── */
     footer {
       padding: 18px 28px;
@@ -798,6 +876,10 @@
       .modal-footer { padding: 14px 22px; flex-direction: column; align-items: stretch; }
       .modal-actions { flex-direction: column; }
       .ghost-btn, .primary-btn { width: 100%; }
+      .ann-dropzone {
+        min-height: 144px;
+        padding: 18px 14px;
+      }
     }
   </style>
 </head>
@@ -1147,9 +1229,14 @@
         </div>
         <div style="margin-bottom:18px;">
           <label style="font-size:13px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;">ไฟล์แนบ</label>
-          <input type="file" id="annFiles" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-            style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:var(--text);outline:none;background:#fff;box-sizing:border-box;" />
-          <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">รองรับหลายไฟล์: รูปภาพ, PDF, DOC/DOCX, XLS/XLSX</div>
+          <div id="annDropzone" class="ann-dropzone" tabindex="0" role="button" aria-label="ลากและวางไฟล์แนบ หรือคลิกเพื่อเลือกไฟล์">
+            <input type="file" id="annFiles" class="ann-dropzone-input" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+            <div class="ann-dropzone-icon">📎</div>
+            <div class="ann-dropzone-title">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+            <div class="ann-dropzone-subtitle">พื้นที่ใหญ่ขึ้นสำหรับวางรูปภาพ เอกสาร และไฟล์แนบหลายไฟล์ในครั้งเดียว</div>
+            <div class="ann-dropzone-meta">รองรับหลายไฟล์: รูปภาพ, PDF, DOC/DOCX, XLS/XLSX · สูงสุด 10 ไฟล์ · ไม่เกิน 10 MB ต่อไฟล์</div>
+            <div id="annDropzoneSummary" class="ann-dropzone-summary"></div>
+          </div>
           <div id="annFilesPreview" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;"></div>
         </div>
         <div style="display:flex;gap:10px;">
@@ -3221,11 +3308,24 @@
     });
   }
 
+  function renderAnnouncementDropzoneSummary() {
+    const el = document.getElementById('annDropzoneSummary');
+    if (!el) return;
+    if (!_annFiles.length) {
+      el.textContent = '';
+      return;
+    }
+    const totalBytes = _annFiles.reduce((sum, file) => sum + (Number(file.sizeBytes) || 0), 0);
+    const totalLabel = formatAnnFileSize(totalBytes);
+    el.textContent = `เลือกแล้ว ${_annFiles.length} ไฟล์${totalLabel ? ` · ${totalLabel}` : ''}`;
+  }
+
   function renderAnnouncementFilesPreview() {
     const el = document.getElementById('annFilesPreview');
     if (!el) return;
     if (!_annFiles.length) {
       el.innerHTML = '';
+      renderAnnouncementDropzoneSummary();
       return;
     }
     el.innerHTML = _annFiles.map((file, idx) => {
@@ -3247,6 +3347,7 @@
         <div style="margin-top:2px;font-size:10.5px;color:var(--text-muted);">${escHtml(meta)}</div>
       </div>`;
     }).join('');
+    renderAnnouncementDropzoneSummary();
   }
 
   function removeAnnouncementFile(index) {
@@ -3389,8 +3490,14 @@
     }
   }
 
-  document.getElementById('annFiles').addEventListener('change', event => {
-    const picked = Array.from(event.target.files || []);
+  function isAnnouncementFileAllowed(file) {
+    const ext = getAnnFileExt(file.name);
+    if (file.type && file.type.startsWith('image/')) return true;
+    if (isAnnImageExt(ext)) return true;
+    return ['pdf', 'doc', 'docx', 'xls', 'xlsx'].includes(ext);
+  }
+
+  function addAnnouncementFiles(picked) {
     const status = document.getElementById('annStatus');
     status.textContent = '';
 
@@ -3398,6 +3505,10 @@
       if (_annFiles.length >= ANN_MAX_FILES) {
         status.textContent = `⚠️ แนบไฟล์ได้สูงสุด ${ANN_MAX_FILES} ไฟล์`;
         break;
+      }
+      if (!isAnnouncementFileAllowed(file)) {
+        status.textContent = `⚠️ ไฟล์ ${file.name} ยังไม่รองรับ`;
+        continue;
       }
       if (file.size > ANN_MAX_FILE_BYTES) {
         status.textContent = `⚠️ ไฟล์ ${file.name} ใหญ่เกิน 10 MB`;
@@ -3417,8 +3528,41 @@
       });
     }
 
-    event.target.value = '';
     renderAnnouncementFilesPreview();
+  }
+
+  document.getElementById('annFiles').addEventListener('change', event => {
+    const picked = Array.from(event.target.files || []);
+    addAnnouncementFiles(picked);
+    event.target.value = '';
+  });
+
+  const annDropzone = document.getElementById('annDropzone');
+  const annFilesInput = document.getElementById('annFiles');
+
+  annDropzone.addEventListener('click', () => annFilesInput.click());
+  annDropzone.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      annFilesInput.click();
+    }
+  });
+  ['dragenter', 'dragover'].forEach(eventName => {
+    annDropzone.addEventListener(eventName, event => {
+      event.preventDefault();
+      annDropzone.classList.add('is-dragover');
+    });
+  });
+  ['dragleave', 'dragend', 'drop'].forEach(eventName => {
+    annDropzone.addEventListener(eventName, event => {
+      event.preventDefault();
+      if (eventName === 'dragleave' && annDropzone.contains(event.relatedTarget)) return;
+      annDropzone.classList.remove('is-dragover');
+    });
+  });
+  annDropzone.addEventListener('drop', event => {
+    const picked = Array.from(event.dataTransfer?.files || []);
+    addAnnouncementFiles(picked);
   });
 
   async function saveAnnouncement() {
