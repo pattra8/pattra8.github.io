@@ -24,35 +24,33 @@ Error generating stack: `+e.message+`
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;color:#2a2218;background:#efe7d8;padding:28px 16px;-webkit-font-smoothing:antialiased}
-  .disp{font-family:"Cormorant Garamond",serif}
-  .doc{max-width:600px;margin:0 auto;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 50px rgba(80,60,30,.14)}
+  .num{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;font-feature-settings:"lnum" 1,"tnum" 1}
+  .doc{max-width:560px;margin:0 auto;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 20px 50px rgba(80,60,30,.14)}
   .bar{height:6px;background:linear-gradient(90deg,#d4913f,#c47a2c)}
-  .head{padding:28px 32px 0;display:flex;justify-content:space-between;align-items:flex-start}
-  .org{font-family:"Cormorant Garamond",serif;font-size:24px;font-weight:600;color:#2a2218;line-height:1.15}
-  .sub{font-size:11px;color:#9a8b75;margin-top:4px;letter-spacing:.04em}
+  .head{padding:26px 30px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .org{font-family:"Cormorant Garamond",serif;font-size:23px;font-weight:600;color:#2a2218;line-height:1.15}
+  .sub{font-size:10px;color:#b9a98f;margin-top:3px;letter-spacing:.06em}
   .rno{text-align:right}
-  .paid{display:inline-flex;align-items:center;gap:5px;background:#e2ecd6;color:#4a6238;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px}
-  .rlabel{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#b9a98f;margin-top:10px}
-  .rval{font-family:"Cormorant Garamond",serif;font-size:17px;color:#2a2218;font-weight:600}
-  .hero{padding:24px 32px 22px;text-align:center}
-  .hero .l{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#b9a98f}
-  .hero .a{font-family:"Cormorant Garamond",serif;font-size:52px;font-weight:600;color:#c47a2c;line-height:1.05;margin-top:2px}
-  .hero .w{font-size:13px;color:#6b5d4a;font-style:italic;margin-top:4px}
-  .meta{display:flex;gap:12px;padding:0 32px 22px}
-  .mcell{flex:1;background:#faf6ee;border:1px solid #efe6d4;border-radius:14px;padding:13px 16px}
-  .mlabel{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#b9a98f;margin-bottom:3px}
-  .mval{font-size:14px;color:#2a2218;font-weight:600;word-break:break-word}
-  .mval.sm{font-size:12px;font-weight:500;color:#6b5d4a}
-  .item{margin:0 32px;border-top:1px solid #efe6d4;padding:16px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
-  .item .d{font-size:14px;color:#2a2218}
-  .item .dd{font-size:12px;color:#9a8b75;margin-top:2px}
-  .item .p{font-size:15px;font-weight:600;color:#2a2218;white-space:nowrap}
-  .foot{margin:8px 32px 0;border-top:1px solid #efe6d4;padding:18px 0 0;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
-  .foot .note{font-size:12px;color:#6b5d4a;line-height:1.6}
-  .sign{text-align:center;min-width:170px}
-  .sign .line{border-top:1px dashed #c9b89c;margin-bottom:6px}
-  .sign .cap{font-size:11px;color:#9a8b75}
-  .fine{padding:18px 32px 26px;font-size:10.5px;color:#b9a98f;text-align:center}
+  .paid{display:inline-block;background:#e2ecd6;color:#4a6238;font-size:11px;font-weight:600;padding:4px 11px;border-radius:999px;white-space:nowrap}
+  .rlabel{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#b9a98f;margin-top:9px}
+  .rval{font-size:14px;color:#2a2218;font-weight:600}
+  .hero{padding:22px 30px 18px;text-align:center}
+  .hero .l{font-size:11px;color:#6b5d4a}
+  .hero .h{font-size:44px;font-weight:700;color:#2a2218;line-height:1.05;margin:5px 0 3px;letter-spacing:.01em}
+  .hero .p{font-size:12.5px;color:#6b5d4a}
+  .amtline{margin:0 30px;background:#faf6ee;border:1px solid #efe6d4;border-radius:14px;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .amtline .k{font-size:13px;color:#6b5d4a}
+  .amtline .v{font-size:27px;font-weight:700;color:#c47a2c;line-height:1;white-space:nowrap}
+  .words{margin:9px 30px 0;font-size:12.5px;color:#6b5d4a;font-style:italic;text-align:center}
+  .klist{margin:16px 30px 0}
+  .krow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #efe6d4;font-size:13px}
+  .krow .k{color:#6b5d4a}.krow .v{color:#2a2218;font-weight:500;text-align:right}
+  .foot{margin:14px 30px 0;padding-top:14px;border-top:1px solid #efe6d4;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+  .foot .note{font-size:11.5px;color:#6b5d4a;line-height:1.6}
+  .sign{text-align:center;min-width:160px}
+  .sign .line{border-top:1px dashed #c9b89c;margin-bottom:5px}
+  .sign .cap{font-size:10.5px;color:#9a8b75}
+  .fine{padding:16px 30px 24px;font-size:10px;color:#b9a98f;text-align:center}
   @media print{body{background:#fff;padding:0}.doc{box-shadow:none;border-radius:0}}
 </style></head>
 <body>
@@ -61,45 +59,35 @@ Error generating stack: `+e.message+`
     <div class="head">
       <div>
         <div class="org">${t.bankAccountName}</div>
-        <div class="sub">PATTRA VILLA 8 · ระบบชำระค่าส่วนกลาง</div>
+        <div class="sub">PATTRA VILLA 8 · ใบเสร็จรับเงิน</div>
       </div>
       <div class="rno">
-        <span class="paid">✓ ชำระเงินแล้ว</span>
-        <div class="rlabel">ใบเสร็จรับเงิน</div>
-        <div class="rval">${e.receiptNo??`-`}</div>
+        <span class="paid">✓ ชำระแล้ว</span>
+        <div class="rlabel">เลขที่</div>
+        <div class="rval num">${e.receiptNo??`-`}</div>
       </div>
     </div>
 
     <div class="hero">
-      <div class="l">จำนวนเงินที่ได้รับ</div>
-      <div class="a">฿${i}</div>
-      <div class="w">(${re(e.amount)})</div>
+      <div class="l">ใบเสร็จ${oe(e)} · บ้านเลขที่</div>
+      <div class="h num">${t.houseBlock} / ${e.houseNo}</div>
+      <div class="p">${ae(e)} · ปี ${e.year}</div>
     </div>
 
-    <div class="meta">
-      <div class="mcell">
-        <div class="mlabel">ได้รับเงินจาก</div>
-        <div class="mval">${e.payerName||`บ้าน `+r}</div>
-        <div class="mlabel" style="margin-top:8px">บ้านเลขที่</div>
-        <div class="mval">${r}</div>
-      </div>
-      <div class="mcell">
-        <div class="mlabel">วันที่</div>
-        <div class="mval">${se(n)}</div>
-        ${e.email?`<div class="mlabel" style="margin-top:8px">ส่งถึง</div><div class="mval sm">${e.email}</div>`:``}
-      </div>
+    <div class="amtline">
+      <span class="k">จำนวนเงินที่ได้รับ</span>
+      <span class="v num">฿${i}</span>
     </div>
+    <div class="words">(${re(e.amount)})</div>
 
-    <div class="item">
-      <div>
-        <div class="d">${oe(e)} · ${r}</div>
-        <div class="dd">${ae(e)} · ปี ${e.year}</div>
-      </div>
-      <div class="p">฿${i}</div>
+    <div class="klist">
+      <div class="krow"><span class="k">ผู้ชำระ</span><span class="v">${e.payerName||`บ้าน `+r}</span></div>
+      <div class="krow"><span class="k">วันที่ · ช่องทาง</span><span class="v">${se(n)} · โอนผ่าน ${t.bankName}</span></div>
+      ${e.email?`<div class="krow"><span class="k">ส่งใบเสร็จถึง</span><span class="v">${e.email}</span></div>`:``}
     </div>
 
     <div class="foot">
-      <div class="note">ได้รับเงินไว้เป็นการถูกต้องแล้ว<br/>ชำระโดย: โอนผ่าน ${t.bankName}</div>
+      <div class="note">ได้รับเงินไว้เป็นการถูกต้องแล้ว</div>
       <div class="sign"><div class="line">&nbsp;</div><div class="cap">ผู้รับเงิน / กรรมการนิติบุคคล</div></div>
     </div>
 
