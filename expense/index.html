@@ -259,6 +259,56 @@
   }
   .filter-select:focus, .filter-search:focus { border-color:var(--accent); }
   .filter-search { flex:1; min-width:160px; }
+  .search-wrap {
+    position:relative; flex:1 1 260px; min-width:min(100%,260px);
+  }
+  .search-wrap .filter-search {
+    width:100%; min-width:0; padding-left:34px; padding-right:34px;
+  }
+  .search-icon {
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    color:var(--text-lo); font-size:14px; pointer-events:none; z-index:1;
+  }
+  .search-clear {
+    display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    width:24px; height:24px; border:none; border-radius:50%;
+    background:var(--surface2); color:var(--text-mid); font-size:15px;
+    line-height:1; cursor:pointer;
+  }
+  .search-clear.visible { display:flex; align-items:center; justify-content:center; }
+  .search-clear:hover { background:var(--border); color:var(--text-hi); }
+  .search-suggestions {
+    display:none; position:absolute; left:0; right:0; top:calc(100% + 6px);
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r-md); box-shadow:var(--shadow-lg);
+    overflow:hidden; z-index:180;
+  }
+  .search-suggestions.open { display:block; }
+  .search-suggestion {
+    width:100%; border:none; background:transparent; padding:10px 12px;
+    display:grid; grid-template-columns:auto minmax(0,1fr) auto;
+    gap:10px; align-items:start; text-align:left; font-family:inherit;
+    cursor:pointer; color:var(--text-hi);
+  }
+  .search-suggestion:hover, .search-suggestion.active { background:var(--accent-bg); }
+  .suggestion-icon { color:var(--text-lo); font-size:13px; line-height:1.45; }
+  .suggestion-main { min-width:0; }
+  .suggestion-title {
+    font-size:13px; font-weight:700; line-height:1.35;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .suggestion-sub {
+    margin-top:2px; font-size:11.5px; color:var(--text-lo); line-height:1.35;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .suggestion-source {
+    font-size:10.5px; font-weight:700; color:var(--accent-dk);
+    background:var(--accent-bg); border-radius:99px; padding:2px 7px;
+    white-space:nowrap; border:1px solid rgba(79,110,247,0.16);
+  }
+  .search-suggestion mark {
+    background:#fef3c7; color:var(--text-hi); border-radius:4px; padding:0 2px;
+  }
 
   /* ── EXPENSE CARDS ── */
   .expense-list { display:flex; flex-direction:column; gap:8px; }
@@ -653,7 +703,12 @@
         <option value="paid">จ่ายแล้ว</option>
         <option value="pending">รอดำเนินการ</option>
       </select>
-      <input type="text" class="filter-search" id="filterSearch" placeholder="🔍 ค้นหา..." oninput="renderExpenses()">
+      <div class="search-wrap" id="expenseSearchWrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="filter-search" id="filterSearch" placeholder="ค้นหาชื่อหัวข้อ / รายละเอียด..." autocomplete="off" oninput="handleExpenseSearchInput()" onfocus="renderSearchSuggestions()" onkeydown="handleExpenseSearchKeydown(event)">
+        <button type="button" class="search-clear" id="searchClearBtn" onclick="clearExpenseSearch()" aria-label="ล้างคำค้น">×</button>
+        <div class="search-suggestions" id="searchSuggestions"></div>
+      </div>
     </div>
     <div class="expense-list" id="expenseList"></div>
   </div>
@@ -1210,6 +1265,7 @@ let activeDashboardFacility = null;
 let activeDashboardType = null;
 let activeExpensesFacility = null;
 let activeAnnualType = null;
+let activeSearchSuggestion = -1;
 
 function facilityRows(sourceItems, activeKey, clickFnName) {
   const data = FACILITIES.map(f => {
@@ -1346,10 +1402,194 @@ function scrollToFirstTxn(listId) {
   }, 60));
 }
 
+function normalizeSearchText(value) {
+  return String(value || '').toLocaleLowerCase('th-TH').replace(/\s+/g, ' ').trim();
+}
+
+function searchTokens(query) {
+  return normalizeSearchText(query).split(' ').filter(Boolean);
+}
+
+function getExpenseSearchQuery() {
+  return normalizeSearchText(document.getElementById('filterSearch')?.value || '');
+}
+
+function expenseSearchScore(expense, query) {
+  const q = normalizeSearchText(query);
+  if (!q) return 0;
+  const title = normalizeSearchText(expense.title);
+  const detail = normalizeSearchText(expense.detail);
+  const tokens = searchTokens(q);
+  const combined = `${title} ${detail}`;
+  const tokenMatches = tokens.filter(token => combined.includes(token)).length;
+  if (!title.includes(q) && !detail.includes(q) && tokenMatches < tokens.length) return 0;
+
+  let score = 1;
+  if (title === q) score += 1200;
+  if (title.startsWith(q)) score += 950;
+  if (title.includes(q)) score += 760;
+  score += tokens.filter(token => title.includes(token)).length * 120;
+  if (detail.includes(q)) score += 280;
+  score += tokens.filter(token => detail.includes(token)).length * 34;
+  return score;
+}
+
+function expenseMatchesSearch(expense, query) {
+  return !normalizeSearchText(query) || expenseSearchScore(expense, query) > 0;
+}
+
+function cleanSuggestionText(value) {
+  return String(value || '').replace(/^[\s\-•–—]+/, '').replace(/\s+/g, ' ').trim();
+}
+
+function detailSuggestionText(expense, query) {
+  const q = normalizeSearchText(query);
+  const tokens = searchTokens(q);
+  const lines = String(expense.detail || '')
+    .split(/\n|,|;/)
+    .map(cleanSuggestionText)
+    .filter(Boolean);
+  return lines.find(line => normalizeSearchText(line).includes(q))
+    || lines.find(line => tokens.some(token => normalizeSearchText(line).includes(token)))
+    || cleanSuggestionText(expense.detail)
+    || expense.title;
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlightSearchMatch(value, query) {
+  const text = escapeHtml(value || '');
+  const tokens = searchTokens(query).slice(0, 5).map(escapeRegExp).filter(Boolean);
+  if (!tokens.length) return text;
+  return text.replace(new RegExp(`(${tokens.join('|')})`, 'ig'), '<mark>$1</mark>');
+}
+
+function buildSearchSuggestions(query) {
+  const q = normalizeSearchText(query);
+  if (!q) return [];
+  const seen = new Set();
+  return [...expenses]
+    .map(expense => ({ expense, score: expenseSearchScore(expense, q) }))
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score || compareExpensesDesc(a.expense, b.expense))
+    .map(({ expense, score }) => {
+      const title = String(expense.title || '');
+      const titleMatch = normalizeSearchText(title).includes(q)
+        || searchTokens(q).some(token => normalizeSearchText(title).includes(token));
+      const value = titleMatch ? title : detailSuggestionText(expense, q);
+      const key = normalizeSearchText(value);
+      if (!key || seen.has(key)) return null;
+      seen.add(key);
+      return {
+        value,
+        title,
+        sub: titleMatch ? (expense.detail ? cleanSuggestionText(expense.detail) : costCategoryLabel(expense)) : value,
+        source: titleMatch ? 'หัวข้อ' : 'รายละเอียด',
+        score,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 7);
+}
+
+function syncSearchUi() {
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (!clearBtn) return;
+  clearBtn.classList.toggle('visible', Boolean(getExpenseSearchQuery()));
+}
+
+function closeSearchSuggestions() {
+  const box = document.getElementById('searchSuggestions');
+  if (!box) return;
+  box.classList.remove('open');
+  box.innerHTML = '';
+  activeSearchSuggestion = -1;
+}
+
+function renderSearchSuggestions() {
+  const box = document.getElementById('searchSuggestions');
+  if (!box) return;
+  syncSearchUi();
+  const query = getExpenseSearchQuery();
+  const suggestions = buildSearchSuggestions(query);
+  activeSearchSuggestion = -1;
+  if (!query || !suggestions.length) {
+    closeSearchSuggestions();
+    return;
+  }
+  box.innerHTML = suggestions.map((item, index) => `
+    <button type="button" class="search-suggestion" data-suggestion="${index}" data-value="${escapeHtml(item.value)}" onclick="selectExpenseSearchSuggestion(this.dataset.value)">
+      <span class="suggestion-icon">⌕</span>
+      <span class="suggestion-main">
+        <span class="suggestion-title">${highlightSearchMatch(item.value, query)}</span>
+        <span class="suggestion-sub">${highlightSearchMatch(item.title === item.value ? item.sub : item.title, query)}</span>
+      </span>
+      <span class="suggestion-source">${item.source}</span>
+    </button>
+  `).join('');
+  box.classList.add('open');
+}
+
+function setActiveSearchSuggestion(nextIndex) {
+  const box = document.getElementById('searchSuggestions');
+  if (!box || !box.classList.contains('open')) return;
+  const items = [...box.querySelectorAll('.search-suggestion')];
+  if (!items.length) return;
+  activeSearchSuggestion = (nextIndex + items.length) % items.length;
+  items.forEach((item, index) => item.classList.toggle('active', index === activeSearchSuggestion));
+}
+
+function handleExpenseSearchInput() {
+  renderExpenses();
+  renderSearchSuggestions();
+}
+
+function handleExpenseSearchKeydown(event) {
+  const box = document.getElementById('searchSuggestions');
+  const isOpen = box?.classList.contains('open');
+  if (event.key === 'Escape') {
+    closeSearchSuggestions();
+    return;
+  }
+  if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && isOpen) {
+    event.preventDefault();
+    setActiveSearchSuggestion(activeSearchSuggestion + (event.key === 'ArrowDown' ? 1 : -1));
+    return;
+  }
+  if (event.key === 'Enter') {
+    if (isOpen && activeSearchSuggestion >= 0) {
+      event.preventDefault();
+      const active = box.querySelectorAll('.search-suggestion')[activeSearchSuggestion];
+      active?.click();
+    } else {
+      closeSearchSuggestions();
+      renderExpenses();
+    }
+  }
+}
+
+function selectExpenseSearchSuggestion(value) {
+  const input = document.getElementById('filterSearch');
+  input.value = value;
+  closeSearchSuggestions();
+  renderExpenses();
+  input.focus();
+}
+
+function clearExpenseSearch() {
+  const input = document.getElementById('filterSearch');
+  input.value = '';
+  closeSearchSuggestions();
+  renderExpenses();
+  input.focus();
+}
+
 function renderExpenses() {
   const month=document.getElementById('filterMonth').value, type=document.getElementById('filterType').value,
         costCategory=document.getElementById('filterCostCategory').value,
-        status=document.getElementById('filterStatus').value, q=document.getElementById('filterSearch').value.toLowerCase();
+        status=document.getElementById('filterStatus').value, q=getExpenseSearchQuery();
   activeExpensesFacility = FACILITIES.some(f => f.key === costCategory) ? costCategory : null;
   activeAnnualType = type || null;
   const list=[...expenses].filter(e=>{
@@ -1359,9 +1599,10 @@ function renderExpenses() {
     if(type&&e.type!==type)return false;
     if(costCategory&&costCategoryValue(e)!==costCategory)return false;
     if(status&&e.status!==status)return false;
-    if(q&&!e.title.toLowerCase().includes(q)&&!costCategoryLabel(e).toLowerCase().includes(q)&&!(e.detail||'').toLowerCase().includes(q)&&!(e.note||'').toLowerCase().includes(q))return false;
+    if(!expenseMatchesSearch(e,q))return false;
     return true;
-  }).sort(compareExpensesDesc);
+  }).sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesDesc(a,b) : compareExpensesDesc(a,b));
+  syncSearchUi();
   renderExpensesHero(list);
   renderExpensesFacilities();
   renderAnnualBreakdown();
@@ -1917,6 +2158,10 @@ function closeModal(id, force = false){
   if (id === 'expenseModal') expenseFormSnapshot = null;
 }
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});});
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('expenseSearchWrap');
+  if (wrap && !wrap.contains(e.target)) closeSearchSuggestions();
+});
 
 // ── GLOBAL CAP MAX ──
 function getGlobalCapMax() {
@@ -1974,8 +2219,11 @@ Object.assign(window, {
   deleteExpense,
   doLogin,
   exportYearTransactions,
+  clearExpenseSearch,
   handleDragOver,
   handleDrop,
+  handleExpenseSearchInput,
+  handleExpenseSearchKeydown,
   handleFiles,
   lightboxNext,
   lightboxPrev,
@@ -1994,6 +2242,7 @@ Object.assign(window, {
   renderMonthTxn,
   saveCapMax,
   saveExpense,
+  selectExpenseSearchSuggestion,
   setCostCategory,
   setType,
   showPage,
