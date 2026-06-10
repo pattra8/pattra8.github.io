@@ -267,6 +267,21 @@
     }
     .bp-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
     .bp-card:focus-visible { outline: 3px solid rgba(196,122,44,0.3); outline-offset: 3px; }
+    .bp-card.dragging { opacity: 0.45; box-shadow: var(--shadow-lg); transform: none; }
+    .bp-card.drop-target-active { transition: none; }
+    .drag-grip {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; margin: -3px 4px -3px -4px; flex-shrink: 0;
+      color: #c0b29a; cursor: grab; border-radius: 7px; line-height: 1;
+      font-size: 17px; user-select: none; align-self: center;
+    }
+    .drag-grip:hover { background: var(--bg2); color: var(--gold); }
+    .drag-grip:active { cursor: grabbing; }
+    .reorder-status {
+      min-height: 18px; margin: -6px 0 10px; font-size: 12.5px; color: var(--muted);
+    }
+    .reorder-status.ok { color: #3a7a42; }
+    .reorder-status.error { color: var(--danger); }
     .card-status-bar { border-radius: 16px 0 0 16px; }
     .card-body { padding: 20px 22px 18px; }
     .card-top {
@@ -544,6 +559,7 @@
       </div>
     </div>
     <div class="list-summary" id="listSummary"></div>
+    <div class="reorder-status" id="reorderStatus"></div>
     <section class="doc-list" id="docList">
       <div class="empty">กรุณาเข้าสู่ระบบ admin เพื่อดูเอกสาร</div>
     </section>
@@ -592,6 +608,8 @@
     let _currentGroups = [];
     let _editingDocId = null;
     let _editingDocs = [];
+    let _dragCard = null;
+    let _orderSnapshot = null;
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -750,11 +768,24 @@
         groups.get(key).docs.push(doc);
       });
       return [...groups.values()]
-        .map(group => ({
-          ...group,
-          docs: group.docs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-        }))
-        .sort((a, b) => new Date((b.docs[0] || {}).createdAt || 0) - new Date((a.docs[0] || {}).createdAt || 0));
+        .map(group => {
+          const orders = group.docs
+            .map(d => d.sortOrder)
+            .filter(v => typeof v === 'number' && isFinite(v));
+          return {
+            ...group,
+            sortOrder: orders.length ? Math.min(...orders) : null,
+            docs: group.docs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+          };
+        })
+        .sort((a, b) => {
+          const aHas = a.sortOrder !== null, bHas = b.sortOrder !== null;
+          // Groups the admin has explicitly ordered come first, in saved order;
+          // brand-new (unordered) groups float to the top, newest first.
+          if (aHas && bHas && a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+          if (aHas !== bHas) return aHas ? 1 : -1;
+          return new Date((b.docs[0] || {}).createdAt || 0) - new Date((a.docs[0] || {}).createdAt || 0);
+        });
     }
 
     /* ── Render ── */
@@ -771,9 +802,13 @@
         activeFilter === 'all' || (g.docs[0]?.category || '') === activeFilter
       );
 
+      const canReorder = activeFilter === 'all' && filtered.length > 1;
       $('listSummary').textContent = activeFilter === 'all'
         ? `แสดง ${filtered.length} รายการทั้งหมด`
         : `แสดง ${filtered.length} จาก ${groups.length} รายการ`;
+      setReorderHint(canReorder
+        ? 'ลากไอคอน ⠿ เพื่อจัดลำดับเอกสาร (บันทึกอัตโนมัติ)'
+        : '');
 
       if (!filtered.length) {
         $('docList').innerHTML = '<div class="empty">ไม่มีเอกสารในหมวดหมู่นี้</div>';
@@ -812,10 +847,11 @@
         ].filter(Boolean).join('  ·  ');
 
         return `
-        <article class="bp-card" data-detail="${esc(first.id)}" tabindex="0" aria-label="ดูรายละเอียด ${esc(group.baseTitle || first.title || '')}">
+        <article class="bp-card" data-detail="${esc(first.id)}" data-group-key="${esc(group.key)}" ${canReorder ? 'draggable="true"' : ''} tabindex="0" aria-label="ดูรายละเอียด ${esc(group.baseTitle || first.title || '')}">
           <div class="card-status-bar" style="background:${barColor}"></div>
           <div class="card-body">
             <div class="card-top">
+              ${canReorder ? '<span class="drag-grip" data-drag-grip title="ลากเพื่อจัดลำดับ" aria-hidden="true">⠿</span>' : ''}
               <div class="card-title-group">
                 <div class="card-title">${esc(group.baseTitle || first.title || '-')}</div>
                 <div class="card-tags">
@@ -848,6 +884,105 @@
           }
         });
       });
+      initCardDnd();
+    }
+
+    /* ── Drag-and-drop reorder ── */
+    function setReorderHint(msg) {
+      const el = $('reorderStatus');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'reorder-status';
+    }
+    let _reorderStatusTimer = null;
+    function setReorderStatus(msg, type = '') {
+      const el = $('reorderStatus');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'reorder-status ' + type;
+      clearTimeout(_reorderStatusTimer);
+      if (type === 'ok') {
+        _reorderStatusTimer = setTimeout(() => {
+          el.className = 'reorder-status';
+          el.textContent = 'ลากไอคอน ⠿ เพื่อจัดลำดับเอกสาร (บันทึกอัตโนมัติ)';
+        }, 2500);
+      }
+    }
+    function getDragAfterElement(container, y) {
+      const cards = [...container.querySelectorAll('.bp-card:not(.dragging)')];
+      let closest = { offset: -Infinity, element: null };
+      for (const card of cards) {
+        const box = card.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) closest = { offset, element: card };
+      }
+      return closest.element;
+    }
+    function initCardDnd() {
+      const list = $('docList');
+      const cards = [...list.querySelectorAll('.bp-card[draggable="true"]')];
+      if (!cards.length) return;
+
+      cards.forEach(card => {
+        const grip = card.querySelector('[data-drag-grip]');
+        // Clicking the grip shouldn't open the detail modal.
+        if (grip) grip.addEventListener('click', e => e.stopPropagation());
+        card.addEventListener('dragstart', e => {
+          _dragCard = card;
+          _orderSnapshot = currentCardOrder();
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          try { e.dataTransfer.setData('text/plain', card.dataset.groupKey || ''); } catch {}
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          _dragCard = null;
+          persistCardOrder();
+        });
+      });
+
+      if (!list._dndBound) {
+        list.addEventListener('dragover', e => {
+          if (!_dragCard) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          const after = getDragAfterElement(list, e.clientY);
+          if (after == null) list.appendChild(_dragCard);
+          else if (after !== _dragCard) list.insertBefore(_dragCard, after);
+        });
+        list.addEventListener('drop', e => e.preventDefault());
+        list._dndBound = true;
+      }
+    }
+    function currentCardOrder() {
+      return [...$('docList').querySelectorAll('.bp-card')].map(c => c.dataset.groupKey);
+    }
+    async function persistCardOrder() {
+      const auth = getAuthPayload();
+      if (!auth) return;
+      const keys = currentCardOrder();
+      if (_orderSnapshot && keys.join('') === _orderSnapshot.join('')) return;
+
+      const items = [];
+      keys.forEach((key, index) => {
+        const group = _currentGroups.find(g => g.key === key);
+        if (!group) return;
+        group.sortOrder = index;
+        group.docs.forEach(d => {
+          d.sortOrder = index;
+          items.push({ documentId: d.id, sortOrder: index });
+        });
+      });
+      if (!items.length) return;
+
+      try {
+        setReorderStatus('กำลังบันทึกลำดับ...');
+        await api({ action: 'reorder', ...auth, items });
+        setReorderStatus('บันทึกลำดับแล้ว ✓', 'ok');
+      } catch (err) {
+        setReorderStatus(err.message || 'บันทึกลำดับไม่สำเร็จ', 'error');
+        loadDocs().catch(() => {});
+      }
     }
 
     function openDetailModal(documentId) {
