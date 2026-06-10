@@ -601,6 +601,21 @@
     header { padding:0 16px; }
     .fab { bottom:20px; right:20px; }
   }
+  /* Drag-and-drop reorder (admin) */
+  .expense-card[draggable="true"] { cursor:grab; }
+  .expense-card[draggable="true"]:active { cursor:grabbing; }
+  .expense-card.dragging { opacity:.45; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  .drag-handle {
+    flex-shrink:0; align-self:center;
+    display:flex; align-items:center; justify-content:center;
+    width:30px; height:34px; margin-right:2px;
+    cursor:grab; user-select:none; touch-action:none;
+    font-size:20px; line-height:1; letter-spacing:1px;
+    color:var(--accent); background:var(--accent-bg);
+    border-radius:8px; transition:background .15s, transform .1s;
+  }
+  .drag-handle:hover { background:var(--accent); color:#fff; }
+  .drag-handle:active { cursor:grabbing; transform:scale(.92); }
 </style>
 </head>
 <body>
@@ -872,6 +887,7 @@ function init() {
   restoreAdminSession();
   populateMonthFilter(); populateDashMonthFilter();
   bindSearchControls();
+  bindReorder();
   renderDashboard(); renderExpenses();
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
   if (usingFirestore) bindFirestore();
@@ -900,24 +916,44 @@ function bindFirestore() {
   }, err => console.error('Firestore settings listener failed:', err));
 }
 
+function currentMonthValue() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+// Months that actually have data, plus the current month — newest first, spanning every year.
+function availableMonthValues() {
+  const set = new Set([currentMonthValue()]);
+  expenses.forEach(e => {
+    const d = e?.date ? new Date(e.date) : null;
+    if (d && Number.isFinite(d.getTime()))
+      set.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  });
+  return [...set].sort().reverse();
+}
+function monthOptionLabel(val) {
+  const [yr, mo] = val.split('-');
+  return `${MONTH_TH[parseInt(mo,10)-1]} ${yr}`;
+}
 function populateMonthFilter() {
   const monthFilter = document.getElementById('filterMonth');
   if (!monthFilter) return;
-  const now = new Date(), opts = ['<option value="">ทุกเดือน</option>'];
-  const year = now.getFullYear();
-  for (let m=0; m<12; m+=1)
-    opts.push(`<option value="${year}-${String(m+1).padStart(2,'0')}">${MONTH_TH[m]} ${year}</option>`);
+  const opts = ['<option value="">ทุกเดือน</option>'];
+  availableMonthValues().forEach(val =>
+    opts.push(`<option value="${val}">${monthOptionLabel(val)}</option>`));
   monthFilter.innerHTML = opts.join('');
 }
 function populateDashMonthFilter() {
-  const now = new Date(), cur = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const opts = [];
-  const year = now.getFullYear();
-  for (let m=0; m<12; m+=1) {
-    const val = `${year}-${String(m+1).padStart(2,'0')}`;
-    opts.push(`<option value="${val}"${val===cur?' selected':''}>${MONTH_TH[m]} ${year}</option>`);
-  }
-  document.getElementById('dashMonthFilter').innerHTML = opts.join('');
+  const sel = document.getElementById('dashMonthFilter');
+  if (!sel) return;
+  const prev = sel.value;
+  const cur = currentMonthValue();
+  const values = availableMonthValues();
+  // Keep whatever month the user was viewing, even if it has no data yet.
+  if (prev && !values.includes(prev)) { values.push(prev); values.sort().reverse(); }
+  const selected = prev || cur;
+  sel.innerHTML = values
+    .map(val => `<option value="${val}"${val===selected?' selected':''}>${monthOptionLabel(val)}</option>`)
+    .join('');
 }
 
 function setAdminState(on, persist = true) {
@@ -1062,6 +1098,15 @@ function compareExpensesDesc(a, b) {
   const dateDiff = getExpenseDateMs(b) - getExpenseDateMs(a);
   if (dateDiff !== 0) return dateDiff;
   return compareExpenseIdsDesc(a, b);
+}
+// Manual drag order takes precedence; items without an order (e.g. newly added) float to the top.
+function expenseOrderRank(e) {
+  return Number.isFinite(e?.order) ? e.order : -Infinity;
+}
+function compareExpensesManual(a, b) {
+  const ra = expenseOrderRank(a), rb = expenseOrderRank(b);
+  if (ra !== rb) return ra - rb;
+  return compareExpensesDesc(a, b);
 }
 
 function renderDashboard() {
@@ -1217,6 +1262,7 @@ function renderMonthHero() {
       </div>
     </div>`;
 }
+
 function getMonthExpenseItems() {
   const {yr,mi} = getMonthFilter();
   return expenses.filter(e=>{
@@ -1233,7 +1279,7 @@ function renderMonthTxn() {
   const q = getExpenseSearchQuery('month');
   const me = getMonthExpenseItems()
     .filter(e => expenseMatchesSearch(e, q))
-    .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesDesc(a,b) : compareExpensesDesc(a,b));
+    .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
   const filterLabels = [
     activeDashboardType ? expenseTypeText(activeDashboardType) : '',
     activeDashboardFacility || '',
@@ -1241,8 +1287,10 @@ function renderMonthTxn() {
   ].filter(Boolean);
   syncSearchUi('month');
   document.getElementById('txnSectionTitle').textContent = `รายจ่ายเดือน ${MONTH_EN[mi]} ${yr}${filterLabels.length ? ' · ' + filterLabels.join(' · ') : ''}`;
+  // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
+  const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility;
   document.getElementById('recentList').innerHTML = me.length
-    ? me.map(e=>expenseCardHtml(e,false)).join('')
+    ? me.map(e=>expenseCardHtml(e,false,reorderable)).join('')
     : '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">ไม่มีรายการในเดือนนี้</div></div>';
 }
 
@@ -1639,14 +1687,95 @@ function renderExpenses() {
     if(activeAnnualType&&e.type!==activeAnnualType)return false;
     if(!expenseMatchesSearch(e,q))return false;
     return true;
-  }).sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesDesc(a,b) : compareExpensesDesc(a,b));
+  }).sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
   syncSearchUi('all');
   renderExpensesHero(list);
   renderExpensesFacilities();
   renderAnnualBreakdown();
+  // Drag-reorder only makes sense on the full, unfiltered, unsearched admin list.
+  const reorderable = isAdmin && !q && !activeExpensesFacility && !activeAnnualType;
   document.getElementById('expenseList').innerHTML=list.length
-    ?list.map(e=>expenseCardHtml(e,true)).join('')
+    ?list.map(e=>expenseCardHtml(e,true,reorderable)).join('')
     :'<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">ไม่พบรายการ</div></div>';
+}
+
+// ---- Drag-and-drop reorder ----
+let reorderDragId = null;
+function bindReorder() {
+  ['expenseList', 'recentList'].forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.addEventListener('dragstart', onReorderDragStart);
+    container.addEventListener('dragover', onReorderDragOver);
+    container.addEventListener('drop', onReorderDrop);
+    container.addEventListener('dragend', onReorderDragEnd);
+  });
+}
+function onReorderDragStart(e) {
+  const card = e.target.closest('.expense-card[draggable="true"]');
+  if (!card) return;
+  reorderDragId = card.dataset.id;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', reorderDragId); } catch (_) {}
+}
+function reorderAfterElement(container, y) {
+  const cards = [...container.querySelectorAll('.expense-card:not(.dragging)')];
+  return cards.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    return closest;
+  }, { offset: -Infinity }).element;
+}
+function onReorderDragOver(e) {
+  if (reorderDragId === null) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const container = e.currentTarget;
+  const dragging = container.querySelector('.expense-card.dragging');
+  if (!dragging) return;
+  const after = reorderAfterElement(container, e.clientY);
+  if (!after) container.appendChild(dragging);
+  else container.insertBefore(dragging, after);
+}
+function onReorderDrop(e) {
+  if (reorderDragId === null) return;
+  e.preventDefault();
+  persistReorder(e.currentTarget);
+}
+function onReorderDragEnd(e) {
+  const card = e.target.closest('.expense-card');
+  if (card) card.classList.remove('dragging');
+  reorderDragId = null;
+}
+function persistReorder(container) {
+  // New visual sequence of just the cards in this container (may be a month subset).
+  const visibleIds = [...container.querySelectorAll('.expense-card')].map(c => c.dataset.id);
+  if (!visibleIds.length) return;
+  const visibleSet = new Set(visibleIds);
+  // Walk the full globally-sorted list; wherever a visible item sits, drop in the next
+  // id from the new sequence. Non-visible items keep their absolute slots, so reordering
+  // a single month never reshuffles other months.
+  const full = [...expenses].sort(compareExpensesManual);
+  let cursor = 0;
+  const nextOrder = full.map(exp => (visibleSet.has(exp.id) ? visibleIds[cursor++] : exp.id));
+  // Reassign a clean sequential order across everything and collect only what changed.
+  const changed = [];
+  nextOrder.forEach((id, idx) => {
+    const exp = expenses.find(x => x.id === id);
+    if (exp && exp.order !== idx) { exp.order = idx; changed.push(exp); }
+  });
+  if (!changed.length) return;
+  if (usingFirestore) {
+    Promise.all(changed.map(exp =>
+      updateDoc(doc(db, 'expenses', exp.id), { order: exp.order })
+        .catch(err => console.error('Failed to persist order for', exp.id, err))
+    ));
+  } else {
+    saveLocal();
+    refreshUI();
+  }
 }
 
 function exportCsvCell(value) {
@@ -1814,18 +1943,19 @@ function attachmentsHtml(items, detail = false) {
   return `<div class="expense-slips">${tiles}${overflow}</div>`;
 }
 
-function expenseCardHtml(e,showAdmin) {
+function expenseCardHtml(e,showAdmin,reorderable=false) {
   const slipsHtml = attachmentsHtml(e.slips,false);
   const adminHtml = isAdmin
     ?`<div class="expense-actions" onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="openEditModal('${e.id}')">✏️ แก้ไข</button><button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">ลบ</button></div>`:'';
   const sd = e.status==='paid'?'<span class="status-dot dot-paid"></span>จ่ายแล้ว':'<span class="status-dot dot-pending"></span>รอดำเนินการ';
-  return `<div class="expense-card" onclick="openDetail('${e.id}')">
-    <span class="expense-type-badge ${typeBadgeClass(e.type)}">${typeLabel(e.type)}</span>
+  const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
+  return `<div class="expense-card" data-id="${e.id}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
+    ${handleHtml}<span class="expense-type-badge ${typeBadgeClass(e.type)}">${typeLabel(e.type)}</span>
     <div class="expense-info">
       <div class="expense-title-row">
-        <span class="expense-title">${e.title}</span>
+        <span class="expense-title">${escapeHtml(e.title)}</span>
       </div>
-      <div class="expense-meta"><span class="expense-category-badge">${costCategoryLabel(e)}</span><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${e.note}</span>`:''}</div>
+      <div class="expense-meta"><span class="expense-category-badge">${costCategoryLabel(e)}</span><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}</div>
       ${slipsHtml}${adminHtml}
     </div>
     <div class="expense-amount">${fmt(e.amount)}</div>
@@ -2144,7 +2274,7 @@ function openDetail(id) {
     <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px">
       <span class="expense-type-badge ${typeBadgeClass(e.type)}" style="flex-shrink:0;margin-top:3px">${typeLabel(e.type)}</span>
       <div>
-        <div style="font-size:19px;font-weight:700;color:var(--text-hi);line-height:1.3;margin-bottom:6px">${e.title}</div>
+        <div style="font-size:19px;font-weight:700;color:var(--text-hi);line-height:1.3;margin-bottom:6px">${escapeHtml(e.title)}</div>
         <span class="expense-category-badge">${costCategoryLabel(e)}</span>
       </div>
     </div>
