@@ -1350,29 +1350,40 @@
       });
 
       if (_editingDocId) {
+        // Records still in the group (existing files removed during edit are
+        // already filtered out of _editingDocs). Do NOT fall back to
+        // _editingDocId here — if every file was removed those records are
+        // already deleted, and updating that id would 404 ("Document not found").
+        const targets = _editingDocs.slice();
+        const newFiles = _selectedNewFiles;
+        if (!targets.length && !newFiles.length) {
+          // Everything was removed; nothing left to save.
+          resetBpFormUi();
+          closeBpModal(true);
+          setStatus('uploadStatus', 'บันทึกแล้ว ✓', 'ok');
+          await loadDocs();
+          return;
+        }
+        const totalAfter = targets.length + newFiles.length;
         setStatus('uploadStatus', 'กำลังบันทึก...');
         try {
-          // Update every record in the group — they share one logical document,
-          // so the new title/category/notes must reach all of them or the group
-          // splits apart. Each record keeps its own "(n)" suffix.
-          const targets = _editingDocs.length
-            ? _editingDocs
-            : [{ id: _editingDocId, title: '' }];
+          // Update every remaining record so the new title/category/notes reach
+          // all of them and the group doesn't split. Each keeps its "(n)" suffix.
           for (let i = 0; i < targets.length; i++) {
             const t = targets[i];
             const m = String(t.title || '').match(/(\(\d+\))\s*$/);
-            const docTitle = (m && targets.length > 1) ? `${title} ${m[1]}` : title;
+            const docTitle = (m && totalAfter > 1) ? `${title} ${m[1]}` : title;
             if (targets.length > 1) setStatus('uploadStatus', `กำลังบันทึก ${i + 1}/${targets.length}...`);
             await api({ action: 'update', ...auth, documentId: t.id, category, title: docTitle, notes });
           }
 
           // Upload any new files added during edit
-          const newFiles = _selectedNewFiles;
           for (let i = 0; i < newFiles.length; i++) {
             const file = newFiles[i];
             setUploadProgress((i / newFiles.length) * 100, `กำลังอัปโหลดไฟล์ใหม่ ${i + 1}/${newFiles.length}`);
             const dataUrl = await fileToDataUrl(file);
-            await api({ action: 'upload', ...auth, category, title: `${title} (${targets.length + i + 1})`, notes, fileName: file.name, dataUrl });
+            const docTitle = totalAfter > 1 ? `${title} (${targets.length + i + 1})` : title;
+            await api({ action: 'upload', ...auth, category, title: docTitle, notes, fileName: file.name, dataUrl });
           }
           setUploadProgress(null);
           resetBpFormUi();
