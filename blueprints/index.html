@@ -1034,9 +1034,11 @@
           ${fileDocs.length > 5
             ? `<div class="file-search"><input type="search" id="fileSearchInput" placeholder="ค้นหาไฟล์..." autocomplete="off" /></div>`
             : '<div style="flex:1"></div>'}
-          ${fileDocs.length
+          ${fileDocs.length > 1
             ? `<button class="btn gold-fill download-all-btn" type="button" data-download-all="${esc(first.id)}">⬇ ZIP ทั้งหมด</button>`
-            : ''}
+            : fileDocs.length === 1
+              ? `<button class="btn gold-fill download-all-btn" type="button" data-download-single>⬇ ดาวน์โหลดไฟล์</button>`
+              : ''}
         </div>
         <div class="download-status" id="downloadStatus"></div>
         <div class="detail-file-box" id="detailFileBox">${filesHtml}</div>
@@ -1068,6 +1070,10 @@
       if (downloadAllBtn) {
         downloadAllBtn.addEventListener('click', () => downloadAllFiles(group, downloadAllBtn));
       }
+      const downloadSingleBtn = $('detailContent').querySelector('[data-download-single]');
+      if (downloadSingleBtn) {
+        downloadSingleBtn.addEventListener('click', () => downloadSingleFile(sortedFileDocs[0], downloadSingleBtn));
+      }
       $('detailContent').querySelector('[data-detail-edit]').addEventListener('click', () => {
         closeDetailModal();
         editDoc({
@@ -1092,6 +1098,34 @@
     function closeDetailModal() {
       $('detailModal').classList.remove('open');
       syncBodyScrollLock();
+    }
+
+    async function downloadSingleFile(doc, button) {
+      if (!doc || !doc.downloadUrl) return;
+      const status = $('downloadStatus');
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'กำลังดาวน์โหลด...';
+      if (status) status.textContent = '';
+      try {
+        const response = await fetch(doc.downloadUrl);
+        if (!response.ok) throw new Error('ดาวน์โหลดไม่สำเร็จ');
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = safeDownloadName(doc.fileName || doc.title || 'blueprint');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        if (status) status.textContent = 'ดาวน์โหลดไฟล์แล้ว';
+      } catch (err) {
+        if (status) status.textContent = err.message || 'ดาวน์โหลดไม่สำเร็จ';
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     }
 
     async function downloadAllFiles(group, button) {
