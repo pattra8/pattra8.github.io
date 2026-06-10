@@ -831,31 +831,15 @@
             <div class="card-footer">
               <div class="file-pills">${filePillsHtml}</div>
               <div class="card-btns">
-                <button class="btn-ghost" data-edit="${esc(first.id)}" data-title="${esc(first.title)}" data-category="${esc(first.category)}" data-notes="${esc(first.notes || '')}">แก้ไข</button>
-                <button class="btn-ghost btn-danger-ghost" data-delete="${esc(first.id)}">ลบ</button>
-                ${fileDocs.length === 1
-                  ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร</button>`
-                  : fileDocs.length > 1
-                    ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร (${fileDocs.length})</button>`
-                    : ''}
+                ${fileDocs.length
+                  ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร (${fileDocs.length})</button>`
+                  : ''}
               </div>
             </div>
           </div>
         </article>`;
       }).join('');
 
-      document.querySelectorAll('[data-delete]').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          deleteDoc(btn.dataset.delete);
-        });
-      });
-      document.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          editDoc(btn.dataset);
-        });
-      });
       document.querySelectorAll('.file-pill').forEach(link => {
         link.addEventListener('click', e => e.stopPropagation());
       });
@@ -938,11 +922,27 @@
         </div>
         <div class="download-status" id="downloadStatus"></div>
         <div class="detail-file-list">${filesHtml}</div>
+        <div class="modal-actions">
+          <button class="btn danger" type="button" data-detail-delete>ลบเอกสาร</button>
+          <button class="btn gold" type="button" data-detail-edit>แก้ไข</button>
+        </div>
       `;
       const downloadAllBtn = $('detailContent').querySelector('[data-download-all]');
       if (downloadAllBtn) {
         downloadAllBtn.addEventListener('click', () => downloadAllFiles(group, downloadAllBtn));
       }
+      $('detailContent').querySelector('[data-detail-edit]').addEventListener('click', () => {
+        closeDetailModal();
+        editDoc({
+          edit: first.id,
+          title: first.title || '',
+          category: first.category || '',
+          notes: first.notes || ''
+        });
+      });
+      $('detailContent').querySelector('[data-detail-delete]').addEventListener('click', e => {
+        deleteGroup(group, e.currentTarget);
+      });
       $('detailModal').classList.add('open');
     }
 
@@ -1244,12 +1244,28 @@
       } catch (err) { setUploadProgress(null); setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
     }
 
-    async function deleteDoc(id) {
-      if (!confirm('ลบเอกสารนี้?')) return;
+    async function deleteGroup(group, button) {
+      const name = group.baseTitle || (group.docs[0] || {}).title || 'เอกสารนี้';
+      const count = group.docs.length;
+      const msg = count > 1
+        ? `ลบ "${name}" ทั้งชุด (${count} รายการ) ออกจากระบบ?`
+        : `ลบ "${name}" ออกจากระบบ?`;
+      if (!confirm(msg)) return;
+      const auth = getAuthPayload();
+      if (!auth) { alert('กรุณาเข้าสู่ระบบ admin'); return; }
+      const originalText = button ? button.textContent : '';
+      if (button) { button.disabled = true; button.textContent = 'กำลังลบ...'; }
       try {
-        await api({action: 'delete', ...getAuthPayload(), documentId: id});
+        for (const doc of group.docs) {
+          await api({action: 'delete', ...auth, documentId: doc.id});
+        }
+        closeDetailModal();
         await loadDocs();
-      } catch (err) { alert(err.message || 'ลบไม่สำเร็จ'); }
+      } catch (err) {
+        alert(err.message || 'ลบไม่สำเร็จ');
+        if (button) { button.disabled = false; button.textContent = originalText; }
+        try { await loadDocs(); } catch {}
+      }
     }
 
     function init() {
