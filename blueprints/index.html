@@ -361,6 +361,7 @@
       z-index:220; align-items:center; justify-content:center; padding:20px;
     }
     .modal-overlay.open { display:flex; }
+    body.modal-open { overflow: hidden; }
     .modal {
       background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(255,248,240,0.98));
       border-radius: 18px; padding: 28px; width: 100%; max-width: 760px;
@@ -944,10 +945,17 @@
         deleteGroup(group, e.currentTarget);
       });
       $('detailModal').classList.add('open');
+      syncBodyScrollLock();
+    }
+
+    function syncBodyScrollLock() {
+      const anyOpen = document.querySelector('.modal-overlay.open') !== null;
+      document.body.classList.toggle('modal-open', anyOpen);
     }
 
     function closeDetailModal() {
       $('detailModal').classList.remove('open');
+      syncBodyScrollLock();
     }
 
     async function downloadAllFiles(group, button) {
@@ -1128,10 +1136,14 @@
     function isBpFormDirty() {
       return bpFormSnapshot && JSON.stringify(getBpFormState()) !== bpFormSnapshot;
     }
-    function openBpModal() { $('bpModal').classList.add('open'); }
+    function openBpModal() {
+      $('bpModal').classList.add('open');
+      syncBodyScrollLock();
+    }
     function closeBpModal(force = false) {
       if (!force && isBpFormDirty() && !confirm('มีข้อมูลที่ยังไม่ได้บันทึก ต้องการปิดหรือไม่?')) return false;
       $('bpModal').classList.remove('open');
+      syncBodyScrollLock();
       bpFormSnapshot = null;
       return true;
     }
