@@ -608,13 +608,13 @@
   .drag-handle {
     flex-shrink:0; align-self:center;
     display:flex; align-items:center; justify-content:center;
-    width:30px; height:34px; margin-right:2px;
+    width:22px; height:28px; margin-right:0;
     cursor:grab; user-select:none; touch-action:none;
-    font-size:20px; line-height:1; letter-spacing:1px;
-    color:var(--accent); background:var(--accent-bg);
-    border-radius:8px; transition:background .15s, transform .1s;
+    font-size:16px; line-height:1; letter-spacing:0;
+    color:#9ca3af; background:transparent;
+    border-radius:6px; transition:color .15s, background .15s, transform .1s;
   }
-  .drag-handle:hover { background:var(--accent); color:#fff; }
+  .drag-handle:hover { background:var(--surface2); color:#6b7280; }
   .drag-handle:active { cursor:grabbing; transform:scale(.92); }
 </style>
 </head>
