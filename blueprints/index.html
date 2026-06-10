@@ -282,42 +282,31 @@
       background: var(--bg2); color: var(--taupe-mid); white-space: nowrap;
     }
 
-    /* Cells */
-    .card-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-    .cell {
-      background: linear-gradient(180deg, rgba(251,245,236,0.9), rgba(243,236,221,0.8));
-      border: 1px solid rgba(219,201,169,0.8);
-      border-radius: 12px; padding: 11px 13px;
+    /* Card meta + notes */
+    .tag-cat {
+      padding: 3px 10px; border-radius: 999px; font-size: 11.5px;
+      font-weight: 600; white-space: nowrap;
     }
-    .cell-label {
-      font-size: 14px; font-weight: 600; letter-spacing: 0.03em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-    }
-    .cell-value { font-size: 19px; font-weight: 700; color: var(--text); line-height: 1.3; }
-    .cell-value.muted { color: var(--muted); font-weight: 400; }
-    .cell-notes {
+    .card-meta { font-size: 12.5px; color: var(--muted); }
+    .card-notes-line {
       font-size: 13px; color: var(--taupe-mid); line-height: 1.55;
-      margin-bottom: 12px; padding: 10px 12px;
-      background: rgba(243,236,221,0.5);
-      border-radius: 8px; border: 1px solid rgba(219,201,169,0.5);
+      margin-top: 12px; overflow: hidden; display: -webkit-box;
+      -webkit-line-clamp: 1; -webkit-box-orient: vertical;
     }
 
     /* Footer */
     .card-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0e8d8;
     }
-    .file-pills { display: flex; gap: 7px; flex-wrap: wrap; }
-    .file-pill {
+    .file-chip {
       display: inline-flex; align-items: center; gap: 5px;
       background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 5px 10px; font-size: 12px;
-      color: var(--taupe-mid); text-decoration: none; font-weight: 500;
-      max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      transition: border-color 0.2s, color 0.2s;
+      border-radius: 7px; padding: 4px 9px; font-size: 11.5px;
+      color: var(--taupe-mid); font-weight: 500;
+      max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .file-pill:hover { border-color: var(--gold); color: var(--gold); }
-    .file-pill-icon { font-size: 13px; flex-shrink: 0; }
+    .file-chip-more { font-size: 11.5px; color: #a08c6e; font-weight: 600; padding: 4px 2px; }
     .card-btns { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
     .btn-ghost {
       background: transparent; border: 1px solid var(--border); color: var(--taupe-mid);
@@ -386,66 +375,64 @@
       display:flex; gap:8px; justify-content:flex-end; margin-top:22px;
       padding-top:16px; border-top:1px solid var(--border);
     }
-    .detail-modal { max-width: 900px; }
-    .detail-summary {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px; margin-bottom: 18px;
-    }
+    .detail-modal { max-width: 760px; }
     .detail-notes {
-      color: var(--taupe-mid); line-height: 1.65; padding: 12px 14px;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 10px; margin-bottom: 20px;
+      color: var(--taupe-mid); font-size: 13px; line-height: 1.6;
+      padding: 10px 13px; background: var(--bg);
+      border-radius: 9px; margin-bottom: 4px;
     }
-    .detail-files-head {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; margin-bottom: 12px;
+    .files-toolbar {
+      display: flex; align-items: center; gap: 10px; margin: 18px 0 12px;
     }
-    .detail-files-head h3 { font-size: 18px; }
-    .detail-files-actions { display: flex; align-items: center; gap: 10px; }
-    .detail-file-count { color: var(--muted); font-size: 13px; }
+    .files-toolbar-title { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+    .files-toolbar-title span { color: #a08c6e; font-weight: 600; }
+    .file-search { flex: 1; min-width: 120px; }
+    .file-search input {
+      padding: 7px 12px; font-size: 13px; border-radius: 8px;
+    }
+    .download-all-btn {
+      flex-shrink: 0; padding: 7px 13px !important; font-size: 12.5px !important;
+      text-transform: none !important; letter-spacing: 0 !important;
+    }
     .download-all-btn:disabled { opacity: 0.6; cursor: wait; }
     .download-status {
-      min-height: 20px; margin: -4px 0 12px; color: var(--muted);
+      min-height: 18px; margin: -6px 0 8px; color: var(--muted);
       font-size: 12px; text-align: right;
     }
-    .detail-file-list {
-      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+    .detail-file-box {
+      border: 1px solid var(--border); border-radius: 11px;
+      overflow-y: auto; max-height: 46vh; background: rgba(255,255,255,0.8);
     }
-    .detail-file {
-      display: flex; align-items: center; gap: 12px; min-width: 0;
-      padding: 12px; border: 1px solid var(--border); border-radius: 12px;
-      background: rgba(255,255,255,0.8);
+    .detail-file-row {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 13px; border-bottom: 1px solid #f0e8d8;
     }
-    .detail-file-icon {
-      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--bg2); font-size: 20px;
+    .detail-file-row:last-child { border-bottom: none; }
+    .file-ext-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      border-radius: 5px; padding: 3px 6px; flex-shrink: 0;
     }
-    .detail-file-info { min-width: 0; flex: 1; }
     .detail-file-name {
-      font-weight: 600; font-size: 13px; color: var(--text);
+      flex: 1; min-width: 0; font-weight: 600; font-size: 13px; color: var(--text);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .detail-file-meta { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .detail-file-size { font-size: 11.5px; color: #a08c6e; flex-shrink: 0; }
     .detail-file-open {
       flex-shrink: 0; color: var(--gold); text-decoration: none;
-      font-size: 12px; font-weight: 700; padding: 7px 10px;
-      border: 1px solid rgba(196,122,44,0.35); border-radius: 8px;
+      font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 6px;
     }
-    .detail-file-open:hover { background: var(--gold); color: #fff; }
+    .detail-file-open:hover { background: var(--gold-pale); }
+    .file-search-empty {
+      text-align: center; color: var(--muted); font-size: 13px; padding: 18px 0;
+    }
 
     @media (max-width: 720px) {
       header { padding: 0 20px; }
       main { padding: 32px 18px 60px; }
       .upload-grid { grid-template-columns: 1fr; }
-      .card-cells { grid-template-columns: repeat(2, 1fr); }
       .card-title { font-size: 17px; }
-      .card-footer { flex-direction: column; align-items: flex-start; }
-      .detail-summary, .detail-file-list { grid-template-columns: 1fr; }
-      .detail-file-open { padding: 7px 9px; }
-      .detail-files-head { align-items: flex-start; }
-      .detail-files-actions { flex-direction: column; align-items: flex-end; }
+      .files-toolbar { flex-wrap: wrap; }
+      .file-search { order: 3; flex-basis: 100%; }
     }
   </style>
 </head>
@@ -677,6 +664,15 @@
       if (['dwg', 'dxf'].includes(ext)) return 'CAD';
       return 'FILE';
     }
+    function extBadgeColor(ext) {
+      if (ext === 'pdf') return '#9b2c1d';
+      if (isImageExt(ext)) return '#2e7d52';
+      if (['doc', 'docx'].includes(ext)) return '#1a7db5';
+      if (['xls', 'xlsx', 'csv'].includes(ext)) return '#2e7d52';
+      if (['ppt', 'pptx'].includes(ext)) return '#a04000';
+      if (['dwg', 'dxf'].includes(ext)) return '#3a5a8a';
+      return '#6b5d4a';
+    }
     function fileEmoji(ext) {
       if (ext === 'pdf') return '📄';
       if (isImageExt(ext)) return '🖼️';
@@ -786,18 +782,20 @@
         const detail      = group.docs.map(d => d._meta.extraNotes).find(Boolean) || meta.legacyNotes || '';
 
         const fileDocs = group.docs.filter(d => d.downloadUrl);
-        const filePillsHtml = fileDocs.length
-          ? fileDocs.slice(0, 5).map(doc => {
+        const shownChips = fileDocs.slice(0, 3);
+        const moreCount = fileDocs.length - shownChips.length;
+        const fileChipsHtml = fileDocs.length
+          ? shownChips.map(doc => {
               const ext = fileExtension(doc.fileName);
               const name = (doc.fileName || doc.title || 'ไฟล์').replace(/\s*\(\d+\)\s*$/, '');
-              return `<a class="file-pill" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">
-                <span class="file-pill-icon">${fileEmoji(ext)}</span>${esc(name)}
-              </a>`;
-            }).join('')
+              return `<span class="file-chip">${fileEmoji(ext)} ${esc(name)}</span>`;
+            }).join('') + (moreCount > 0 ? `<span class="file-chip-more">+${moreCount} ไฟล์</span>` : '')
           : `<span style="font-size:12px;color:var(--muted)">ยังไม่มีไฟล์แนบ</span>`;
 
         const metaLine = [
           version ? `Rev: ${version}` : '',
+          dateAdded,
+          `${fileCount} ไฟล์`,
           responsible ? `👤 ${responsible}` : ''
         ].filter(Boolean).join('  ·  ');
 
@@ -809,41 +807,20 @@
               <div class="card-title-group">
                 <div class="card-title">${esc(group.baseTitle || first.title || '-')}</div>
                 <div class="card-tags">
-                  <span class="tag">${catIcon} ${esc(category)}</span>
-                  ${metaLine ? `<span class="tag">${esc(metaLine)}</span>` : ''}
+                  <span class="tag-cat" style="background:${barColor}14;color:${barColor}">${catIcon} ${esc(category)}</span>
+                  <span class="card-meta">${esc(metaLine)}</span>
                 </div>
               </div>
+              ${fileDocs.length
+                ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร</button>`
+                : ''}
             </div>
-            <div class="card-cells">
-              <div class="cell">
-                <div class="cell-label">หมวดหมู่</div>
-                <div class="cell-value" style="font-size:15px;font-weight:700">${esc(category)}</div>
-              </div>
-              <div class="cell">
-                <div class="cell-label">อัปโหลดเมื่อ</div>
-                <div class="cell-value" style="font-size:15px">${esc(dateAdded)}</div>
-              </div>
-              <div class="cell">
-                <div class="cell-label">จำนวนไฟล์</div>
-                <div class="cell-value" style="color:#3a5a8a">${fileCount} ไฟล์</div>
-              </div>
-            </div>
-            ${detail ? `<div class="cell-notes">${esc(detail)}</div>` : ''}
-            <div class="card-footer">
-              <div class="file-pills">${filePillsHtml}</div>
-              <div class="card-btns">
-                ${fileDocs.length
-                  ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร (${fileDocs.length})</button>`
-                  : ''}
-              </div>
-            </div>
+            ${detail ? `<div class="card-notes-line">${esc(detail)}</div>` : ''}
+            <div class="card-footer">${fileChipsHtml}</div>
           </div>
         </article>`;
       }).join('');
 
-      document.querySelectorAll('.file-pill').forEach(link => {
-        link.addEventListener('click', e => e.stopPropagation());
-      });
       document.querySelectorAll('[data-view-detail]').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
@@ -873,61 +850,73 @@
       const detail = group.docs.map(d => d._meta.extraNotes).find(Boolean) || first._meta.legacyNotes || '';
       const fileDocs = group.docs.filter(d => d.downloadUrl);
 
+      const barColor = CATEGORY_COLORS[category] || '#6b5d4a';
       $('detailTitle').textContent = group.baseTitle || first.title || 'รายละเอียดเอกสาร';
+      const headMeta = [
+        version ? `Rev: ${version}` : '',
+        `อัปโหลด ${formatDate(first.createdAt)}`,
+        responsible ? `👤 ${responsible}` : ''
+      ].filter(Boolean).join('  ·  ');
       $('detailTags').innerHTML = `
-        <span class="tag">${catIcon} ${esc(category)}</span>
-        ${version ? `<span class="tag">Rev: ${esc(version)}</span>` : ''}
-        ${responsible ? `<span class="tag">👤 ${esc(responsible)}</span>` : ''}
+        <span class="tag-cat" style="background:${barColor}14;color:${barColor}">${catIcon} ${esc(category)}</span>
+        <span class="card-meta">${esc(headMeta)}</span>
       `;
 
-      const filesHtml = fileDocs.length
-        ? fileDocs.map((doc, index) => {
+      const sortedFileDocs = [...fileDocs].sort((a, b) =>
+        String(a.fileName || a.title || '').localeCompare(String(b.fileName || b.title || ''), 'th', {numeric: true})
+      );
+      const filesHtml = sortedFileDocs.length
+        ? sortedFileDocs.map((doc, index) => {
             const ext = fileExtension(doc.fileName);
             const name = doc.fileName || doc.title || `ไฟล์ ${index + 1}`;
+            const badgeColor = extBadgeColor(ext);
             return `
-              <div class="detail-file">
-                <div class="detail-file-icon">${fileEmoji(ext)}</div>
-                <div class="detail-file-info">
-                  <div class="detail-file-name" title="${esc(name)}">${esc(name)}</div>
-                  <div class="detail-file-meta">${esc(fileIcon(ext))} · ${esc(formatSize(doc.size))}</div>
-                </div>
-                <a class="detail-file-open" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>
+              <div class="detail-file-row" data-file-name="${esc(name.toLowerCase())}">
+                <span class="file-ext-badge" style="background:${badgeColor}14;color:${badgeColor}">${esc(fileIcon(ext))}</span>
+                <span class="detail-file-name" title="${esc(name)}">${esc(name)}</span>
+                <span class="detail-file-size">${esc(formatSize(doc.size))}</span>
+                <a class="detail-file-open" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener" aria-label="เปิดไฟล์ ${esc(name)}">เปิด ↗</a>
               </div>`;
           }).join('')
-        : '<div class="empty">ยังไม่มีไฟล์แนบ</div>';
+        : '<div class="empty" style="border:none">ยังไม่มีไฟล์แนบ</div>';
 
       $('detailContent').innerHTML = `
-        <div class="detail-summary">
-          <div class="cell">
-            <div class="cell-label">หมวดหมู่</div>
-            <div class="cell-value" style="font-size:15px">${esc(category)}</div>
-          </div>
-          <div class="cell">
-            <div class="cell-label">อัปโหลดเมื่อ</div>
-            <div class="cell-value" style="font-size:15px">${esc(formatDate(first.createdAt))}</div>
-          </div>
-          <div class="cell">
-            <div class="cell-label">จำนวนไฟล์</div>
-            <div class="cell-value" style="color:#3a5a8a">${fileDocs.length} ไฟล์</div>
-          </div>
-        </div>
         ${detail ? `<div class="detail-notes">${esc(detail)}</div>` : ''}
-        <div class="detail-files-head">
-          <h3>ไฟล์แนบทั้งหมด</h3>
-          <div class="detail-files-actions">
-            <div class="detail-file-count">${fileDocs.length} ไฟล์</div>
-            ${fileDocs.length
-              ? `<button class="btn gold-fill download-all-btn" type="button" data-download-all="${esc(first.id)}">ดาวน์โหลดทั้งหมด</button>`
-              : ''}
-          </div>
+        <div class="files-toolbar">
+          <div class="files-toolbar-title">ไฟล์แนบ <span>${fileDocs.length}</span></div>
+          ${fileDocs.length > 5
+            ? `<div class="file-search"><input type="search" id="fileSearchInput" placeholder="ค้นหาไฟล์..." autocomplete="off" /></div>`
+            : '<div style="flex:1"></div>'}
+          ${fileDocs.length
+            ? `<button class="btn gold-fill download-all-btn" type="button" data-download-all="${esc(first.id)}">⬇ ZIP ทั้งหมด</button>`
+            : ''}
         </div>
         <div class="download-status" id="downloadStatus"></div>
-        <div class="detail-file-list">${filesHtml}</div>
-        <div class="modal-actions">
+        <div class="detail-file-box" id="detailFileBox">${filesHtml}</div>
+        <div class="file-search-empty hidden" id="fileSearchEmpty">ไม่พบไฟล์ที่ตรงกับคำค้นหา</div>
+        <div class="modal-actions" style="justify-content:space-between">
           <button class="btn danger" type="button" data-detail-delete>ลบเอกสาร</button>
-          <button class="btn gold" type="button" data-detail-edit>แก้ไข</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn" type="button" data-detail-close>ปิด</button>
+            <button class="btn gold" type="button" data-detail-edit>✏️ แก้ไข</button>
+          </div>
         </div>
       `;
+      const searchInput = $('detailContent').querySelector('#fileSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          const q = searchInput.value.trim().toLowerCase();
+          let visible = 0;
+          $('detailFileBox').querySelectorAll('.detail-file-row').forEach(row => {
+            const show = !q || row.dataset.fileName.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+          });
+          $('fileSearchEmpty').classList.toggle('hidden', visible > 0);
+          $('detailFileBox').classList.toggle('hidden', visible === 0);
+        });
+      }
+      $('detailContent').querySelector('[data-detail-close]').addEventListener('click', closeDetailModal);
       const downloadAllBtn = $('detailContent').querySelector('[data-download-all]');
       if (downloadAllBtn) {
         downloadAllBtn.addEventListener('click', () => downloadAllFiles(group, downloadAllBtn));
