@@ -263,8 +263,10 @@
       box-shadow: var(--shadow);
       overflow: hidden;
       transition: box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
     }
     .bp-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .bp-card:focus-visible { outline: 3px solid rgba(196,122,44,0.3); outline-offset: 3px; }
     .card-status-bar { border-radius: 16px 0 0 16px; }
     .card-body { padding: 20px 22px 18px; }
     .card-top {
@@ -383,6 +385,54 @@
       display:flex; gap:8px; justify-content:flex-end; margin-top:22px;
       padding-top:16px; border-top:1px solid var(--border);
     }
+    .detail-modal { max-width: 900px; }
+    .detail-summary {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px; margin-bottom: 18px;
+    }
+    .detail-notes {
+      color: var(--taupe-mid); line-height: 1.65; padding: 12px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 20px;
+    }
+    .detail-files-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 12px;
+    }
+    .detail-files-head h3 { font-size: 18px; }
+    .detail-files-actions { display: flex; align-items: center; gap: 10px; }
+    .detail-file-count { color: var(--muted); font-size: 13px; }
+    .download-all-btn:disabled { opacity: 0.6; cursor: wait; }
+    .download-status {
+      min-height: 20px; margin: -4px 0 12px; color: var(--muted);
+      font-size: 12px; text-align: right;
+    }
+    .detail-file-list {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .detail-file {
+      display: flex; align-items: center; gap: 12px; min-width: 0;
+      padding: 12px; border: 1px solid var(--border); border-radius: 12px;
+      background: rgba(255,255,255,0.8);
+    }
+    .detail-file-icon {
+      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg2); font-size: 20px;
+    }
+    .detail-file-info { min-width: 0; flex: 1; }
+    .detail-file-name {
+      font-weight: 600; font-size: 13px; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .detail-file-meta { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .detail-file-open {
+      flex-shrink: 0; color: var(--gold); text-decoration: none;
+      font-size: 12px; font-weight: 700; padding: 7px 10px;
+      border: 1px solid rgba(196,122,44,0.35); border-radius: 8px;
+    }
+    .detail-file-open:hover { background: var(--gold); color: #fff; }
 
     @media (max-width: 720px) {
       header { padding: 0 20px; }
@@ -391,6 +441,10 @@
       .card-cells { grid-template-columns: repeat(2, 1fr); }
       .card-title { font-size: 17px; }
       .card-footer { flex-direction: column; align-items: flex-start; }
+      .detail-summary, .detail-file-list { grid-template-columns: 1fr; }
+      .detail-file-open { padding: 7px 9px; }
+      .detail-files-head { align-items: flex-start; }
+      .detail-files-actions { flex-direction: column; align-items: flex-end; }
     }
   </style>
 </head>
@@ -477,6 +531,20 @@
       </div>
     </div>
 
+    <!-- Blueprint Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+      <div class="modal detail-modal">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="detailTitle">รายละเอียดเอกสาร</div>
+            <div class="card-tags" id="detailTags" style="margin-top:8px"></div>
+          </div>
+          <button class="modal-close" type="button" onclick="closeDetailModal()" aria-label="ปิด">×</button>
+        </div>
+        <div id="detailContent"></div>
+      </div>
+    </div>
+
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="toolbar-top">
@@ -493,6 +561,10 @@
     </section>
   </main>
 
+  <script
+    src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+    integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG"
+    crossorigin="anonymous"></script>
   <script>
     const VAULT_TYPE = 'blueprints';
     const CATEGORIES = [
@@ -613,6 +685,28 @@
       if (['dwg', 'dxf'].includes(ext)) return '📐';
       return '📎';
     }
+    function safeDownloadName(name, fallback = 'blueprint') {
+      const cleaned = String(name || fallback)
+        .normalize('NFKC')
+        .replace(/[\\/:*?"<>|#%{}^~[\]`]/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return cleaned || fallback;
+    }
+    function uniqueFileName(name, usedNames) {
+      const safeName = safeDownloadName(name, 'file');
+      const dot = safeName.lastIndexOf('.');
+      const base = dot > 0 ? safeName.slice(0, dot) : safeName;
+      const ext = dot > 0 ? safeName.slice(dot) : '';
+      let candidate = safeName;
+      let suffix = 2;
+      while (usedNames.has(candidate.toLowerCase())) {
+        candidate = `${base} (${suffix})${ext}`;
+        suffix++;
+      }
+      usedNames.add(candidate.toLowerCase());
+      return candidate;
+    }
 
     /* ── Structured notes ── */
     function buildStructuredNotes({ version, responsible, extraNotes }) {
@@ -707,7 +801,7 @@
         ].filter(Boolean).join('  ·  ');
 
         return `
-        <article class="bp-card">
+        <article class="bp-card" data-detail="${esc(first.id)}" tabindex="0" aria-label="ดูรายละเอียด ${esc(group.baseTitle || first.title || '')}">
           <div class="card-status-bar" style="background:${barColor}"></div>
           <div class="card-body">
             <div class="card-top">
@@ -740,9 +834,9 @@
                 <button class="btn-ghost" data-edit="${esc(first.id)}" data-title="${esc(first.title)}" data-category="${esc(first.category)}" data-notes="${esc(first.notes || '')}">แก้ไข</button>
                 <button class="btn-ghost btn-danger-ghost" data-delete="${esc(first.id)}">ลบ</button>
                 ${fileDocs.length === 1
-                  ? `<a class="btn-gold" href="${esc(fileDocs[0].downloadUrl)}" target="_blank" rel="noopener">ดูเอกสาร</a>`
+                  ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร</button>`
                   : fileDocs.length > 1
-                    ? `<button class="btn-gold" data-viewall="${esc(first.id)}">ดูเอกสาร (${fileDocs.length})</button>`
+                    ? `<button class="btn-gold" data-view-detail="${esc(first.id)}">ดูเอกสาร (${fileDocs.length})</button>`
                     : ''}
               </div>
             </div>
@@ -751,17 +845,157 @@
       }).join('');
 
       document.querySelectorAll('[data-delete]').forEach(btn => {
-        btn.addEventListener('click', () => deleteDoc(btn.dataset.delete));
-      });
-      document.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => editDoc(btn.dataset));
-      });
-      document.querySelectorAll('[data-viewall]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const card = btn.closest('.bp-card');
-          if (card) card.querySelectorAll('.file-pill').forEach(p => window.open(p.href, '_blank'));
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          deleteDoc(btn.dataset.delete);
         });
       });
+      document.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          editDoc(btn.dataset);
+        });
+      });
+      document.querySelectorAll('.file-pill').forEach(link => {
+        link.addEventListener('click', e => e.stopPropagation());
+      });
+      document.querySelectorAll('[data-view-detail]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          openDetailModal(btn.dataset.viewDetail);
+        });
+      });
+      document.querySelectorAll('[data-detail]').forEach(card => {
+        card.addEventListener('click', () => openDetailModal(card.dataset.detail));
+        card.addEventListener('keydown', e => {
+          if (e.target === card && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            openDetailModal(card.dataset.detail);
+          }
+        });
+      });
+    }
+
+    function openDetailModal(documentId) {
+      const group = _currentGroups.find(g => g.docs.some(d => d.id === documentId));
+      if (!group) return;
+
+      const first = group.docs[0];
+      const category = first.category || '-';
+      const catIcon = CATEGORY_ICONS[category] || '📁';
+      const version = group.docs.map(d => d._meta.version).find(Boolean) || '';
+      const responsible = group.docs.map(d => d._meta.responsible).find(Boolean) || '';
+      const detail = group.docs.map(d => d._meta.extraNotes).find(Boolean) || first._meta.legacyNotes || '';
+      const fileDocs = group.docs.filter(d => d.downloadUrl);
+
+      $('detailTitle').textContent = group.baseTitle || first.title || 'รายละเอียดเอกสาร';
+      $('detailTags').innerHTML = `
+        <span class="tag">${catIcon} ${esc(category)}</span>
+        ${version ? `<span class="tag">Rev: ${esc(version)}</span>` : ''}
+        ${responsible ? `<span class="tag">👤 ${esc(responsible)}</span>` : ''}
+      `;
+
+      const filesHtml = fileDocs.length
+        ? fileDocs.map((doc, index) => {
+            const ext = fileExtension(doc.fileName);
+            const name = doc.fileName || doc.title || `ไฟล์ ${index + 1}`;
+            return `
+              <div class="detail-file">
+                <div class="detail-file-icon">${fileEmoji(ext)}</div>
+                <div class="detail-file-info">
+                  <div class="detail-file-name" title="${esc(name)}">${esc(name)}</div>
+                  <div class="detail-file-meta">${esc(fileIcon(ext))} · ${esc(formatSize(doc.size))}</div>
+                </div>
+                <a class="detail-file-open" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener">เปิดไฟล์</a>
+              </div>`;
+          }).join('')
+        : '<div class="empty">ยังไม่มีไฟล์แนบ</div>';
+
+      $('detailContent').innerHTML = `
+        <div class="detail-summary">
+          <div class="cell">
+            <div class="cell-label">หมวดหมู่</div>
+            <div class="cell-value" style="font-size:15px">${esc(category)}</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">อัปโหลดเมื่อ</div>
+            <div class="cell-value" style="font-size:15px">${esc(formatDate(first.createdAt))}</div>
+          </div>
+          <div class="cell">
+            <div class="cell-label">จำนวนไฟล์</div>
+            <div class="cell-value" style="color:#3a5a8a">${fileDocs.length} ไฟล์</div>
+          </div>
+        </div>
+        ${detail ? `<div class="detail-notes">${esc(detail)}</div>` : ''}
+        <div class="detail-files-head">
+          <h3>ไฟล์แนบทั้งหมด</h3>
+          <div class="detail-files-actions">
+            <div class="detail-file-count">${fileDocs.length} ไฟล์</div>
+            ${fileDocs.length
+              ? `<button class="btn gold-fill download-all-btn" type="button" data-download-all="${esc(first.id)}">ดาวน์โหลดทั้งหมด</button>`
+              : ''}
+          </div>
+        </div>
+        <div class="download-status" id="downloadStatus"></div>
+        <div class="detail-file-list">${filesHtml}</div>
+      `;
+      const downloadAllBtn = $('detailContent').querySelector('[data-download-all]');
+      if (downloadAllBtn) {
+        downloadAllBtn.addEventListener('click', () => downloadAllFiles(group, downloadAllBtn));
+      }
+      $('detailModal').classList.add('open');
+    }
+
+    function closeDetailModal() {
+      $('detailModal').classList.remove('open');
+    }
+
+    async function downloadAllFiles(group, button) {
+      const fileDocs = group.docs.filter(d => d.downloadUrl);
+      if (!fileDocs.length) return;
+      if (typeof JSZip === 'undefined') {
+        alert('ไม่สามารถโหลดระบบสร้าง ZIP ได้ กรุณาลองใหม่อีกครั้ง');
+        return;
+      }
+
+      const status = $('downloadStatus');
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'กำลังเตรียม ZIP...';
+      status.textContent = `กำลังดาวน์โหลด 0/${fileDocs.length} ไฟล์`;
+
+      try {
+        const zip = new JSZip();
+        const usedNames = new Set();
+        for (let i = 0; i < fileDocs.length; i++) {
+          const doc = fileDocs[i];
+          status.textContent = `กำลังดาวน์โหลด ${i + 1}/${fileDocs.length}: ${doc.fileName || 'ไฟล์'}`;
+          const response = await fetch(doc.downloadUrl);
+          if (!response.ok) throw new Error(`ดาวน์โหลด ${doc.fileName || 'ไฟล์'} ไม่สำเร็จ`);
+          const blob = await response.blob();
+          zip.file(uniqueFileName(doc.fileName || doc.title || `file-${i + 1}`, usedNames), blob);
+        }
+
+        button.textContent = 'กำลังสร้าง ZIP...';
+        const zipBlob = await zip.generateAsync(
+          {type: 'blob', compression: 'STORE'},
+          meta => { status.textContent = `กำลังสร้าง ZIP ${Math.round(meta.percent)}%`; }
+        );
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${safeDownloadName(group.baseTitle, 'blueprint')}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        status.textContent = `ดาวน์โหลด ZIP รวม ${fileDocs.length} ไฟล์แล้ว`;
+      } catch (err) {
+        status.textContent = err.message || 'สร้าง ZIP ไม่สำเร็จ';
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     }
 
     function setActiveFilter(filter) {
@@ -1025,6 +1259,12 @@
       $('addBpBtn').addEventListener('click', openCreateForm);
       $('bpModal').addEventListener('click', e => {
         if (e.target === $('bpModal')) closeBpModal();
+      });
+      $('detailModal').addEventListener('click', e => {
+        if (e.target === $('detailModal')) closeDetailModal();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && $('detailModal').classList.contains('open')) closeDetailModal();
       });
       $('logoutBtn').addEventListener('click', () => { location.href = '/'; });
       const resident = getResidentSession();
