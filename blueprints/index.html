@@ -496,10 +496,10 @@
               <label>แนบไฟล์เอกสาร</label>
               <div class="drop-area" id="dropArea">
                 <input id="fileInput" type="file" multiple
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.heic,.dwg,.dxf" />
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.heic,.dwg,.dxf,.zip,.rar,.7z" />
                 <div class="drop-area-icon">📐</div>
                 <div class="drop-area-label">คลิกหรือลากไฟล์มาวางที่นี่</div>
-                <div class="drop-area-hint">PDF, Word, Excel, PowerPoint, รูปภาพ · สูงสุด 15 MB ต่อไฟล์</div>
+                <div class="drop-area-hint">PDF, Word, Excel, PowerPoint, รูปภาพ, ZIP · สูงสุด 15 MB ต่อไฟล์</div>
               </div>
               <div class="file-preview-grid" id="filePreviewGrid"></div>
               <div class="upload-progress-wrap" id="uploadProgressWrap">
@@ -629,7 +629,15 @@
     function fileToDataUrl(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
+        reader.onload = () => {
+          let result = String(reader.result || '');
+          // Some archive/CAD types yield an empty MIME ("data:;base64,..."),
+          // which the backend rejects. Give them a generic content type.
+          if (result.startsWith('data:;base64,')) {
+            result = result.replace('data:;base64,', 'data:application/octet-stream;base64,');
+          }
+          resolve(result);
+        };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
@@ -663,6 +671,7 @@
       if (['xls', 'xlsx', 'csv'].includes(ext)) return 'XLS';
       if (['ppt', 'pptx'].includes(ext)) return 'PPT';
       if (['dwg', 'dxf'].includes(ext)) return 'CAD';
+      if (['zip', 'rar', '7z'].includes(ext)) return 'ZIP';
       return 'FILE';
     }
     function extBadgeColor(ext) {
@@ -672,6 +681,7 @@
       if (['xls', 'xlsx', 'csv'].includes(ext)) return '#2e7d52';
       if (['ppt', 'pptx'].includes(ext)) return '#a04000';
       if (['dwg', 'dxf'].includes(ext)) return '#3a5a8a';
+      if (['zip', 'rar', '7z'].includes(ext)) return '#6c3483';
       return '#6b5d4a';
     }
     function fileEmoji(ext) {
@@ -681,6 +691,7 @@
       if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
       if (['ppt', 'pptx'].includes(ext)) return '📑';
       if (['dwg', 'dxf'].includes(ext)) return '📐';
+      if (['zip', 'rar', '7z'].includes(ext)) return '🗜️';
       return '📎';
     }
     function safeDownloadName(name, fallback = 'blueprint') {
