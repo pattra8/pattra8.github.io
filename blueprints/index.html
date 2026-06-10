@@ -591,6 +591,7 @@
     let _existingFileDocs = [];
     let _currentGroups = [];
     let _editingDocId = null;
+    let _editingDocs = [];
 
     function $(id) { return document.getElementById(id); }
     function esc(s) {
@@ -1073,6 +1074,7 @@
           try {
             await api({ action: 'delete', ...getAuthPayload(), documentId: doc.id });
             _existingFileDocs.splice(i, 1);
+            _editingDocs = _editingDocs.filter(d => d.id !== doc.id);
             renderFilePreview();
           } catch (err) { alert(err.message || 'ลบไม่สำเร็จ'); }
         });
@@ -1138,6 +1140,7 @@
     }
     function resetBpFormUi() {
       _editingDocId = null;
+      _editingDocs = [];
       _selectedNewFiles.forEach(f => { if (f._objUrl) URL.revokeObjectURL(f._objUrl); });
       _selectedNewFiles = [];
       _existingFileDocs = [];
@@ -1169,6 +1172,9 @@
       $('responsible').value = meta.responsible || '';
       $('notes').value = meta.extraNotes || meta.legacyNotes || '';
       const group = _currentGroups.find(g => g.docs.some(d => d.id === data.edit));
+      _editingDocs = group
+        ? group.docs.map(d => ({ id: d.id, title: d.title || '' }))
+        : [{ id: data.edit, title: data.title || '' }];
       if (group) {
         _existingFileDocs = group.docs
           .filter(d => d.downloadUrl)
@@ -1200,7 +1206,19 @@
       if (_editingDocId) {
         setStatus('uploadStatus', 'กำลังบันทึก...');
         try {
-          await api({ action: 'update', ...auth, documentId: _editingDocId, category, title, notes });
+          // Update every record in the group — they share one logical document,
+          // so the new title/category/notes must reach all of them or the group
+          // splits apart. Each record keeps its own "(n)" suffix.
+          const targets = _editingDocs.length
+            ? _editingDocs
+            : [{ id: _editingDocId, title: '' }];
+          for (let i = 0; i < targets.length; i++) {
+            const t = targets[i];
+            const m = String(t.title || '').match(/(\(\d+\))\s*$/);
+            const docTitle = (m && targets.length > 1) ? `${title} ${m[1]}` : title;
+            if (targets.length > 1) setStatus('uploadStatus', `กำลังบันทึก ${i + 1}/${targets.length}...`);
+            await api({ action: 'update', ...auth, documentId: t.id, category, title: docTitle, notes });
+          }
 
           // Upload any new files added during edit
           const newFiles = _selectedNewFiles;
@@ -1208,7 +1226,7 @@
             const file = newFiles[i];
             setUploadProgress((i / newFiles.length) * 100, `กำลังอัปโหลดไฟล์ใหม่ ${i + 1}/${newFiles.length}`);
             const dataUrl = await fileToDataUrl(file);
-            await api({ action: 'upload', ...auth, category, title: `${title} (${i + 1})`, notes, fileName: file.name, dataUrl });
+            await api({ action: 'upload', ...auth, category, title: `${title} (${targets.length + i + 1})`, notes, fileName: file.name, dataUrl });
           }
           setUploadProgress(null);
           resetBpFormUi();
