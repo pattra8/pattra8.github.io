@@ -659,6 +659,14 @@
       <div class="section-title" id="txnSectionTitle">รายจ่ายเดือน —</div>
       <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
     </div>
+    <div class="filters">
+      <div class="search-wrap" id="monthSearchWrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่ายเดือนนี้..." autocomplete="off">
+        <button type="button" class="search-clear" id="monthSearchClearBtn" aria-label="ล้างคำค้น">×</button>
+        <div class="search-suggestions" id="monthSearchSuggestions"></div>
+      </div>
+    </div>
     <div class="expense-list" id="recentList"></div>
   </div>
 
@@ -675,38 +683,10 @@
     <div id="annualBreakdownCard"></div>
     <div id="expensesFacilitiesCard"></div>
     <div class="filters">
-      <select class="filter-select" id="filterMonth" onchange="renderExpenses()"></select>
-      <select class="filter-select" id="filterType" onchange="renderExpenses()">
-        <option value="">ทุกประเภท</option>
-        <option value="recurring">ประจำ</option>
-        <option value="investment">ลงทุน</option>
-        <option value="maintenance">ซ่อมบำรุง</option>
-        <option value="general">ทั่วไป</option>
-      </select>
-      <select class="filter-select" id="filterCostCategory" onchange="renderExpenses()">
-        <option value="">ทุกหมวด</option>
-        <option value="ส่วนกลาง">ส่วนกลาง</option>
-        <option value="สโมสร">สโมสร</option>
-        <option value="ฟิตเนส">ฟิตเนส</option>
-        <option value="สระว่ายน้ำ">สระว่ายน้ำ</option>
-        <option value="แม่บ้าน / ทำความสะอาด">แม่บ้าน / ทำความสะอาด</option>
-        <option value="รปภ.">รปภ.</option>
-        <option value="กล้องวงจรปิด">กล้องวงจรปิด</option>
-        <option value="สวน / ภูมิทัศน์">สวน / ภูมิทัศน์</option>
-        <option value="ไฟฟ้าส่วนกลาง">ไฟฟ้าส่วนกลาง</option>
-        <option value="ประปา">ประปา</option>
-        <option value="สำนักงานนิติ">สำนักงานนิติ</option>
-        <option value="อื่น ๆ">อื่น ๆ</option>
-      </select>
-      <select class="filter-select" id="filterStatus" onchange="renderExpenses()">
-        <option value="">ทุกสถานะ</option>
-        <option value="paid">จ่ายแล้ว</option>
-        <option value="pending">รอดำเนินการ</option>
-      </select>
       <div class="search-wrap" id="expenseSearchWrap">
         <span class="search-icon">⌕</span>
-        <input type="text" class="filter-search" id="filterSearch" placeholder="ค้นหาชื่อหัวข้อ / รายละเอียด..." autocomplete="off" oninput="handleExpenseSearchInput()" onfocus="renderSearchSuggestions()" onkeydown="handleExpenseSearchKeydown(event)">
-        <button type="button" class="search-clear" id="searchClearBtn" onclick="clearExpenseSearch()" aria-label="ล้างคำค้น">×</button>
+        <input type="text" class="filter-search" id="filterSearch" placeholder="ค้นหาชื่อหัวข้อ / รายละเอียด..." autocomplete="off">
+        <button type="button" class="search-clear" id="searchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="searchSuggestions"></div>
       </div>
     </div>
@@ -891,6 +871,7 @@ let expenseFormSnapshot = null;
 function init() {
   restoreAdminSession();
   populateMonthFilter(); populateDashMonthFilter();
+  bindSearchControls();
   renderDashboard(); renderExpenses();
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
   if (usingFirestore) bindFirestore();
@@ -920,11 +901,13 @@ function bindFirestore() {
 }
 
 function populateMonthFilter() {
+  const monthFilter = document.getElementById('filterMonth');
+  if (!monthFilter) return;
   const now = new Date(), opts = ['<option value="">ทุกเดือน</option>'];
   const year = now.getFullYear();
   for (let m=0; m<12; m+=1)
     opts.push(`<option value="${year}-${String(m+1).padStart(2,'0')}">${MONTH_TH[m]} ${year}</option>`);
-  document.getElementById('filterMonth').innerHTML = opts.join('');
+  monthFilter.innerHTML = opts.join('');
 }
 function populateDashMonthFilter() {
   const now = new Date(), cur = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
@@ -1234,20 +1217,29 @@ function renderMonthHero() {
       </div>
     </div>`;
 }
+function getMonthExpenseItems() {
+  const {yr,mi} = getMonthFilter();
+  return expenses.filter(e=>{
+    const d=new Date(e.date);
+    return d.getFullYear()===yr&&d.getMonth()===mi
+      && (!activeDashboardType || e.type===activeDashboardType)
+      && (!activeDashboardFacility || costCategoryValue(e)===activeDashboardFacility);
+  });
+}
+
 function renderMonthTxn() {
   renderMonthHero();
   const {yr,mi} = getMonthFilter();
-  const me = expenses.filter(e=>{
-                       const d=new Date(e.date);
-                       return d.getFullYear()===yr&&d.getMonth()===mi
-                         && (!activeDashboardType || e.type===activeDashboardType)
-                         && (!activeDashboardFacility || costCategoryValue(e)===activeDashboardFacility);
-                     })
-                     .sort(compareExpensesDesc);
+  const q = getExpenseSearchQuery('month');
+  const me = getMonthExpenseItems()
+    .filter(e => expenseMatchesSearch(e, q))
+    .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesDesc(a,b) : compareExpensesDesc(a,b));
   const filterLabels = [
     activeDashboardType ? expenseTypeText(activeDashboardType) : '',
     activeDashboardFacility || '',
+    q ? `ค้นหา: ${q}` : '',
   ].filter(Boolean);
+  syncSearchUi('month');
   document.getElementById('txnSectionTitle').textContent = `รายจ่ายเดือน ${MONTH_EN[mi]} ${yr}${filterLabels.length ? ' · ' + filterLabels.join(' · ') : ''}`;
   document.getElementById('recentList').innerHTML = me.length
     ? me.map(e=>expenseCardHtml(e,false)).join('')
@@ -1265,7 +1257,7 @@ let activeDashboardFacility = null;
 let activeDashboardType = null;
 let activeExpensesFacility = null;
 let activeAnnualType = null;
-let activeSearchSuggestion = -1;
+let activeSearchSuggestion = { all: -1, month: -1 };
 
 function facilityRows(sourceItems, activeKey, clickFnName) {
   const data = FACILITIES.map(f => {
@@ -1362,30 +1354,23 @@ function toggleDashboardTypeFilter(type) {
 
 function toggleExpensesFacilityFilter(key) {
   activeExpensesFacility = activeExpensesFacility === key ? null : key;
-  const sel = document.getElementById('filterCostCategory');
-  sel.value = activeExpensesFacility || '';
-  if (activeExpensesFacility) document.getElementById('filterMonth').value = '';
   renderExpenses();
   if (activeExpensesFacility) scrollToFirstTxn('expenseList');
 }
 
 function clearExpensesFacilityFilter() {
   activeExpensesFacility = null;
-  document.getElementById('filterCostCategory').value = '';
   renderExpenses();
 }
 
 function toggleAnnualTypeFilter(type) {
   activeAnnualType = activeAnnualType === type ? null : type;
-  document.getElementById('filterType').value = activeAnnualType || '';
-  if (activeAnnualType) document.getElementById('filterMonth').value = '';
   renderExpenses();
   if (activeAnnualType) scrollToFirstTxn('expenseList');
 }
 
 function clearAnnualTypeFilter() {
   activeAnnualType = null;
-  document.getElementById('filterType').value = '';
   renderExpenses();
 }
 
@@ -1410,8 +1395,57 @@ function searchTokens(query) {
   return normalizeSearchText(query).split(' ').filter(Boolean);
 }
 
-function getExpenseSearchQuery() {
-  return normalizeSearchText(document.getElementById('filterSearch')?.value || '');
+const SEARCH_SCOPES = {
+  all: {
+    inputId: 'filterSearch',
+    clearId: 'searchClearBtn',
+    boxId: 'searchSuggestions',
+    wrapId: 'expenseSearchWrap',
+  },
+  month: {
+    inputId: 'monthSearch',
+    clearId: 'monthSearchClearBtn',
+    boxId: 'monthSearchSuggestions',
+    wrapId: 'monthSearchWrap',
+  },
+};
+
+function searchScope(scope = 'all') {
+  return SEARCH_SCOPES[scope] ? scope : 'all';
+}
+
+function searchEls(scope = 'all') {
+  const cfg = SEARCH_SCOPES[searchScope(scope)];
+  return {
+    input: document.getElementById(cfg.inputId),
+    clear: document.getElementById(cfg.clearId),
+    box: document.getElementById(cfg.boxId),
+    wrap: document.getElementById(cfg.wrapId),
+  };
+}
+
+function searchSourceItems(scope = 'all') {
+  return searchScope(scope) === 'month' ? getMonthExpenseItems() : expenses;
+}
+
+function bindSearchControls() {
+  Object.keys(SEARCH_SCOPES).forEach(scope => {
+    const { input, clear } = searchEls(scope);
+    if (input && input.dataset.searchBound !== 'true') {
+      input.addEventListener('input', () => handleExpenseSearchInput(scope));
+      input.addEventListener('focus', () => renderSearchSuggestions(scope));
+      input.addEventListener('keydown', event => handleExpenseSearchKeydown(event, scope));
+      input.dataset.searchBound = 'true';
+    }
+    if (clear && clear.dataset.searchBound !== 'true') {
+      clear.addEventListener('click', () => clearExpenseSearch(scope));
+      clear.dataset.searchBound = 'true';
+    }
+  });
+}
+
+function getExpenseSearchQuery(scope = 'all') {
+  return normalizeSearchText(searchEls(scope).input?.value || '');
 }
 
 function expenseSearchScore(expense, query) {
@@ -1466,11 +1500,11 @@ function highlightSearchMatch(value, query) {
   return text.replace(new RegExp(`(${tokens.join('|')})`, 'ig'), '<mark>$1</mark>');
 }
 
-function buildSearchSuggestions(query) {
+function buildSearchSuggestions(query, sourceItems = expenses) {
   const q = normalizeSearchText(query);
   if (!q) return [];
   const seen = new Set();
-  return [...expenses]
+  return [...sourceItems]
     .map(expense => ({ expense, score: expenseSearchScore(expense, q) }))
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score || compareExpensesDesc(a.expense, b.expense))
@@ -1494,33 +1528,35 @@ function buildSearchSuggestions(query) {
     .slice(0, 7);
 }
 
-function syncSearchUi() {
-  const clearBtn = document.getElementById('searchClearBtn');
+function syncSearchUi(scope = 'all') {
+  const clearBtn = searchEls(scope).clear;
   if (!clearBtn) return;
-  clearBtn.classList.toggle('visible', Boolean(getExpenseSearchQuery()));
+  clearBtn.classList.toggle('visible', Boolean(getExpenseSearchQuery(scope)));
 }
 
-function closeSearchSuggestions() {
-  const box = document.getElementById('searchSuggestions');
+function closeSearchSuggestions(scope = 'all') {
+  const normalizedScope = searchScope(scope);
+  const box = searchEls(normalizedScope).box;
   if (!box) return;
   box.classList.remove('open');
   box.innerHTML = '';
-  activeSearchSuggestion = -1;
+  activeSearchSuggestion[normalizedScope] = -1;
 }
 
-function renderSearchSuggestions() {
-  const box = document.getElementById('searchSuggestions');
+function renderSearchSuggestions(scope = 'all') {
+  const normalizedScope = searchScope(scope);
+  const box = searchEls(normalizedScope).box;
   if (!box) return;
-  syncSearchUi();
-  const query = getExpenseSearchQuery();
-  const suggestions = buildSearchSuggestions(query);
-  activeSearchSuggestion = -1;
+  syncSearchUi(normalizedScope);
+  const query = getExpenseSearchQuery(normalizedScope);
+  const suggestions = buildSearchSuggestions(query, searchSourceItems(normalizedScope));
+  activeSearchSuggestion[normalizedScope] = -1;
   if (!query || !suggestions.length) {
-    closeSearchSuggestions();
+    closeSearchSuggestions(normalizedScope);
     return;
   }
   box.innerHTML = suggestions.map((item, index) => `
-    <button type="button" class="search-suggestion" data-suggestion="${index}" data-value="${escapeHtml(item.value)}" onclick="selectExpenseSearchSuggestion(this.dataset.value)">
+    <button type="button" class="search-suggestion" data-suggestion="${index}" data-value="${escapeHtml(item.value)}" onclick="selectExpenseSearchSuggestion(this.dataset.value,'${normalizedScope}')">
       <span class="suggestion-icon">⌕</span>
       <span class="suggestion-main">
         <span class="suggestion-title">${highlightSearchMatch(item.value, query)}</span>
@@ -1532,77 +1568,79 @@ function renderSearchSuggestions() {
   box.classList.add('open');
 }
 
-function setActiveSearchSuggestion(nextIndex) {
-  const box = document.getElementById('searchSuggestions');
+function setActiveSearchSuggestion(nextIndex, scope = 'all') {
+  const normalizedScope = searchScope(scope);
+  const box = searchEls(normalizedScope).box;
   if (!box || !box.classList.contains('open')) return;
   const items = [...box.querySelectorAll('.search-suggestion')];
   if (!items.length) return;
-  activeSearchSuggestion = (nextIndex + items.length) % items.length;
-  items.forEach((item, index) => item.classList.toggle('active', index === activeSearchSuggestion));
+  activeSearchSuggestion[normalizedScope] = (nextIndex + items.length) % items.length;
+  items.forEach((item, index) => item.classList.toggle('active', index === activeSearchSuggestion[normalizedScope]));
 }
 
-function handleExpenseSearchInput() {
-  renderExpenses();
-  renderSearchSuggestions();
+function handleExpenseSearchInput(scope = 'all') {
+  if (searchScope(scope) === 'month') renderMonthTxn();
+  else renderExpenses();
+  renderSearchSuggestions(scope);
 }
 
-function handleExpenseSearchKeydown(event) {
-  const box = document.getElementById('searchSuggestions');
+function handleExpenseSearchKeydown(event, scope = 'all') {
+  const normalizedScope = searchScope(scope);
+  const box = searchEls(normalizedScope).box;
   const isOpen = box?.classList.contains('open');
   if (event.key === 'Escape') {
-    closeSearchSuggestions();
+    closeSearchSuggestions(normalizedScope);
     return;
   }
   if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && isOpen) {
     event.preventDefault();
-    setActiveSearchSuggestion(activeSearchSuggestion + (event.key === 'ArrowDown' ? 1 : -1));
+    setActiveSearchSuggestion(activeSearchSuggestion[normalizedScope] + (event.key === 'ArrowDown' ? 1 : -1), normalizedScope);
     return;
   }
   if (event.key === 'Enter') {
-    if (isOpen && activeSearchSuggestion >= 0) {
+    if (isOpen && activeSearchSuggestion[normalizedScope] >= 0) {
       event.preventDefault();
-      const active = box.querySelectorAll('.search-suggestion')[activeSearchSuggestion];
+      const active = box.querySelectorAll('.search-suggestion')[activeSearchSuggestion[normalizedScope]];
       active?.click();
     } else {
-      closeSearchSuggestions();
-      renderExpenses();
+      closeSearchSuggestions(normalizedScope);
+      if (normalizedScope === 'month') renderMonthTxn();
+      else renderExpenses();
     }
   }
 }
 
-function selectExpenseSearchSuggestion(value) {
-  const input = document.getElementById('filterSearch');
+function selectExpenseSearchSuggestion(value, scope = 'all') {
+  const normalizedScope = searchScope(scope);
+  const input = searchEls(normalizedScope).input;
   input.value = value;
-  closeSearchSuggestions();
-  renderExpenses();
+  closeSearchSuggestions(normalizedScope);
+  if (normalizedScope === 'month') renderMonthTxn();
+  else renderExpenses();
   input.focus();
 }
 
-function clearExpenseSearch() {
-  const input = document.getElementById('filterSearch');
+function clearExpenseSearch(scope = 'all') {
+  const normalizedScope = searchScope(scope);
+  const input = searchEls(normalizedScope).input;
   input.value = '';
-  closeSearchSuggestions();
-  renderExpenses();
+  closeSearchSuggestions(normalizedScope);
+  if (normalizedScope === 'month') renderMonthTxn();
+  else renderExpenses();
   input.focus();
 }
 
 function renderExpenses() {
-  const month=document.getElementById('filterMonth').value, type=document.getElementById('filterType').value,
-        costCategory=document.getElementById('filterCostCategory').value,
-        status=document.getElementById('filterStatus').value, q=getExpenseSearchQuery();
-  activeExpensesFacility = FACILITIES.some(f => f.key === costCategory) ? costCategory : null;
-  activeAnnualType = type || null;
+  const q=getExpenseSearchQuery('all');
   const list=[...expenses].filter(e=>{
-    if(month&&new Date(e.date).toISOString().slice(0,7)!==month)return false;
     if(activeExpensesFacility&&new Date(e.date).getFullYear()!==new Date().getFullYear())return false;
     if(activeAnnualType&&new Date(e.date).getFullYear()!==new Date().getFullYear())return false;
-    if(type&&e.type!==type)return false;
-    if(costCategory&&costCategoryValue(e)!==costCategory)return false;
-    if(status&&e.status!==status)return false;
+    if(activeExpensesFacility&&costCategoryValue(e)!==activeExpensesFacility)return false;
+    if(activeAnnualType&&e.type!==activeAnnualType)return false;
     if(!expenseMatchesSearch(e,q))return false;
     return true;
   }).sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesDesc(a,b) : compareExpensesDesc(a,b));
-  syncSearchUi();
+  syncSearchUi('all');
   renderExpensesHero(list);
   renderExpensesFacilities();
   renderAnnualBreakdown();
@@ -2159,8 +2197,10 @@ function closeModal(id, force = false){
 }
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});});
 document.addEventListener('click', e => {
-  const wrap = document.getElementById('expenseSearchWrap');
-  if (wrap && !wrap.contains(e.target)) closeSearchSuggestions();
+  Object.keys(SEARCH_SCOPES).forEach(scope => {
+    const wrap = searchEls(scope).wrap;
+    if (wrap && !wrap.contains(e.target)) closeSearchSuggestions(scope);
+  });
 });
 
 // ── GLOBAL CAP MAX ──
@@ -2239,6 +2279,7 @@ Object.assign(window, {
   renderDashboardFacilities,
   renderExpenses,
   renderExpensesFacilities,
+  renderSearchSuggestions,
   renderMonthTxn,
   saveCapMax,
   saveExpense,
