@@ -4,37 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pattra Villa 8 — รายจ่ายนิติบุคคล</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #F7F8FA;
+    --bg:        #F9F3E9;
     --surface:   #FFFFFF;
-    --surface2:  #F1F3F8;
-    --border:    #E4E7ED;
-    --border2:   #CDD2DC;
+    --surface2:  #F3ECDD;
+    --border:    #E6DCC7;
+    --border2:   #D9C9AA;
 
-    --text-hi:   #0F1623;
-    --text-mid:  #4B5568;
-    --text-lo:   #9CA3AF;
+    --text-hi:   #2A2218;
+    --text-mid:  #6B5D4A;
+    --text-lo:   #9A8A73;
 
-    --accent:    #4F6EF7;
-    --accent-bg: #EEF1FE;
-    --accent-dk: #3A55D4;
+    --accent:    #C47A2C;
+    --accent-bg: #F7E6CD;
+    --accent-dk: #A5611D;
 
-    --ok:        #16A34A;
-    --ok-bg:     #DCFCE7;
-    --amber:     #D97706;
-    --amber-bg:  #FEF3C7;
-    --rose:      #E11D48;
-    --rose-bg:   #FFE4E6;
-    --violet:    #7C3AED;
-    --violet-bg: #EDE9FE;
+    --ok:        #5A7549;
+    --ok-bg:     #E2ECD6;
+    --amber:     #BA7517;
+    --amber-bg:  #FAEEDA;
+    --rose:      #9A3322;
+    --rose-bg:   #F3E0DB;
+    --violet:    #C47A2C;
+    --violet-bg: #F7E6CD;
 
-    --shadow-sm: 0 1px 3px rgba(15,22,35,0.07);
-    --shadow-md: 0 4px 16px rgba(15,22,35,0.09), 0 1px 4px rgba(15,22,35,0.05);
-    --shadow-lg: 0 12px 40px rgba(15,22,35,0.12), 0 4px 12px rgba(15,22,35,0.06);
+    --shadow-sm: 0 1px 3px rgba(80,60,30,0.07);
+    --shadow-md: 0 4px 16px rgba(80,60,30,0.10), 0 1px 4px rgba(80,60,30,0.06);
+    --shadow-lg: 0 12px 40px rgba(80,60,30,0.13), 0 4px 12px rgba(80,60,30,0.07);
 
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
   }
   *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -56,8 +58,8 @@
     display:flex; align-items:center; justify-content:center;
     font-weight:700; color:#fff; font-size:13px; flex-shrink:0;
   }
-  .header-title { font-size:14px; font-weight:600; color:var(--text-hi); line-height:1.2; }
-  .header-sub   { font-size:11px; color:var(--text-lo); }
+  .header-title { font-family:var(--font-display); font-size:22px; font-weight:600; color:var(--text-hi); line-height:1.1; letter-spacing:.01em; }
+  .header-sub   { font-size:11px; color:var(--text-mid); letter-spacing:.02em; }
   .header-right { display:flex; align-items:center; gap:10px; }
   .badge-admin  {
     font-size:11px; font-weight:600; color:var(--ok);
@@ -88,7 +90,7 @@
 
   /* ── SECTION HEADER ── */
   .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-  .section-title  { font-size:17px; font-weight:700; color:var(--text-hi); }
+  .section-title  { font-family:var(--font-display); font-size:21px; font-weight:600; color:var(--text-hi); letter-spacing:.01em; }
   .section-sub    { font-size:12px; color:var(--text-lo); margin-top:2px; }
 
   /* ── BUTTONS ── */
@@ -107,7 +109,7 @@
 
   /* ── HERO CARD ── */
   .month-hero {
-    background:var(--accent); border-radius:var(--r-xl);
+    background:var(--surface2); border:1px solid var(--border); border-radius:var(--r-xl);
     padding:28px 32px; display:flex; align-items:center;
     justify-content:space-between; gap:24px; margin-bottom:20px;
     position:relative; overflow:hidden;
@@ -115,27 +117,27 @@
   .month-hero::before {
     content:''; position:absolute; top:-50px; right:-30px;
     width:200px; height:200px; border-radius:50%;
-    background:rgba(255,255,255,0.08); pointer-events:none;
+    background:rgba(196,122,44,0.06); pointer-events:none;
   }
   .month-hero::after {
     content:''; position:absolute; bottom:-60px; right:100px;
     width:140px; height:140px; border-radius:50%;
-    background:rgba(255,255,255,0.05); pointer-events:none;
+    background:rgba(196,122,44,0.04); pointer-events:none;
   }
-  .hero-label  { font-size:11px; font-weight:600; color:rgba(255,255,255,0.6); letter-spacing:.8px; text-transform:uppercase; margin-bottom:4px; }
-  .hero-month  { font-size:16px; font-weight:500; color:rgba(255,255,255,0.9); margin-bottom:10px; }
-  .hero-amount { font-size:40px; font-weight:700; color:#fff; line-height:1; letter-spacing:-1.5px; }
-  .hero-amount span { font-size:20px; font-weight:400; margin-right:3px; opacity:.75; }
+  .hero-label  { font-size:11px; font-weight:600; color:var(--accent); letter-spacing:.18em; text-transform:uppercase; margin-bottom:4px; }
+  .hero-month  { font-family:var(--font-display); font-size:18px; font-weight:500; color:var(--text-mid); margin-bottom:10px; }
+  .hero-amount { font-family:var(--font-display); font-size:44px; font-weight:600; color:var(--text-hi); line-height:1; }
+  .hero-amount span { font-size:24px; font-weight:500; margin-right:3px; color:var(--accent); }
   .hero-chips  { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
   .hero-chip {
-    background:rgba(255,255,255,0.16); border-radius:99px;
-    padding:4px 12px; font-size:12px; font-weight:500; color:#fff;
+    background:var(--accent-bg); border:1px solid var(--border); border-radius:99px;
+    padding:4px 12px; font-size:12px; font-weight:500; color:var(--accent-dk);
     display:flex; align-items:center; gap:5px;
   }
   .hero-chip-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
   .hero-right    { text-align:right; flex-shrink:0; }
-  .hero-count    { font-size:40px; font-weight:700; color:rgba(255,255,255,.9); line-height:1; }
-  .hero-count-lbl { font-size:12px; color:rgba(255,255,255,.5); margin-top:3px; }
+  .hero-count    { font-family:var(--font-display); font-size:44px; font-weight:600; color:var(--accent); line-height:1; }
+  .hero-count-lbl { font-size:12px; color:var(--text-mid); margin-top:3px; }
   .annual-chart-card {
     background:var(--surface); border:1px solid var(--border);
     border-radius:var(--r-xl); padding:24px; margin-bottom:20px;
@@ -164,7 +166,7 @@
     text-align:center; padding:0 34px;
   }
   .annual-donut-label { font-size:12px; font-weight:700; color:var(--text-lo); text-transform:uppercase; letter-spacing:.6px; }
-  .annual-donut-value { font-size:28px; font-weight:800; color:var(--text-hi); line-height:1.1; margin-top:8px; }
+  .annual-donut-value { font-family:var(--font-display); font-size:32px; font-weight:600; color:var(--text-hi); line-height:1.1; margin-top:8px; }
   .annual-donut-meta { font-size:13px; color:var(--text-mid); margin-top:8px; }
   .annual-legend { display:flex; flex-direction:column; gap:12px; }
   .annual-legend-item {
@@ -184,14 +186,14 @@
     .hero-right {
       align-self:flex-start; text-align:left;
       display:inline-flex; align-items:baseline; gap:5px;
-      background:rgba(255,255,255,.14); border-radius:99px;
-      padding:6px 10px;
+      background:var(--accent-bg); border:1px solid var(--border); border-radius:99px;
+      padding:6px 12px;
     }
-    .hero-month { font-size:17px; font-weight:700; margin-bottom:8px; }
-    .hero-amount { font-size:26px; letter-spacing:-0.6px; }
-    .hero-amount span { font-size:16px; }
-    .hero-count { font-size:22px; font-weight:700; }
-    .hero-count-lbl { font-size:11px; margin-top:0; color:rgba(255,255,255,.68); }
+    .hero-month { font-size:18px; font-weight:600; margin-bottom:8px; }
+    .hero-amount { font-size:30px; }
+    .hero-amount span { font-size:18px; }
+    .hero-count { font-size:24px; font-weight:600; }
+    .hero-count-lbl { font-size:11px; margin-top:0; color:var(--text-mid); }
   }
   @media(max-width:900px) {
     .annual-chart-layout { grid-template-columns:1fr; }
@@ -221,7 +223,7 @@
   .stat-card.active { border-color:var(--accent); box-shadow:0 0 0 1px rgba(79,110,247,.08), var(--shadow-md); }
   .stat-icon { width:40px; height:40px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:19px; margin-bottom:14px; }
   .stat-label { font-size:13px; color:var(--text-mid); font-weight:600; margin-bottom:6px; }
-  .stat-value { font-size:28px; font-weight:700; color:var(--text-hi); line-height:1; }
+  .stat-value { font-family:var(--font-display); font-size:30px; font-weight:600; color:var(--text-hi); line-height:1; }
   .stat-sub   { font-size:13px; color:var(--text-lo); margin-top:6px; }
   .stat-card.accent { background:var(--accent); border-color:var(--accent); }
   .stat-card.accent .stat-icon  { background:rgba(255,255,255,.18); }
@@ -337,7 +339,7 @@
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
     border:1px solid rgba(79,110,247,0.18); flex-shrink:0;
   }
-  .expense-amount { font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; }
+  .expense-amount { font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; }
   .expense-slips  { display:flex; gap:5px; margin-top:9px; flex-wrap:wrap; align-items:flex-start; }
   .slip-thumb     { width:48px; height:48px; border-radius:7px; object-fit:cover; border:1.5px solid var(--border); cursor:pointer; }
   .slip-count     { width:48px; height:48px; border-radius:7px; background:var(--surface2); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text-lo); font-weight:600; cursor:pointer; }
@@ -518,7 +520,7 @@
   .login-modal { display:none; position:fixed; inset:0; background:rgba(15,22,35,.6); backdrop-filter:blur(8px); z-index:400; align-items:center; justify-content:center; }
   .login-modal.open { display:flex; }
   .login-box { background:var(--surface); border-radius:var(--r-xl); padding:36px; width:320px; text-align:center; box-shadow:var(--shadow-lg); border:1px solid var(--border); }
-  .login-logo { width:52px; height:52px; background:var(--accent); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-weight:700; color:#fff; font-size:18px; }
+  .login-logo { font-family:var(--font-display); color:var(--text-hi); font-weight:600; font-size:26px; margin:0 auto 6px; letter-spacing:.01em; }
   .login-title { font-size:17px; font-weight:700; color:var(--text-hi); margin-bottom:4px; }
   .login-sub   { font-size:13px; color:var(--text-lo); margin-bottom:22px; }
   .login-input { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--r-sm); font-family:inherit; font-size:14px; outline:none; margin-bottom:10px; text-align:center; letter-spacing:2px; transition:border-color .18s; }
@@ -623,7 +625,7 @@
 <!-- LOGIN -->
 <div class="login-modal" id="loginModal">
   <div class="login-box">
-    <div class="login-logo">P8</div>
+    <div class="login-logo">Pattra Villa 8</div>
     <div class="login-title">Admin Login</div>
     <div class="login-sub">Pattra Villa 8 — ระบบจัดการรายจ่าย</div>
     <div class="login-error" id="loginError">รหัสผ่านไม่ถูกต้อง</div>
@@ -636,14 +638,12 @@
 <!-- HEADER -->
 <header>
   <div class="header-brand">
-    <div class="header-logo">P8</div>
     <div>
       <div class="header-title">Pattra Villa 8</div>
       <div class="header-sub">รายจ่ายนิติบุคคล</div>
     </div>
   </div>
   <div class="header-right">
-    <button class="btn-admin-toggle" onclick="location.href='/'">บริการทั้งหมด</button>
     <span class="badge-admin" id="badgeAdmin">● Admin</span>
     <button class="btn-admin-toggle" id="adminToggleBtn" onclick="toggleAdminPrompt()">เข้าสู่ระบบ Admin</button>
   </div>
@@ -722,7 +722,7 @@
         <button class="type-btn" onclick="setType('recurring')"   id="typeBtnRecurring">🔄 ประจำ</button>
         <button class="type-btn" onclick="setType('investment')"  id="typeBtnInvestment">📈 ลงทุน</button>
         <button class="type-btn" onclick="setType('maintenance')" id="typeBtnMaintenance">🔧 ซ่อมบำรุง</button>
-        <button class="type-btn" onclick="setType('general')"     id="typeBtnGeneral">🟣 ทั่วไป</button>
+        <button class="type-btn" onclick="setType('general')"     id="typeBtnGeneral">🟤 ทั่วไป</button>
       </div>
     </div>
     <div class="form-group">
@@ -1045,7 +1045,7 @@ function typeLabel(t) {
   return t==='recurring' ? '🔄 ประจำ'
     : t==='investment' ? '📈 ลงทุน'
     : t==='maintenance' ? '🔧 ซ่อมบำรุง'
-    : '🟣 ทั่วไป';
+    : '🟤 ทั่วไป';
 }
 function typeBadgeClass(t) {
   return t==='recurring' ? 'badge-recurring'
@@ -1125,7 +1125,7 @@ function renderDashboard() {
       <div class="stat-sub">${monthly.filter(e=>e.type==='recurring').length} รายการ</div>
     </div>
     <div class="stat-card${activeDashboardType === 'general' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('general')">
-      <div class="stat-icon" style="background:var(--violet-bg)">🟣</div>
+      <div class="stat-icon" style="background:var(--violet-bg)">🟤</div>
       <div class="stat-label">ค่าใช้จ่ายทั่วไป</div>
       <div class="stat-value" style="color:var(--violet)">${fmt(gen)}</div>
       <div class="stat-sub">${monthly.filter(e=>e.type==='general').length} รายการ</div>
