@@ -404,6 +404,8 @@
       color: var(--gold-light);
       border-color: rgba(184,151,90,0.45);
       background: var(--gold-pale);
+      letter-spacing: 0.02em;
+      text-transform: none;
     }
 
     .service-cta {
@@ -1362,7 +1364,7 @@
 
     <!-- Admin only: Asset Insurance -->
     <a href="/insurance/" class="service-card admin-only-card" data-admin-card>
-      <div class="tag">Admin</div>
+      <div class="tag">เฉพาะกรรมการ</div>
       <div class="service-icon">🛡️</div>
       <div class="service-title">Asset Insurance</div>
       <p class="service-desc">จัดเก็บเอกสารประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง</p>
@@ -1374,12 +1376,24 @@
 
     <!-- Admin only: Blueprints -->
     <a href="/blueprints/" class="service-card admin-only-card" data-admin-card>
-      <div class="tag">Admin</div>
+      <div class="tag">เฉพาะกรรมการ</div>
       <div class="service-icon">📐</div>
       <div class="service-title">Blueprints</div>
       <p class="service-desc">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท</p>
       <span class="service-cta">
         Open Plans
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <!-- Admin only: Expense -->
+    <a href="/expense/" class="service-card admin-only-card" data-admin-card>
+      <div class="tag">เฉพาะกรรมการ</div>
+      <div class="service-icon">🧾</div>
+      <div class="service-title">Expense</div>
+      <p class="service-desc">บันทึกและติดตามรายจ่ายนิติบุคคล สรุปยอดรายเดือนและรายปี</p>
+      <span class="service-cta">
+        View Expenses
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </span>
     </a>
@@ -1500,9 +1514,11 @@ function storeResidentSession(houseNo, pin, residentName) {
 }
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
 
+// กรรมการนิติบุคคล (admin) — เพิ่มบ้านเลขที่ได้ที่นี่
+const ADMIN_HOUSES = ['38/8', '38/38'];
 function hasAdminSession() {
   const resident = getResidentSession();
-  return !!(resident && resident.houseNo === '38/8');
+  return !!(resident && ADMIN_HOUSES.includes(resident.houseNo));
 }
 
 function renderAdminCards() {
