@@ -45,7 +45,7 @@
     background: var(--bg); color: var(--text-hi);
     min-height: 100vh; -webkit-font-smoothing: antialiased;
   }
-  body.no-scroll { overflow: hidden; }
+  html.no-scroll, body.no-scroll { overflow: hidden; }
 
   /* ── HEADER ── */
   header {
@@ -2341,11 +2341,14 @@ function closeModal(id, force = false){
 // Lock background page scroll while any modal/lightbox is open (and avoid the layout jump).
 function syncModalScrollLock() {
   const anyOpen = document.querySelector('.modal-overlay.open, .login-modal.open, .lightbox.open');
+  const root = document.documentElement;
   if (anyOpen) {
-    const sw = window.innerWidth - document.documentElement.clientWidth;
+    const sw = window.innerWidth - root.clientWidth;
     document.body.style.paddingRight = sw > 0 ? sw + 'px' : '';
+    root.classList.add('no-scroll');
     document.body.classList.add('no-scroll');
   } else {
+    root.classList.remove('no-scroll');
     document.body.classList.remove('no-scroll');
     document.body.style.paddingRight = '';
   }
