@@ -45,6 +45,7 @@
     background: var(--bg); color: var(--text-hi);
     min-height: 100vh; -webkit-font-smoothing: antialiased;
   }
+  body.no-scroll { overflow: hidden; }
 
   /* ── HEADER ── */
   header {
@@ -889,6 +890,7 @@ function init() {
   populateMonthFilter(); populateDashMonthFilter();
   bindSearchControls();
   bindReorder();
+  bindModalScrollLock();
   renderDashboard(); renderExpenses();
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
   if (usingFirestore) bindFirestore();
@@ -2325,6 +2327,24 @@ function closeModal(id, force = false){
   if (!force && id === 'expenseModal' && isExpenseFormDirty() && !confirmDiscardExpenseForm()) return;
   document.getElementById(id).classList.remove('open');
   if (id === 'expenseModal') expenseFormSnapshot = null;
+}
+// Lock background page scroll while any modal/lightbox is open (and avoid the layout jump).
+function syncModalScrollLock() {
+  const anyOpen = document.querySelector('.modal-overlay.open, .login-modal.open, .lightbox.open');
+  if (anyOpen) {
+    const sw = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.paddingRight = sw > 0 ? sw + 'px' : '';
+    document.body.classList.add('no-scroll');
+  } else {
+    document.body.classList.remove('no-scroll');
+    document.body.style.paddingRight = '';
+  }
+}
+function bindModalScrollLock() {
+  const obs = new MutationObserver(syncModalScrollLock);
+  document.querySelectorAll('.modal-overlay, .login-modal, .lightbox')
+    .forEach(m => obs.observe(m, { attributes: true, attributeFilter: ['class'] }));
+  syncModalScrollLock();
 }
 document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});});
 document.addEventListener('click', e => {
