@@ -760,7 +760,7 @@
     </a>
     <nav class="nav">
       <a class="btn" href="/">← Home</a>
-      <a class="btn gold" href="/admin/">Admin</a>
+      <a class="btn gold" id="adminNavLink" href="/admin/">Admin</a>
       <button class="btn danger hidden" id="logoutBtn">ออกจากระบบ</button>
     </nav>
   </header>
@@ -913,7 +913,9 @@
     };
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+    const COMMITTEE_ROLES = {'38/8': 'superadmin', '38/38': 'committee'};
     let activeFilter = 'all';
+    let accessRole = '';
     let insuranceFormSnapshot = null;
     let _selectedNewFiles = [];   // File objects pending upload
     let _existingFileDocs = [];   // {id, fileName, downloadUrl} already on server
@@ -932,10 +934,21 @@
     }
     function getAuthPayload() {
       const resident = getResidentSession();
-      if (resident && resident.houseNo === '38/8' && resident.pin) {
+      if (resident && COMMITTEE_ROLES[resident.houseNo] && resident.pin) {
         return {houseNo: resident.houseNo, pin: resident.pin};
       }
       return null;
+    }
+    function canManageVault() {
+      return accessRole === 'superadmin';
+    }
+    function applyAccessMode() {
+      const canManage = canManageVault();
+      $('addInsuranceBtn').classList.toggle('hidden', !canManage);
+      $('adminNavLink').classList.toggle('hidden', !canManage);
+      $('detailEditBtn').classList.toggle('hidden', !canManage);
+      $('detailDeleteBtn').classList.toggle('hidden', !canManage);
+      $('insuranceModal').setAttribute('aria-hidden', canManage ? 'false' : 'true');
     }
     function setStatus(id, msg, type = '') {
       const el = $(id);
@@ -1292,6 +1305,8 @@
       $('loginPanel').classList.add('hidden');
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
       const data = await api({action: 'list', ...auth});
+      accessRole = data.role || accessRole;
+      applyAccessMode();
       renderDocs(data.documents || []);
     }
     function getInsuranceFormState() {
@@ -1488,14 +1503,15 @@
 
       // Wire action buttons
       const primaryDoc = group.docs[0];
-      $('detailEditBtn').onclick = () => {
+      $('detailEditBtn').onclick = canManageVault() ? () => {
         closeDetailModal();
         editDoc({ edit: primaryDoc.id, title: primaryDoc.title, category: primaryDoc.category, notes: primaryDoc.notes || '' });
-      };
-      $('detailDeleteBtn').onclick = () => {
+      } : null;
+      $('detailDeleteBtn').onclick = canManageVault() ? () => {
         closeDetailModal();
         deleteDoc(primaryDoc.id);
-      };
+      } : null;
+      applyAccessMode();
 
       $('detailModal').classList.add('open');
     }
@@ -1523,6 +1539,7 @@
       resetInsuranceFormUi();
     }
     function openCreateForm() {
+      if (!canManageVault()) return;
       resetInsuranceFormUi();
       openInsuranceModal();
       rememberInsuranceFormSnapshot();
@@ -1530,6 +1547,7 @@
 
     let _editingDocId = null;
     function editDoc(data) {
+      if (!canManageVault()) return;
       resetInsuranceFormUi();
       const meta = parseStructuredNotes(data.notes || '');
       _editingDocId = data.edit;
@@ -1562,6 +1580,7 @@
 
     async function uploadDoc(e) {
       e.preventDefault();
+      if (!canManageVault()) return;
       const auth = getAuthPayload();
       if (!auth) { setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error'); return; }
 
@@ -1632,6 +1651,7 @@
     }
 
     async function deleteDoc(id) {
+      if (!canManageVault()) return;
       if (!confirm('ลบเอกสารนี้?')) return;
       try {
         await api({action: 'delete', ...getAuthPayload(), documentId: id});
@@ -1663,10 +1683,12 @@
       updateWarrantyPreview();
       $('logoutBtn').addEventListener('click', logout);
       const resident = getResidentSession();
-      if (!resident || resident.houseNo !== '38/8') {
+      accessRole = resident ? (COMMITTEE_ROLES[resident.houseNo] || '') : '';
+      if (!resident || !accessRole) {
         location.href = '/';
         return;
       }
+      applyAccessMode();
       loadDocs().catch(() => { location.href = '/'; });
     }
     init();

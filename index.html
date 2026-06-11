@@ -1252,7 +1252,7 @@
   </a>
   <div class="header-actions">
     <div id="headerIdentity"></div>
-    <button class="header-btn secondary" id="adminHomeBtn" type="button">Admin</button>
+    <button class="header-btn secondary" id="adminHomeBtn" type="button" style="display:none">Admin</button>
   </div>
 </header>
 
@@ -1517,19 +1517,30 @@ function storeResidentSession(houseNo, pin, residentName) {
 }
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
 
-// กรรมการนิติบุคคล (admin) — เพิ่มบ้านเลขที่ได้ที่นี่
-const ADMIN_HOUSES = ['38/8', '38/38'];
-function hasAdminSession() {
+const COMMITTEE_ROLES = {
+  '38/8': 'superadmin',
+  '38/38': 'committee'
+};
+function getCommitteeRole() {
   const resident = getResidentSession();
-  return !!(resident && ADMIN_HOUSES.includes(resident.houseNo));
+  return resident ? (COMMITTEE_ROLES[resident.houseNo] || '') : '';
+}
+function hasCommitteeSession() {
+  return !!getCommitteeRole();
+}
+function hasSuperadminSession() {
+  return getCommitteeRole() === 'superadmin';
 }
 
 function renderAdminCards() {
   document.querySelectorAll('[data-admin-card]').forEach(card => {
-    card.classList.toggle('show', hasAdminSession());
+    card.classList.toggle('show', hasCommitteeSession());
   });
   const btn = document.getElementById('adminHomeBtn');
-  if (btn) btn.textContent = 'Admin';
+  if (btn) {
+    btn.textContent = 'Admin';
+    btn.style.display = hasSuperadminSession() ? '' : 'none';
+  }
 }
 
 function escH(s) {
@@ -1587,7 +1598,7 @@ function closeLoginModal() {
 }
 
 function showAdminLoginModal() {
-  window.location.href = '/admin/';
+  if (hasSuperadminSession()) window.location.href = '/admin/';
 }
 
 async function handleLoginSubmit() {

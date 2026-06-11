@@ -461,7 +461,7 @@
     </a>
     <nav class="nav">
       <a class="btn" href="/">← Home</a>
-      <a class="btn gold" href="/admin/">Admin</a>
+      <a class="btn gold" id="adminNavLink" href="/admin/">Admin</a>
       <button class="btn danger hidden" id="logoutBtn">ออกจากระบบ</button>
     </nav>
   </header>
@@ -601,7 +601,9 @@
 
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+    const COMMITTEE_ROLES = {'38/8': 'superadmin', '38/38': 'committee'};
     let activeFilter = 'all';
+    let accessRole = '';
     let bpFormSnapshot = null;
     let _selectedNewFiles = [];
     let _existingFileDocs = [];
@@ -624,10 +626,19 @@
     }
     function getAuthPayload() {
       const resident = getResidentSession();
-      if (resident && resident.houseNo === '38/8' && resident.pin) {
+      if (resident && COMMITTEE_ROLES[resident.houseNo] && resident.pin) {
         return {houseNo: resident.houseNo, pin: resident.pin};
       }
       return null;
+    }
+    function canManageVault() {
+      return accessRole === 'superadmin';
+    }
+    function applyAccessMode() {
+      const canManage = canManageVault();
+      $('addBpBtn').classList.toggle('hidden', !canManage);
+      $('adminNavLink').classList.toggle('hidden', !canManage);
+      $('bpModal').setAttribute('aria-hidden', canManage ? 'false' : 'true');
     }
     function setStatus(id, msg, type = '') {
       const el = $(id);
@@ -802,7 +813,7 @@
         activeFilter === 'all' || (g.docs[0]?.category || '') === activeFilter
       );
 
-      const canReorder = activeFilter === 'all' && filtered.length > 1;
+      const canReorder = canManageVault() && activeFilter === 'all' && filtered.length > 1;
       $('listSummary').textContent = activeFilter === 'all'
         ? `แสดง ${filtered.length} รายการทั้งหมด`
         : `แสดง ${filtered.length} จาก ${groups.length} รายการ`;
@@ -958,6 +969,7 @@
       return [...$('docList').querySelectorAll('.bp-card')].map(c => c.dataset.groupKey);
     }
     async function persistCardOrder() {
+      if (!canManageVault()) return;
       const auth = getAuthPayload();
       if (!auth) return;
       const keys = currentCardOrder();
@@ -1043,11 +1055,11 @@
         <div class="download-status" id="downloadStatus"></div>
         <div class="detail-file-box" id="detailFileBox">${filesHtml}</div>
         <div class="file-search-empty hidden" id="fileSearchEmpty">ไม่พบไฟล์ที่ตรงกับคำค้นหา</div>
-        <div class="modal-actions" style="justify-content:space-between">
-          <button class="btn danger" type="button" data-detail-delete>ลบเอกสาร</button>
+        <div class="modal-actions" style="justify-content:${canManageVault() ? 'space-between' : 'flex-end'}">
+          ${canManageVault() ? '<button class="btn danger" type="button" data-detail-delete>ลบเอกสาร</button>' : ''}
           <div style="display:flex;gap:8px">
             <button class="btn" type="button" data-detail-close>ปิด</button>
-            <button class="btn gold" type="button" data-detail-edit>✏️ แก้ไข</button>
+            ${canManageVault() ? '<button class="btn gold" type="button" data-detail-edit>✏️ แก้ไข</button>' : ''}
           </div>
         </div>
       `;
@@ -1074,18 +1086,24 @@
       if (downloadSingleBtn) {
         downloadSingleBtn.addEventListener('click', () => downloadSingleFile(sortedFileDocs[0], downloadSingleBtn));
       }
-      $('detailContent').querySelector('[data-detail-edit]').addEventListener('click', () => {
-        closeDetailModal();
-        editDoc({
-          edit: first.id,
-          title: first.title || '',
-          category: first.category || '',
-          notes: first.notes || ''
+      const editButton = $('detailContent').querySelector('[data-detail-edit]');
+      if (editButton) {
+        editButton.addEventListener('click', () => {
+          closeDetailModal();
+          editDoc({
+            edit: first.id,
+            title: first.title || '',
+            category: first.category || '',
+            notes: first.notes || ''
+          });
         });
-      });
-      $('detailContent').querySelector('[data-detail-delete]').addEventListener('click', e => {
-        deleteGroup(group, e.currentTarget);
-      });
+      }
+      const deleteButton = $('detailContent').querySelector('[data-detail-delete]');
+      if (deleteButton) {
+        deleteButton.addEventListener('click', e => {
+          deleteGroup(group, e.currentTarget);
+        });
+      }
       $('detailModal').classList.add('open');
       syncBodyScrollLock();
     }
@@ -1209,6 +1227,8 @@
       $('loginPanel').classList.add('hidden');
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
       const data = await api({action: 'list', ...auth});
+      accessRole = data.role || accessRole;
+      applyAccessMode();
       const docs = data.documents || [];
       buildFilterPills(docs);
       renderDocs(docs);
@@ -1337,12 +1357,14 @@
       resetBpFormUi();
     }
     function openCreateForm() {
+      if (!canManageVault()) return;
       resetBpFormUi();
       openBpModal();
       bpFormSnapshot = JSON.stringify(getBpFormState());
     }
 
     function editDoc(data) {
+      if (!canManageVault()) return;
       resetBpFormUi();
       const meta = parseStructuredNotes(data.notes || '');
       _editingDocId = data.edit;
@@ -1372,6 +1394,7 @@
     /* ── Upload / Edit submit ── */
     async function uploadDoc(e) {
       e.preventDefault();
+      if (!canManageVault()) return;
       const auth = getAuthPayload();
       if (!auth) { setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error'); return; }
 
@@ -1455,6 +1478,7 @@
     }
 
     async function deleteGroup(group, button) {
+      if (!canManageVault()) return;
       const name = group.baseTitle || (group.docs[0] || {}).title || 'เอกสารนี้';
       const count = group.docs.length;
       const msg = count > 1
@@ -1494,7 +1518,9 @@
       });
       $('logoutBtn').addEventListener('click', () => { location.href = '/'; });
       const resident = getResidentSession();
-      if (!resident || resident.houseNo !== '38/8') { location.href = '/'; return; }
+      accessRole = resident ? (COMMITTEE_ROLES[resident.houseNo] || '') : '';
+      if (!resident || !accessRole) { location.href = '/'; return; }
+      applyAccessMode();
       loadDocs().catch(() => { location.href = '/'; });
     }
     init();
