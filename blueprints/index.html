@@ -423,6 +423,14 @@
       padding: 9px 13px; border-bottom: 1px solid #f0e8d8;
     }
     .detail-file-row:last-child { border-bottom: none; }
+    .detail-image-thumb {
+      width: 46px; height: 46px; padding: 0; border: 1px solid var(--border);
+      border-radius: 7px; overflow: hidden; background: var(--bg);
+      cursor: zoom-in; flex-shrink: 0;
+    }
+    .detail-image-thumb img {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+    }
     .file-ext-badge {
       font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
       border-radius: 5px; padding: 3px 6px; flex-shrink: 0;
@@ -435,10 +443,37 @@
     .detail-file-open {
       flex-shrink: 0; color: var(--gold); text-decoration: none;
       font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 6px;
+      border: none; background: transparent; cursor: pointer;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
     }
     .detail-file-open:hover { background: var(--gold-pale); }
     .file-search-empty {
       text-align: center; color: var(--muted); font-size: 13px; padding: 18px 0;
+    }
+    .image-preview-overlay { z-index: 260; }
+    .image-preview-modal {
+      width: min(100%, 1080px); max-height: 94vh; padding: 18px;
+      background: #17130f; border-color: rgba(255,255,255,0.15);
+    }
+    .image-preview-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px; color: #fff;
+    }
+    .image-preview-title {
+      min-width: 0; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; font-weight: 600;
+    }
+    .image-preview-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .image-preview-actions .btn { color: #fff; border-color: rgba(255,255,255,0.35); }
+    .image-preview-actions .modal-close { background: rgba(255,255,255,0.12); color: #fff; }
+    .image-preview-stage {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 240px; max-height: calc(94vh - 100px); overflow: auto;
+      background: #0b0907; border-radius: 12px;
+    }
+    .image-preview-stage img {
+      display: block; max-width: 100%; max-height: calc(94vh - 100px);
+      width: auto; height: auto; object-fit: contain;
     }
 
     @media (max-width: 720px) {
@@ -548,6 +583,22 @@
       </div>
     </div>
 
+    <!-- Image Preview Modal -->
+    <div class="modal-overlay image-preview-overlay" id="imagePreviewModal">
+      <div class="modal image-preview-modal">
+        <div class="image-preview-head">
+          <div class="image-preview-title" id="imagePreviewTitle">ตัวอย่างภาพ</div>
+          <div class="image-preview-actions">
+            <a class="btn" id="imagePreviewOriginal" href="#" target="_blank" rel="noopener">เปิดภาพต้นฉบับ</a>
+            <button class="modal-close" type="button" onclick="closeImagePreview()" aria-label="ปิด">×</button>
+          </div>
+        </div>
+        <div class="image-preview-stage">
+          <img id="imagePreviewImg" alt="" />
+        </div>
+      </div>
+    </div>
+
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="toolbar-top">
@@ -565,10 +616,6 @@
     </section>
   </main>
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
-    integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG"
-    crossorigin="anonymous"></script>
   <script>
     const VAULT_TYPE = 'blueprints';
     const CATEGORIES = [
@@ -692,6 +739,9 @@
     }
     function isImageExt(ext) {
       return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext);
+    }
+    function canPreviewImage(ext) {
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
     }
     function fileIcon(ext) {
       if (ext === 'pdf') return 'PDF';
@@ -1029,12 +1079,19 @@
             const ext = fileExtension(doc.fileName);
             const name = doc.fileName || doc.title || `ไฟล์ ${index + 1}`;
             const badgeColor = extBadgeColor(ext);
+            const previewable = canPreviewImage(ext);
             return `
               <div class="detail-file-row" data-file-name="${esc(name.toLowerCase())}">
-                <span class="file-ext-badge" style="background:${badgeColor}14;color:${badgeColor}">${esc(fileIcon(ext))}</span>
+                ${previewable
+                  ? `<button class="detail-image-thumb" type="button" data-image-preview="${esc(doc.downloadUrl)}" data-image-name="${esc(name)}" aria-label="ดูตัวอย่าง ${esc(name)}">
+                      <img src="${esc(doc.downloadUrl)}" alt="" loading="lazy" />
+                    </button>`
+                  : `<span class="file-ext-badge" style="background:${badgeColor}14;color:${badgeColor}">${esc(fileIcon(ext))}</span>`}
                 <span class="detail-file-name" title="${esc(name)}">${esc(name)}</span>
                 <span class="detail-file-size">${esc(formatSize(doc.size))}</span>
-                <a class="detail-file-open" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener" aria-label="เปิดไฟล์ ${esc(name)}">เปิด ↗</a>
+                ${previewable
+                  ? `<button class="detail-file-open" type="button" data-image-preview="${esc(doc.downloadUrl)}" data-image-name="${esc(name)}">ดูภาพ</button>`
+                  : `<a class="detail-file-open" href="${esc(doc.downloadUrl)}" target="_blank" rel="noopener" aria-label="เปิดไฟล์ ${esc(name)}">เปิด ↗</a>`}
               </div>`;
           }).join('')
         : '<div class="empty" style="border:none">ยังไม่มีไฟล์แนบ</div>';
@@ -1047,7 +1104,7 @@
             ? `<div class="file-search"><input type="search" id="fileSearchInput" placeholder="ค้นหาไฟล์..." autocomplete="off" /></div>`
             : '<div style="flex:1"></div>'}
           ${fileDocs.length > 1
-            ? `<button class="btn gold-fill download-all-btn" type="button" data-download-all="${esc(first.id)}">⬇ ZIP ทั้งหมด</button>`
+            ? `<button class="btn gold-fill download-all-btn" type="button" data-download-all="${esc(first.id)}">⬇ Download All</button>`
             : fileDocs.length === 1
               ? `<button class="btn gold-fill download-all-btn" type="button" data-download-single>⬇ ดาวน์โหลดไฟล์</button>`
               : ''}
@@ -1086,6 +1143,11 @@
       if (downloadSingleBtn) {
         downloadSingleBtn.addEventListener('click', () => downloadSingleFile(sortedFileDocs[0], downloadSingleBtn));
       }
+      $('detailContent').querySelectorAll('[data-image-preview]').forEach(previewButton => {
+        previewButton.addEventListener('click', () => {
+          openImagePreview(previewButton.dataset.imagePreview, previewButton.dataset.imageName);
+        });
+      });
       const editButton = $('detailContent').querySelector('[data-detail-edit]');
       if (editButton) {
         editButton.addEventListener('click', () => {
@@ -1118,6 +1180,33 @@
       syncBodyScrollLock();
     }
 
+    function openImagePreview(url, name) {
+      if (!url) return;
+      $('imagePreviewTitle').textContent = name || 'ตัวอย่างภาพ';
+      $('imagePreviewImg').src = url;
+      $('imagePreviewImg').alt = name || 'ตัวอย่างภาพ';
+      $('imagePreviewOriginal').href = url;
+      $('imagePreviewModal').classList.add('open');
+      syncBodyScrollLock();
+    }
+
+    function closeImagePreview() {
+      $('imagePreviewModal').classList.remove('open');
+      $('imagePreviewImg').removeAttribute('src');
+      syncBodyScrollLock();
+    }
+
+    function triggerBlobDownload(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+
     async function downloadSingleFile(doc, button) {
       if (!doc || !doc.downloadUrl) return;
       const status = $('downloadStatus');
@@ -1129,14 +1218,7 @@
         const response = await fetch(doc.downloadUrl);
         if (!response.ok) throw new Error('ดาวน์โหลดไม่สำเร็จ');
         const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = safeDownloadName(doc.fileName || doc.title || 'blueprint');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        triggerBlobDownload(blob, safeDownloadName(doc.fileName || doc.title || 'blueprint'));
         if (status) status.textContent = 'ดาวน์โหลดไฟล์แล้ว';
       } catch (err) {
         if (status) status.textContent = err.message || 'ดาวน์โหลดไม่สำเร็จ';
@@ -1147,21 +1229,20 @@
     }
 
     async function downloadAllFiles(group, button) {
-      const fileDocs = group.docs.filter(d => d.downloadUrl);
+      const fileDocs = group.docs
+        .filter(d => d.downloadUrl)
+        .sort((a, b) =>
+          String(a.fileName || a.title || '').localeCompare(String(b.fileName || b.title || ''), 'th', {numeric: true})
+        );
       if (!fileDocs.length) return;
-      if (typeof JSZip === 'undefined') {
-        alert('ไม่สามารถโหลดระบบสร้าง ZIP ได้ กรุณาลองใหม่อีกครั้ง');
-        return;
-      }
 
       const status = $('downloadStatus');
       const originalText = button.textContent;
       button.disabled = true;
-      button.textContent = 'กำลังเตรียม ZIP...';
+      button.textContent = 'กำลังดาวน์โหลด...';
       status.textContent = `กำลังดาวน์โหลด 0/${fileDocs.length} ไฟล์`;
 
       try {
-        const zip = new JSZip();
         const usedNames = new Set();
         for (let i = 0; i < fileDocs.length; i++) {
           const doc = fileDocs[i];
@@ -1169,25 +1250,12 @@
           const response = await fetch(doc.downloadUrl);
           if (!response.ok) throw new Error(`ดาวน์โหลด ${doc.fileName || 'ไฟล์'} ไม่สำเร็จ`);
           const blob = await response.blob();
-          zip.file(uniqueFileName(doc.fileName || doc.title || `file-${i + 1}`, usedNames), blob);
+          const fileName = uniqueFileName(doc.fileName || doc.title || `file-${i + 1}`, usedNames);
+          triggerBlobDownload(blob, fileName);
         }
-
-        button.textContent = 'กำลังสร้าง ZIP...';
-        const zipBlob = await zip.generateAsync(
-          {type: 'blob', compression: 'STORE'},
-          meta => { status.textContent = `กำลังสร้าง ZIP ${Math.round(meta.percent)}%`; }
-        );
-        const url = URL.createObjectURL(zipBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${safeDownloadName(group.baseTitle, 'blueprint')}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-        status.textContent = `ดาวน์โหลด ZIP รวม ${fileDocs.length} ไฟล์แล้ว`;
+        status.textContent = `ดาวน์โหลดครบ ${fileDocs.length} ไฟล์แล้ว`;
       } catch (err) {
-        status.textContent = err.message || 'สร้าง ZIP ไม่สำเร็จ';
+        status.textContent = err.message || 'ดาวน์โหลดไม่สำเร็จ';
       } finally {
         button.disabled = false;
         button.textContent = originalText;
@@ -1514,8 +1582,13 @@
       $('detailModal').addEventListener('click', e => {
         if (e.target === $('detailModal')) closeDetailModal();
       });
+      $('imagePreviewModal').addEventListener('click', e => {
+        if (e.target === $('imagePreviewModal')) closeImagePreview();
+      });
       document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && $('detailModal').classList.contains('open')) closeDetailModal();
+        if (e.key !== 'Escape') return;
+        if ($('imagePreviewModal').classList.contains('open')) closeImagePreview();
+        else if ($('detailModal').classList.contains('open')) closeDetailModal();
       });
       $('logoutBtn').addEventListener('click', () => { location.href = '/'; });
       const resident = getResidentSession();
