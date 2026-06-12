@@ -261,16 +261,29 @@
       overflow: hidden;
     }
     .access-row {
+      width: 100%;
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) auto auto;
+      grid-template-columns: minmax(220px, 1fr) auto;
       gap: 14px;
       align-items: center;
-      padding: 14px 16px;
+      padding: 11px 16px;
+      border: 0;
       border-bottom: 1px solid var(--border-soft);
+      background: #fff;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
       transition: background .15s;
     }
     .access-row:last-child { border-bottom: 0; }
     .access-row:hover { background: #fcf9f3; }
+    .access-row:focus-visible {
+      position: relative;
+      z-index: 1;
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
     .access-house-line {
       display: flex;
       align-items: center;
@@ -290,7 +303,7 @@
     .access-resident {
       color: var(--text-muted);
       font-size: 12px;
-      margin-top: 2px;
+      margin-top: 1px;
     }
     .access-status-pill {
       display: inline-flex;
@@ -307,25 +320,6 @@
     .access-status-pill.off {
       background: var(--bg-soft);
       color: var(--text-muted);
-    }
-    .access-edit {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 78px;
-      padding: 9px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--text-body);
-      font: inherit;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .access-edit:hover {
-      border-color: var(--accent);
-      color: var(--accent-deep);
     }
     .access-status {
       min-height: 20px;
@@ -522,11 +516,18 @@
       color: var(--text);
     }
     .level-choice input:checked + span {
-      border-color: var(--accent-deep);
+      border-color: #8b9b91;
       border-right-width: 1px;
-      background: var(--accent-deep);
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(133,80,21,.18);
+      background: #eef3f0;
+      color: #263a30;
+      box-shadow: inset 0 0 0 1px #8b9b91;
+    }
+    .level-choice input:checked + span::before {
+      content: '✓';
+      margin-right: 5px;
+      color: #386148;
+      font-size: 11px;
+      font-weight: 800;
     }
     .level-choice:has(input:checked) + .level-choice span {
       border-left-width: 0;
@@ -1268,10 +1269,9 @@
       .access-row {
         grid-template-columns: 1fr auto;
         gap: 10px;
-        padding: 15px;
+        padding: 11px 13px;
       }
-      .access-edit { grid-column: 2; grid-row: 1; }
-      .access-status-pill { grid-column: 1; }
+      .access-status-pill { grid-column: 2; grid-row: 1; }
       .drawer-fields,
       .portal-permissions { grid-template-columns: 1fr; }
       .level-row {
@@ -1471,28 +1471,12 @@
     </div>
 
     <div class="drawer-body" id="accessDrawerBody">
-      <section class="drawer-section">
-        <h3>ข้อมูลผู้ดูแล</h3>
-        <p class="drawer-section-note">ชื่อบทบาทใช้เพื่อให้อ่านรายการได้ง่ายขึ้น</p>
-        <div class="drawer-fields">
-          <div class="drawer-field">
-            <label>บ้านเลขที่</label>
-            <input id="drawerHouseNo" type="text" disabled>
-          </div>
-          <div class="drawer-field">
-            <label>ชื่อบทบาท</label>
-            <select id="drawerRoleLabel" onchange="markAccessDrawerDirty()">
-              <option value="กรรมการ">กรรมการ</option>
-              <option value="ประธานกรรมการ">ประธานกรรมการ</option>
-              <option value="ผู้ดูแล">ผู้ดูแล</option>
-            </select>
-          </div>
-        </div>
-      </section>
+      <input id="drawerHouseNo" type="hidden">
+      <input id="drawerRoleLabel" type="hidden" value="ผู้ดูแล">
 
       <section class="drawer-section">
-        <h3>ตั้งค่าด่วน</h3>
-        <p class="drawer-section-note">เลือกชุดสิทธิ์พื้นฐาน แล้วปรับรายละเอียดต่อได้</p>
+        <h3>รูปแบบสิทธิ์</h3>
+        <p class="drawer-section-note">เลือกชุดเริ่มต้น แล้วปรับสิทธิ์แต่ละส่วนต่อได้</p>
         <div class="preset-row">
           <button class="preset-btn" type="button" data-preset="chair"
             onclick="applyAccessPreset('chair')">ประธานกรรมการ</button>
@@ -2312,7 +2296,10 @@
       return;
     }
     list.innerHTML = accessMatrix.map(access => `
-      <div class="access-row" data-house="${escHtml(access.houseNo)}">
+      <button class="access-row" type="button"
+        data-house="${escHtml(access.houseNo)}"
+        aria-label="แก้ไขสิทธิ์บ้าน ${escHtml(access.houseNo)}"
+        onclick="openAccessDrawer('${escHtml(access.houseNo)}')">
         <div>
           <div class="access-house-line">
             <span class="access-house">${escHtml(access.houseNo)}</span>
@@ -2324,9 +2311,7 @@
         <span class="access-status-pill${access.active ? '' : ' off'}">
           ${access.active ? '● เปิดใช้งาน' : '○ ปิดใช้งาน'}
         </span>
-        <button class="access-edit" type="button"
-          onclick="openAccessDrawer('${escHtml(access.houseNo)}')">แก้ไข</button>
-      </div>
+      </button>
     `).join('');
   }
 
@@ -2397,12 +2382,8 @@
     document.getElementById('drawerAccessSubtitle').textContent =
       access.residentName || 'ไม่พบชื่อในข้อมูลลูกบ้าน';
     document.getElementById('drawerHouseNo').value = houseNo;
-    const roleSelect = document.getElementById('drawerRoleLabel');
     const roleLabel = access.roleLabel || 'ผู้ดูแล';
-    if (![...roleSelect.options].some(option => option.value === roleLabel)) {
-      roleSelect.add(new Option(roleLabel, roleLabel));
-    }
-    roleSelect.value = roleLabel;
+    document.getElementById('drawerRoleLabel').value = roleLabel;
     document.getElementById('drawerAccessActive').checked = access.active;
     document.getElementById('drawerAccessActive').disabled =
       houseNo === '38/8';
@@ -2488,6 +2469,8 @@
       document.getElementById('drawerRoleLabel').value = 'ประธานกรรมการ';
     } else if (preset === 'committee') {
       document.getElementById('drawerRoleLabel').value = 'กรรมการ';
+    } else {
+      document.getElementById('drawerRoleLabel').value = 'ผู้ดูแล';
     }
     document.querySelectorAll('[data-drawer-permission]').forEach(input => {
       input.checked = Boolean(permissions[input.dataset.drawerPermission]);
@@ -2524,6 +2507,9 @@
         permissionsMatch(permissions, presetPermissions('committee')) ?
           'committee' : 'custom';
     }
+    document.getElementById('drawerRoleLabel').value =
+      active === 'chair' ? 'ประธานกรรมการ' :
+        active === 'committee' ? 'กรรมการ' : 'ผู้ดูแล';
     document.querySelectorAll('[data-preset]').forEach(button => {
       button.classList.toggle('active', button.dataset.preset === active);
     });
