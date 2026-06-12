@@ -190,7 +190,7 @@
     /* ─── AUTHORIZATION MATRIX ─── */
     .access-shell {
       padding: 26px 28px 40px;
-      max-width: 1440px;
+      max-width: 1180px;
       width: 100%;
       margin: 0 auto;
     }
@@ -221,7 +221,7 @@
       box-shadow: var(--shadow-card);
     }
     .access-add input,
-    .access-role-input {
+    .drawer-field input {
       width: 100%;
       min-width: 0;
       border: 1.5px solid var(--border);
@@ -233,7 +233,7 @@
       outline: none;
     }
     .access-add input:focus,
-    .access-role-input:focus {
+    .drawer-field input:focus {
       border-color: var(--accent);
     }
     .access-primary {
@@ -252,24 +252,23 @@
       cursor: wait;
     }
     .access-list {
-      display: grid;
-      gap: 12px;
-    }
-    .access-row {
-      display: grid;
-      grid-template-columns: minmax(210px, 0.7fr) minmax(520px, 2fr) auto;
-      gap: 18px;
-      align-items: start;
-      padding: 18px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
       box-shadow: var(--shadow-card);
+      overflow: hidden;
     }
-    .access-identity {
+    .access-row {
       display: grid;
-      gap: 8px;
+      grid-template-columns: minmax(190px, .75fr) minmax(300px, 1.5fr) auto auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border-soft);
+      transition: background .15s;
     }
+    .access-row:last-child { border-bottom: 0; }
+    .access-row:hover { background: #fcf9f3; }
     .access-house-line {
       display: flex;
       align-items: center;
@@ -280,65 +279,296 @@
       font-size: 18px;
       font-weight: 700;
     }
+    .access-role-summary {
+      margin-top: 3px;
+      color: var(--text-body);
+      font-size: 13px;
+      font-weight: 700;
+    }
     .access-resident {
       color: var(--text-muted);
       font-size: 12px;
-      min-height: 18px;
+      margin-top: 2px;
     }
-    .access-active {
+    .access-status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      color: var(--text-soft);
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .access-active input,
-    .permission-check input {
-      width: 17px;
-      height: 17px;
-      accent-color: var(--accent);
-    }
-    .permission-groups {
-      display: grid;
-      gap: 12px;
-    }
-    .permission-group-title {
-      margin-bottom: 7px;
-      color: var(--text-muted);
+      gap: 6px;
+      width: fit-content;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--status-ok-bg);
+      color: var(--status-ok);
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
     }
-    .permission-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
-      gap: 7px;
+    .access-status-pill.off {
+      background: var(--bg-soft);
+      color: var(--text-muted);
     }
-    .permission-check {
+    .access-summary {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 38px;
-      padding: 8px 10px;
-      border: 1px solid var(--border-soft);
-      border-radius: 8px;
-      background: var(--bg);
-      color: var(--text-body);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
+      gap: 6px;
+      flex-wrap: wrap;
     }
-    .permission-check:has(input:checked) {
+    .access-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 27px;
+      padding: 4px 9px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--text-soft);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .access-chip.manage {
       border-color: #d8b276;
       background: var(--accent-pale);
       color: var(--accent-deep);
     }
-    .access-actions {
+    .access-count {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .access-edit {
       display: flex;
-      gap: 7px;
       align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text-body);
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .access-edit:hover {
+      border-color: var(--accent);
+      color: var(--accent-deep);
+    }
+    .access-status {
+      min-height: 20px;
+      margin-top: 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .access-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      background: rgba(42,34,24,.34);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .access-drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .access-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 960;
+      width: min(600px, 94vw);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-left: 1px solid var(--border);
+      box-shadow: -18px 0 46px rgba(60,40,20,.14);
+      transform: translateX(102%);
+      transition: transform .23s ease;
+    }
+    .access-drawer.open { transform: translateX(0); }
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .drawer-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .drawer-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .drawer-close {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text-soft);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow: auto;
+      padding: 22px;
+    }
+    .drawer-section {
+      padding: 0 0 22px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .drawer-section:last-child { border-bottom: 0; }
+    .drawer-section h3 {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .drawer-section-note {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-bottom: 13px;
+    }
+    .drawer-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .drawer-field label {
+      display: block;
+      color: var(--text-soft);
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .preset-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .preset-btn {
+      padding: 10px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-body);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .preset-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-pale);
+      color: var(--accent-deep);
+    }
+    .portal-permissions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .portal-check {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text-body);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .portal-check:has(input:checked) {
+      border-color: #d8b276;
+      background: var(--accent-pale);
+      color: var(--accent-deep);
+    }
+    .portal-check input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+    }
+    .level-table {
+      display: grid;
+      gap: 8px;
+    }
+    .level-row {
+      display: grid;
+      grid-template-columns: minmax(125px, 1fr) repeat(3, 74px);
+      gap: 5px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    .level-name {
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+    .level-choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .level-choice span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .level-choice input:checked + span {
+      border-color: #d8b276;
+      background: var(--accent-pale);
+      color: var(--accent-deep);
+    }
+    .drawer-active {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+    }
+    .drawer-active strong { display: block; font-size: 13px; }
+    .drawer-active small { color: var(--text-muted); }
+    .drawer-active input {
+      width: 19px;
+      height: 19px;
+      accent-color: var(--accent);
+    }
+    .drawer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 22px;
+      border-top: 1px solid var(--border-soft);
+      background: #fff;
+    }
+    .drawer-dirty {
+      color: var(--status-pending);
+      font-size: 11.5px;
+      font-weight: 700;
     }
     .access-remove {
       border: 1px solid #ebc6bc;
@@ -349,12 +579,6 @@
       font: inherit;
       font-weight: 700;
       cursor: pointer;
-    }
-    .access-status {
-      min-height: 20px;
-      margin-top: 12px;
-      color: var(--text-muted);
-      font-size: 12px;
     }
 
     /* ─── TOOLBAR ─── */
@@ -1049,9 +1273,21 @@
       .access-shell { padding: 20px 14px 32px; }
       .access-heading { align-items: flex-start; flex-direction: column; }
       .access-add { grid-template-columns: 1fr; }
-      .access-row { grid-template-columns: 1fr; }
-      .permission-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .access-actions { justify-content: flex-end; }
+      .access-row {
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding: 15px;
+      }
+      .access-summary { grid-column: 1 / -1; }
+      .access-count { display: none; }
+      .access-edit { grid-column: 2; grid-row: 1; }
+      .drawer-fields,
+      .portal-permissions { grid-template-columns: 1fr; }
+      .level-row {
+        grid-template-columns: 1fr repeat(3, 62px);
+        padding: 7px;
+      }
+      .preset-row { grid-template-columns: 1fr; }
       .dashboard > header { padding: 14px 16px; }
       .dashboard > header > div:last-child { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
       .admin-quick-links { width: 100%; }
@@ -1224,6 +1460,87 @@
       <div id="accessStatus" class="access-status"></div>
     </div>
   </div>
+
+  <div class="access-drawer-backdrop" id="accessDrawerBackdrop"
+    onclick="requestCloseAccessDrawer()"></div>
+  <aside class="access-drawer" id="accessDrawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title" id="drawerAccessTitle">แก้ไขสิทธิ์</div>
+        <div class="drawer-subtitle" id="drawerAccessSubtitle"></div>
+      </div>
+      <button class="drawer-close" type="button" aria-label="ปิด"
+        onclick="requestCloseAccessDrawer()">×</button>
+    </div>
+
+    <div class="drawer-body" id="accessDrawerBody">
+      <section class="drawer-section">
+        <h3>ข้อมูลผู้ดูแล</h3>
+        <p class="drawer-section-note">ชื่อบทบาทใช้เพื่อให้อ่านรายการได้ง่ายขึ้น</p>
+        <div class="drawer-fields">
+          <div class="drawer-field">
+            <label>บ้านเลขที่</label>
+            <input id="drawerHouseNo" type="text" disabled>
+          </div>
+          <div class="drawer-field">
+            <label>ชื่อบทบาท</label>
+            <input id="drawerRoleLabel" type="text"
+              oninput="markAccessDrawerDirty()">
+          </div>
+        </div>
+      </section>
+
+      <section class="drawer-section">
+        <h3>ตั้งค่าด่วน</h3>
+        <p class="drawer-section-note">เลือกชุดสิทธิ์พื้นฐาน แล้วปรับรายละเอียดต่อได้</p>
+        <div class="preset-row">
+          <button class="preset-btn" type="button" data-preset="chair"
+            onclick="applyAccessPreset('chair')">ประธานกรรมการ</button>
+          <button class="preset-btn" type="button" data-preset="committee"
+            onclick="applyAccessPreset('committee')">กรรมการ</button>
+          <button class="preset-btn" type="button" data-preset="custom"
+            onclick="applyAccessPreset('custom')">กำหนดเอง</button>
+        </div>
+      </section>
+
+      <section class="drawer-section">
+        <h3>Admin portal</h3>
+        <p class="drawer-section-note">เลือกเมนูที่บ้านนี้สามารถเปิดและใช้งานได้</p>
+        <div class="portal-permissions" id="drawerPortalPermissions"></div>
+      </section>
+
+      <section class="drawer-section">
+        <h3>การเงินและเอกสาร</h3>
+        <p class="drawer-section-note">หนึ่งระบบเลือกได้เพียงระดับเดียว</p>
+        <div class="level-table" id="drawerResourceLevels"></div>
+      </section>
+
+      <section class="drawer-section">
+        <div class="drawer-active">
+          <div>
+            <strong>เปิดใช้งานสิทธิ์</strong>
+            <small>ปิดชั่วคราวได้โดยไม่ลบการตั้งค่า</small>
+          </div>
+          <input id="drawerAccessActive" type="checkbox"
+            onchange="markAccessDrawerDirty()">
+        </div>
+      </section>
+    </div>
+
+    <div class="drawer-footer">
+      <div>
+        <button class="access-remove" id="drawerRemoveBtn" type="button"
+          onclick="removeCurrentAccess()">นำออก</button>
+        <span class="drawer-dirty" id="drawerDirtyLabel"></span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="toolbar-btn" type="button"
+          onclick="requestCloseAccessDrawer()">ยกเลิก</button>
+        <button class="access-primary" id="drawerSaveBtn" type="button"
+          onclick="saveCurrentAccess()">บันทึกสิทธิ์</button>
+      </div>
+    </div>
+  </aside>
 
   <!-- Tab: Vote / Poll -->
   <div id="voteTab" style="display:none">
@@ -1915,37 +2232,32 @@
   let filteredData = [];
   let currentAdminAccess = null;
   let accessMatrix = [];
+  let editingAccessHouse = '';
+  let accessDrawerDirty = false;
   // Track issues ที่ approve/reject แล้วในระหว่าง session — กัน card โผล่กลับก่อน GitHub ปิด
   const processedIssues = new Set();
   let editingIndex = -1;
   let originalSnap = null;
   let currentTab   = 'residents';
 
-  const ACCESS_PERMISSION_GROUPS = [
-    {
-      title: 'Admin portal',
-      items: [
-        ['admin.portal', 'เข้า /admin'],
-        ['admin.residents', 'ข้อมูลลูกบ้าน'],
-        ['admin.pins', 'PIN ลูกบ้าน'],
-        ['admin.vote', 'โหวต'],
-        ['admin.survey', 'ไลฟ์สไตล์'],
-        ['admin.announcements', 'ประกาศ'],
-        ['admin.pickup', 'ทิ้งของใหญ่'],
-        ['admin.audit', 'Activity log']
-      ]
-    },
-    {
-      title: 'การเงินและเอกสาร',
-      items: [
-        ['expense.view', 'ดูรายจ่าย'],
-        ['expense.manage', 'จัดการรายจ่าย'],
-        ['insurance.view', 'ดูประกัน'],
-        ['insurance.manage', 'จัดการประกัน'],
-        ['blueprints.view', 'ดูแบบก่อสร้าง'],
-        ['blueprints.manage', 'จัดการแบบก่อสร้าง']
-      ]
-    }
+  const ACCESS_PORTAL_ITEMS = [
+    ['admin.portal', 'เข้า /admin'],
+    ['admin.residents', 'ข้อมูลลูกบ้าน'],
+    ['admin.pins', 'PIN ลูกบ้าน'],
+    ['admin.vote', 'โหวต'],
+    ['admin.survey', 'ไลฟ์สไตล์'],
+    ['admin.announcements', 'ประกาศ'],
+    ['admin.pickup', 'ทิ้งของใหญ่'],
+    ['admin.audit', 'Activity log']
+  ];
+  const ACCESS_RESOURCES = [
+    ['expense', 'รายจ่าย'],
+    ['insurance', 'ประกัน'],
+    ['blueprints', 'แบบก่อสร้าง']
+  ];
+  const ALL_ACCESS_KEYS = [
+    ...ACCESS_PORTAL_ITEMS.map(([key]) => key),
+    ...ACCESS_RESOURCES.flatMap(([key]) => [`${key}.view`, `${key}.manage`])
   ];
 
   const ADMIN_TAB_PERMISSIONS = {
@@ -1986,22 +2298,29 @@
     return data;
   }
 
-  function renderPermissionGroups(access) {
-    return ACCESS_PERMISSION_GROUPS.map(group => `
-      <div>
-        <div class="permission-group-title">${escHtml(group.title)}</div>
-        <div class="permission-grid">
-          ${group.items.map(([key, label]) => `
-            <label class="permission-check">
-              <input type="checkbox" data-permission="${escHtml(key)}"
-                ${access.permissions?.[key] ? 'checked' : ''}
-                onchange="syncPermissionDependency(this)">
-              <span>${escHtml(label)}</span>
-            </label>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
+  function resourceAccessLevel(access, resource) {
+    if (access.permissions?.[`${resource}.manage`]) return 'manage';
+    if (access.permissions?.[`${resource}.view`]) return 'view';
+    return 'none';
+  }
+
+  function accessSummaryChips(access) {
+    const chips = [];
+    if (access.permissions?.['admin.portal']) {
+      const portalCount = ACCESS_PORTAL_ITEMS
+        .filter(([key]) => access.permissions?.[key]).length;
+      chips.push(`<span class="access-chip">Admin ${portalCount}/8</span>`);
+    }
+    ACCESS_RESOURCES.forEach(([resource, label]) => {
+      const level = resourceAccessLevel(access, resource);
+      if (level === 'manage') {
+        chips.push(`<span class="access-chip manage">${label}: จัดการ</span>`);
+      } else if (level === 'view') {
+        chips.push(`<span class="access-chip">${label}: ดู</span>`);
+      }
+    });
+    return chips.join('') ||
+      '<span class="access-chip">ยังไม่ได้กำหนดสิทธิ์</span>';
   }
 
   function renderAccessMatrix() {
@@ -2012,41 +2331,190 @@
     }
     list.innerHTML = accessMatrix.map(access => `
       <div class="access-row" data-house="${escHtml(access.houseNo)}">
-        <div class="access-identity">
+        <div>
           <div class="access-house-line">
             <span class="access-house">${escHtml(access.houseNo)}</span>
-            ${access.isDefault ? '<span class="badge">CURRENT</span>' : ''}
+            ${access.houseNo === '38/8' ? '<span class="badge">ผู้ดูแลหลัก</span>' : ''}
           </div>
+          <div class="access-role-summary">${escHtml(access.roleLabel || 'ผู้ดูแล')}</div>
           <div class="access-resident">${escHtml(access.residentName || 'ไม่พบชื่อในข้อมูลลูกบ้าน')}</div>
-          <input class="access-role-input" value="${escHtml(access.roleLabel || 'ผู้ดูแล')}"
-            aria-label="ชื่อบทบาท ${escHtml(access.houseNo)}">
-          <label class="access-active">
-            <input type="checkbox" data-access-active ${access.active ? 'checked' : ''}>
-            เปิดใช้งานสิทธิ์
-          </label>
         </div>
-        <div class="permission-groups">${renderPermissionGroups(access)}</div>
-        <div class="access-actions">
-          <button class="access-primary" onclick="saveAccessRow('${escHtml(access.houseNo)}')">บันทึก</button>
-          ${access.houseNo === '38/8' ? '' : `
-            <button class="access-remove" onclick="removeAccessRow('${escHtml(access.houseNo)}')">นำออก</button>
-          `}
-        </div>
+        <div class="access-summary">${accessSummaryChips(access)}</div>
+        <span class="access-status-pill${access.active ? '' : ' off'}">
+          ${access.active ? '● เปิดใช้งาน' : '○ ปิดใช้งาน'}
+        </span>
+        <button class="access-edit" type="button"
+          onclick="openAccessDrawer('${escHtml(access.houseNo)}')">แก้ไข</button>
       </div>
     `).join('');
   }
 
-  function accessRowForHouse(houseNo) {
-    return [...document.querySelectorAll('.access-row')]
-      .find(row => row.dataset.house === houseNo);
+  function renderAccessDrawerControls(access) {
+    document.getElementById('drawerPortalPermissions').innerHTML =
+      ACCESS_PORTAL_ITEMS.map(([key, label]) => `
+        <label class="portal-check">
+          <input type="checkbox" data-drawer-permission="${escHtml(key)}"
+            ${access.permissions?.[key] ? 'checked' : ''}
+            ${access.houseNo === '38/8' && key === 'admin.portal' ? 'disabled' : ''}
+            onchange="markAccessDrawerDirty()">
+          <span>${escHtml(label)}</span>
+        </label>
+      `).join('');
+
+    document.getElementById('drawerResourceLevels').innerHTML =
+      ACCESS_RESOURCES.map(([resource, label]) => {
+        const level = resourceAccessLevel(access, resource);
+        return `
+          <div class="level-row">
+            <span class="level-name">${escHtml(label)}</span>
+            ${[
+              ['none', 'ไม่มี'],
+              ['view', 'ดู'],
+              ['manage', 'จัดการ']
+            ].map(([value, text]) => `
+              <label class="level-choice">
+                <input type="radio" name="level-${escHtml(resource)}"
+                  value="${value}" ${level === value ? 'checked' : ''}
+                  onchange="markAccessDrawerDirty()">
+                <span>${text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
   }
 
-  function syncPermissionDependency(input) {
-    if (!input.checked || !input.dataset.permission?.endsWith('.manage')) return;
-    const row = input.closest('.access-row');
-    const viewKey = input.dataset.permission.replace('.manage', '.view');
-    const viewInput = row?.querySelector(`[data-permission="${viewKey}"]`);
-    if (viewInput) viewInput.checked = true;
+  function openAccessDrawer(houseNo) {
+    const access = accessMatrix.find(item => item.houseNo === houseNo);
+    if (!access) return;
+    editingAccessHouse = houseNo;
+    accessDrawerDirty = false;
+    document.getElementById('drawerAccessTitle').textContent =
+      `สิทธิ์บ้าน ${houseNo}`;
+    document.getElementById('drawerAccessSubtitle').textContent =
+      access.residentName || 'ไม่พบชื่อในข้อมูลลูกบ้าน';
+    document.getElementById('drawerHouseNo').value = houseNo;
+    document.getElementById('drawerRoleLabel').value =
+      access.roleLabel || 'ผู้ดูแล';
+    document.getElementById('drawerAccessActive').checked = access.active;
+    document.getElementById('drawerAccessActive').disabled =
+      houseNo === '38/8';
+    document.getElementById('drawerRemoveBtn').style.display =
+      houseNo === '38/8' ? 'none' : '';
+    renderAccessDrawerControls(access);
+    updatePresetState();
+    updateAccessDirtyUI();
+    document.getElementById('accessDrawer').classList.add('open');
+    document.getElementById('accessDrawerBackdrop').classList.add('open');
+    document.getElementById('accessDrawer').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAccessDrawer() {
+    editingAccessHouse = '';
+    accessDrawerDirty = false;
+    document.getElementById('accessDrawer').classList.remove('open');
+    document.getElementById('accessDrawerBackdrop').classList.remove('open');
+    document.getElementById('accessDrawer').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function requestCloseAccessDrawer() {
+    if (accessDrawerDirty &&
+        !confirm('มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการปิดใช่ไหม?')) {
+      return;
+    }
+    closeAccessDrawer();
+  }
+
+  function markAccessDrawerDirty() {
+    accessDrawerDirty = true;
+    updatePresetState();
+    updateAccessDirtyUI();
+  }
+
+  function updateAccessDirtyUI() {
+    document.getElementById('drawerDirtyLabel').textContent =
+      accessDrawerDirty ? '● ยังไม่บันทึก' : '';
+  }
+
+  function drawerPermissions() {
+    const permissions = Object.fromEntries(
+      ALL_ACCESS_KEYS.map(key => [key, false])
+    );
+    document.querySelectorAll('[data-drawer-permission]').forEach(input => {
+      permissions[input.dataset.drawerPermission] = input.checked;
+    });
+    ACCESS_RESOURCES.forEach(([resource]) => {
+      const selected = document.querySelector(
+        `input[name="level-${resource}"]:checked`
+      )?.value || 'none';
+      permissions[`${resource}.view`] =
+        selected === 'view' || selected === 'manage';
+      permissions[`${resource}.manage`] = selected === 'manage';
+    });
+    if (editingAccessHouse === '38/8') permissions['admin.portal'] = true;
+    return permissions;
+  }
+
+  function presetPermissions(preset) {
+    const permissions = Object.fromEntries(
+      ALL_ACCESS_KEYS.map(key => [key, false])
+    );
+    if (preset === 'chair') {
+      ALL_ACCESS_KEYS.forEach(key => { permissions[key] = true; });
+    }
+    if (preset === 'committee') {
+      ['expense.view', 'insurance.view', 'blueprints.view']
+        .forEach(key => { permissions[key] = true; });
+    }
+    return permissions;
+  }
+
+  function applyAccessPreset(preset) {
+    if (preset === 'custom') {
+      updatePresetState('custom');
+      return;
+    }
+    const permissions = presetPermissions(preset);
+    document.querySelectorAll('[data-drawer-permission]').forEach(input => {
+      input.checked = Boolean(permissions[input.dataset.drawerPermission]);
+    });
+    ACCESS_RESOURCES.forEach(([resource]) => {
+      const level = permissions[`${resource}.manage`] ? 'manage' :
+        permissions[`${resource}.view`] ? 'view' : 'none';
+      const input = document.querySelector(
+        `input[name="level-${resource}"][value="${level}"]`
+      );
+      if (input) input.checked = true;
+    });
+    if (editingAccessHouse === '38/8') {
+      const portal = document.querySelector(
+        '[data-drawer-permission="admin.portal"]'
+      );
+      if (portal) portal.checked = true;
+    }
+    accessDrawerDirty = true;
+    updatePresetState(preset);
+    updateAccessDirtyUI();
+  }
+
+  function permissionsMatch(a, b) {
+    return ALL_ACCESS_KEYS.every(key => Boolean(a[key]) === Boolean(b[key]));
+  }
+
+  function updatePresetState(forced = '') {
+    const permissions = drawerPermissions();
+    let active = forced;
+    if (!active) {
+      active = permissionsMatch(permissions, presetPermissions('chair')) ?
+        'chair' :
+        permissionsMatch(permissions, presetPermissions('committee')) ?
+          'committee' : 'custom';
+    }
+    document.querySelectorAll('[data-preset]').forEach(button => {
+      button.classList.toggle('active', button.dataset.preset === active);
+    });
   }
 
   async function loadAccessMatrix() {
@@ -2082,6 +2550,7 @@
       houseInput.value = '';
       roleInput.value = '';
       await loadAccessMatrix();
+      openAccessDrawer(houseNo);
     } catch (error) {
       document.getElementById('accessStatus').textContent = error.message;
     } finally {
@@ -2089,38 +2558,37 @@
     }
   }
 
-  async function saveAccessRow(houseNo) {
-    const row = accessRowForHouse(houseNo);
-    if (!row) return;
-    const button = row.querySelector('.access-primary');
-    const permissions = {};
-    row.querySelectorAll('[data-permission]').forEach(input => {
-      permissions[input.dataset.permission] = input.checked;
-    });
+  async function saveCurrentAccess() {
+    if (!editingAccessHouse) return;
+    const button = document.getElementById('drawerSaveBtn');
     button.disabled = true;
     button.textContent = 'กำลังบันทึก';
     try {
       await adminAccessRequest('save', {
-        targetHouseNo: houseNo,
-        roleLabel: row.querySelector('.access-role-input').value.trim(),
-        active: row.querySelector('[data-access-active]').checked,
-        permissions
+        targetHouseNo: editingAccessHouse,
+        roleLabel: document.getElementById('drawerRoleLabel').value.trim(),
+        active: document.getElementById('drawerAccessActive').checked,
+        permissions: drawerPermissions()
       });
-      button.textContent = 'บันทึกแล้ว';
-      setTimeout(() => { button.textContent = 'บันทึก'; }, 1200);
+      accessDrawerDirty = false;
+      updateAccessDirtyUI();
       await loadAccessMatrix();
+      closeAccessDrawer();
     } catch (error) {
-      button.textContent = 'ลองใหม่';
       document.getElementById('accessStatus').textContent = error.message;
     } finally {
+      button.textContent = 'บันทึกสิทธิ์';
       button.disabled = false;
     }
   }
 
-  async function removeAccessRow(houseNo) {
+  async function removeCurrentAccess() {
+    const houseNo = editingAccessHouse;
+    if (!houseNo || houseNo === '38/8') return;
     if (!confirm(`นำบ้าน ${houseNo} ออกจากรายชื่อผู้ดูแล?`)) return;
     try {
       await adminAccessRequest('remove', {targetHouseNo: houseNo});
+      closeAccessDrawer();
       await loadAccessMatrix();
     } catch (error) {
       document.getElementById('accessStatus').textContent = error.message;
@@ -2166,9 +2634,25 @@
     loadPending();
   }
   function doLogout() {
+    if (accessDrawerDirty &&
+        !confirm('มีการแก้ไขสิทธิ์ที่ยังไม่ได้บันทึก ต้องการออกจากระบบใช่ไหม?')) {
+      return;
+    }
     localStorage.removeItem(RESIDENT_SESSION_KEY);
     location.href = '/';
   }
+
+  window.addEventListener('beforeunload', event => {
+    if (!accessDrawerDirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' &&
+        document.getElementById('accessDrawer')?.classList.contains('open')) {
+      requestCloseAccessDrawer();
+    }
+  });
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
   function switchTab(tab) {
