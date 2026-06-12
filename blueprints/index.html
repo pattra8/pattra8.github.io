@@ -425,12 +425,11 @@
     .detail-file-row:last-child { border-bottom: none; }
     .detail-image-thumb {
       width: 46px; height: 46px; padding: 0; border: 1px solid var(--border);
-      border-radius: 7px; overflow: hidden; background: var(--bg);
+      border-radius: 7px; overflow: hidden; background: #eef6f1;
       cursor: zoom-in; flex-shrink: 0;
+      color: #2e7d52; font-size: 17px; font-weight: 700;
     }
-    .detail-image-thumb img {
-      display: block; width: 100%; height: 100%; object-fit: cover;
-    }
+    .detail-image-thumb:hover { border-color: #2e7d52; background: #e3f1e8; }
     .file-ext-badge {
       font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
       border-radius: 5px; padding: 3px 6px; flex-shrink: 0;
@@ -648,6 +647,8 @@
 
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+    const DOC_CACHE_KEY = 'pattra_blueprints_cache_v2';
+    const DOC_CACHE_MAX_AGE = 10 * 60 * 1000;
     let activeFilter = 'all';
     let accessRole = '';
     let accessCanWrite = false;
@@ -680,6 +681,42 @@
     }
     function canManageVault() {
       return accessCanWrite;
+    }
+    function readDocsCache() {
+      try {
+        const cached = JSON.parse(localStorage.getItem(DOC_CACHE_KEY) || 'null');
+        const resident = getResidentSession();
+        if (!cached || !resident || cached.houseNo !== resident.houseNo) return null;
+        if (Date.now() - Number(cached.savedAt || 0) > DOC_CACHE_MAX_AGE) return null;
+        if (!Array.isArray(cached.documents)) return null;
+        return cached;
+      } catch {
+        return null;
+      }
+    }
+    function writeDocsCache(data) {
+      try {
+        const resident = getResidentSession();
+        if (!resident) return;
+        localStorage.setItem(DOC_CACHE_KEY, JSON.stringify({
+          houseNo: resident.houseNo,
+          savedAt: Date.now(),
+          role: data.role || '',
+          canWrite: data.canWrite === true,
+          documents: data.documents || []
+        }));
+      } catch {}
+    }
+    function clearDocsCache() {
+      try { localStorage.removeItem(DOC_CACHE_KEY); } catch {}
+    }
+    function applyDocsData(data) {
+      accessRole = data.role || accessRole;
+      accessCanWrite = data.canWrite === true;
+      applyAccessMode();
+      const docs = data.documents || [];
+      buildFilterPills(docs);
+      renderDocs(docs);
     }
     function applyAccessMode() {
       const canManage = canManageVault();
@@ -1084,7 +1121,7 @@
               <div class="detail-file-row" data-file-name="${esc(name.toLowerCase())}">
                 ${previewable
                   ? `<button class="detail-image-thumb" type="button" data-image-preview="${esc(doc.downloadUrl)}" data-image-name="${esc(name)}" aria-label="ดูตัวอย่าง ${esc(name)}">
-                      <img src="${esc(doc.downloadUrl)}" alt="" loading="lazy" />
+                      IMG
                     </button>`
                   : `<span class="file-ext-badge" style="background:${badgeColor}14;color:${badgeColor}">${esc(fileIcon(ext))}</span>`}
                 <span class="detail-file-name" title="${esc(name)}">${esc(name)}</span>
@@ -1147,6 +1184,8 @@
         previewButton.addEventListener('click', () => {
           openImagePreview(previewButton.dataset.imagePreview, previewButton.dataset.imageName);
         });
+        previewButton.addEventListener('pointerenter', () => warmImagePreview(previewButton.dataset.imagePreview), {once: true});
+        previewButton.addEventListener('focus', () => warmImagePreview(previewButton.dataset.imagePreview), {once: true});
       });
       const editButton = $('detailContent').querySelector('[data-detail-edit]');
       if (editButton) {
@@ -1188,6 +1227,14 @@
       $('imagePreviewOriginal').href = url;
       $('imagePreviewModal').classList.add('open');
       syncBodyScrollLock();
+    }
+
+    const warmedImageUrls = new Set();
+    function warmImagePreview(url) {
+      if (!url || warmedImageUrls.has(url)) return;
+      warmedImageUrls.add(url);
+      const image = new Image();
+      image.src = url;
     }
 
     function closeImagePreview() {
@@ -1288,19 +1335,24 @@
       });
     }
 
-    async function loadDocs() {
+    async function loadDocs(options = {}) {
       const auth = getAuthPayload();
       if (!auth) return;
       $('logoutBtn').classList.remove('hidden');
       $('loginPanel').classList.add('hidden');
-      $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
-      const data = await api({action: 'list', ...auth});
-      accessRole = data.role || accessRole;
-      accessCanWrite = data.canWrite === true;
-      applyAccessMode();
-      const docs = data.documents || [];
-      buildFilterPills(docs);
-      renderDocs(docs);
+      const cached = options.skipCache ? null : readDocsCache();
+      if (cached) {
+        applyDocsData(cached);
+      } else {
+        $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
+      }
+      try {
+        const data = await api({action: 'list', ...auth});
+        writeDocsCache(data);
+        applyDocsData(data);
+      } catch (err) {
+        if (!cached) throw err;
+      }
     }
 
     /* ── File preview ── */
@@ -1342,6 +1394,7 @@
           if (!confirm(`ลบไฟล์ "${doc.fileName}" ออกจากระบบ?`)) return;
           try {
             await api({ action: 'delete', ...getAuthPayload(), documentId: doc.id });
+            clearDocsCache();
             _existingFileDocs.splice(i, 1);
             _editingDocs = _editingDocs.filter(d => d.id !== doc.id);
             renderFilePreview();
@@ -1487,7 +1540,8 @@
           resetBpFormUi();
           closeBpModal(true);
           setStatus('uploadStatus', 'บันทึกแล้ว ✓', 'ok');
-          await loadDocs();
+          clearDocsCache();
+          await loadDocs({skipCache: true});
           return;
         }
         const totalAfter = targets.length + newFiles.length;
@@ -1515,7 +1569,8 @@
           resetBpFormUi();
           closeBpModal(true);
           setStatus('uploadStatus', 'บันทึกแล้ว ✓', 'ok');
-          await loadDocs();
+          clearDocsCache();
+          await loadDocs({skipCache: true});
         } catch (err) { setUploadProgress(null); setStatus('uploadStatus', err.message || 'บันทึกไม่สำเร็จ', 'error'); }
         return;
       }
@@ -1542,7 +1597,8 @@
         resetBpFormUi();
         closeBpModal(true);
         setStatus('uploadStatus', `อัปโหลดแล้ว ${files.length} ไฟล์ ✓`, 'ok');
-        await loadDocs();
+        clearDocsCache();
+        await loadDocs({skipCache: true});
       } catch (err) { setUploadProgress(null); setStatus('uploadStatus', err.message || 'อัปโหลดไม่สำเร็จ', 'error'); }
     }
 
@@ -1563,11 +1619,13 @@
           await api({action: 'delete', ...auth, documentId: doc.id});
         }
         closeDetailModal();
-        await loadDocs();
+        clearDocsCache();
+        await loadDocs({skipCache: true});
       } catch (err) {
         alert(err.message || 'ลบไม่สำเร็จ');
         if (button) { button.disabled = false; button.textContent = originalText; }
-        try { await loadDocs(); } catch {}
+        clearDocsCache();
+        try { await loadDocs({skipCache: true}); } catch {}
       }
     }
 
