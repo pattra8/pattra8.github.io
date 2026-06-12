@@ -506,12 +506,12 @@
     .level-row {
       display: grid;
       grid-template-columns: minmax(125px, 1fr) repeat(3, 74px);
-      gap: 5px;
+      gap: 0;
       align-items: center;
-      padding: 9px;
+      padding: 10px;
       border: 1px solid var(--border-soft);
       border-radius: 8px;
-      background: var(--bg);
+      background: #fff;
     }
     .level-name {
       font-size: 12.5px;
@@ -527,17 +527,35 @@
       align-items: center;
       justify-content: center;
       min-height: 34px;
-      border: 1px solid transparent;
-      border-radius: 7px;
-      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-right-width: 0;
+      background: var(--bg);
+      color: var(--text-soft);
       font-size: 11.5px;
       font-weight: 700;
       cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .level-choice:first-of-type span {
+      border-radius: 7px 0 0 7px;
+    }
+    .level-choice:last-child span {
+      border-right-width: 1px;
+      border-radius: 0 7px 7px 0;
+    }
+    .level-choice span:hover {
+      background: var(--bg-soft);
+      color: var(--text);
     }
     .level-choice input:checked + span {
-      border-color: #d8b276;
-      background: var(--accent-pale);
-      color: var(--accent-deep);
+      border-color: var(--accent-deep);
+      border-right-width: 1px;
+      background: var(--accent-deep);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(133,80,21,.18);
+    }
+    .level-choice:has(input:checked) + .level-choice span {
+      border-left-width: 0;
     }
     .drawer-active {
       display: flex;
@@ -1510,7 +1528,7 @@
       </section>
 
       <section class="drawer-section">
-        <h3>Finance &amp; Documents</h3>
+        <h3>Admin Features</h3>
         <p class="drawer-section-note">หนึ่งระบบเลือกได้เพียงระดับเดียว</p>
         <div class="level-table" id="drawerResourceLevels"></div>
       </section>
