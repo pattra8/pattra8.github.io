@@ -2441,7 +2441,11 @@ Object.assign(window, {
   clearExpensesFacilityFilter,
 });
 seedIfEmpty();
-init().catch(err => console.error('Expense initialization failed:', err));
+init().catch(() => {
+  if (location.pathname.startsWith('/expense')) {
+    location.replace('https://pattra8.com/');
+  }
+});
 </script>
 </body>
 </html>
