@@ -190,7 +190,7 @@
     /* ─── AUTHORIZATION MATRIX ─── */
     .access-shell {
       padding: 26px 28px 40px;
-      max-width: 1180px;
+      max-width: 920px;
       width: 100%;
       margin: 0 auto;
     }
@@ -211,17 +211,18 @@
     }
     .access-add {
       display: grid;
-      grid-template-columns: minmax(140px, 0.7fr) minmax(210px, 1fr) auto;
+      grid-template-columns: minmax(240px, 1.25fr) minmax(170px, .75fr) auto;
       gap: 10px;
       margin-bottom: 18px;
-      padding: 16px;
+      padding: 13px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 10px;
       box-shadow: var(--shadow-card);
     }
-    .access-add input,
-    .drawer-field input {
+    .access-add select,
+    .drawer-field input,
+    .drawer-field select {
       width: 100%;
       min-width: 0;
       border: 1.5px solid var(--border);
@@ -232,8 +233,9 @@
       font: inherit;
       outline: none;
     }
-    .access-add input:focus,
-    .drawer-field input:focus {
+    .access-add select:focus,
+    .drawer-field input:focus,
+    .drawer-field select:focus {
       border-color: var(--accent);
     }
     .access-primary {
@@ -260,10 +262,10 @@
     }
     .access-row {
       display: grid;
-      grid-template-columns: minmax(190px, .75fr) minmax(300px, 1.5fr) auto auto;
-      gap: 16px;
+      grid-template-columns: minmax(220px, 1fr) auto auto;
+      gap: 14px;
       align-items: center;
-      padding: 16px 18px;
+      padding: 14px 16px;
       border-bottom: 1px solid var(--border-soft);
       transition: background .15s;
     }
@@ -305,34 +307,6 @@
     .access-status-pill.off {
       background: var(--bg-soft);
       color: var(--text-muted);
-    }
-    .access-summary {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .access-chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 27px;
-      padding: 4px 9px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--bg);
-      color: var(--text-soft);
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .access-chip.manage {
-      border-color: #d8b276;
-      background: var(--accent-pale);
-      color: var(--accent-deep);
-    }
-    .access-count {
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
     }
     .access-edit {
       display: flex;
@@ -1296,9 +1270,8 @@
         gap: 10px;
         padding: 15px;
       }
-      .access-summary { grid-column: 1 / -1; }
-      .access-count { display: none; }
       .access-edit { grid-column: 2; grid-row: 1; }
+      .access-status-pill { grid-column: 1; }
       .drawer-fields,
       .portal-permissions { grid-template-columns: 1fr; }
       .level-row {
@@ -1463,8 +1436,14 @@
       </div>
 
       <div class="access-add">
-        <input id="accessHouseInput" type="text" placeholder="บ้านเลขที่ เช่น 38/38" />
-        <input id="accessRoleInput" type="text" placeholder="ชื่อบทบาท เช่น กรรมการ" />
+        <select id="accessHouseInput" aria-label="เลือกบ้าน">
+          <option value="">เลือกบ้าน</option>
+        </select>
+        <select id="accessRoleInput" aria-label="เลือกบทบาท">
+          <option value="กรรมการ">กรรมการ</option>
+          <option value="ประธานกรรมการ">ประธานกรรมการ</option>
+          <option value="ผู้ดูแล">ผู้ดูแล</option>
+        </select>
         <button class="access-primary" id="accessAddBtn" onclick="addAdminAccess()">
           + เพิ่มผู้ดูแล
         </button>
@@ -1502,8 +1481,11 @@
           </div>
           <div class="drawer-field">
             <label>ชื่อบทบาท</label>
-            <input id="drawerRoleLabel" type="text"
-              oninput="markAccessDrawerDirty()">
+            <select id="drawerRoleLabel" onchange="markAccessDrawerDirty()">
+              <option value="กรรมการ">กรรมการ</option>
+              <option value="ประธานกรรมการ">ประธานกรรมการ</option>
+              <option value="ผู้ดูแล">ผู้ดูแล</option>
+            </select>
           </div>
         </div>
       </section>
@@ -2250,6 +2232,7 @@
   let filteredData = [];
   let currentAdminAccess = null;
   let accessMatrix = [];
+  let accessResidents = [];
   let editingAccessHouse = '';
   let accessDrawerDirty = false;
   // Track issues ที่ approve/reject แล้วในระหว่าง session — กัน card โผล่กลับก่อน GitHub ปิด
@@ -2322,25 +2305,6 @@
     return 'none';
   }
 
-  function accessSummaryChips(access) {
-    const chips = [];
-    if (access.permissions?.['admin.portal']) {
-      const portalCount = ACCESS_PORTAL_ITEMS
-        .filter(([key]) => access.permissions?.[key]).length;
-      chips.push(`<span class="access-chip">Admin ${portalCount}/8</span>`);
-    }
-    ACCESS_RESOURCES.forEach(([resource, label]) => {
-      const level = resourceAccessLevel(access, resource);
-      if (level === 'manage') {
-        chips.push(`<span class="access-chip manage">${label}: จัดการ</span>`);
-      } else if (level === 'view') {
-        chips.push(`<span class="access-chip">${label}: ดู</span>`);
-      }
-    });
-    return chips.join('') ||
-      '<span class="access-chip">ยังไม่ได้กำหนดสิทธิ์</span>';
-  }
-
   function renderAccessMatrix() {
     const list = document.getElementById('accessList');
     if (!accessMatrix.length) {
@@ -2357,7 +2321,6 @@
           <div class="access-role-summary">${escHtml(access.roleLabel || 'ผู้ดูแล')}</div>
           <div class="access-resident">${escHtml(access.residentName || 'ไม่พบชื่อในข้อมูลลูกบ้าน')}</div>
         </div>
-        <div class="access-summary">${accessSummaryChips(access)}</div>
         <span class="access-status-pill${access.active ? '' : ' off'}">
           ${access.active ? '● เปิดใช้งาน' : '○ ปิดใช้งาน'}
         </span>
@@ -2365,6 +2328,28 @@
           onclick="openAccessDrawer('${escHtml(access.houseNo)}')">แก้ไข</button>
       </div>
     `).join('');
+  }
+
+  function populateAccessHouseOptions() {
+    const select = document.getElementById('accessHouseInput');
+    const selected = select.value;
+    const assigned = new Set(
+      accessMatrix.filter(item => item.active).map(item => item.houseNo)
+    );
+    const available = accessResidents.filter(
+      resident => !assigned.has(resident.houseNo)
+    );
+    select.innerHTML = [
+      '<option value="">เลือกบ้าน</option>',
+      ...available.map(resident => `
+        <option value="${escHtml(resident.houseNo)}">
+          ${escHtml(resident.houseNo)} — ${escHtml(resident.residentName || 'ไม่ระบุชื่อ')}
+        </option>
+      `)
+    ].join('');
+    if (available.some(item => item.houseNo === selected)) {
+      select.value = selected;
+    }
   }
 
   function renderAccessDrawerControls(access) {
@@ -2412,8 +2397,12 @@
     document.getElementById('drawerAccessSubtitle').textContent =
       access.residentName || 'ไม่พบชื่อในข้อมูลลูกบ้าน';
     document.getElementById('drawerHouseNo').value = houseNo;
-    document.getElementById('drawerRoleLabel').value =
-      access.roleLabel || 'ผู้ดูแล';
+    const roleSelect = document.getElementById('drawerRoleLabel');
+    const roleLabel = access.roleLabel || 'ผู้ดูแล';
+    if (![...roleSelect.options].some(option => option.value === roleLabel)) {
+      roleSelect.add(new Option(roleLabel, roleLabel));
+    }
+    roleSelect.value = roleLabel;
     document.getElementById('drawerAccessActive').checked = access.active;
     document.getElementById('drawerAccessActive').disabled =
       houseNo === '38/8';
@@ -2495,6 +2484,11 @@
       return;
     }
     const permissions = presetPermissions(preset);
+    if (preset === 'chair') {
+      document.getElementById('drawerRoleLabel').value = 'ประธานกรรมการ';
+    } else if (preset === 'committee') {
+      document.getElementById('drawerRoleLabel').value = 'กรรมการ';
+    }
     document.querySelectorAll('[data-drawer-permission]').forEach(input => {
       input.checked = Boolean(permissions[input.dataset.drawerPermission]);
     });
@@ -2541,7 +2535,9 @@
     try {
       const data = await adminAccessRequest('list');
       accessMatrix = data.access || [];
+      accessResidents = data.residents || [];
       renderAccessMatrix();
+      populateAccessHouseOptions();
       status.textContent = `ผู้ดูแล ${accessMatrix.length} บ้าน`;
     } catch (error) {
       status.textContent = error.message;
@@ -2561,12 +2557,12 @@
     try {
       await adminAccessRequest('save', {
         targetHouseNo: houseNo,
-        roleLabel: roleInput.value.trim() || 'ผู้ดูแล',
+        roleLabel: roleInput.value || 'กรรมการ',
         active: true,
         permissions: {}
       });
       houseInput.value = '';
-      roleInput.value = '';
+      roleInput.value = 'กรรมการ';
       await loadAccessMatrix();
       openAccessDrawer(houseNo);
     } catch (error) {
