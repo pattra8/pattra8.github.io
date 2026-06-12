@@ -913,9 +913,9 @@
     };
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
-    const COMMITTEE_ROLES = {'38/8': 'superadmin', '38/38': 'committee'};
     let activeFilter = 'all';
     let accessRole = '';
+    let accessCanWrite = false;
     let insuranceFormSnapshot = null;
     let _selectedNewFiles = [];   // File objects pending upload
     let _existingFileDocs = [];   // {id, fileName, downloadUrl} already on server
@@ -934,13 +934,13 @@
     }
     function getAuthPayload() {
       const resident = getResidentSession();
-      if (resident && COMMITTEE_ROLES[resident.houseNo] && resident.pin) {
+      if (resident && resident.houseNo && resident.pin) {
         return {houseNo: resident.houseNo, pin: resident.pin};
       }
       return null;
     }
     function canManageVault() {
-      return accessRole === 'superadmin';
+      return accessCanWrite;
     }
     function applyAccessMode() {
       const canManage = canManageVault();
@@ -1306,6 +1306,7 @@
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
       const data = await api({action: 'list', ...auth});
       accessRole = data.role || accessRole;
+      accessCanWrite = data.canWrite === true;
       applyAccessMode();
       renderDocs(data.documents || []);
     }
@@ -1683,8 +1684,7 @@
       updateWarrantyPreview();
       $('logoutBtn').addEventListener('click', logout);
       const resident = getResidentSession();
-      accessRole = resident ? (COMMITTEE_ROLES[resident.houseNo] || '') : '';
-      if (!resident || !accessRole) {
+      if (!resident?.houseNo || !resident?.pin) {
         location.href = '/';
         return;
       }

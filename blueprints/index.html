@@ -601,9 +601,9 @@
 
     const API_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
     const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
-    const COMMITTEE_ROLES = {'38/8': 'superadmin', '38/38': 'committee'};
     let activeFilter = 'all';
     let accessRole = '';
+    let accessCanWrite = false;
     let bpFormSnapshot = null;
     let _selectedNewFiles = [];
     let _existingFileDocs = [];
@@ -626,13 +626,13 @@
     }
     function getAuthPayload() {
       const resident = getResidentSession();
-      if (resident && COMMITTEE_ROLES[resident.houseNo] && resident.pin) {
+      if (resident && resident.houseNo && resident.pin) {
         return {houseNo: resident.houseNo, pin: resident.pin};
       }
       return null;
     }
     function canManageVault() {
-      return accessRole === 'superadmin';
+      return accessCanWrite;
     }
     function applyAccessMode() {
       const canManage = canManageVault();
@@ -1228,6 +1228,7 @@
       $('docList').innerHTML = '<div class="empty">กำลังโหลด...</div>';
       const data = await api({action: 'list', ...auth});
       accessRole = data.role || accessRole;
+      accessCanWrite = data.canWrite === true;
       applyAccessMode();
       const docs = data.documents || [];
       buildFilterPills(docs);
@@ -1518,8 +1519,9 @@
       });
       $('logoutBtn').addEventListener('click', () => { location.href = '/'; });
       const resident = getResidentSession();
-      accessRole = resident ? (COMMITTEE_ROLES[resident.houseNo] || '') : '';
-      if (!resident || !accessRole) { location.href = '/'; return; }
+      if (!resident?.houseNo || !resident?.pin) {
+        location.href = '/'; return;
+      }
       applyAccessMode();
       loadDocs().catch(() => { location.href = '/'; });
     }

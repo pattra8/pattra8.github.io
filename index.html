@@ -1366,7 +1366,8 @@
     </a>
 
     <!-- Admin only: Asset Insurance -->
-    <a href="/insurance/" class="service-card admin-only-card" data-admin-card>
+    <a href="/insurance/" class="service-card admin-only-card" data-admin-card
+      data-access-permission="insurance.view">
       <div class="tag">เฉพาะกรรมการ</div>
       <div class="service-icon">🛡️</div>
       <div class="service-title">Asset Insurance</div>
@@ -1378,7 +1379,8 @@
     </a>
 
     <!-- Admin only: Blueprints -->
-    <a href="/blueprints/" class="service-card admin-only-card" data-admin-card>
+    <a href="/blueprints/" class="service-card admin-only-card" data-admin-card
+      data-access-permission="blueprints.view">
       <div class="tag">เฉพาะกรรมการ</div>
       <div class="service-icon">📐</div>
       <div class="service-title">Blueprints</div>
@@ -1390,7 +1392,8 @@
     </a>
 
     <!-- Admin only: Expense -->
-    <a href="/expense/" class="service-card admin-only-card" data-admin-card>
+    <a href="/expense/" class="service-card admin-only-card" data-admin-card
+      data-access-permission="expense.view">
       <div class="tag">เฉพาะกรรมการ</div>
       <div class="service-icon">🧾</div>
       <div class="service-title">Expense</div>
@@ -1499,6 +1502,8 @@ const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
 const RESIDENT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const RESIDENT_AUTH_URL =
   'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
+const ADMIN_ACCESS_URL =
+  'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix';
 
 function getResidentSession() {
   try {
@@ -1517,29 +1522,42 @@ function storeResidentSession(houseNo, pin, residentName) {
 }
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
 
-const COMMITTEE_ROLES = {
-  '38/8': 'superadmin',
-  '38/38': 'committee'
-};
-function getCommitteeRole() {
+let currentAdminAccess = null;
+async function resolveAdminAccess() {
   const resident = getResidentSession();
-  return resident ? (COMMITTEE_ROLES[resident.houseNo] || '') : '';
-}
-function hasCommitteeSession() {
-  return !!getCommitteeRole();
-}
-function hasSuperadminSession() {
-  return getCommitteeRole() === 'superadmin';
+  if (!resident?.houseNo || !resident?.pin) return null;
+  try {
+    const response = await fetch(ADMIN_ACCESS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'resolve',
+        houseNo: resident.houseNo,
+        pin: resident.pin
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    return response.ok && data.ok ? data.access : null;
+  } catch {
+    return null;
+  }
 }
 
-function renderAdminCards() {
+async function renderAdminCards() {
+  currentAdminAccess = await resolveAdminAccess();
   document.querySelectorAll('[data-admin-card]').forEach(card => {
-    card.classList.toggle('show', hasCommitteeSession());
+    const permission = card.dataset.accessPermission;
+    const canAccess = Boolean(
+      currentAdminAccess?.active &&
+      currentAdminAccess.permissions?.[permission]
+    );
+    card.classList.toggle('show', canAccess);
   });
   const btn = document.getElementById('adminHomeBtn');
   if (btn) {
     btn.textContent = 'Admin';
-    btn.style.display = hasSuperadminSession() ? '' : 'none';
+    btn.style.display = currentAdminAccess?.active &&
+      currentAdminAccess.permissions?.['admin.portal'] ? '' : 'none';
   }
 }
 
@@ -1598,7 +1616,9 @@ function closeLoginModal() {
 }
 
 function showAdminLoginModal() {
-  if (hasSuperadminSession()) window.location.href = '/admin/';
+  if (currentAdminAccess?.permissions?.['admin.portal']) {
+    window.location.href = '/admin/';
+  }
 }
 
 async function handleLoginSubmit() {

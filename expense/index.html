@@ -856,7 +856,6 @@ const CAPMAX_STORAGE_KEY = 'pattra8_capMax';
 const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
 const EXPENSE_SESSION_URL =
   'https://asia-southeast1-pattra8-expense.cloudfunctions.net/expenseSession';
-const EXPENSE_ROLES = {'38/8': 'superadmin', '38/38': 'committee'};
 const FIRESTORE_SETTINGS_DOC = 'global';
 const FIREBASE_READY = Object.values(FIREBASE_CONFIG).every(v => v && !String(v).startsWith('REPLACE_WITH_'));
 
@@ -987,8 +986,7 @@ function applyAccessRole(role) {
 
 async function authenticateExpenseAccess() {
   const resident = getResidentSession();
-  const expectedRole = resident ? EXPENSE_ROLES[resident.houseNo] : '';
-  if (!resident?.pin || !expectedRole) {
+  if (!resident?.houseNo || !resident?.pin) {
     if (auth) await signOut(auth).catch(() => {});
     location.replace('https://pattra8.com/');
     throw new Error('Expense access denied');
@@ -1000,7 +998,8 @@ async function authenticateExpenseAccess() {
     body: JSON.stringify({houseNo: resident.houseNo, pin: resident.pin})
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.ok || data.role !== expectedRole) {
+  if (!response.ok || !data.ok ||
+      !['superadmin', 'committee'].includes(data.role)) {
     await signOut(auth).catch(() => {});
     location.replace('https://pattra8.com/');
     throw new Error(data.error || 'Expense access denied');
