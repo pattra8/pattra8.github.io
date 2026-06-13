@@ -70,6 +70,18 @@
       margin-top: 1px;
     }
     .nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .access-role-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #e8f5e9;
+      color: #28713d;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
     a, button { font: inherit; }
     .btn {
       border: 1px solid var(--border);
@@ -494,6 +506,7 @@
       </div>
     </a>
     <nav class="nav">
+      <span class="access-role-badge hidden" id="accessRoleBadge"></span>
       <a class="btn" href="/">← Home</a>
       <a class="btn gold" id="adminNavLink" href="/admin/">Admin</a>
       <button class="btn danger hidden" id="logoutBtn">ออกจากระบบ</button>
@@ -682,6 +695,13 @@
     function canManageVault() {
       return accessCanWrite;
     }
+    function renderAccessRoleBadge() {
+      const badge = $('accessRoleBadge');
+      const label = String(accessRole || '').includes('ประธาน') ?
+        'ประธานกรรมการ' : 'กรรมการ';
+      badge.textContent = `● ${label}`;
+      badge.classList.toggle('hidden', !accessRole);
+    }
     function readDocsCache() {
       try {
         const cached = JSON.parse(localStorage.getItem(DOC_CACHE_KEY) || 'null');
@@ -720,6 +740,7 @@
     }
     function applyAccessMode() {
       const canManage = canManageVault();
+      renderAccessRoleBadge();
       $('addBpBtn').classList.toggle('hidden', !canManage);
       $('adminNavLink').classList.toggle('hidden', !canManage);
       $('bpModal').setAttribute('aria-hidden', canManage ? 'false' : 'true');
