@@ -1370,11 +1370,16 @@
   const RESIDENT_UNLOCK_KEY = 'pattra_resident_unlocks_v1';
   const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
   const RESIDENT_UNLOCK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  const RESIDENT_DATA_CACHE_PREFIX = 'pattra_resident_data_cache_v1:';
+  const RESIDENT_DATA_CACHE_MAX_AGE = 5 * 60 * 1000;
+  const SURVEY_CACHE_PREFIX = 'pattra_lifestyle_cache_v1:';
+  const SURVEY_CACHE_MAX_AGE = 10 * 60 * 1000;
 
   let allData = [];
   let currentRecord = {};
   let modalInitialState = null;
   let isSubmitting = false;
+  let residentRequestSeq = 0;
 
   // ── Cross-page session context (Level 1+2+3) ──
   const SESSION_KEY = 'pattra_current_house';
@@ -1410,6 +1415,11 @@
     updateNavLinks(houseNo);
   }
   function clearStoredHouse() {
+    const previousHouse = sessionStorage.getItem(SESSION_KEY) || getResidentSession()?.houseNo;
+    if (previousHouse) {
+      clearResidentCache(previousHouse);
+      clearSurveyCache(previousHouse);
+    }
     sessionStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(RESIDENT_SESSION_KEY);
     const url = new URL(location.href);
@@ -1488,6 +1498,30 @@
 
   function normalizeHouseForAuth(houseNo) {
     return String(houseNo || '').trim().replace(/\s+/g, '');
+  }
+  function residentCacheKey(houseNo) {
+    return RESIDENT_DATA_CACHE_PREFIX + normalizeHouseForAuth(houseNo);
+  }
+  function readResidentCache(houseNo) {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(residentCacheKey(houseNo)) || 'null');
+      if (!cached || Date.now() - Number(cached.savedAt || 0) > RESIDENT_DATA_CACHE_MAX_AGE) return null;
+      return cached.resident || null;
+    } catch (_) {
+      return null;
+    }
+  }
+  function writeResidentCache(resident) {
+    if (!resident?.house_no) return;
+    try {
+      sessionStorage.setItem(residentCacheKey(resident.house_no), JSON.stringify({
+        savedAt: Date.now(),
+        resident
+      }));
+    } catch (_) {}
+  }
+  function clearResidentCache(houseNo) {
+    try { sessionStorage.removeItem(residentCacheKey(houseNo)); } catch (_) {}
   }
 
   function getResidentUnlocks() {
@@ -1849,9 +1883,8 @@
 
   // ── Data fetch via Firebase Function (Phase 2) ──
   async function fetchResidentData(houseNo, pin) {
-    const res = await fetch(`${FUNCTION_BASE}/getResidentData?t=${Date.now()}`, {
+    const res = await fetch(`${FUNCTION_BASE}/getResidentData`, {
       method: 'POST',
-      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ houseNo, pin })
     });
@@ -1873,6 +1906,26 @@
         last_updated: r.last_updated || null
       }
     };
+  }
+  function applyResidentRecord(record) {
+    const found = normalise(record);
+    allData = [found];
+    currentRecord = found;
+    renderResult(found);
+    setStoredHouse(found.house_no);
+    showContextBar(found);
+    return found;
+  }
+  async function refreshResidentRecord(houseNo, pin, requestId) {
+    const fresh = await fetchResidentData(houseNo, pin);
+    const found = normalise(fresh);
+    writeResidentCache(found);
+    const sameAsCurrent = allData[0] &&
+      JSON.stringify(allData[0]) === JSON.stringify(found);
+    if ((!requestId || requestId === residentRequestSeq) && !sameAsCurrent) {
+      applyResidentRecord(found);
+    }
+    return found;
   }
 
   async function loadData() { return true; }
@@ -2178,22 +2231,25 @@
 
       const json = await res.json();
       if (res.ok && json.ok) {
-        try {
-          const fresh = await fetchResidentData(currentRecord.houseNo, pin || '');
-          const found = normalise(fresh);
-          allData = [found];
-          currentRecord = found;
-        } catch (_) {
-          currentRecord.name = newName;
-          currentRecord.email = newEmail;
-          currentRecord.phone = newPhone;
-        }
+        const houseNo = normalizeHouseForAuth(currentRecord.houseNo || currentRecord.house_no);
+        const base = allData.find(r => normalizeHouseForAuth(r.house_no) === houseNo) || {};
+        const updated = normalise({
+          ...base,
+          house_no: houseNo,
+          name: newName,
+          email: newEmail,
+          phone: newPhone,
+          last_updated: new Date().toISOString()
+        });
+        writeResidentCache(updated);
+        allData = [updated];
+        currentRecord = updated;
         document.getElementById('formView').style.display = 'none';
         document.getElementById('successView').classList.add('visible');
         modalInitialState = null;
-        setTimeout(async () => {
+        setTimeout(() => {
           closeModal(true);
-          await performSearch(currentRecord.houseNo);
+          applyResidentRecord(updated);
         }, 1800);
       } else {
         throw new Error(json.error || `HTTP ${res.status}`);
@@ -2209,6 +2265,7 @@
   async function performSearch(q) {
     const houseNo = normalizeHouseForAuth(q);
     if (!houseNo) { renderResult(null); return null; }
+    const requestId = ++residentRequestSeq;
 
     // Ensure PIN is in session (prompts if needed)
     const stubRecord = { house_no: houseNo };
@@ -2218,13 +2275,22 @@
     const pin = getPinSession(houseNo);
     if (!pin) return null;
 
+    const cached = readResidentCache(houseNo);
+    if (cached) {
+      const found = applyResidentRecord(cached);
+      refreshResidentRecord(houseNo, pin, requestId).catch(err => {
+        if (err.status === 401 || err.status === 404) clearResidentCache(houseNo);
+      });
+      return found;
+    }
+
     // Fetch resident data from Function
-    let resident;
     try {
-      resident = await fetchResidentData(houseNo, pin);
+      return await refreshResidentRecord(houseNo, pin, requestId);
     } catch (err) {
       if (err.status === 401 || err.status === 404) {
         // PIN wrong or house not found — clear session and show error
+        clearResidentCache(houseNo);
         storePinSession(houseNo, '');
         const sec = document.getElementById('resultSection');
         sec.style.display = 'block';
@@ -2238,14 +2304,6 @@
       sec.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">ไม่สามารถโหลดข้อมูลได้</div><div class="empty-desc">ลองรีเฟรชหน้าหรือ <a href="/report/">ติดต่อนิติบุคคล</a></div></div>`;
       return null;
     }
-
-    const found = normalise(resident);
-    allData = [found];
-    currentRecord = found;
-    renderResult(found);
-    setStoredHouse(found.house_no);
-    showContextBar(found);
-    return found;
   }
 
   // ── Init ──
@@ -2303,6 +2361,29 @@
     workshops: [], workshopSuggestion: '',
   };
   let surveyTimer = null;
+  function surveyCacheKey(houseNo) {
+    return SURVEY_CACHE_PREFIX + normalizeHouseForAuth(houseNo);
+  }
+  function readSurveyCache(houseNo) {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(surveyCacheKey(houseNo)) || 'null');
+      if (!cached || Date.now() - Number(cached.savedAt || 0) > SURVEY_CACHE_MAX_AGE) return null;
+      return cached.survey || null;
+    } catch (_) {
+      return null;
+    }
+  }
+  function writeSurveyCache(houseNo, survey) {
+    try {
+      sessionStorage.setItem(surveyCacheKey(houseNo), JSON.stringify({
+        savedAt: Date.now(),
+        survey
+      }));
+    } catch (_) {}
+  }
+  function clearSurveyCache(houseNo) {
+    try { sessionStorage.removeItem(surveyCacheKey(houseNo)); } catch (_) {}
+  }
 
   function initSurveyCard(houseNo, pin) {
     surveyState = {
@@ -2377,6 +2458,12 @@
       });
     }
 
+    const cachedSurvey = readSurveyCache(houseNo);
+    if (cachedSurvey) {
+      surveyState = {...surveyState, ...cachedSurvey};
+      renderSurveyUI();
+      setSurveyStatus('saved', '✓ โหลดข้อมูลล่าสุดแล้ว');
+    }
     loadSurveyData(houseNo, pin);
     const card = document.getElementById('lifestyleSurvey');
     if (card) card.style.display = 'block';
@@ -2416,9 +2503,8 @@
 
   async function loadSurveyData(houseNo, pin) {
     try {
-      const r = await fetch(`${SURVEY_GET_URL}?t=${Date.now()}`, {
+      const r = await fetch(SURVEY_GET_URL, {
         method: 'POST',
-        cache: 'no-store',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({houseNo, pin}),
       });
@@ -2432,6 +2518,7 @@
           workshops: d.survey.workshops || [],
           workshopSuggestion: d.survey.workshopSuggestion || '',
         };
+        writeSurveyCache(houseNo, surveyState);
         renderSurveyUI();
         const secs = d.survey.updatedAt && d.survey.updatedAt.seconds;
         const ts = secs
@@ -2450,15 +2537,15 @@
 
   async function saveSurveyData(houseNo, pin) {
     try {
-      const r = await fetch(`${SURVEY_UPDATE_URL}?t=${Date.now()}`, {
+      const r = await fetch(SURVEY_UPDATE_URL, {
         method: 'POST',
-        cache: 'no-store',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({houseNo, pin, ...surveyState}),
       });
       const d = await r.json();
       if (d.ok) {
-        await loadSurveyData(houseNo, pin);
+        writeSurveyCache(houseNo, surveyState);
+        setSurveyStatus('saved', '✓ บันทึกแล้ว');
       } else {
         setSurveyStatus('', '');
       }
