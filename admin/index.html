@@ -2190,13 +2190,15 @@
   }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   // ── Config ──────────────────────────────────────────────────────────────
   const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
   const LPR_SYNC_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprPlateSync';
   const RESIDENT_AUTH_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
   const ADMIN_ACCESS_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix';
+  const ADMIN_RESIDENT_CACHE_KEY = 'pattra_admin_residents_cache_v1';
+  const ADMIN_RESIDENT_CACHE_MAX_AGE = 2 * 60 * 1000;
+  const XLSX_SCRIPT_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
   const GH_OWNER  = 'pattra8';
   const GH_REPO   = 'pattra8.github.io';
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
@@ -2224,6 +2226,51 @@
   let editingIndex = -1;
   let originalSnap = null;
   let currentTab   = 'residents';
+  let adminDataRequest = null;
+  let pendingLoadScheduled = false;
+  let xlsxLoadPromise = null;
+
+  function adminSessionHouse() {
+    return getAdminAuth().adminHouseNo || '';
+  }
+  function readAdminResidentCache() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(ADMIN_RESIDENT_CACHE_KEY) || 'null');
+      if (!cached || cached.houseNo !== adminSessionHouse()) return null;
+      if (Date.now() - Number(cached.savedAt || 0) > ADMIN_RESIDENT_CACHE_MAX_AGE) return null;
+      return Array.isArray(cached.residents) ? cached : null;
+    } catch {
+      return null;
+    }
+  }
+  function writeAdminResidentCache(residents) {
+    try {
+      sessionStorage.setItem(ADMIN_RESIDENT_CACHE_KEY, JSON.stringify({
+        houseNo: adminSessionHouse(),
+        savedAt: Date.now(),
+        residents
+      }));
+    } catch {}
+  }
+  function clearAdminResidentCache() {
+    try { sessionStorage.removeItem(ADMIN_RESIDENT_CACHE_KEY); } catch {}
+  }
+  function applyAdminResidents(residents, note) {
+    allData = Array.isArray(residents) ? residents : [];
+    filteredData = [...allData];
+    renderAdmin(filteredData);
+    setToolbarNote(note, 'success');
+  }
+  function schedulePendingLoad() {
+    if (pendingLoadScheduled || !canAdmin('admin.residents')) return;
+    pendingLoadScheduled = true;
+    const run = () => loadPending().finally(() => { pendingLoadScheduled = false; });
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(run, {timeout: 1800});
+    } else {
+      setTimeout(run, 600);
+    }
+  }
 
   const ACCESS_PORTAL_ITEMS = [
     ['admin.portal', 'เข้า /admin'],
@@ -2616,8 +2663,7 @@
     document.getElementById('tabAccess').style.display =
       canManageAccess ? '' : 'none';
     if (canAdmin('admin.residents')) {
-      loadAdminData();
-      loadPending();
+      loadAdminData().finally(schedulePendingLoad);
     }
     const firstTab = Object.entries(ADMIN_TAB_PERMISSIONS)
       .find(([, permission]) => canAdmin(permission))?.[0] ||
@@ -2630,7 +2676,8 @@
     GH_TOKEN = t.trim();
     localStorage.setItem('gh_admin_token', GH_TOKEN);
     alert('✅ บันทึก Token แล้ว — โหลดข้อมูลใหม่');
-    loadAdminData();
+    clearAdminResidentCache();
+    loadAdminData({force: true});
     loadPending();
   }
   function doLogout() {
@@ -2639,6 +2686,7 @@
       return;
     }
     localStorage.removeItem(RESIDENT_SESSION_KEY);
+    clearAdminResidentCache();
     location.href = '/';
   }
 
@@ -3634,26 +3682,46 @@
   }
 
   // ── Load resident data (Firestore is the source of truth) ────────────────
-  async function loadAdminData() {
-    setToolbarNote('กำลังโหลด...');
-    try {
-      const res = await fetch(RESIDENT_AUTH_URL, {
+  async function loadAdminData(options = {}) {
+    const force = options.force === true;
+    const cached = force ? null : readAdminResidentCache();
+    if (cached) {
+      applyAdminResidents(
+        cached.residents,
+        `⚡ โหลดจาก cache · ${cached.residents.length} รายการ · กำลังตรวจข้อมูลล่าสุด...`
+      );
+    } else {
+      setToolbarNote('กำลังโหลด...');
+    }
+    if (adminDataRequest) return adminDataRequest;
+    adminDataRequest = (async () => {
+      try {
+        const res = await fetch(RESIDENT_AUTH_URL, {
         method: 'POST',
-        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'adminResidents', ...getAdminAuth() })
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) throw new Error(json.error || `Firestore API: ${res.status}`);
-      allData = Array.isArray(json.residents) ? json.residents : [];
-      filteredData = [...allData];
-      renderAdmin(filteredData);
-      setToolbarNote(`✅ Firestore real-time · ${allData.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
-    } catch(e) {
-      document.getElementById('adminBody').innerHTML =
-        `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
-      setToolbarNote('โหลดไม่สำเร็จ', 'error');
-    }
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.ok) throw new Error(json.error || `Firestore API: ${res.status}`);
+        const residents = Array.isArray(json.residents) ? json.residents : [];
+        writeAdminResidentCache(residents);
+        applyAdminResidents(
+          residents,
+          `✅ Firestore real-time · ${residents.length} รายการ · ${new Date().toLocaleTimeString('th-TH')}`
+        );
+      } catch(e) {
+        if (!cached) {
+          document.getElementById('adminBody').innerHTML =
+            `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+          setToolbarNote('โหลดไม่สำเร็จ', 'error');
+        } else {
+          setToolbarNote(`⚠️ แสดงข้อมูล cache · อัปเดตล่าสุดไม่สำเร็จ`, 'error');
+        }
+      } finally {
+        adminDataRequest = null;
+      }
+    })();
+    return adminDataRequest;
   }
 
   // ── Render residents table ────────────────────────────────────────────────
@@ -3854,14 +3922,16 @@
       setToolbarNote('กำลังบันทึกเข้า Firestore...', 'saving');
       const result = await saveResidentToFirestore(formRec);
       closeEditModal();
-      await loadAdminData();
+      clearAdminResidentCache();
+      await loadAdminData({force: true});
       if (result.lprPending) {
         setToolbarNote(`⚠️ บันทึกแล้ว · LPR pending · ${new Date().toLocaleTimeString('th-TH')}`, 'error');
       } else {
         setToolbarNote(`✅ บันทึก Firestore${result.lprSync ? ' และ sync LPR' : ''} สำเร็จ · ${new Date().toLocaleTimeString('th-TH')}`, 'success');
       }
     } catch(e) {
-      await loadAdminData().catch(() => {});
+      clearAdminResidentCache();
+      await loadAdminData({force: true}).catch(() => {});
       setToolbarNote(`❌ บันทึกไม่สำเร็จ: ${e.message}`, 'error');
       alert('บันทึกไม่สำเร็จ\n\n' + e.message);
     }
@@ -4031,7 +4101,8 @@
 
     // Ensure allData is loaded
     if (!allData.length) {
-      await loadAdminData();
+      clearAdminResidentCache();
+      await loadAdminData({force: true});
     }
 
     const idx = allData.findIndex(r => r.house_no === houseNo);
@@ -4066,7 +4137,8 @@
       card.style.opacity = '0.5';
       card.innerHTML = `<div style="padding:16px;text-align:center;color:#15803d;font-weight:600;">✅ Approved & บันทึกแล้ว — บ้านเลขที่ ${escHtml(houseNo)}</div>`;
       // Reload ข้อมูลจาก Firestore ทันที
-      await loadAdminData();
+      clearAdminResidentCache();
+      await loadAdminData({force: true});
       // ลบ card ออกทันทีหลังแสดง success — ไม่รอ GitHub API ซึ่งอาจยังไม่ปิด issue
       setTimeout(() => {
         card.style.transition = 'all 0.5s';
@@ -4174,8 +4246,33 @@
     downloadBlob(new Blob([json],{type:'application/json'}), `residents_${dateStamp()}.json`);
   }
 
-  function exportExcel() {
+  function ensureXlsxLoaded() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (xlsxLoadPromise) return xlsxLoadPromise;
+    xlsxLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = XLSX_SCRIPT_URL;
+      script.async = true;
+      script.onload = () => resolve(window.XLSX);
+      script.onerror = () => reject(new Error('โหลดระบบ Excel ไม่สำเร็จ'));
+      document.head.appendChild(script);
+    }).catch(err => {
+      xlsxLoadPromise = null;
+      throw err;
+    });
+    return xlsxLoadPromise;
+  }
+
+  async function exportExcel() {
     if (!allData.length) { alert('ยังไม่มีข้อมูล'); return; }
+    const button = document.getElementById('exportXlsxBtn');
+    const originalText = button?.textContent || '';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'กำลังเตรียม Excel...';
+    }
+    try {
+      await ensureXlsxLoaded();
     const rows = allData.map(r => ({
       'บ้านเลขที่':            r.house_no    || '',
       'ชื่อ-นามสกุล':         r.name        || '',
@@ -4192,6 +4289,14 @@
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Residents');
     XLSX.writeFile(wb, `residents_${dateStamp()}.xlsx`);
+    } catch (err) {
+      alert(err.message || 'Export Excel ไม่สำเร็จ');
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
   }
 
   function dateStamp() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
@@ -5004,7 +5109,7 @@ function renderPickupList(requests) {
         ${(() => { const all = pickupAllPhotos(req); return all.length ? `
           <div class="pickup-thumbs">
             ${all.slice(0, 5).map(p =>
-              `<img class="pickup-thumb" src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" />`
+              `<img class="pickup-thumb" src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}" loading="lazy" decoding="async" />`
             ).join('')}
             ${all.length > 5 ? `<div style="width:150px;height:150px;background:var(--bg-soft);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:var(--text-muted)">+${all.length - 5}</div>` : ''}
           </div>` : ''; })()}
@@ -5114,6 +5219,7 @@ function openPickupModal(id) {
                   ${it.photos.map(p => `
                     <a href="${escH(p.downloadUrl)}" target="_blank">
                       <img src="${escH(p.downloadUrl)}" alt="${escH(p.fileName)}"
+                           loading="lazy" decoding="async"
                            style="width:100%;max-height:420px;object-fit:cover;border-radius:12px;border:1px solid var(--border-soft);display:block;" />
                     </a>`).join('')}
                 </div>`
