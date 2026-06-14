@@ -668,7 +668,14 @@
 
     .col-actions { width: 78px; }
     .col-house   { width: 100px; }
-    .col-name    { min-width: 190px; white-space: nowrap; }
+    .col-name    {
+      width: 240px;
+      min-width: 190px;
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .col-phone   { white-space: nowrap; }
     .col-email   { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .arrow-col   { color: var(--text-muted); font-size: 11px; }
@@ -3735,7 +3742,7 @@
         <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
         <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
         <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
-        <td class="col-name">${showVal(r.name)}</td>
+        <td class="col-name" title="${escHtml(r.name || '')}">${showVal(r.name)}</td>
         <td class="col-email">${showVal(r.email)}</td>
         <td class="col-phone">${showVal(formatPhone(r.phone))}</td>
         <td class="col-deed">${showVal(r.deed_no)}</td>
