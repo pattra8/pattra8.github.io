@@ -2310,6 +2310,35 @@
     log: 'admin.audit'
   };
 
+  const ADMIN_HASH_TABS = {
+    residents: 'residents',
+    data: 'residents',
+    pins: 'pins',
+    pin: 'pins',
+    vote: 'vote',
+    polls: 'vote',
+    poll: 'vote',
+    survey: 'survey',
+    lifestyle: 'survey',
+    announce: 'announce',
+    announcements: 'announce',
+    pickup: 'pickup',
+    access: 'access',
+    log: 'log',
+    audit: 'log'
+  };
+
+  function getRequestedAdminTab() {
+    const raw = (location.hash || '').replace(/^#/, '').split('?')[0].trim().toLowerCase();
+    return ADMIN_HASH_TABS[raw] || '';
+  }
+
+  function canOpenAdminTab(tab, canManageAccess = currentAdminAccess?.houseNo === '38/8') {
+    if (!tab) return false;
+    if (tab === 'access') return !!canManageAccess;
+    return canAdmin(ADMIN_TAB_PERMISSIONS[tab]);
+  }
+
   function setToolbarNote(message, state = '') {
     const el = document.getElementById('toolbarNote');
     if (!el) return;
@@ -2673,7 +2702,9 @@
     if (canAdmin('admin.residents')) {
       loadAdminData().finally(schedulePendingLoad);
     }
-    const firstTab = Object.entries(ADMIN_TAB_PERMISSIONS)
+    const requestedTab = getRequestedAdminTab();
+    const firstTab = (canOpenAdminTab(requestedTab, canManageAccess) ? requestedTab : '') ||
+      Object.entries(ADMIN_TAB_PERMISSIONS)
       .find(([, permission]) => canAdmin(permission))?.[0] ||
       (canManageAccess ? 'access' : '');
     if (firstTab) switchTab(firstTab);
@@ -2713,8 +2744,7 @@
   // ── Tabs ─────────────────────────────────────────────────────────────────
   function switchTab(tab) {
     if (tab === 'pending') tab = 'residents';
-    if (tab === 'access' && currentAdminAccess?.houseNo !== '38/8') return;
-    if (tab !== 'access' && !canAdmin(ADMIN_TAB_PERMISSIONS[tab])) return;
+    if (!canOpenAdminTab(tab)) return;
     currentTab = tab;
     document.getElementById('residentsTab').style.display  = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pinsTab').style.display       = tab === 'pins'      ? 'block' : 'none';
@@ -3966,6 +3996,7 @@
   // ── Load Pending Corrections ──────────────────────────────────────────────
   async function loadPending() {
     const list = document.getElementById('pendingList');
+    if (!list) return;
     list.innerHTML = '<div class="pending-empty"><div class="big">⏳</div>กำลังโหลดคำร้อง...</div>';
     try {
       const res = await fetch(
@@ -3979,10 +4010,10 @@
 
       // Update badge
       const badge = document.getElementById('pendingBadge');
-      if (corrections.length > 0) {
+      if (badge && corrections.length > 0) {
         badge.textContent = corrections.length;
         badge.classList.remove('hidden');
-      } else {
+      } else if (badge) {
         badge.classList.add('hidden');
       }
 
