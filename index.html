@@ -1180,15 +1180,62 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 640px) {
-      header { padding: 0 16px; height: auto; min-height: 68px; gap: 12px; }
+      header { padding: 0 14px; height: auto; min-height: 62px; gap: 10px; }
+      .logo-wordmark { font-size: 15px; }
       .header-actions { gap: 6px; }
       .header-btn { padding: 7px 10px; font-size: 10px; }
-      .hero { padding: 32px 20px 36px; }
-      .hero h1 { font-size: 36px; }
-      .hero-ornament { margin-bottom: 16px; }
-      .hero-sub { margin-top: 12px; font-size: 14px; }
-      .main { padding: 40px 16px 64px; }
+      .identity-pill { gap: 7px; padding: 4px 10px 4px 5px; }
+      .pill-avatar { width: 24px; height: 24px; font-size: 0.74rem; }
+      .pill-house { font-size: 0.72rem; }
+      .pill-name { font-size: 0.66rem; }
+      .hero { padding: 18px 16px 20px; }
+      .hero h1 { font-size: 30px; }
+      .hero-ornament { margin-bottom: 10px; gap: 10px; }
+      .hero-ornament-line { width: 42px; }
+      .hero-sub { margin-top: 8px; font-size: 13px; line-height: 1.55; }
+      .main { padding: 24px 16px 56px; }
+      .section-eyebrow { margin-bottom: 6px; }
+      .section-title { margin-bottom: 18px; font-size: 24px; line-height: 1.14; }
       .section-row { align-items: flex-start; flex-direction: column; margin-bottom: 24px; }
+      .services-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 44px;
+      }
+      .service-card {
+        padding: 20px 18px 18px;
+        gap: 10px;
+        min-height: 0;
+      }
+      .service-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        font-size: 19px;
+      }
+      .service-title {
+        font-size: 15px;
+        line-height: 1.28;
+      }
+      .service-desc {
+        font-size: 12.5px;
+        line-height: 1.55;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+      }
+      .service-cta {
+        margin-top: 2px;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+      }
+      .tag {
+        top: 14px;
+        right: 14px;
+        font-size: 8px;
+        padding: 3px 8px;
+      }
       .logo-sub { display: none; }
 
       /* announce headline list — mobile */
@@ -1242,6 +1289,25 @@
       }
       .announce-gallery.g-count-1 .g-img img {
         max-height: 70vh;
+      }
+    }
+
+    @media (min-width: 390px) and (max-width: 640px) {
+      .services-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .service-card {
+        padding: 18px 16px 16px;
+      }
+      .service-title {
+        font-size: 14px;
+      }
+      .service-desc {
+        -webkit-line-clamp: 4;
+      }
+      .service-cta {
+        font-size: 9.5px;
       }
     }
   </style>
