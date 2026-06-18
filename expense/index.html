@@ -840,7 +840,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getStorage, ref, uploadBytesResumable, uploadString, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-import { getAuth, inMemoryPersistence, setPersistence, signInWithCustomToken, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithCustomToken, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyAj8pSPvM22aA7ngOREZzECuvmgr3CM5OI',
@@ -854,10 +854,12 @@ const FIREBASE_CONFIG = {
 const EXPENSES_STORAGE_KEY = 'pattra8_expenses';
 const CAPMAX_STORAGE_KEY = 'pattra8_capMax';
 const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+const EXPENSE_ACCESS_CACHE_KEY = 'pattra_expense_access_v1';
 const EXPENSE_SESSION_URL =
   'https://asia-southeast1-pattra8-expense.cloudfunctions.net/expenseSession';
 const FIRESTORE_SETTINGS_DOC = 'global';
 const FIREBASE_READY = Object.values(FIREBASE_CONFIG).every(v => v && !String(v).startsWith('REPLACE_WITH_'));
+const MAX_PARALLEL_UPLOADS = 3;
 
 let db = null;
 let storage = null;
@@ -886,25 +888,34 @@ let expenses = usingFirestore ? [] : JSON.parse(localStorage.getItem(EXPENSES_ST
 let editingId = null, currentSlips = [], lightboxSlips = [], lightboxIdx = 0, currentType = 'recurring';
 let isSavingExpense = false;
 let expenseFormSnapshot = null;
+let refreshQueued = false;
 
 async function init() {
-  if (usingFirestore) {
-    await authenticateExpenseAccess();
-    localStorage.removeItem(EXPENSES_STORAGE_KEY);
-    localStorage.removeItem(CAPMAX_STORAGE_KEY);
-  }
   populateMonthFilter(); populateDashMonthFilter();
   bindSearchControls();
   bindReorder();
   bindModalScrollLock();
-  renderDashboard(); renderExpenses();
+  renderDashboard();
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
-  if (usingFirestore) bindFirestore();
+  if (usingFirestore) {
+    await authenticateExpenseAccess();
+    localStorage.removeItem(EXPENSES_STORAGE_KEY);
+    localStorage.removeItem(CAPMAX_STORAGE_KEY);
+    bindFirestore();
+  }
 }
 function refreshUI() {
   populateDashMonthFilter();
-  renderDashboard();
-  renderExpenses();
+  if (isDashboardPageVisible()) renderDashboard();
+  if (isExpensesPageVisible()) renderExpenses();
+}
+function scheduleRefreshUI() {
+  if (refreshQueued) return;
+  refreshQueued = true;
+  requestAnimationFrame(() => {
+    refreshQueued = false;
+    refreshUI();
+  });
 }
 function saveLocal() { localStorage.setItem(EXPENSES_STORAGE_KEY, JSON.stringify(expenses)); }
 function save() {
@@ -914,12 +925,12 @@ function bindFirestore() {
   const expensesQuery = query(collection(db,'expenses'), orderBy('date','desc'));
   onSnapshot(expensesQuery, snap => {
     expenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    refreshUI();
+    scheduleRefreshUI();
   }, err => console.error('Firestore expenses listener failed:', err));
 
   onSnapshot(doc(db,'app_settings',FIRESTORE_SETTINGS_DOC), snap => {
     sharedCapMax = snap.exists() ? Number(snap.data().capMax || 0) : 0;
-    renderDashboard();
+    scheduleRefreshUI();
   }, err => console.error('Firestore settings listener failed:', err));
 }
 
@@ -973,6 +984,57 @@ function getResidentSession() {
   }
 }
 
+function getCachedExpenseAccess(resident) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(EXPENSE_ACCESS_CACHE_KEY) || 'null');
+    if (!cached || cached.houseNo !== resident?.houseNo) return null;
+    if (!['superadmin', 'committee'].includes(cached.role)) return null;
+    if (Number(cached.expiresAt) <= Date.now()) return null;
+    return cached;
+  } catch {
+    return null;
+  }
+}
+
+function rememberExpenseAccess(resident, role) {
+  const residentExpiry = Number(resident?.expiresAt || 0);
+  const expiresAt = residentExpiry > Date.now()
+    ? residentExpiry
+    : Date.now() + 6 * 60 * 60 * 1000;
+  localStorage.setItem(EXPENSE_ACCESS_CACHE_KEY, JSON.stringify({
+    houseNo: resident.houseNo,
+    role,
+    expiresAt,
+  }));
+}
+
+function waitForAuthUser(timeoutMs = 1200) {
+  if (!auth) return Promise.resolve(null);
+  if (auth.currentUser) return Promise.resolve(auth.currentUser);
+  return new Promise(resolve => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      unsubscribe();
+      resolve(auth.currentUser || null);
+    }, timeoutMs);
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      unsubscribe();
+      resolve(user || null);
+    }, () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      unsubscribe();
+      resolve(null);
+    });
+  });
+}
+
 function applyAccessRole(role) {
   accessRole = role;
   isAdmin = role === 'superadmin';
@@ -988,10 +1050,17 @@ async function authenticateExpenseAccess() {
   const resident = getResidentSession();
   if (!resident?.houseNo || !resident?.pin) {
     if (auth) await signOut(auth).catch(() => {});
+    localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
     location.replace('https://pattra8.com/');
     throw new Error('Expense access denied');
   }
-  await setPersistence(auth, inMemoryPersistence);
+  await setPersistence(auth, browserLocalPersistence);
+  const cached = getCachedExpenseAccess(resident);
+  const existingUser = cached ? await waitForAuthUser() : null;
+  if (cached && existingUser) {
+    applyAccessRole(cached.role);
+    return;
+  }
   const response = await fetch(EXPENSE_SESSION_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -1001,18 +1070,27 @@ async function authenticateExpenseAccess() {
   if (!response.ok || !data.ok ||
       !['superadmin', 'committee'].includes(data.role)) {
     await signOut(auth).catch(() => {});
+    localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
     location.replace('https://pattra8.com/');
     throw new Error(data.error || 'Expense access denied');
   }
   await signInWithCustomToken(auth, data.customToken);
+  rememberExpenseAccess(resident, data.role);
   applyAccessRole(data.role);
 }
 
 async function returnToCenter() {
-  if (auth) await signOut(auth).catch(() => {});
   location.href = 'https://pattra8.com/';
 }
 
+function isDashboardPageVisible() {
+  const el = document.getElementById('pageDashboard');
+  return !!el && el.style.display !== 'none';
+}
+function isExpensesPageVisible() {
+  const el = document.getElementById('pageExpenses');
+  return !!el && el.style.display !== 'none';
+}
 function showPage(p) {
   document.getElementById('pageDashboard').style.display = p==='dashboard'?'':'none';
   document.getElementById('pageExpenses').style.display  = p==='expenses' ?'':'none';
@@ -1923,7 +2001,7 @@ function attachmentsHtml(items, detail = false) {
   const tiles = visible.map((att, index) => {
     const source = attachmentSource(att);
     if (att.kind === 'image' && source) {
-      return `<img class="slip-thumb" src="${source}" ${detail ? 'style="width:76px;height:76px"' : ''} onclick="event.stopPropagation();openAttachment(${encodedAll},${index})">`;
+      return `<img class="slip-thumb" src="${source}" loading="lazy" decoding="async" fetchpriority="low" ${detail ? 'style="width:76px;height:76px"' : ''} onclick="event.stopPropagation();openAttachment(${encodedAll},${index})">`;
     }
     return `<button class="file-thumb" ${detail ? 'style="width:76px;height:76px"' : ''} onclick="event.stopPropagation();openAttachment(${encodedAll},${index})"><strong>${attachmentBadge(att.kind)}</strong><span>${escapeHtml(att.name)}</span></button>`;
   }).join('');
@@ -2041,10 +2119,13 @@ function extensionFromDataUrl(dataUrl) {
   const ext = (match && match[1] ? match[1] : 'jpeg').toLowerCase();
   return ext === 'jpeg' ? 'jpg' : ext;
 }
+function isUploadedAttachment(att) {
+  return !!(att && att.url && !att.file && !isDataUrl(att.previewUrl || ''));
+}
 async function uploadSlipAsset(expenseId, slip, index) {
-  const normalized = normalizeAttachment(slip);
+  let normalized = normalizeAttachment(slip);
   if (!usingFirestore || !storage || !normalized) return normalized;
-  if (normalized.url && !normalized.file && !isDataUrl(normalized.previewUrl || '')) return normalized;
+  if (isUploadedAttachment(normalized)) return normalized;
   if (normalized.file) {
     const fileRef = ref(storage, `expense-slips/${expenseId}/${Date.now()}-${index}-${sanitizeFileName(normalized.name)}`);
     await uploadFileWithProgress(fileRef, normalized, index);
@@ -2059,6 +2140,7 @@ async function uploadSlipAsset(expenseId, slip, index) {
   const ext = extensionFromDataUrl(normalized.previewUrl || '');
   const fileRef = ref(storage, `expense-slips/${expenseId}/${Date.now()}-${index}.${ext}`);
   await uploadString(fileRef, normalized.previewUrl, 'data_url');
+  if (currentSaveTracker) currentSaveTracker.complete(index);
   return {
     url: await getDownloadURL(fileRef),
     name: normalized.name || `image-${index}.${ext}`,
@@ -2094,8 +2176,8 @@ function createSlipProgressTracker(slips) {
   const normalized = slips.map(normalizeAttachment).filter(Boolean);
   const progressByIndex = normalized.map((att, index) => ({
     index,
-    done: att.url && !att.file && !isDataUrl(att.previewUrl || ''),
-    loaded: att.url && !att.file && !isDataUrl(att.previewUrl || '') ? Math.max(Number(att.size || 0), 1) : 0,
+    done: isUploadedAttachment(att),
+    loaded: isUploadedAttachment(att) ? Math.max(Number(att.size || 0), 1) : 0,
     total: Math.max(Number(att.size || 0), 1),
     name: att.name || `ไฟล์ ${index + 1}`,
   }));
@@ -2148,12 +2230,19 @@ function uploadFileWithProgress(fileRef, normalized, index) {
 }
 let currentSaveTracker = null;
 async function persistSlipAssets(expenseId, slips) {
-  const uploaded = [];
+  const uploaded = new Array(slips.length);
   currentSaveTracker = createSlipProgressTracker(slips);
   if (currentSaveTracker.hasUploads) currentSaveTracker.start();
-  for (let i = 0; i < slips.length; i += 1) {
-    uploaded.push(compactAttachment(await uploadSlipAsset(expenseId, slips[i], i)));
-  }
+  let nextIndex = 0;
+  const workerCount = Math.min(MAX_PARALLEL_UPLOADS, Math.max(slips.length, 1));
+  const uploadNext = async () => {
+    while (nextIndex < slips.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      uploaded[index] = compactAttachment(await uploadSlipAsset(expenseId, slips[index], index));
+    }
+  };
+  await Promise.all(Array.from({ length: workerCount }, uploadNext));
   currentSaveTracker = null;
   return uploaded.filter(Boolean);
 }
