@@ -1058,9 +1058,16 @@ async function authenticateExpenseAccess() {
   const cached = getCachedExpenseAccess(resident);
   const existingUser = cached ? await waitForAuthUser() : null;
   if (cached && existingUser) {
+    // แสดงผลเร็วด้วย role ที่ cache ไว้ก่อน แต่ยังเช็กกับเซิร์ฟเวอร์เบื้องหลังเสมอ
+    // เผื่อสิทธิ์ถูกถอนหรือถูกแก้ใน localStorage จะได้แก้ให้ถูกต้อง (เซิร์ฟเวอร์คือตัวตัดสิน)
     applyAccessRole(cached.role);
+    performServerExpenseAuth(resident).catch(() => {});
     return;
   }
+  await performServerExpenseAuth(resident);
+}
+
+async function performServerExpenseAuth(resident) {
   const response = await fetch(EXPENSE_SESSION_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -1080,6 +1087,8 @@ async function authenticateExpenseAccess() {
 }
 
 async function returnToCenter() {
+  if (auth) await signOut(auth).catch(() => {});
+  localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
   location.href = 'https://pattra8.com/';
 }
 
@@ -2173,14 +2182,21 @@ function setExpenseSaveState(isSaving) {
   }
 }
 function createSlipProgressTracker(slips) {
-  const normalized = slips.map(normalizeAttachment).filter(Boolean);
-  const progressByIndex = normalized.map((att, index) => ({
-    index,
-    done: isUploadedAttachment(att),
-    loaded: isUploadedAttachment(att) ? Math.max(Number(att.size || 0), 1) : 0,
-    total: Math.max(Number(att.size || 0), 1),
-    name: att.name || `ไฟล์ ${index + 1}`,
-  }));
+  // คง index ให้ตรงกับ slips ต้นฉบับ (ไฟล์ที่ normalize ไม่ผ่านใช้ placeholder ที่นับเป็นเสร็จแล้ว)
+  // เพื่อให้ complete(index)/update(index) จาก persistSlipAssets อ้างถึงไฟล์ที่ถูกต้อง
+  const progressByIndex = slips.map((slip, index) => {
+    const att = normalizeAttachment(slip);
+    if (!att) {
+      return { index, done: true, loaded: 0, total: 0, name: `ไฟล์ ${index + 1}`, skip: true };
+    }
+    return {
+      index,
+      done: isUploadedAttachment(att),
+      loaded: isUploadedAttachment(att) ? Math.max(Number(att.size || 0), 1) : 0,
+      total: Math.max(Number(att.size || 0), 1),
+      name: att.name || `ไฟล์ ${index + 1}`,
+    };
+  });
   const refresh = (activeIndex = -1, detailPrefix = 'กำลังอัปโหลดไฟล์แนบ...') => {
     const total = progressByIndex.reduce((sum, item) => sum + item.total, 0);
     const loaded = progressByIndex.reduce((sum, item) => sum + Math.min(item.loaded, item.total), 0);
