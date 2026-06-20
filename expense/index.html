@@ -51,8 +51,8 @@
 
   /* ── HEADER ── */
   header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 28px; height: 60px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 0 40px; height: 68px;
     display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
   }
@@ -69,19 +69,20 @@
     display:flex; align-items:center; justify-content:center;
     font-weight:700; color:#fff; font-size:13px; flex-shrink:0;
   }
-  .header-title { font-family:'Gambetta', var(--font-display); font-size:22px; font-weight:700; color:var(--text-hi); line-height:1.1; letter-spacing:.2em; }
-  .header-sub   { font-size:11px; color:var(--text-mid); letter-spacing:.02em; }
+  .header-title { font-family:'Gambetta', var(--font-display); font-size:19px; font-weight:700; color:var(--text-hi); line-height:1.1; letter-spacing:.2em; }
+  .header-sub   { font-family:'IBM Plex Sans Thai',sans-serif; font-size:10px; color:var(--text-mid); letter-spacing:.18em; text-transform:uppercase; margin-top:1px; }
   .header-right { display:flex; align-items:center; gap:10px; }
   .badge-admin  {
     font-size:11px; font-weight:600; color:var(--ok);
     background:var(--ok-bg); padding:3px 10px; border-radius:99px; display:none;
   }
   .btn-admin-toggle {
-    background:transparent; border:1.5px solid var(--border2); color:var(--text-mid);
-    padding:6px 14px; border-radius:99px; font-size:12px; font-weight:500;
-    font-family:inherit; cursor:pointer; transition:all .18s;
+    background:transparent; border:1px solid var(--accent); color:var(--accent);
+    padding:8px 20px; border-radius:8px; font-size:12px; font-weight:500;
+    font-family:'IBM Plex Sans Thai',sans-serif; cursor:pointer; transition:all .2s;
+    letter-spacing:.08em;
   }
-  .btn-admin-toggle:hover  { border-color:var(--accent); color:var(--accent); }
+  .btn-admin-toggle:hover  { background:var(--accent); color:#fff; }
   .btn-admin-toggle.active { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
 
   /* ── LAYOUT ── */
@@ -636,9 +637,6 @@
 <!-- HEADER -->
 <header>
   <div class="header-brand">
-    <a class="header-back" href="/" title="กลับหน้า Pattra Center" aria-label="กลับหน้า Pattra Center">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    </a>
     <div>
       <div class="header-title">Pattra Villa 8</div>
       <div class="header-sub">รายจ่ายนิติบุคคล</div>
