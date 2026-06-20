@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เช็คทะเบียน LPR · Pattra Villa 8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:           #f9f3e9;
+      --bg-soft:      #f3ecdd;
+      --card:         #ffffff;
+      --border:       #e6dcc7;
+      --border-soft:  #efe8d6;
+      --text:         #2a2218;
+      --text-body:    #3a3024;
+      --text-soft:    #6b5d4a;
+      --text-muted:   #8a7960;
+      --accent:       #c47a2c;
+      --accent-text:  #9a5c1f;
+      --accent-deep:  #855015;
+
+      --ok:        #3f6431;
+      --ok-bg:     #e8efd9;
+      --ok-bd:     #c4d4a3;
+      --warn:      #855015;
+      --warn-bg:   #f7e6cd;
+      --warn-bd:   #e8b577;
+      --err:       #86341e;
+      --err-bg:    #f7dfd5;
+      --err-bd:    #e2a48f;
+      --neutral:   #6b5d4a;
+      --neutral-bg:#efe8d6;
+      --neutral-bd:#ddd0b8;
+
+      --radius:    16px;
+      --shadow:    0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-body);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px 60px;
+    }
+    .wrap { width: 100%; max-width: 460px; }
+
+    header { text-align: center; margin: 8px 0 22px; }
+    .title {
+      font-size: 24px; font-weight: 700; color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .subtitle {
+      font-size: 14px; color: var(--text-muted); margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    /* ── Search ── */
+    .search { margin-bottom: 18px; }
+    .plate-input {
+      width: 100%;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 30px; font-weight: 700;
+      text-align: center; letter-spacing: 0.04em;
+      padding: 18px 14px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: border-color .15s;
+    }
+    .plate-input:focus { outline: none; border-color: var(--accent); }
+    .plate-input::placeholder { color: #cdbfa6; font-weight: 600; letter-spacing: 0.02em; }
+    .btn {
+      width: 100%; margin-top: 12px;
+      font-family: inherit; font-size: 18px; font-weight: 600;
+      padding: 16px; border: none; border-radius: var(--radius);
+      background: var(--accent); color: #fff;
+      cursor: pointer; transition: background .15s, transform .05s;
+    }
+    .btn:hover { background: var(--accent-deep); }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.55; cursor: default; }
+
+    /* ── Result ── */
+    .result { display: none; }
+    .result.show { display: block; animation: rise .2s ease; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .verdict {
+      border: 1.5px solid var(--neutral-bd);
+      background: var(--neutral-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .verdict.ok   { border-color: var(--ok-bd);   background: var(--ok-bg); }
+    .verdict.warn { border-color: var(--warn-bd); background: var(--warn-bg); }
+    .verdict.err  { border-color: var(--err-bd);  background: var(--err-bg); }
+
+    .v-icon { font-size: 40px; line-height: 1; }
+    .v-plate {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px; font-weight: 700; color: var(--text);
+      margin: 8px 0 2px; letter-spacing: 0.03em;
+    }
+    .v-headline {
+      font-size: 19px; font-weight: 700; margin: 10px 0 4px;
+    }
+    .verdict.ok   .v-headline { color: var(--ok); }
+    .verdict.warn .v-headline { color: var(--warn); }
+    .verdict.err  .v-headline { color: var(--err); }
+    .verdict.neutral .v-headline { color: var(--neutral); }
+    .v-house {
+      font-size: 16px; font-weight: 600; color: var(--text-body);
+    }
+    .v-house b { font-size: 19px; color: var(--text); }
+    .v-action {
+      font-size: 14px; color: var(--text-soft); line-height: 1.55;
+      margin-top: 10px;
+    }
+
+    /* ── Detail rows ── */
+    .detail {
+      margin-top: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 14px 16px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 14.5px; color: var(--text-soft); }
+    .row-label small { display: block; color: var(--text-muted); font-size: 12px; margin-top: 1px; }
+    .pill {
+      font-size: 13.5px; font-weight: 600;
+      padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+    }
+    .pill.yes  { color: var(--ok);   background: var(--ok-bg); }
+    .pill.no   { color: var(--err);  background: var(--err-bg); }
+    .pill.unk  { color: var(--neutral); background: var(--neutral-bg); }
+
+    /* ── Error / loading ── */
+    .note {
+      margin-top: 14px; text-align: center; font-size: 14px;
+      color: var(--err); background: var(--err-bg);
+      border: 1px solid var(--err-bd); border-radius: var(--radius);
+      padding: 14px;
+    }
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.45); border-top-color: #fff;
+      border-radius: 50%; animation: spin .7s linear infinite;
+      vertical-align: -3px; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Recent ── */
+    .recent { margin-top: 24px; }
+    .recent-title { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; font-weight: 600;
+      padding: 7px 12px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text-body); cursor: pointer;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent-text); }
+
+    footer {
+      text-align: center; margin-top: 36px;
+      font-size: 12px; color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">เช็คทะเบียน LPR</div>
+      <div class="subtitle">พิมพ์เลขทะเบียนเพื่อตรวจว่าอยู่ในระบบ<br>และอยู่ใน allowlist ของกล้องไม้กั้นหรือไม่</div>
+    </header>
+
+    <div class="search">
+      <input id="plate" class="plate-input" type="text"
+             inputmode="text" autocomplete="off" autocapitalize="characters"
+             spellcheck="false" placeholder="กข 1234" />
+      <button id="btn" class="btn">ตรวจสอบ</button>
+    </div>
+
+    <div id="result" class="result"></div>
+    <div id="note"></div>
+
+    <div id="recent" class="recent" style="display:none">
+      <div class="recent-title">ค้นล่าสุด</div>
+      <div id="chips" class="chips"></div>
+    </div>
+
+    <footer>Pattra Villa 8 · สำหรับเจ้าหน้าที่ รปภ</footer>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+    var API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lprGuardLookup';
+    var RECENT_KEY = 'lprcheck_recent_v1';
+
+    var elPlate  = document.getElementById('plate');
+    var elBtn    = document.getElementById('btn');
+    var elResult = document.getElementById('result');
+    var elNote   = document.getElementById('note');
+    var elRecent = document.getElementById('recent');
+    var elChips  = document.getElementById('chips');
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    function setBusy(busy) {
+      elBtn.disabled = busy;
+      elBtn.innerHTML = busy
+        ? '<span class="spinner"></span>กำลังตรวจสอบ…'
+        : 'ตรวจสอบ';
+    }
+
+    function clearOutput() {
+      elResult.className = 'result';
+      elResult.innerHTML = '';
+      elNote.innerHTML = '';
+    }
+
+    async function lookup(plate) {
+      plate = (plate || '').trim();
+      if (!plate) { elPlate.focus(); return; }
+      clearOutput();
+      setBusy(true);
+      try {
+        var res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+          body: JSON.stringify({ plate: plate })
+        });
+        var data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data && data.error ? data.error : ('HTTP ' + res.status));
+        }
+        render(data);
+        rememberRecent(data.plate || plate);
+      } catch (err) {
+        elNote.innerHTML = '<div class="note">เชื่อมต่อระบบไม่ได้ ลองใหม่อีกครั้ง<br><small>' + esc(err.message) + '</small></div>';
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function render(data) {
+      var cams = data.cameras || [];
+      var known = cams.filter(function (c) { return c.inCamera !== null; });
+      var inAny = cams.some(function (c) { return c.inCamera === true; });
+      var inAll = known.length > 0 && known.every(function (c) { return c.inCamera === true; });
+      var allOffline = cams.length > 0 && known.length === 0;
+      var registered = !!data.registered;
+      var houses = data.houses || [];
+
+      var cls, icon, headline, action;
+
+      if (registered && inAll) {
+        cls = 'ok'; icon = '✅';
+        headline = 'พร้อมใช้งาน — ไม้กั้นควรเปิด';
+        action = 'ถ้าไม้กั้นไม่เปิด มักเป็นที่กล้องอ่านป้ายพลาด (ป้ายเลอะ/มุม/แสง) หรือฮาร์ดแวร์ไม้กั้น ไม่ใช่ข้อมูลในระบบ';
+      } else if (registered && inAny) {
+        cls = 'warn'; icon = '⚠️';
+        headline = 'มีในระบบ แต่เข้ากล้องไม่ครบ';
+        action = 'ทะเบียนนี้ยังไม่ถูก sync เข้ากล้องครบทุกตัว แจ้งนิติให้กด sync ทะเบียนใหม่';
+      } else if (registered && allOffline) {
+        cls = 'neutral'; icon = 'ℹ️';
+        headline = 'มีในระบบ — แต่ตรวจกล้องไม่ได้';
+        action = 'กล้องไม่ตอบสนองตอนนี้ (อาจออฟไลน์) ตรวจสถานะกล้อง/เครือข่ายไม้กั้น';
+      } else if (registered) {
+        cls = 'warn'; icon = '⚠️';
+        headline = 'มีในระบบ แต่ยังไม่เข้ากล้อง';
+        action = 'ทะเบียนนี้อยู่ในระบบแล้วแต่ยังไม่อยู่ใน allowlist กล้อง แจ้งนิติให้กด sync ทะเบียน';
+      } else if (allOffline) {
+        cls = 'neutral'; icon = 'ℹ️';
+        headline = 'ไม่พบในระบบ — และตรวจกล้องไม่ได้';
+        action = 'ทะเบียนนี้ไม่มีในระบบ pattra8.com ลูกบ้านอาจยังไม่ได้เพิ่มทะเบียน (กล้องก็ตอบไม่ได้ตอนนี้)';
+      } else {
+        cls = 'err'; icon = '⛔';
+        headline = 'ไม่พบในระบบ';
+        action = 'ทะเบียนนี้ยังไม่ถูกเพิ่มในระบบ ลูกบ้านต้องไปเพิ่มทะเบียนที่ pattra8.com ก่อน ระหว่างนี้เปิดไม้กั้นด้วยมือตามขั้นตอน';
+      }
+
+      var houseHtml = '';
+      if (registered) {
+        houseHtml = '<div class="v-house">บ้านเลขที่ <b>' +
+          houses.map(esc).join('</b>, <b>') + '</b></div>';
+      }
+
+      var camRows = cams.map(function (c) {
+        var pill = c.inCamera === true
+          ? '<span class="pill yes">✓ มี</span>'
+          : c.inCamera === false
+            ? '<span class="pill no">✕ ไม่มี</span>'
+            : '<span class="pill unk">— ตรวจไม่ได้</span>';
+        return '<div class="row"><div class="row-label">' + esc(c.label) +
+          '</div>' + pill + '</div>';
+      }).join('');
+
+      var sysPill = registered
+        ? '<span class="pill yes">✓ มี</span>'
+        : '<span class="pill no">✕ ไม่มี</span>';
+
+      elResult.className = 'result show';
+      elResult.innerHTML =
+        '<div class="verdict ' + cls + '">' +
+          '<div class="v-icon">' + icon + '</div>' +
+          '<div class="v-plate">' + esc(data.plate) + '</div>' +
+          '<div class="v-headline">' + headline + '</div>' +
+          houseHtml +
+          '<div class="v-action">' + action + '</div>' +
+        '</div>' +
+        '<div class="detail">' +
+          '<div class="row"><div class="row-label">ระบบ pattra8.com' +
+            '<small>ทะเบียนที่ลูกบ้านลงทะเบียน</small></div>' + sysPill + '</div>' +
+          camRows +
+        '</div>';
+    }
+
+    /* ── Recent searches ── */
+    function getRecent() {
+      try { return JSON.parse(sessionStorage.getItem(RECENT_KEY) || '[]'); }
+      catch (e) { return []; }
+    }
+    function rememberRecent(plate) {
+      var list = getRecent().filter(function (p) { return p !== plate; });
+      list.unshift(plate);
+      list = list.slice(0, 8);
+      try { sessionStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (e) {}
+      renderRecent();
+    }
+    function renderRecent() {
+      var list = getRecent();
+      if (!list.length) { elRecent.style.display = 'none'; return; }
+      elRecent.style.display = 'block';
+      elChips.innerHTML = list.map(function (p) {
+        return '<button class="chip" data-plate="' + esc(p) + '">' + esc(p) + '</button>';
+      }).join('');
+    }
+
+    /* ── Events ── */
+    elBtn.addEventListener('click', function () { lookup(elPlate.value); });
+    elPlate.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { lookup(elPlate.value); }
+    });
+    elChips.addEventListener('click', function (e) {
+      var btn = e.target.closest('.chip');
+      if (!btn) return;
+      elPlate.value = btn.dataset.plate;
+      lookup(btn.dataset.plate);
+    });
+
+    renderRecent();
+    elPlate.focus();
+  })();
+  </script>
+</body>
+</html>
