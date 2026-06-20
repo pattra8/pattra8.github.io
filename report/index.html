@@ -66,7 +66,7 @@ header{background:var(--bg);color:var(--text);border-bottom:1px solid var(--bord
 /* ── BOARD ── */
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:13px 22px 32px}
 @media(max-width:800px){.board{grid-template-columns:1fr}}
-.col{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;max-height:calc(100vh - 230px);min-height:0;overflow:visible;border:1.5px solid var(--border);transition:max-height .3s ease}
+.col{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:0;overflow:visible;border:1.5px solid var(--border)}
 .col.collapsed{max-height:54px!important}
 .col.collapsed .col-body{display:none}
 .col-toggle{background:none;border:none;cursor:pointer;font-size:.85rem;color:var(--muted);padding:2px 4px;border-radius:6px;transition:transform .25s;line-height:1}
@@ -78,7 +78,7 @@ header{background:var(--bg);color:var(--text);border-bottom:1px solid var(--bord
 .col-lbl{font-family:'IBM Plex Sans Thai',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-.01em}
 .cbadge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px}
 .cb-todo{background:var(--todo-bg);color:var(--todo-c)}.cb-doing{background:var(--doing-bg);color:#b45309}.cb-done{background:var(--done-bg);color:#15803d}
-.col-body{flex:1;overflow-y:auto;overflow-x:clip;padding:11px 11px 24px;display:flex;flex-direction:column;gap:9px;min-height:200px}
+.col-body{flex:1;overflow:visible;padding:11px 11px 24px;display:flex;flex-direction:column;gap:9px;min-height:200px}
 .col-body::-webkit-scrollbar{width:4px}
 .col-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
