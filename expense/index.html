@@ -419,6 +419,12 @@
   .form-input:focus,.form-textarea:focus,.form-select:focus { border-color:var(--accent); }
   .form-textarea { resize:vertical; min-height:75px; }
   .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ocr-hint { margin-top:5px; font-size:12px; line-height:1.35; display:flex; align-items:center; gap:5px; }
+  .ocr-hint.loading { color:var(--accent); }
+  .ocr-hint.ok { color:#1f9d55; }
+  .ocr-hint.warn { color:#b46a00; }
+  .ocr-hint .ocr-spin { width:11px; height:11px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; display:inline-block; animation:ocrspin .7s linear infinite; }
+  @keyframes ocrspin { to { transform:rotate(360deg); } }
   .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:22px; padding-top:16px; border-top:1px solid var(--border); }
 
   /* ── TYPE TOGGLE ── */
@@ -763,6 +769,7 @@
       <div class="form-group">
         <label class="form-label">จำนวนเงิน (บาท) *</label>
         <input class="form-input" type="number" id="fAmount" placeholder="0">
+        <div class="ocr-hint" id="ocrHint" style="display:none"></div>
       </div>
       <div class="form-group">
         <label class="form-label">วันที่จ่าย *</label>
@@ -857,6 +864,8 @@ const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
 const EXPENSE_ACCESS_CACHE_KEY = 'pattra_expense_access_v1';
 const EXPENSE_SESSION_URL =
   'https://asia-southeast1-pattra8-expense.cloudfunctions.net/expenseSession';
+const EXPENSE_OCR_URL =
+  'https://asia-southeast1-pattra8-expense.cloudfunctions.net/expenseOcr';
 const FIRESTORE_SETTINGS_DOC = 'global';
 const FIREBASE_READY = Object.values(FIREBASE_CONFIG).every(v => v && !String(v).startsWith('REPLACE_WITH_'));
 const MAX_PARALLEL_UPLOADS = 3;
@@ -2046,6 +2055,7 @@ function openAddModal() {
   document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
   setCostCategory('ส่วนกลาง');
   document.getElementById('uploadPreview').innerHTML='';
+  setOcrHint('');
   setExpenseSaveState(false);
   document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
   setType('recurring'); document.getElementById('expenseModal').classList.add('open');
@@ -2061,6 +2071,7 @@ function openEditModal(id) {
   document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=e.detail||'';
   document.getElementById('fNote').value=e.note||''; document.getElementById('fStatus').value=e.status||'paid';
   setCostCategory(costCategoryValue(e));
+  setOcrHint('');
   setExpenseSaveState(false);
   setType(e.type||'recurring'); renderPreview(); document.getElementById('expenseModal').classList.add('open');
   rememberExpenseFormSnapshot();
@@ -2349,6 +2360,79 @@ function processFiles(files){
     }));
   });
   renderPreview();
+  // อ่านยอดจากสลิปรูปแรกที่เพิ่งแนบ แล้วเติมช่องให้อัตโนมัติ
+  const firstImage = files.find(f => (f.type || '').startsWith('image/'));
+  if (firstImage) tryAutofillFromSlip(firstImage);
+}
+
+let ocrInFlight = false;
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(String(reader.result).split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+function setOcrHint(msg, state){
+  const el = document.getElementById('ocrHint');
+  if (!el) return;
+  el.className = 'ocr-hint' + (state ? ' ' + state : '');
+  el.innerHTML = msg ? (state === 'loading' ? '<span class="ocr-spin"></span>' : '') + escapeHtml(msg) : '';
+  el.style.display = msg ? 'flex' : 'none';
+}
+async function tryAutofillFromSlip(file){
+  if (!usingFirestore || !auth || !auth.currentUser) return;
+  if (!file || !(file.type || '').startsWith('image/')) return;
+  if (ocrInFlight) return;
+  const amountEl = document.getElementById('fAmount');
+  // ไม่ทับยอดที่ผู้ใช้กรอกไว้แล้ว
+  if (amountEl.value && Number(amountEl.value) > 0) return;
+  ocrInFlight = true;
+  setOcrHint('กำลังอ่านยอดจากสลิป…', 'loading');
+  try {
+    const [imageBase64, idToken] = await Promise.all([
+      fileToBase64(file),
+      auth.currentUser.getIdToken(),
+    ]);
+    const res = await fetch(EXPENSE_OCR_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+      body: JSON.stringify({ imageBase64, mimeType: file.type }),
+    });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || 'ocr_failed');
+    const filled = [];
+    if (data.amount > 0 && !(amountEl.value && Number(amountEl.value) > 0)){
+      amountEl.value = data.amount; filled.push('ยอดเงิน');
+    }
+    const titleEl = document.getElementById('fTitle');
+    if (data.memo && !titleEl.value.trim()){ titleEl.value = data.memo; filled.push('ชื่อรายจ่าย'); }
+    const detailEl = document.getElementById('fDetail');
+    if (data.payee && !detailEl.value.trim()){ detailEl.value = 'จ่ายให้: ' + data.payee; filled.push('รายละเอียด'); }
+    // วันที่: ใช้ตามสลิป (ทับค่า default = วันนี้)
+    if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date)){
+      const dateEl = document.getElementById('fDate');
+      if (dateEl.value !== data.date){ dateEl.value = data.date; filled.push('วันที่'); }
+    }
+    // หมวด: ใช้ตามที่เดาจากสลิป (ถ้าอยู่ในรายการที่มี)
+    if (data.category && COST_CATEGORY_EMOJI[data.category]){
+      if (document.getElementById('fCostCategory').value !== data.category){
+        setCostCategory(data.category); filled.push('หมวด');
+      }
+    }
+    if (filled.length) setOcrHint('เติมให้แล้ว: ' + filled.join(', ') + ' — ตรวจสอบอีกครั้งได้', 'ok');
+    else setOcrHint('อ่านสลิปไม่พบยอด กรอกเองได้เลย', 'warn');
+  } catch (err){
+    console.warn('OCR autofill failed', err);
+    setOcrHint('อ่านสลิปอัตโนมัติไม่สำเร็จ — กรอกยอดเอง', 'warn');
+  } finally {
+    ocrInFlight = false;
+    setTimeout(()=>{
+      const el = document.getElementById('ocrHint');
+      if (el && el.classList.contains('ok')) setOcrHint('');
+    }, 6000);
+  }
 }
 function renderPreview(){
   document.getElementById('uploadPreview').innerHTML=currentSlips.map((item,i)=>{
