@@ -121,6 +121,27 @@
     .reason { font-size:13px; color:var(--err); font-weight:600; }
     .empty { padding:20px; text-align:center; color:var(--text-muted); font-size:13.5px; }
 
+    /* unreadable review card (image + comment for OCR training) */
+    .unread { padding:14px 16px; border-bottom:1px solid var(--border-soft); }
+    .unread:last-child { border-bottom:none; }
+    .unread-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .unread-meta { font-size:12px; color:var(--text-muted); text-align:right;
+      white-space:nowrap; line-height:1.5; }
+    .unread-img { display:block; width:100%; max-width:340px; border-radius:10px;
+      margin:11px 0; border:1px solid var(--border); }
+    .unread-noimg { font-size:12.5px; color:var(--text-muted); background:var(--bg-soft);
+      border-radius:10px; padding:16px; text-align:center; margin:11px 0; }
+    .cmt { width:100%; font-family:inherit; font-size:14px; padding:10px 12px;
+      border:1.5px solid var(--border); border-radius:10px; resize:vertical;
+      min-height:52px; color:var(--text); background:var(--card); }
+    .cmt:focus { outline:none; border-color:var(--accent); }
+    .cmt-actions { display:flex; align-items:center; gap:10px; margin-top:8px; }
+    .cmt-save { font-family:inherit; font-size:13.5px; font-weight:600; padding:8px 18px;
+      border:none; border-radius:9px; background:var(--accent); color:#fff; cursor:pointer; }
+    .cmt-save:hover { background:var(--accent-deep); }
+    .cmt-save:disabled { opacity:.55; cursor:default; }
+    .cmt-status { font-size:12.5px; color:var(--ok); font-weight:600; }
+
     /* login */
     .overlay { position:fixed; inset:0; background:rgba(40,30,18,0.45);
       display:none; align-items:center; justify-content:center; padding:20px; z-index:50; }
@@ -288,11 +309,21 @@
       if(!rows.length) return '<div class="empty">ไม่มีรายการสแกนไม่พบ 🎉</div>';
       return rows.map(function(e){
         var dir = e.direction==='entry'?'เข้า':e.direction==='exit'?'ออก':esc(e.direction||'');
-        return '<div class="item"><div class="it-main">'+
-          '<div class="reason">'+esc(e.reason||'อ่านไม่ออก')+'</div>'+
-          '<div class="it-sub">'+dir+' · กล้อง '+esc(e.cameraId||'-')+
-            (e.rawPlate?' · raw: '+esc(e.rawPlate):'')+'</div>'+
-          '</div><div class="io"><span class="muted">'+esc(e.time||'')+'</span></div></div>'; }).join('');
+        var img = e.imageUrl ?
+          '<a href="'+esc(e.imageUrl)+'" target="_blank" rel="noopener">'+
+            '<img class="unread-img" src="'+esc(e.imageUrl)+'" alt="ภาพจากกล้อง" loading="lazy"></a>'
+          : '<div class="unread-noimg">⏳ ยังไม่มีภาพ (ระบบกำลังดึงจากกล้อง ~15 นาที)</div>';
+        return '<div class="unread" data-eid="'+esc(e.eventId||'')+'">'+
+          '<div class="unread-top">'+
+            '<div class="reason">'+esc(e.reason||'อ่านไม่ออก')+'</div>'+
+            '<div class="unread-meta">'+esc(e.time||'')+'<br>'+dir+' · กล้อง '+esc(e.cameraId||'-')+
+              (e.rawPlate?'<br>raw: '+esc(e.rawPlate):'')+'</div>'+
+          '</div>'+ img +
+          '<textarea class="cmt" placeholder="พิมพ์สิ่งที่เห็น เช่น ทะเบียนจริง / ยี่ห้อ-สี / ป้ายเลอะ-มุมมืด… (ใช้สอน AI)">'+
+            esc(e.comment||'')+'</textarea>'+
+          '<div class="cmt-actions"><button class="cmt-save">บันทึกคอมเมนต์</button>'+
+            '<span class="cmt-status"></span></div>'+
+        '</div>'; }).join('');
     }
 
     function acc(key, cls, title, count, inner){
@@ -335,11 +366,28 @@
 
     /* fix2 + fix5: accordion toggle + stat boxes navigate */
     elBody.addEventListener('click', function(e){
+      var save = e.target.closest('.cmt-save');
+      if(save){ saveComment(save.closest('.unread')); return; }
       var head = e.target.closest('.acc-head');
       if(head){ document.getElementById('sec-'+head.dataset.key).classList.toggle('open'); return; }
       var stat = e.target.closest('.stat');
       if(stat){ navTo(stat.dataset.target); }
     });
+    async function saveComment(card){
+      if(!card) return;
+      var s=getSession(); if(!s){ showLogin(); return; }
+      var eid=card.dataset.eid, txt=card.querySelector('.cmt').value,
+          btn=card.querySelector('.cmt-save'), st=card.querySelector('.cmt-status');
+      btn.disabled=true; st.style.color=''; st.textContent='กำลังบันทึก…';
+      try{
+        var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+          body:JSON.stringify({action:'lprLabel',houseNo:s.houseNo,pin:s.pin,eventId:eid,comment:txt,reportDate:elDate.value})});
+        var data=await res.json();
+        if(!res.ok||!data.ok) throw new Error(data&&data.error?data.error:('HTTP '+res.status));
+        st.style.color='var(--ok)'; st.textContent='✓ บันทึกแล้ว';
+      }catch(err){ st.style.color='var(--err)'; st.textContent='บันทึกไม่สำเร็จ: '+err.message; }
+      finally{ btn.disabled=false; setTimeout(function(){ if(st.textContent.indexOf('✓')===0) st.textContent=''; },3000); }
+    }
     function navTo(key){
       var sec=document.getElementById('sec-'+key); if(!sec) return;
       sec.classList.add('open');
