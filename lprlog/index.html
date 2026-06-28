@@ -102,21 +102,33 @@
     .acc.open .acc-body { display:block; }
 
     .item { display:flex; align-items:center; justify-content:space-between;
-      gap:10px; padding:12px 16px; border-bottom:1px solid var(--border-soft); }
+      gap:10px; padding:11px 16px; border-bottom:1px solid var(--border-soft); }
     .item:last-child { border-bottom:none; }
-    .it-main { min-width:0; }
-    .plate { font-family:'IBM Plex Mono', monospace; font-size:16px; font-weight:700;
-      color:var(--text); letter-spacing:0.02em; }
-    .it-sub { font-size:12.5px; color:var(--text-muted); margin-top:3px; line-height:1.45; }
+    .it-main { min-width:0; display:flex; align-items:center; gap:10px; }
+    .plate { display:inline-flex; align-items:center; justify-content:center;
+      min-width:82px; max-width:112px; height:30px; padding:0 10px;
+      border:1.5px solid #3f3529; border-radius:8px; background:#fffdf9;
+      font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:700;
+      color:var(--text); letter-spacing:0.02em; white-space:nowrap; line-height:1; }
+    .it-sub { min-width:0; font-size:13px; color:var(--text-muted); line-height:1.35;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .house { font-weight:700; color:var(--accent-text); }
     .brand { color:var(--text-soft); font-weight:600; }
     .color-th { color:var(--text-muted); }
 
     /* in/out block */
-    .io { text-align:right; white-space:nowrap; font-size:13px; line-height:1.5; min-width:84px; }
+    .io { text-align:right; white-space:nowrap; font-size:13.5px; line-height:1.2;
+      min-width:96px; font-weight:700; }
     .io-in { color:var(--ok); font-weight:600; }
     .io-out { color:var(--err); font-weight:600; }
-    .io .muted { color:var(--text-muted); font-weight:400; }
+    .io-arrow, .io .muted { color:var(--text-muted); font-weight:400; }
+    @media (max-width:390px) {
+      .item { gap:8px; padding-left:12px; padding-right:12px; }
+      .it-main { gap:8px; }
+      .plate { min-width:74px; padding:0 8px; font-size:13px; }
+      .it-sub { font-size:12.5px; }
+      .io { min-width:82px; font-size:13px; }
+    }
 
     .reason { font-size:13px; color:var(--err); font-weight:600; }
     .empty { padding:20px; text-align:center; color:var(--text-muted); font-size:13.5px; }
@@ -274,20 +286,24 @@
         '<span class="win">🕖 วันเริ่มนับ 07:00 น.'+(isToday?' (วันนี้ถึงปัจจุบัน)':'')+' · '+win+'</span>';
     }
 
-    /* in/out — always show both for clarity (fix4) */
+    function displayPlate(plate){
+      return String(plate||'').replace(/\s+/g,'');
+    }
+
+    /* in/out — compact single line */
     function ioBlock(r){
-      var inT = r.entryTime ? '<div class="io-in">↓ เข้า '+esc(r.entryTime)+'</div>'
-                            : '<div class="io-in muted">↓ เข้า —</div>';
-      var outT = r.exitTime ? '<div class="io-out">↑ ออก '+esc(r.exitTime)+'</div>'
-                            : '<div class="io-out muted">↑ ออก —</div>';
-      return '<div class="io">'+inT+outT+'</div>';
+      var inT = r.entryTime ? '<span class="io-in">'+esc(r.entryTime)+'</span>' :
+        '<span class="muted">—</span>';
+      var outT = r.exitTime ? '<span class="io-out">'+esc(r.exitTime)+'</span>' :
+        '<span class="muted">—</span>';
+      return '<div class="io">'+inT+' <span class="io-arrow">→</span> '+outT+'</div>';
     }
 
     function residentItems(rows){
       if(!rows.length) return '<div class="empty">ไม่มีรถลูกบ้านในวันนี้</div>';
       return rows.map(function(r){
         return '<div class="item"><div class="it-main">'+
-          '<span class="plate">'+esc(r.plate)+'</span>'+
+          '<span class="plate">'+esc(displayPlate(r.plate))+'</span>'+
           '<div class="it-sub">บ้าน <span class="house">'+(r.houses||[]).map(esc).join(', ')+'</span></div>'+
           '</div>'+ioBlock(r)+'</div>'; }).join('');
     }
@@ -302,7 +318,7 @@
             (cth?'<span class="color-th">'+(brand?' · ':'')+esc(cth)+'</span>':'')+'</div>'
           : '<div class="it-sub" style="opacity:.7">ไม่มีข้อมูลรถ</div>';
         return '<div class="item"><div class="it-main">'+
-          '<span class="plate">'+esc(r.plate)+'</span>'+carline+
+          '<span class="plate">'+esc(displayPlate(r.plate))+'</span>'+carline+
           '</div>'+ioBlock(r)+'</div>'; }).join('');
     }
     function unreadableItems(rows){
