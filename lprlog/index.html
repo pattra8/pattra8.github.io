@@ -23,62 +23,100 @@
       font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
       background:var(--bg); color:var(--text-body);
       min-height:100dvh; display:flex; justify-content:center;
-      padding:20px 16px 60px;
+      padding:18px 14px 70px;
     }
-    .wrap { width:100%; max-width:560px; }
-    header { text-align:center; margin:8px 0 18px; }
+    .wrap { width:100%; max-width:540px; }
+    .topbar { display:flex; justify-content:flex-end; margin-bottom:4px; }
+    .logout { font-size:12.5px; color:var(--text-muted); background:none; border:none;
+      cursor:pointer; text-decoration:underline; }
+    header { text-align:center; margin:6px 0 16px; }
     .title { font-size:23px; font-weight:700; color:var(--text); letter-spacing:-0.01em; }
-    .subtitle { font-size:13.5px; color:var(--text-muted); margin-top:5px; line-height:1.5; }
+    .subtitle { font-size:13px; color:var(--text-muted); margin-top:4px; line-height:1.5; }
 
     /* date bar */
-    .datebar { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+    .datebar { display:flex; gap:8px; align-items:center; }
     .datebar input[type=date] {
       flex:1; font-family:inherit; font-size:16px; font-weight:600;
       padding:12px 14px; border:1.5px solid var(--border); border-radius:12px;
-      background:var(--card); color:var(--text); box-shadow:var(--shadow);
+      background:var(--card); color:var(--text); box-shadow:var(--shadow); min-width:0;
     }
-    .navbtn {
-      font-family:inherit; font-size:18px; font-weight:700; line-height:1;
+    .navbtn { font-family:inherit; font-size:18px; font-weight:700; line-height:1;
       width:46px; min-width:46px; height:46px; border:1.5px solid var(--border);
       border-radius:12px; background:var(--card); color:var(--accent-text);
-      cursor:pointer; box-shadow:var(--shadow);
-    }
+      cursor:pointer; box-shadow:var(--shadow); }
     .navbtn:active { transform:scale(0.97); }
     .navbtn:disabled { opacity:0.4; cursor:default; }
+    .daycaption { text-align:center; font-size:13px; color:var(--text-soft); margin:10px 2px 2px; }
+    .daycaption .win { display:block; font-size:11.5px; color:var(--text-muted); margin-top:2px; }
 
-    /* stats */
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px; }
-    .stat { background:var(--card); border:1px solid var(--border); border-radius:12px;
-      padding:11px 6px; text-align:center; }
-    .stat-num { font-size:22px; font-weight:700; line-height:1; }
-    .stat-lbl { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.3; }
+    /* hero */
+    .hero { background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:16px 18px; margin:16px 0 10px; text-align:center; }
+    .hero-cap { font-size:13px; color:var(--text-soft); }
+    .hero-num { font-size:40px; font-weight:700; color:var(--text); line-height:1.05; margin-top:2px; }
+    .hero-unit { font-size:13px; color:var(--text-muted); margin-top:1px; }
+
+    /* stat boxes (clickable) */
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:8px; }
+    .stat { background:var(--card); border:1px solid var(--border); border-radius:13px;
+      padding:13px 6px 11px; text-align:center; cursor:pointer; position:relative;
+      transition:transform .06s, border-color .12s, box-shadow .12s; }
+    .stat:hover { border-color:var(--accent); box-shadow:var(--shadow); }
+    .stat:active { transform:scale(0.97); }
+    .stat-ico { font-size:17px; line-height:1; }
+    .stat-num { font-size:24px; font-weight:700; line-height:1.1; margin-top:3px; }
+    .stat-lbl { font-size:12px; color:var(--text-muted); margin-top:3px; line-height:1.3; }
+    .stat-go { font-size:10.5px; color:var(--accent-text); margin-top:5px; opacity:0.85; }
     .stat.res .stat-num { color:var(--ok); }
     .stat.vis .stat-num { color:var(--accent-text); }
     .stat.unk .stat-num { color:var(--err); }
-    .stat.all .stat-num { color:var(--text); }
 
-    /* sections */
-    .section { margin-bottom:22px; }
-    .sec-head { display:flex; align-items:baseline; gap:8px; margin:0 4px 9px; }
-    .sec-title { font-size:15.5px; font-weight:700; color:var(--text); }
-    .sec-count { font-size:12.5px; color:var(--text-muted); }
-    .list { background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); overflow:hidden; }
+    /* legend */
+    .legend { font-size:11.5px; color:var(--text-muted); line-height:1.6;
+      background:var(--bg-soft); border-radius:12px; padding:10px 13px; margin-bottom:20px; }
+    .legend b { color:var(--text-soft); font-weight:600; }
+
+    /* accordion */
+    .acc { background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); margin-bottom:12px; overflow:hidden; scroll-margin-top:14px; }
+    .acc.flash { animation:flash 1.1s ease; }
+    @keyframes flash { 0%,100%{ box-shadow:var(--shadow);} 30%{ box-shadow:0 0 0 3px var(--warn-bd, #e8b577);} }
+    .acc-head { width:100%; display:flex; align-items:center; justify-content:space-between;
+      gap:10px; padding:15px 16px; background:none; border:none; cursor:pointer;
+      font-family:inherit; text-align:left; }
+    .acc-title { font-size:15.5px; font-weight:700; color:var(--text); }
+    .acc-meta { display:flex; align-items:center; gap:10px; }
+    .acc-cnt { font-size:12.5px; font-weight:600; color:var(--text-muted);
+      background:var(--neutral-bg); padding:3px 9px; border-radius:999px; white-space:nowrap; }
+    .acc.res .acc-cnt { color:var(--ok); background:var(--ok-bg); }
+    .acc.vis .acc-cnt { color:var(--accent-text); background:var(--warn-bg); }
+    .acc.unk .acc-cnt { color:var(--err); background:var(--err-bg); }
+    .chev { font-size:13px; color:var(--text-muted); transition:transform .18s; }
+    .acc.open .chev { transform:rotate(90deg); }
+    .acc-body { display:none; border-top:1px solid var(--border-soft); }
+    .acc.open .acc-body { display:block; }
+
     .item { display:flex; align-items:center; justify-content:space-between;
-      gap:10px; padding:12px 14px; border-bottom:1px solid var(--border-soft); }
+      gap:10px; padding:12px 16px; border-bottom:1px solid var(--border-soft); }
     .item:last-child { border-bottom:none; }
     .it-main { min-width:0; }
     .plate { font-family:'IBM Plex Mono', monospace; font-size:16px; font-weight:700;
       color:var(--text); letter-spacing:0.02em; }
-    .it-sub { font-size:12.5px; color:var(--text-muted); margin-top:2px; line-height:1.4; }
-    .house { display:inline-block; font-weight:700; color:var(--accent-text); }
-    .times { text-align:right; white-space:nowrap; font-size:13px; }
-    .t-in { color:var(--ok); font-weight:600; }
-    .t-out { color:var(--err); font-weight:600; }
-    .t-dash { color:var(--text-muted); }
-    .badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 7px;
-      border-radius:999px; background:var(--neutral-bg); color:var(--neutral); margin-left:6px; }
-    .reason { font-size:12.5px; color:var(--err); }
+    .it-sub { font-size:12.5px; color:var(--text-muted); margin-top:3px; line-height:1.45; }
+    .house { font-weight:700; color:var(--accent-text); }
+    .tag-car { display:inline-flex; align-items:center; gap:5px; }
+    .swatch { width:10px; height:10px; border-radius:50%; border:1px solid rgba(0,0,0,0.15);
+      display:inline-block; vertical-align:-1px; }
+    .brand { color:var(--text-soft); font-weight:600; }
+    .color-th { color:var(--text-muted); }
+
+    /* in/out block */
+    .io { text-align:right; white-space:nowrap; font-size:13px; line-height:1.5; min-width:84px; }
+    .io-in { color:var(--ok); font-weight:600; }
+    .io-out { color:var(--err); font-weight:600; }
+    .io .muted { color:var(--text-muted); font-weight:400; }
+
+    .reason { font-size:13px; color:var(--err); font-weight:600; }
     .empty { padding:20px; text-align:center; color:var(--text-muted); font-size:13.5px; }
 
     /* login */
@@ -90,23 +128,18 @@
     .modal h2 { margin:0 0 4px; font-size:20px; color:var(--text); }
     .modal p { margin:0 0 18px; font-size:13px; color:var(--text-muted); line-height:1.5; }
     .field { margin-bottom:14px; }
-    .field label { display:block; font-size:12.5px; font-weight:600;
-      color:var(--text-soft); margin-bottom:6px; }
+    .field label { display:block; font-size:12.5px; font-weight:600; color:var(--text-soft); margin-bottom:6px; }
     .houserow { display:flex; align-items:stretch; border:1.5px solid var(--border);
-      border-radius:12px; overflow:hidden; background:var(--card); }
+      border-radius:12px; overflow:hidden; }
     .houserow .prefix { display:flex; align-items:center; padding:0 12px;
       background:var(--bg-soft); font-weight:700; color:var(--text-soft); font-size:16px; }
-    .houserow input, .pin-in {
-      width:100%; font-family:inherit; font-size:17px; font-weight:600;
-      padding:12px 12px; border:none; outline:none; color:var(--text); background:transparent;
-    }
+    .houserow input, .pin-in { width:100%; font-family:inherit; font-size:17px; font-weight:600;
+      padding:12px; border:none; outline:none; color:var(--text); background:transparent; }
     .pin-in { border:1.5px solid var(--border); border-radius:12px;
       letter-spacing:0.3em; font-family:'IBM Plex Mono', monospace; }
-    .houserow input:focus, .pin-in:focus { outline:none; }
     .field:focus-within .houserow, .pin-in:focus { border-color:var(--accent); }
     .btn { width:100%; font-family:inherit; font-size:17px; font-weight:600;
-      padding:15px; border:none; border-radius:12px; background:var(--accent);
-      color:#fff; cursor:pointer; }
+      padding:15px; border:none; border-radius:12px; background:var(--accent); color:#fff; cursor:pointer; }
     .btn:hover { background:var(--accent-deep); }
     .btn:disabled { opacity:0.55; cursor:default; }
     .modal-err { font-size:13px; color:var(--err); background:var(--err-bg);
@@ -114,16 +147,13 @@
     .modal-err.show { display:block; }
 
     .note { margin:8px 0; text-align:center; font-size:13.5px; color:var(--err);
-      background:var(--err-bg); border:1px solid var(--err-bg); border-radius:12px; padding:12px; }
+      background:var(--err-bg); border-radius:12px; padding:12px; }
     .loading { text-align:center; padding:40px 0; color:var(--text-muted); font-size:14px; }
     .spinner { display:inline-block; width:18px; height:18px;
       border:2.5px solid rgba(150,120,80,.3); border-top-color:var(--accent);
       border-radius:50%; animation:spin .7s linear infinite; vertical-align:-3px; margin-right:8px; }
     @keyframes spin { to { transform:rotate(360deg); } }
-    .topbar { display:flex; justify-content:flex-end; margin-bottom:6px; }
-    .logout { font-size:12.5px; color:var(--text-muted); background:none; border:none;
-      cursor:pointer; text-decoration:underline; }
-    footer { text-align:center; margin-top:30px; font-size:12px; color:var(--text-muted); }
+    footer { text-align:center; margin-top:28px; font-size:12px; color:var(--text-muted); }
   </style>
 </head>
 <body>
@@ -139,6 +169,7 @@
       <input id="date" type="date" />
       <button id="next" class="navbtn" title="วันถัดไป">›</button>
     </div>
+    <div id="daycap" class="daycaption"></div>
 
     <div id="body"></div>
 
@@ -152,10 +183,8 @@
       <div id="mErr" class="modal-err"></div>
       <div class="field">
         <label>บ้านเลขที่</label>
-        <div class="houserow">
-          <span class="prefix">38/</span>
-          <input id="mSuffix" type="text" inputmode="numeric" autocomplete="off" placeholder="8" />
-        </div>
+        <div class="houserow"><span class="prefix">38/</span>
+          <input id="mSuffix" type="text" inputmode="numeric" autocomplete="off" placeholder="8" /></div>
       </div>
       <div class="field">
         <label>PIN (6 หลัก)</label>
@@ -173,195 +202,201 @@
     var SESSION_KEY = 'pattra_resident_session_v1';
     var TTL = 30 * 24 * 60 * 60 * 1000;
 
-    var elBody = document.getElementById('body');
-    var elDate = document.getElementById('date');
-    var elPrev = document.getElementById('prev');
-    var elNext = document.getElementById('next');
-    var elOverlay = document.getElementById('overlay');
-    var elSuffix = document.getElementById('mSuffix');
-    var elPin = document.getElementById('mPin');
-    var elBtn = document.getElementById('mBtn');
-    var elMErr = document.getElementById('mErr');
-    var elLogout = document.getElementById('logout');
+    var elBody=document.getElementById('body'), elDate=document.getElementById('date'),
+        elPrev=document.getElementById('prev'), elNext=document.getElementById('next'),
+        elCap=document.getElementById('daycap'), elOverlay=document.getElementById('overlay'),
+        elSuffix=document.getElementById('mSuffix'), elPin=document.getElementById('mPin'),
+        elBtn=document.getElementById('mBtn'), elMErr=document.getElementById('mErr'),
+        elLogout=document.getElementById('logout');
 
     function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+
+      String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
-    function todayStr(){
-      var d = new Date();
-      return d.getFullYear() + '-' +
-        String(d.getMonth()+1).padStart(2,'0') + '-' +
-        String(d.getDate()).padStart(2,'0');
-    }
+    /* fix3: vehicle color → Thai (brand stays English) */
+    var COLOR_PHRASE={'dark blue':'น้ำเงินเข้ม','light blue':'ฟ้า','dark gray':'เทาเข้ม',
+      'dark grey':'เทาเข้ม','light gray':'เทาอ่อน','light grey':'เทาอ่อน','dark green':'เขียวเข้ม'};
+    var COLOR_TH={white:'ขาว',black:'ดำ',silver:'เงิน',gray:'เทา',grey:'เทา',red:'แดง',
+      blue:'น้ำเงิน',navy:'กรมท่า',green:'เขียว',yellow:'เหลือง',brown:'น้ำตาล',orange:'ส้ม',
+      gold:'ทอง',beige:'เบจ',cream:'ครีม',purple:'ม่วง',violet:'ม่วง',pink:'ชมพู',
+      maroon:'เลือดหมู',tan:'น้ำตาลอ่อน',bronze:'ทองแดง'};
+    var COLOR_HEX={ขาว:'#f5f5f5',ดำ:'#222',เงิน:'#c8ccce',เทา:'#9aa0a3','เทาเข้ม':'#5b6164',
+      แดง:'#c0392b','น้ำเงิน':'#274b8e','น้ำเงินเข้ม':'#1c2f52',ฟ้า:'#5da9e0',กรมท่า:'#1c2f52',
+      เขียว:'#3f8a4f','เขียวเข้ม':'#27502f',เหลือง:'#e8c24a','น้ำตาล':'#8a5a33',ส้ม:'#d2772c',
+      ทอง:'#c9a14a',เบจ:'#d8c9a8',ครีม:'#ece3cc',ม่วง:'#7a5299',ชมพู:'#d98ca6',
+      'เลือดหมู':'#6e2b29','น้ำตาลอ่อน':'#b89a72',ทองแดง:'#9c6b3f'};
+    function colorTh(c){ if(!c) return ''; var s=String(c).toLowerCase().trim();
+      if(COLOR_PHRASE[s]) return COLOR_PHRASE[s];
+      return s.split(/\s+/).map(function(w){return COLOR_TH[w]||w;}).join(' '); }
 
-    /* ── session ── */
-    function getSession(){
-      try {
-        var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-        if (!s || Number(s.expiresAt) <= Date.now()) return null;
-        return s;
-      } catch(e){ return null; }
-    }
-    function storeSession(houseNo, pin){
-      localStorage.setItem(SESSION_KEY, JSON.stringify({
-        houseNo: houseNo, pin: pin, expiresAt: Date.now()+TTL }));
-    }
-
-    function showLogin(msg){
-      elOverlay.classList.add('open');
-      elLogout.style.display = 'none';
-      if (msg){ elMErr.textContent = msg; elMErr.classList.add('show'); }
-      setTimeout(function(){ elSuffix.focus(); }, 80);
-    }
+    /* session */
+    function getSession(){ try{ var s=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
+      if(!s||Number(s.expiresAt)<=Date.now()) return null; return s; }catch(e){return null;} }
+    function storeSession(h,p){ localStorage.setItem(SESSION_KEY, JSON.stringify({
+      houseNo:h, pin:p, expiresAt:Date.now()+TTL })); }
+    function showLogin(msg){ elOverlay.classList.add('open'); elLogout.style.display='none';
+      if(msg){ elMErr.textContent=msg; elMErr.classList.add('show'); }
+      setTimeout(function(){ elSuffix.focus(); }, 80); }
     function hideLogin(){ elOverlay.classList.remove('open'); elMErr.classList.remove('show'); }
 
-    /* ── load ── */
-    function fmtTime(t){
-      return t ? '<span class="t-in">' + esc(t) + '</span>' : '<span class="t-dash">—</span>';
-    }
-    function dirTh(d){ return d==='entry'?'เข้า':d==='exit'?'ออก':esc(d||''); }
-
-    function inOut(row){
-      var inT = row.entryTime ? '<span class="t-in">เข้า '+esc(row.entryTime)+'</span>' : '';
-      var outT = row.exitTime ? '<span class="t-out">ออก '+esc(row.exitTime)+'</span>' : '';
-      if (!inT && !outT) return '<span class="t-dash">'+esc(row.firstTime||'—')+'</span>';
-      return [inT,outT].filter(Boolean).join('<br>');
-    }
-
-    function sectionResidents(rows){
-      var inner = rows.length ? rows.map(function(r){
-        return '<div class="item"><div class="it-main">' +
-          '<span class="plate">'+esc(r.plate)+'</span>' +
-          '<div class="it-sub">บ้าน <span class="house">'+(r.houses||[]).map(esc).join(', ')+'</span></div>' +
-          '</div><div class="times">'+inOut(r)+'</div></div>';
-      }).join('') : '<div class="empty">ไม่มีรถลูกบ้านในวันนี้</div>';
-      return secWrap('🏠 ลูกบ้าน เข้า-ออก', rows.length+' คัน', inner);
+    /* fix1: friendly date + coverage window caption */
+    function renderCaption(report){
+      var label='';
+      try { label = new Date(elDate.value+'T00:00:00').toLocaleDateString('en-GB',
+        {weekday:'long',day:'numeric',month:'long',year:'numeric'}); } catch(e){ label=elDate.value; }
+      var isToday = elDate.value >= todayStr();
+      var win = report && report.timeRange ? ('พบรถ '+esc(report.timeRange)+' น.') :
+        (isToday ? 'ยังไม่มีรถผ่านวันนี้' : 'ไม่มีข้อมูลวันนี้');
+      elCap.innerHTML = esc(label) +
+        '<span class="win">🕖 วันเริ่มนับ 07:00 น.'+(isToday?' (วันนี้ถึงปัจจุบัน)':'')+' · '+win+'</span>';
     }
 
-    function sectionVisitors(rows){
-      var inner = rows.length ? rows.map(function(r){
-        var v = r.vehicleVision || {};
-        var desc = [v.make, v.model].filter(Boolean).join(' ');
-        var color = v.color ? '<span class="badge">'+esc(v.color)+'</span>' : '';
-        var sub = desc || color ?
-          '<div class="it-sub">'+esc(desc||'—')+' '+color+'</div>' :
-          '<div class="it-sub" style="color:var(--text-muted)">ไม่มีข้อมูลรถ</div>';
-        return '<div class="item"><div class="it-main">' +
-          '<span class="plate">'+esc(r.plate)+'</span>'+sub +
-          '</div><div class="times">'+inOut(r)+'</div></div>';
-      }).join('') : '<div class="empty">ไม่มีรถภายนอกในวันนี้</div>';
-      return secWrap('🚗 รถภายนอก (visitor)', rows.length+' คัน', inner);
+    /* in/out — always show both for clarity (fix4) */
+    function ioBlock(r){
+      var inT = r.entryTime ? '<div class="io-in">↓ เข้า '+esc(r.entryTime)+'</div>'
+                            : '<div class="io-in muted">↓ เข้า —</div>';
+      var outT = r.exitTime ? '<div class="io-out">↑ ออก '+esc(r.exitTime)+'</div>'
+                            : '<div class="io-out muted">↑ ออก —</div>';
+      return '<div class="io">'+inT+outT+'</div>';
     }
 
-    function sectionUnreadable(rows){
-      var inner = rows.length ? rows.map(function(e){
-        return '<div class="item"><div class="it-main">' +
-          '<div class="reason">'+esc(e.reason||'อ่านไม่ออก')+'</div>' +
-          '<div class="it-sub">'+dirTh(e.direction)+' · กล้อง '+esc(e.cameraId||'-')+
-            (e.rawPlate?' · raw: '+esc(e.rawPlate):'')+'</div>' +
-          '</div><div class="times"><span class="t-dash">'+esc(e.time||'')+'</span></div></div>';
-      }).join('') : '<div class="empty">ไม่มีรายการสแกนไม่พบ 🎉</div>';
-      return secWrap('❓ สแกนไม่พบ', rows.length+' ครั้ง', inner);
+    function residentItems(rows){
+      if(!rows.length) return '<div class="empty">ไม่มีรถลูกบ้านในวันนี้</div>';
+      return rows.map(function(r){
+        return '<div class="item"><div class="it-main">'+
+          '<span class="plate">'+esc(r.plate)+'</span>'+
+          '<div class="it-sub">บ้าน <span class="house">'+(r.houses||[]).map(esc).join(', ')+'</span></div>'+
+          '</div>'+ioBlock(r)+'</div>'; }).join('');
+    }
+    function visitorItems(rows){
+      if(!rows.length) return '<div class="empty">ไม่มีรถภายนอกในวันนี้</div>';
+      return rows.map(function(r){
+        var v=r.vehicleVision||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
+        var cth=colorTh(v.color); var hex=COLOR_HEX[cth];
+        var sw = cth ? '<span class="swatch" style="background:'+(hex||'#ccc')+'"></span>' : '';
+        var carline = (brand||cth) ?
+          '<div class="it-sub tag-car">'+sw+
+            (brand?'<span class="brand">'+esc(brand)+'</span>':'')+
+            (cth?'<span class="color-th">'+(brand?' · ':'')+esc(cth)+'</span>':'')+'</div>'
+          : '<div class="it-sub" style="opacity:.7">ไม่มีข้อมูลรถ</div>';
+        return '<div class="item"><div class="it-main">'+
+          '<span class="plate">'+esc(r.plate)+'</span>'+carline+
+          '</div>'+ioBlock(r)+'</div>'; }).join('');
+    }
+    function unreadableItems(rows){
+      if(!rows.length) return '<div class="empty">ไม่มีรายการสแกนไม่พบ 🎉</div>';
+      return rows.map(function(e){
+        var dir = e.direction==='entry'?'เข้า':e.direction==='exit'?'ออก':esc(e.direction||'');
+        return '<div class="item"><div class="it-main">'+
+          '<div class="reason">'+esc(e.reason||'อ่านไม่ออก')+'</div>'+
+          '<div class="it-sub">'+dir+' · กล้อง '+esc(e.cameraId||'-')+
+            (e.rawPlate?' · raw: '+esc(e.rawPlate):'')+'</div>'+
+          '</div><div class="io"><span class="muted">'+esc(e.time||'')+'</span></div></div>'; }).join('');
     }
 
-    function secWrap(title, count, inner){
-      return '<div class="section"><div class="sec-head">' +
-        '<span class="sec-title">'+title+'</span>' +
-        '<span class="sec-count">'+esc(count)+'</span></div>' +
-        '<div class="list">'+inner+'</div></div>';
+    function acc(key, cls, title, count, inner){
+      return '<div class="acc '+cls+'" id="sec-'+key+'">'+
+        '<button class="acc-head" data-key="'+key+'">'+
+          '<span class="acc-title">'+title+'</span>'+
+          '<span class="acc-meta"><span class="acc-cnt">'+esc(count)+'</span>'+
+          '<span class="chev">▸</span></span>'+
+        '</button><div class="acc-body">'+inner+'</div></div>';
     }
 
+    var lastReport=null;
     function render(r){
-      var stats = '<div class="stats">' +
-        '<div class="stat all"><div class="stat-num">'+r.totalDetections+'</div><div class="stat-lbl">รวม<br>(ครั้ง)</div></div>' +
-        '<div class="stat res"><div class="stat-num">'+r.residentCars+'</div><div class="stat-lbl">ลูกบ้าน<br>(คัน)</div></div>' +
-        '<div class="stat vis"><div class="stat-num">'+r.externalCars+'</div><div class="stat-lbl">ภายนอก<br>(คัน)</div></div>' +
-        '<div class="stat unk"><div class="stat-num">'+r.unreadableDetections+'</div><div class="stat-lbl">สแกน<br>ไม่พบ</div></div>' +
+      lastReport=r; renderCaption(r);
+      var hero = '<div class="hero"><div class="hero-cap">รถผ่านเข้า-ออกทั้งหมด</div>'+
+        '<div class="hero-num">'+r.totalDetections+'</div>'+
+        '<div class="hero-unit">ครั้ง · นับทุกครั้งที่ผ่านกล้อง (เข้า+ออก)</div></div>';
+      var stats = '<div class="stats">'+
+        '<div class="stat res" data-target="res"><div class="stat-ico">🏠</div>'+
+          '<div class="stat-num">'+r.residentCars+'</div><div class="stat-lbl">ลูกบ้าน (คัน)</div>'+
+          '<div class="stat-go">ดูรายการ →</div></div>'+
+        '<div class="stat vis" data-target="vis"><div class="stat-ico">🚗</div>'+
+          '<div class="stat-num">'+r.externalCars+'</div><div class="stat-lbl">ภายนอก (คัน)</div>'+
+          '<div class="stat-go">ดูรายการ →</div></div>'+
+        '<div class="stat unk" data-target="unk"><div class="stat-ico">❓</div>'+
+          '<div class="stat-num">'+r.unreadableDetections+'</div><div class="stat-lbl">สแกนไม่พบ</div>'+
+          '<div class="stat-go">ดูรายการ →</div></div>'+
         '</div>';
-      elBody.innerHTML = stats +
-        sectionResidents(r.residentPlates||[]) +
-        sectionVisitors(r.externalPlates||[]) +
-        sectionUnreadable(r.unreadableEvents||[]);
+      var legend = '<div class="legend">'+
+        '<b>ครั้ง</b> = จำนวนการผ่านกล้อง (รถ 1 คัน เข้า+ออก = 2 ครั้ง) · '+
+        '<b>คัน</b> = จำนวนรถไม่ซ้ำ<br>'+
+        'เวลา <b style="color:var(--ok)">↓ เข้า</b> / <b style="color:var(--err)">↑ ออก</b> '+
+        '= เวลาแรกที่กล้องเห็นรถในทิศนั้น (“—” คือไม่พบทิศนั้น)</div>';
+      var sections =
+        acc('res','res','🏠 ลูกบ้าน เข้า-ออก', r.residentCars+' คัน', residentItems(r.residentPlates||[]))+
+        acc('vis','vis','🚗 รถภายนอก (visitor)', r.externalCars+' คัน', visitorItems(r.externalPlates||[]))+
+        acc('unk','unk','❓ สแกนไม่พบ', r.unreadableDetections+' ครั้ง', unreadableItems(r.unreadableEvents||[]));
+      elBody.innerHTML = hero + stats + legend + sections;
     }
 
-    function setNavState(){
-      elNext.disabled = (elDate.value >= todayStr());
+    /* fix2 + fix5: accordion toggle + stat boxes navigate */
+    elBody.addEventListener('click', function(e){
+      var head = e.target.closest('.acc-head');
+      if(head){ document.getElementById('sec-'+head.dataset.key).classList.toggle('open'); return; }
+      var stat = e.target.closest('.stat');
+      if(stat){ navTo(stat.dataset.target); }
+    });
+    function navTo(key){
+      var sec=document.getElementById('sec-'+key); if(!sec) return;
+      sec.classList.add('open');
+      sec.scrollIntoView({behavior:'smooth', block:'start'});
+      sec.classList.remove('flash'); void sec.offsetWidth; sec.classList.add('flash');
     }
+
+    function setNavState(){ elNext.disabled = (elDate.value >= todayStr()); }
 
     async function load(){
-      var session = getSession();
-      if (!session){ showLogin(); return; }
+      var s=getSession(); if(!s){ showLogin(); return; }
       setNavState();
-      elBody.innerHTML = '<div class="loading"><span class="spinner"></span>กำลังโหลด…</div>';
-      try {
-        var res = await fetch(API, {
-          method:'POST', headers:{'Content-Type':'application/json'}, cache:'no-store',
-          body: JSON.stringify({ action:'dailyLog', houseNo:session.houseNo,
-            pin:session.pin, reportDate: elDate.value })
-        });
-        if (res.status === 401 || res.status === 403){
-          localStorage.removeItem(SESSION_KEY);
-          showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
-          return;
-        }
-        var data = await res.json();
-        if (!res.ok || !data.ok) throw new Error(data && data.error ? data.error : ('HTTP '+res.status));
-        elLogout.style.display = 'inline';
-        render(data.report);
-      } catch(err){
-        elBody.innerHTML = '<div class="note">โหลดข้อมูลไม่สำเร็จ<br><small>'+esc(err.message)+'</small></div>';
-      }
+      elBody.innerHTML='<div class="loading"><span class="spinner"></span>กำลังโหลด…</div>';
+      try{
+        var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+          body:JSON.stringify({action:'dailyLog',houseNo:s.houseNo,pin:s.pin,reportDate:elDate.value})});
+        if(res.status===401||res.status===403){ localStorage.removeItem(SESSION_KEY);
+          showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return; }
+        var data=await res.json();
+        if(!res.ok||!data.ok) throw new Error(data&&data.error?data.error:('HTTP '+res.status));
+        elLogout.style.display='inline'; render(data.report);
+      }catch(err){ elBody.innerHTML='<div class="note">โหลดข้อมูลไม่สำเร็จ<br><small>'+esc(err.message)+'</small></div>'; }
     }
 
     async function doLogin(){
-      var suffix = (elSuffix.value||'').trim();
-      var pin = (elPin.value||'').trim();
+      var suf=(elSuffix.value||'').trim(), pin=(elPin.value||'').trim();
       elMErr.classList.remove('show');
-      if (!/^\d{1,2}$/.test(suffix)){ elMErr.textContent='กรอกเลขบ้านให้ถูกต้อง'; elMErr.classList.add('show'); return; }
-      if (pin.length !== 6){ elMErr.textContent='PIN ต้องมี 6 หลัก'; elMErr.classList.add('show'); return; }
-      elBtn.disabled = true; elBtn.textContent='กำลังตรวจสอบ…';
-      var houseNo = '38/'+suffix;
-      try {
-        var res = await fetch(API, {
-          method:'POST', headers:{'Content-Type':'application/json'}, cache:'no-store',
-          body: JSON.stringify({ action:'dailyLog', houseNo:houseNo, pin:pin, reportDate: elDate.value })
-        });
-        if (res.status===401 || res.status===403){
-          elMErr.textContent='เลขบ้าน/PIN ไม่ถูกต้อง หรือไม่มีสิทธิ์ดู LPR Log';
-          elMErr.classList.add('show'); return;
-        }
-        var data = await res.json();
-        if (!res.ok || !data.ok) throw new Error(data && data.error ? data.error : ('HTTP '+res.status));
-        storeSession(houseNo, pin);
-        hideLogin();
-        elLogout.style.display='inline';
-        render(data.report);
-      } catch(err){
-        elMErr.textContent='เชื่อมต่อไม่ได้: '+err.message; elMErr.classList.add('show');
-      } finally {
-        elBtn.disabled=false; elBtn.textContent='เข้าสู่ระบบ';
-      }
+      if(!/^\d{1,2}$/.test(suf)){ elMErr.textContent='กรอกเลขบ้านให้ถูกต้อง'; elMErr.classList.add('show'); return; }
+      if(pin.length!==6){ elMErr.textContent='PIN ต้องมี 6 หลัก'; elMErr.classList.add('show'); return; }
+      elBtn.disabled=true; elBtn.textContent='กำลังตรวจสอบ…';
+      var h='38/'+suf;
+      try{
+        var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+          body:JSON.stringify({action:'dailyLog',houseNo:h,pin:pin,reportDate:elDate.value})});
+        if(res.status===401||res.status===403){ elMErr.textContent='เลขบ้าน/PIN ไม่ถูกต้อง หรือไม่มีสิทธิ์ดู LPR Log';
+          elMErr.classList.add('show'); return; }
+        var data=await res.json();
+        if(!res.ok||!data.ok) throw new Error(data&&data.error?data.error:('HTTP '+res.status));
+        storeSession(h,pin); hideLogin(); elLogout.style.display='inline'; render(data.report);
+      }catch(err){ elMErr.textContent='เชื่อมต่อไม่ได้: '+err.message; elMErr.classList.add('show'); }
+      finally{ elBtn.disabled=false; elBtn.textContent='เข้าสู่ระบบ'; }
     }
 
     function shiftDay(delta){
-      var d = new Date(elDate.value + 'T00:00:00');
-      d.setDate(d.getDate()+delta);
-      var s = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      if (s > todayStr()) return;
-      elDate.value = s; load();
+      var d=new Date(elDate.value+'T00:00:00'); d.setDate(d.getDate()+delta);
+      var s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(s>todayStr()) return; elDate.value=s; load();
     }
 
-    elDate.value = todayStr();
-    elDate.max = todayStr();
+    elDate.value=todayStr(); elDate.max=todayStr();
     elDate.addEventListener('change', function(){ if(elDate.value>todayStr()) elDate.value=todayStr(); load(); });
     elPrev.addEventListener('click', function(){ shiftDay(-1); });
     elNext.addEventListener('click', function(){ shiftDay(1); });
     elBtn.addEventListener('click', doLogin);
     elPin.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
     elSuffix.addEventListener('keydown', function(e){ if(e.key==='Enter') elPin.focus(); });
-    elLogout.addEventListener('click', function(){
-      localStorage.removeItem(SESSION_KEY); showLogin();
-    });
+    elLogout.addEventListener('click', function(){ localStorage.removeItem(SESSION_KEY); showLogin(); });
 
     load();
   })();
