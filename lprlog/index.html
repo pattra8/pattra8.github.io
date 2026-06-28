@@ -104,9 +104,6 @@
       color:var(--text); letter-spacing:0.02em; }
     .it-sub { font-size:12.5px; color:var(--text-muted); margin-top:3px; line-height:1.45; }
     .house { font-weight:700; color:var(--accent-text); }
-    .tag-car { display:inline-flex; align-items:center; gap:5px; }
-    .swatch { width:10px; height:10px; border-radius:50%; border:1px solid rgba(0,0,0,0.15);
-      display:inline-block; vertical-align:-1px; }
     .brand { color:var(--text-soft); font-weight:600; }
     .color-th { color:var(--text-muted); }
 
@@ -220,15 +217,11 @@
     var COLOR_TH={white:'ขาว',black:'ดำ',silver:'เงิน',gray:'เทา',grey:'เทา',red:'แดง',
       blue:'น้ำเงิน',navy:'กรมท่า',green:'เขียว',yellow:'เหลือง',brown:'น้ำตาล',orange:'ส้ม',
       gold:'ทอง',beige:'เบจ',cream:'ครีม',purple:'ม่วง',violet:'ม่วง',pink:'ชมพู',
-      maroon:'เลือดหมู',tan:'น้ำตาลอ่อน',bronze:'ทองแดง'};
-    var COLOR_HEX={ขาว:'#f5f5f5',ดำ:'#222',เงิน:'#c8ccce',เทา:'#9aa0a3','เทาเข้ม':'#5b6164',
-      แดง:'#c0392b','น้ำเงิน':'#274b8e','น้ำเงินเข้ม':'#1c2f52',ฟ้า:'#5da9e0',กรมท่า:'#1c2f52',
-      เขียว:'#3f8a4f','เขียวเข้ม':'#27502f',เหลือง:'#e8c24a','น้ำตาล':'#8a5a33',ส้ม:'#d2772c',
-      ทอง:'#c9a14a',เบจ:'#d8c9a8',ครีม:'#ece3cc',ม่วง:'#7a5299',ชมพู:'#d98ca6',
-      'เลือดหมู':'#6e2b29','น้ำตาลอ่อน':'#b89a72',ทองแดง:'#9c6b3f'};
+      maroon:'เลือดหมู',tan:'น้ำตาลอ่อน',bronze:'ทองแดง',cyan:'ฟ้าอมเขียว',
+      turquoise:'ฟ้าอมเขียว',teal:'เขียวอมฟ้า'};
     function colorTh(c){ if(!c) return ''; var s=String(c).toLowerCase().trim();
-      if(COLOR_PHRASE[s]) return COLOR_PHRASE[s];
-      return s.split(/\s+/).map(function(w){return COLOR_TH[w]||w;}).join(' '); }
+      var th = COLOR_PHRASE[s] || s.split(/\s+/).map(function(w){return COLOR_TH[w]||w;}).join(' ');
+      return 'สี'+th; }
 
     /* session */
     function getSession(){ try{ var s=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
@@ -273,10 +266,9 @@
       if(!rows.length) return '<div class="empty">ไม่มีรถภายนอกในวันนี้</div>';
       return rows.map(function(r){
         var v=r.vehicleVision||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
-        var cth=colorTh(v.color); var hex=COLOR_HEX[cth];
-        var sw = cth ? '<span class="swatch" style="background:'+(hex||'#ccc')+'"></span>' : '';
+        var cth=colorTh(v.color);
         var carline = (brand||cth) ?
-          '<div class="it-sub tag-car">'+sw+
+          '<div class="it-sub tag-car">'+
             (brand?'<span class="brand">'+esc(brand)+'</span>':'')+
             (cth?'<span class="color-th">'+(brand?' · ':'')+esc(cth)+'</span>':'')+'</div>'
           : '<div class="it-sub" style="opacity:.7">ไม่มีข้อมูลรถ</div>';
