@@ -287,7 +287,8 @@
     }
 
     function displayPlate(plate){
-      return String(plate||'').replace(/\s+/g,'');
+      var compact = String(plate||'').replace(/\s+/g,'');
+      return compact.replace(/^(.+?)(\d{1,4})$/, '$1 $2');
     }
 
     /* in/out — compact single line */
