@@ -103,6 +103,7 @@
   /* ── SECTION HEADER ── */
   .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .section-title  { font-family:var(--font-display); font-size:21px; font-weight:600; color:var(--text-hi); letter-spacing:.01em; }
+  .section-title .title-month { font-family:var(--font-num); font-weight:600; font-size:0.92em; }
   .section-sub    { font-size:12px; color:var(--text-lo); margin-top:2px; }
 
   /* ── BUTTONS ── */
@@ -1401,7 +1402,8 @@ function renderMonthTxn() {
     q ? `ค้นหา: ${q}` : '',
   ].filter(Boolean);
   syncSearchUi('month');
-  document.getElementById('txnSectionTitle').textContent = `รายจ่ายเดือน ${MONTH_EN[mi]} ${yr}${filterLabels.length ? ' · ' + filterLabels.join(' · ') : ''}`;
+  const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
+  document.getElementById('txnSectionTitle').innerHTML = `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
   // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
   const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility;
   document.getElementById('recentList').innerHTML = me.length
@@ -2398,6 +2400,13 @@ function processFiles(files){
 }
 
 let ocrInFlight = false;
+// วันที่จากสลิปต้องไม่อยู่อนาคต และไม่เก่ากว่า ~1 ปี ไม่งั้นถือว่า OCR อ่านปีเพี้ยน ไม่เอามาทับ
+function isPlausibleSlipDate(d){
+  const t = new Date(d + 'T00:00:00').getTime();
+  if (!Number.isFinite(t)) return false;
+  const now = Date.now(), DAY = 86400000;
+  return t <= now + 2*DAY && t >= now - 366*DAY;
+}
 function fileToBase64(file){
   return new Promise((resolve, reject)=>{
     const reader = new FileReader();
@@ -2442,8 +2451,8 @@ async function tryAutofillFromSlip(file){
     if (data.memo && !titleEl.value.trim()){ titleEl.value = data.memo; filled.push('ชื่อรายจ่าย'); }
     const detailEl = document.getElementById('fDetail');
     if (data.payee && !detailEl.value.trim()){ detailEl.value = 'จ่ายให้: ' + data.payee; filled.push('รายละเอียด'); }
-    // วันที่: ใช้ตามสลิป (ทับค่า default = วันนี้)
-    if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date)){
+    // วันที่: ใช้ตามสลิป แต่เฉพาะเมื่อ "สมเหตุสมผล" (กัน OCR อ่านปีผิดแล้วทับวันที่)
+    if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date) && isPlausibleSlipDate(data.date)){
       const dateEl = document.getElementById('fDate');
       if (dateEl.value !== data.date){ dateEl.value = data.date; filled.push('วันที่'); }
     }
