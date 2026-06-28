@@ -26,7 +26,12 @@
       padding:18px 14px 70px;
     }
     .wrap { width:100%; max-width:540px; }
-    .topbar { display:flex; justify-content:flex-end; margin-bottom:4px; }
+    .navbar { display:flex; align-items:center; justify-content:space-between;
+      gap:10px; padding:10px 4px; margin-bottom:6px; border-bottom:1px solid var(--border-soft); }
+    .nav-home { display:inline-flex; align-items:center; gap:6px; font-size:14px;
+      font-weight:600; color:var(--accent-text); text-decoration:none; }
+    .nav-home:hover { color:var(--accent-deep); }
+    .nav-home .arrow { font-size:16px; line-height:1; }
     .logout { font-size:12.5px; color:var(--text-muted); background:none; border:none;
       cursor:pointer; text-decoration:underline; }
     header { text-align:center; margin:6px 0 16px; }
@@ -155,7 +160,10 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="topbar"><button id="logout" class="logout" style="display:none">ออกจากระบบ</button></div>
+    <div class="navbar">
+      <a class="nav-home" href="/"><span class="arrow">←</span> หน้าแรก</a>
+      <button id="logout" class="logout" style="display:none">ออกจากระบบ</button>
+    </div>
     <header>
       <div class="title">LPR Log รายวัน</div>
       <div class="subtitle">บันทึกรถเข้า-ออก แยกลูกบ้าน · รถภายนอก · สแกนไม่พบ</div>
