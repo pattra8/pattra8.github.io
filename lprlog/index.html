@@ -122,6 +122,7 @@
     .io-in { color:var(--ok); font-weight:600; }
     .io-out { color:var(--err); font-weight:600; }
     .io-arrow, .io .muted { color:var(--text-muted); font-weight:400; }
+    .nd { font-size:10px; opacity:.85; vertical-align:middle; }
     @media (max-width:390px) {
       .item { gap:8px; padding-left:12px; padding-right:12px; }
       .it-main { gap:8px; }
@@ -291,11 +292,20 @@
       return compact.replace(/^(.+?)(\d{1,4})$/, '$1 $2');
     }
 
+    /* 🌙 = ช่วงกลางคืน 00:00–07:00 (night card) · ☀️ = กลางวัน 07:00–23:59 (day card) */
+    function ndMark(t){
+      var m = /^(\d{1,2}):/.exec(String(t||''));
+      if(!m) return '';
+      var h = parseInt(m[1],10);
+      return (h<7) ? ' <span class="nd nd-night" title="ช่วงกลางคืน 00:00–07:00">🌙</span>'
+                   : ' <span class="nd nd-day" title="ช่วงกลางวัน 07:00–23:59">☀️</span>';
+    }
+
     /* in/out — compact single line */
     function ioBlock(r){
-      var inT = r.entryTime ? '<span class="io-in">'+esc(r.entryTime)+'</span>' :
+      var inT = r.entryTime ? '<span class="io-in">'+esc(r.entryTime)+'</span>'+ndMark(r.entryTime) :
         '<span class="muted">—</span>';
-      var outT = r.exitTime ? '<span class="io-out">'+esc(r.exitTime)+'</span>' :
+      var outT = r.exitTime ? '<span class="io-out">'+esc(r.exitTime)+'</span>'+ndMark(r.exitTime) :
         '<span class="muted">—</span>';
       return '<div class="io">'+inT+' <span class="io-arrow">→</span> '+outT+'</div>';
     }
@@ -333,7 +343,7 @@
         return '<div class="unread" data-eid="'+esc(e.eventId||'')+'">'+
           '<div class="unread-top">'+
             '<div class="reason">'+esc(e.reason||'อ่านไม่ออก')+'</div>'+
-            '<div class="unread-meta">'+esc(e.time||'')+'<br>'+dir+' · กล้อง '+esc(e.cameraId||'-')+
+            '<div class="unread-meta">'+esc(e.time||'')+ndMark(e.time)+'<br>'+dir+' · กล้อง '+esc(e.cameraId||'-')+
               (e.rawPlate?'<br>raw: '+esc(e.rawPlate):'')+'</div>'+
           '</div>'+ img +
           '<textarea class="cmt" placeholder="พิมพ์สิ่งที่เห็น เช่น ทะเบียนจริง / ยี่ห้อ-สี / ป้ายเลอะ-มุมมืด… (ใช้สอน AI)">'+
@@ -373,7 +383,9 @@
         '<b>ครั้ง</b> = จำนวนการผ่านกล้อง (รถ 1 คัน เข้า+ออก = 2 ครั้ง) · '+
         '<b>คัน</b> = จำนวนรถไม่ซ้ำ<br>'+
         'เวลา <b style="color:var(--ok)">↓ เข้า</b> / <b style="color:var(--err)">↑ ออก</b> '+
-        '= เวลาแรกที่กล้องเห็นรถในทิศนั้น (“—” คือไม่พบทิศนั้น)</div>';
+        '= เวลาแรกที่กล้องเห็นรถในทิศนั้น (“—” คือไม่พบทิศนั้น)<br>'+
+        '🌙 = ช่วงกลางคืน 00:00–07:00 (การ์ดกลางคืน) · '+
+        '☀️ = กลางวัน 07:00–23:59 (การ์ดกลางวัน)</div>';
       var sections =
         acc('res','res','🏠 ลูกบ้าน เข้า-ออก', r.residentCars+' คัน', residentItems(r.residentPlates||[]))+
         acc('vis','vis','🚗 รถภายนอก (visitor)', r.externalCars+' คัน', visitorItems(r.externalPlates||[]))+
