@@ -6,7 +6,7 @@
   <title>Visitor Intake · Pattra Villa 8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg:#f9f3e9; --card:#ffffff; --card-soft:#f3ecdd; --line:#e6dcc7;
@@ -23,16 +23,44 @@
     body {
       min-height:100dvh; background:linear-gradient(180deg,#f8f3e9 0%,var(--bg) 42%);
       color:var(--text); font-family:"IBM Plex Sans Thai", system-ui, sans-serif;
-      display:flex; justify-content:center; padding:18px 14px 70px;
+      padding:0 0 70px;
     }
-    .wrap { width:100%; max-width:760px; }
-    .top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:2px 0 18px; }
-    .home { color:var(--amber-text); text-decoration:none; font-weight:700; font-size:14px; }
-    .logout { display:none; border:0; background:transparent; color:var(--muted); text-decoration:underline; font:inherit; font-size:13px; cursor:pointer; }
-    header { margin:10px 0 18px; }
-    .eyebrow { color:var(--amber-text); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:12px; }
+    .wrap { width:100%; max-width:760px; margin:0 auto; padding:0 14px; }
+    /* ── Canonical Pattra Villa 8 header (matches pattra8.com) ── */
+    .site-header {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      background:var(--bg); border-bottom:1px solid var(--line);
+      padding:0 24px; height:68px; position:sticky; top:0; z-index:100;
+    }
+    .brand { display:flex; flex-direction:column; text-decoration:none; }
+    .brand-mark {
+      font-family:"Cormorant Garamond", serif; font-weight:700; font-size:21px;
+      color:var(--text); letter-spacing:.2em;
+    }
+    .brand-sub {
+      font-size:10px; color:var(--muted); letter-spacing:.18em;
+      text-transform:uppercase; margin-top:1px;
+    }
+    .header-actions { display:flex; align-items:center; gap:10px; }
+    .identity-pill {
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+      background:var(--amber-bg); border:1px solid #d4913f; border-radius:99px;
+      padding:4px 14px 4px 6px; white-space:nowrap;
+    }
+    .pill-avatar {
+      width:28px; height:28px; border-radius:50%; flex-shrink:0;
+      background:var(--amber); color:#fff; display:flex; align-items:center;
+      justify-content:center; font-size:.8rem; font-weight:800;
+    }
+    .pill-house { font-size:.8rem; font-weight:700; color:var(--text); line-height:1.2; }
+    .pill-name { font-size:.72rem; color:var(--muted); line-height:1.2; }
+    .hero { text-align:center; margin:22px 0 4px; }
+    .ornament { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; }
+    .o-line { width:56px; height:1px; background:linear-gradient(90deg,transparent,var(--amber)); }
+    .o-line.r { background:linear-gradient(90deg,var(--amber),transparent); }
+    .o-diamond { width:6px; height:6px; background:var(--amber); transform:rotate(45deg); opacity:.8; }
     h1 { margin:3px 0 4px; font-size:30px; line-height:1.1; letter-spacing:-.03em; }
-    .sub { margin:0; color:var(--muted); font-size:14px; line-height:1.55; }
+    .sub { margin:0 auto; color:var(--muted); font-size:14px; line-height:1.55; max-width:560px; }
     .toolbar { display:flex; gap:10px; align-items:center; margin:16px 0 14px; }
     .navbtn {
       flex:0 0 auto; border:1.5px solid var(--line); border-radius:14px;
@@ -112,16 +140,19 @@
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <div class="brand-mark">Pattra Villa 8</div>
+      <div class="brand-sub">Resident Services</div>
+    </a>
+    <div class="header-actions"><div id="headerIdentity"></div></div>
+  </header>
   <div class="wrap">
-    <div class="top">
-      <a class="home" href="/">← หน้าแรก</a>
-      <button id="logout" class="logout">ออกจากระบบ</button>
-    </div>
-    <header>
-      <div class="eyebrow">Pattra Villa 8</div>
+    <section class="hero">
+      <div class="ornament"><span class="o-line"></span><span class="o-diamond"></span><span class="o-line r"></span></div>
       <h1>Visitor Intake</h1>
       <p class="sub">ข้อมูล Visitor จาก รปภ: บ้านที่ไป เหตุผล รูปเอกสาร และรูปรถ/ทะเบียน · เฉพาะกรรมการ</p>
-    </header>
+    </section>
     <div class="toolbar">
       <button id="prev" class="navbtn" aria-label="วันก่อนหน้า">‹</button>
       <input id="date" type="date" />
@@ -161,13 +192,25 @@
       elStats=document.getElementById('stats'), elList=document.getElementById('list'),
       elOverlay=document.getElementById('overlay'), elHouse=document.getElementById('house'),
       elPin=document.getElementById('pin'), elLogin=document.getElementById('login'),
-      elErr=document.getElementById('merr'), elLogout=document.getElementById('logout');
+      elErr=document.getElementById('merr'), elIdentity=document.getElementById('headerIdentity');
 
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function residentName(houseNo){try{var r=JSON.parse(localStorage.getItem('pattra_resident_session_v1')||'null'); if(r&&r.houseNo===houseNo&&r.residentName) return r.residentName;}catch(e){} return '';}
+    function renderIdentity(s){
+      if(!s){elIdentity.innerHTML=''; return;}
+      var name=residentName(s.houseNo);
+      var initial=((name||s.houseNo||'').match(/[\dA-Za-z฀-๿]/)||['P'])[0].toUpperCase();
+      elIdentity.innerHTML='<div class="identity-pill" id="idPill" title="ออกจากระบบ">'+
+        '<div class="pill-avatar">'+esc(initial)+'</div><div>'+
+        '<div class="pill-house">บ้าน '+esc(s.houseNo)+'</div>'+
+        '<div class="pill-name">'+esc(name||'กรรมการ')+'</div></div></div>';
+      var p=document.getElementById('idPill');
+      if(p) p.addEventListener('click',function(){localStorage.removeItem(KEY); renderIdentity(null); showLogin();});
+    }
     function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
     function session(){try{var s=JSON.parse(localStorage.getItem(KEY)||'null'); if(!s||s.expiresAt<Date.now()) return null; return s;}catch(e){return null;}}
     function store(h,p){localStorage.setItem(KEY,JSON.stringify({houseNo:h,pin:p,expiresAt:Date.now()+TTL}));}
-    function showLogin(msg){elOverlay.classList.add('open'); elLogout.style.display='none'; if(msg){elErr.textContent=msg; elErr.classList.add('show');} setTimeout(function(){elHouse.focus();},80);}
+    function showLogin(msg){elOverlay.classList.add('open'); renderIdentity(null); if(msg){elErr.textContent=msg; elErr.classList.add('show');} setTimeout(function(){elHouse.focus();},80);}
     function hideLogin(){elOverlay.classList.remove('open'); elErr.classList.remove('show');}
     function fmtTs(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return ''; return new Date(ms).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'});}catch(e){return '';}}
     function statusLabel(s){return s==='complete'?'ครบแล้ว':s==='pending_text'?'รอข้อความ':s==='pending_image'?'รอรูป':'รอตรวจ';}
@@ -230,7 +273,7 @@
       elReload.disabled=true; elList.innerHTML='<div class="loading"><span class="spinner"></span>กำลังโหลด Visitor Intake…</div>';
       try{
         var data=await call({action:'list',houseNo:s.houseNo,pin:s.pin,visitDate:elDate.value});
-        elLogout.style.display='inline'; renderStats(data.stats||{}); render(data.records||[]);
+        renderIdentity(s); renderStats(data.stats||{}); render(data.records||[]);
       }catch(err){
         if(err.status===401||err.status===403){localStorage.removeItem(KEY); showLogin('เลขบ้าน/PIN ไม่ถูกต้อง หรือไม่มีสิทธิ์กรรมการ'); elList.innerHTML=''; return;}
         elList.innerHTML='<div class="note err">โหลดข้อมูลไม่สำเร็จ<br><small>'+esc(err.message)+'</small></div>';
@@ -268,7 +311,6 @@
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});
-    elLogout.addEventListener('click',function(){localStorage.removeItem(KEY); showLogin();});
     load();
   })();
   </script>
