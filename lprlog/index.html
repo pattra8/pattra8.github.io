@@ -283,7 +283,7 @@
       var win = report && report.timeRange ? ('พบรถ '+esc(report.timeRange)+' น.') :
         (isToday ? 'ยังไม่มีรถผ่านวันนี้' : 'ไม่มีข้อมูลวันนี้');
       elCap.innerHTML = esc(label) +
-        '<span class="win">🕖 วันเริ่มนับ 07:00 น.'+(isToday?' (วันนี้ถึงปัจจุบัน)':'')+' · '+win+'</span>';
+        '<span class="win">🕛 ทั้งวัน 00:00–23:59 น.'+(isToday?' (ถึงปัจจุบัน)':'')+' · '+win+'</span>';
     }
 
     function displayPlate(plate){
