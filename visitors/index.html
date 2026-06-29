@@ -171,7 +171,7 @@
     function hideLogin(){elOverlay.classList.remove('open'); elErr.classList.remove('show');}
     function fmtTs(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return ''; return new Date(ms).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'});}catch(e){return '';}}
     function statusLabel(s){return s==='complete'?'ครบแล้ว':s==='pending_text'?'รอข้อความ':s==='pending_image'?'รอรูป':'รอตรวจ';}
-    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'พัสดุ/ขนส่ง',pickup:'รถรับ-ส่ง',contractor:'ช่าง/ผู้รับเหมา',utility:'งานสาธารณูปโภค (ไฟ/ประปา)',guest:'ญาติ/แขกมาเยี่ยม',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
+    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'พัสดุ/ขนส่ง',pickup:'รถรับ-ส่ง',contractor:'ช่าง/ผู้รับเหมา',utility:'งานสาธารณูปโภค (ไฟ/ประปา)',office:'ติดต่อนิติบุคคล',guest:'ญาติ/แขกมาเยี่ยม',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'เอกสาร':k==='vehicle'?'รถ/ทะเบียน':'อื่น ๆ';}
     function plateText(v){return String(v||'').replace(/\s+/g,'').replace(/^(.+?)(\d{1,4})$/,'$1 $2');}
 
