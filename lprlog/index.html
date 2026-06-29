@@ -157,6 +157,37 @@
     .cmt-save:disabled { opacity:.55; cursor:default; }
     .cmt-status { font-size:12.5px; color:var(--ok); font-weight:600; }
 
+    /* tappable row → photo evidence */
+    .item.tap { cursor:pointer; transition:background .12s; }
+    .item.tap:hover, .item.tap:active { background:var(--bg-soft); }
+    .row-go { color:var(--text-muted); font-size:17px; font-weight:700; line-height:1;
+      margin-left:-2px; flex:none; }
+
+    /* photo evidence lightbox */
+    .pbx { position:fixed; inset:0; background:rgba(40,30,18,0.55);
+      display:none; align-items:flex-start; justify-content:center;
+      padding:24px 14px; z-index:60; overflow-y:auto; }
+    .pbx.open { display:flex; }
+    .pbx-card { background:var(--card); border-radius:18px; width:100%; max-width:420px;
+      box-shadow:var(--shadow); padding:18px 18px 20px; position:relative; }
+    .pbx-x { position:absolute; top:12px; right:12px; width:32px; height:32px;
+      border:none; border-radius:50%; background:var(--bg-soft); color:var(--text-soft);
+      font-size:15px; cursor:pointer; line-height:1; }
+    .pbx-x:hover { background:var(--neutral-bg); }
+    .pbx-head { display:flex; flex-direction:column; gap:3px; margin:2px 36px 14px 2px; }
+    .pbx-plate { font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:700;
+      color:var(--text); letter-spacing:0.02em; }
+    .pbx-sub { font-size:13px; color:var(--text-muted); }
+    .pbx-item { margin-bottom:14px; }
+    .pbx-item:last-child { margin-bottom:0; }
+    .pbx-cap { font-size:13px; font-weight:600; margin-bottom:6px; }
+    .pbx-cap .pbx-time { color:var(--text-muted); font-weight:400; font-size:12.5px; }
+    .pbx-img { display:block; width:100%; border-radius:12px; border:1px solid var(--border); }
+    .pbx-noimg { font-size:12.5px; color:var(--text-muted); background:var(--bg-soft);
+      border-radius:12px; padding:20px; text-align:center; }
+    .pbx-empty { font-size:13.5px; color:var(--text-muted); text-align:center; padding:24px 0; }
+    .pbx-foot { font-size:11.5px; color:var(--text-muted); text-align:center; margin-top:6px; }
+
     /* login */
     .overlay { position:fixed; inset:0; background:rgba(40,30,18,0.45);
       display:none; align-items:center; justify-content:center; padding:20px; z-index:50; }
@@ -236,6 +267,15 @@
     </div>
   </div>
 
+  <div id="photobox" class="pbx">
+    <div class="pbx-card">
+      <button id="pbxX" class="pbx-x" title="ปิด">✕</button>
+      <div id="pbxHead" class="pbx-head"></div>
+      <div id="pbxBody" class="pbx-body"></div>
+      <div class="pbx-foot">แตะรูปเพื่อเปิดเต็มจอ · ภาพจากกล้องเก็บไว้เป็นหลักฐาน</div>
+    </div>
+  </div>
+
   <script>
   (function () {
     'use strict';
@@ -303,13 +343,17 @@
       return '<div class="io">'+inT+' <span class="io-arrow">→</span> '+outT+'</div>';
     }
 
+    /* photo-evidence registry: maps a row to a click id (rebuilt each render) */
+    var CAPS={}, capSeq=0;
+    function regRow(r){ var id='c'+(capSeq++); CAPS[id]=r; return id; }
+
     function residentItems(rows){
       if(!rows.length) return '<div class="empty">ไม่มีรถลูกบ้านในวันนี้</div>';
       return rows.map(function(r){
-        return '<div class="item"><div class="it-main">'+
+        return '<div class="item tap" data-cap="'+regRow(r)+'"><div class="it-main">'+
           '<span class="plate">'+esc(displayPlate(r.plate))+'</span>'+
           '<div class="it-sub">บ้าน <span class="house">'+(r.houses||[]).map(esc).join(', ')+'</span></div>'+
-          '</div>'+ioBlock(r)+'</div>'; }).join('');
+          '</div>'+ioBlock(r)+'<span class="row-go">›</span></div>'; }).join('');
     }
     function visitorItems(rows){
       if(!rows.length) return '<div class="empty">ไม่มีรถภายนอกในวันนี้</div>';
@@ -321,9 +365,9 @@
             (brand?'<span class="brand">'+esc(brand)+'</span>':'')+
             (cth?'<span class="color-th">'+(brand?' · ':'')+esc(cth)+'</span>':'')+'</div>'
           : '<div class="it-sub" style="opacity:.7">ไม่มีข้อมูลรถ</div>';
-        return '<div class="item"><div class="it-main">'+
+        return '<div class="item tap" data-cap="'+regRow(r)+'"><div class="it-main">'+
           '<span class="plate">'+esc(displayPlate(r.plate))+'</span>'+carline+
-          '</div>'+ioBlock(r)+'</div>'; }).join('');
+          '</div>'+ioBlock(r)+'<span class="row-go">›</span></div>'; }).join('');
     }
     function unreadableItems(rows){
       if(!rows.length) return '<div class="empty">ไม่มีรายการสแกนไม่พบ 🎉</div>';
@@ -357,7 +401,7 @@
 
     var lastReport=null;
     function render(r){
-      lastReport=r; renderCaption(r);
+      lastReport=r; renderCaption(r); CAPS={}; capSeq=0;
       var hero = '<div class="hero"><div class="hero-cap">รถผ่านเข้า-ออกทั้งหมด</div>'+
         '<div class="hero-num">'+r.totalDetections+'</div>'+
         '<div class="hero-unit">ครั้ง · นับทุกครั้งที่ผ่านกล้อง (เข้า+ออก)</div></div>';
@@ -393,9 +437,46 @@
       if(save){ saveComment(save.closest('.unread')); return; }
       var head = e.target.closest('.acc-head');
       if(head){ document.getElementById('sec-'+head.dataset.key).classList.toggle('open'); return; }
+      var item = e.target.closest('.item.tap');
+      if(item){ var id=item.getAttribute('data-cap'); if(id&&CAPS[id]) openPhotos(CAPS[id]); return; }
       var stat = e.target.closest('.stat');
       if(stat){ navTo(stat.dataset.target); }
     });
+
+    /* photo evidence lightbox */
+    var elPbx=document.getElementById('photobox'),
+        elPbxHead=document.getElementById('pbxHead'),
+        elPbxBody=document.getElementById('pbxBody');
+    function closePhotos(){ elPbx.classList.remove('open'); elPbxBody.innerHTML=''; }
+    function openPhotos(r){
+      var caps=(r&&r.captures)||[];
+      var v=(r&&r.vehicleVision)||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
+      var cth=colorTh(v.color);
+      var sub=[brand,cth].filter(Boolean).join(' · ');
+      var head='<span class="pbx-plate">'+esc(displayPlate(r.plate))+'</span>';
+      if(r.houses&&r.houses.length) head+='<span class="pbx-sub">บ้าน '+r.houses.map(esc).join(', ')+'</span>';
+      if(sub) head+='<span class="pbx-sub">'+esc(sub)+'</span>';
+      elPbxHead.innerHTML=head;
+      if(!caps.length){
+        elPbxBody.innerHTML='<div class="pbx-empty">ไม่มีภาพสำหรับรายการนี้</div>';
+      } else {
+        elPbxBody.innerHTML=caps.map(function(c){
+          var dirCls=c.direction==='entry'?'io-in':c.direction==='exit'?'io-out':'';
+          var meta=(c.time?esc(c.time)+' น.':'')+(c.cameraId?' · กล้อง '+esc(c.cameraId):'');
+          var cap='<div class="pbx-cap"><span class="'+dirCls+'">'+esc(c.label||'')+'</span> '+
+            '<span class="pbx-time">'+meta+'</span></div>';
+          var img=c.imageUrl ?
+            '<a href="'+esc(c.imageUrl)+'" target="_blank" rel="noopener">'+
+              '<img class="pbx-img" src="'+esc(c.imageUrl)+'" alt="ภาพรถจากกล้อง" loading="lazy"></a>'
+            : '<div class="pbx-noimg">⏳ ยังไม่มีภาพ (ระบบกำลังดึงจากกล้อง ~15 นาที)</div>';
+          return '<div class="pbx-item">'+cap+img+'</div>';
+        }).join('');
+      }
+      elPbx.classList.add('open');
+    }
+    document.getElementById('pbxX').addEventListener('click', closePhotos);
+    elPbx.addEventListener('click', function(e){ if(e.target===elPbx) closePhotos(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'&&elPbx.classList.contains('open')) closePhotos(); });
     async function saveComment(card){
       if(!card) return;
       var s=getSession(); if(!s){ showLogin(); return; }
