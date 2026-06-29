@@ -9,12 +9,14 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:#f7f4ee; --card:#fff; --card-soft:#fbf7ef; --line:#e6dccb;
-      --line-soft:#efe7d8; --text:#241f18; --muted:#7a6e60;
-      --soft:#9a8b78; --green:#17623d; --green-bg:#e6f0e8;
-      --amber:#a45b12; --amber-bg:#faead6; --red:#a72a20; --red-bg:#f8e0dc;
-      --blue:#235a7d; --blue-bg:#e4eff5; --shadow:0 10px 30px rgba(55,40,20,.08);
-      --radius:18px;
+      --bg:#f9f3e9; --card:#ffffff; --card-soft:#f3ecdd; --line:#e6dcc7;
+      --line-soft:#efe8d6; --text:#2a2218; --muted:#6b5d4a;
+      --soft:#8a7960; --green:#3f6431; --green-bg:#e8efd9;
+      --amber:#c47a2c; --amber-text:#9a5c1f; --amber-deep:#855015;
+      --amber-bg:#f7e6cd; --red:#86341e; --red-bg:#f7dfd5;
+      --blue:#235a7d; --blue-bg:#e4eff5;
+      --shadow:0 1px 2px rgba(60,40,20,.04), 0 8px 24px rgba(60,40,20,.07);
+      --radius:16px;
     }
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html, body { margin:0; padding:0; }
@@ -25,13 +27,20 @@
     }
     .wrap { width:100%; max-width:760px; }
     .top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:2px 0 18px; }
-    .home { color:var(--amber); text-decoration:none; font-weight:700; font-size:14px; }
+    .home { color:var(--amber-text); text-decoration:none; font-weight:700; font-size:14px; }
     .logout { display:none; border:0; background:transparent; color:var(--muted); text-decoration:underline; font:inherit; font-size:13px; cursor:pointer; }
     header { margin:10px 0 18px; }
-    .eyebrow { color:var(--amber); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:12px; }
+    .eyebrow { color:var(--amber-text); font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:12px; }
     h1 { margin:3px 0 4px; font-size:30px; line-height:1.1; letter-spacing:-.03em; }
     .sub { margin:0; color:var(--muted); font-size:14px; line-height:1.55; }
     .toolbar { display:flex; gap:10px; align-items:center; margin:16px 0 14px; }
+    .navbtn {
+      flex:0 0 auto; border:1.5px solid var(--line); border-radius:14px;
+      background:var(--card); color:var(--amber-text); width:46px; height:46px;
+      font:inherit; font-size:22px; font-weight:700; line-height:1; cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+    .navbtn:disabled { opacity:.4; cursor:default; }
     input[type=date] {
       flex:1; min-width:0; border:1.5px solid var(--line); border-radius:14px;
       background:var(--card); color:var(--text); padding:12px 14px; font:inherit;
@@ -40,14 +49,14 @@
     .btn {
       border:0; border-radius:14px; background:var(--amber); color:#fff;
       padding:13px 17px; font:inherit; font-weight:700; cursor:pointer;
-      box-shadow:0 8px 22px rgba(164,91,18,.18); white-space:nowrap;
+      box-shadow:0 8px 22px rgba(196,122,44,.20); white-space:nowrap;
     }
     .btn:disabled { opacity:.55; cursor:default; }
     .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0; }
     .stat { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 10px; box-shadow:var(--shadow); }
     .stat .n { font-size:26px; line-height:1; font-weight:800; }
     .stat .l { margin-top:5px; color:var(--muted); font-size:12.5px; }
-    .ok .n { color:var(--green); } .pending .n { color:var(--amber); } .plate .n { color:var(--blue); }
+    .ok .n { color:var(--green); } .pending .n { color:var(--amber-text); } .plate .n { color:var(--blue); }
     .list { display:grid; gap:12px; margin-top:14px; }
     .card {
       background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
@@ -59,7 +68,7 @@
     .time { color:var(--soft); font-size:13px; white-space:nowrap; text-align:right; }
     .badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:3px 9px; font-size:12px; font-weight:700; margin-top:7px; }
     .badge.complete { color:var(--green); background:var(--green-bg); }
-    .badge.pending_text, .badge.pending_image, .badge.unknown { color:var(--amber); background:var(--amber-bg); }
+    .badge.pending_text, .badge.pending_image, .badge.unknown { color:var(--amber-deep); background:var(--amber-bg); }
     .body { padding:14px 16px 16px; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .info { background:var(--card-soft); border:1px solid var(--line-soft); border-radius:14px; padding:11px 12px; min-height:78px; }
@@ -77,7 +86,7 @@
     }
     .note.err { color:var(--red); background:var(--red-bg); border-color:#efc5bf; }
     .loading { color:var(--muted); text-align:center; padding:34px 0; }
-    .spinner { display:inline-block; width:18px; height:18px; margin-right:8px; vertical-align:-4px; border:2.5px solid rgba(164,91,18,.22); border-top-color:var(--amber); border-radius:50%; animation:spin .8s linear infinite; }
+    .spinner { display:inline-block; width:18px; height:18px; margin-right:8px; vertical-align:-4px; border:2.5px solid rgba(196,122,44,.22); border-top-color:var(--amber); border-radius:50%; animation:spin .8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .overlay { position:fixed; inset:0; background:rgba(35,26,16,.48); display:none; align-items:center; justify-content:center; padding:20px; z-index:20; }
     .overlay.open { display:flex; }
@@ -114,12 +123,14 @@
       <p class="sub">ข้อมูล Visitor จาก รปภ: บ้านที่ไป เหตุผล รูปเอกสาร และรูปรถ/ทะเบียน · เฉพาะกรรมการ</p>
     </header>
     <div class="toolbar">
+      <button id="prev" class="navbtn" aria-label="วันก่อนหน้า">‹</button>
       <input id="date" type="date" />
+      <button id="next" class="navbtn" aria-label="วันถัดไป">›</button>
       <button id="reload" class="btn">โหลด</button>
     </div>
     <div id="stats" class="stats" style="display:none"></div>
     <main id="list"></main>
-    <footer>รูปเป็น signed URL ชั่วคราว · รูปเต็มเก็บ 30 วัน / metadata 60 วัน</footer>
+    <footer>เฉพาะกรรมการ · รูปเต็มเก็บ 90 วัน / ข้อมูล OCR 365 วัน</footer>
   </div>
 
   <div id="overlay" class="overlay">
@@ -146,6 +157,7 @@
     var KEY='pattra_visitor_intake_session_v1';
     var TTL=30*24*60*60*1000;
     var elDate=document.getElementById('date'), elReload=document.getElementById('reload'),
+      elPrev=document.getElementById('prev'), elNext=document.getElementById('next'),
       elStats=document.getElementById('stats'), elList=document.getElementById('list'),
       elOverlay=document.getElementById('overlay'), elHouse=document.getElementById('house'),
       elPin=document.getElementById('pin'), elLogin=document.getElementById('login'),
@@ -200,8 +212,8 @@
               (vc.vehicleType?'<br>'+esc(vc.vehicleType):'')+
             '</div></div>'+
             '<div class="info"><div class="label">ข้อความ รปภ</div><div class="value">'+esc(raw||'—')+'</div></div>'+
-            '<div class="info"><div class="label">Retention</div><div class="value">'+
-              (r.imagesPurged?'ลบรูปเต็มแล้ว':'รูปเต็มยังอยู่')+'<br>ไม่ link LPR ใน phase 1</div></div>'+
+            '<div class="info"><div class="label">การเก็บรูป</div><div class="value">'+
+              (r.imagesPurged?'ลบรูปแล้ว (พ้น 90 วัน)':'เก็บรูปไว้ 90 วัน')+'</div></div>'+
           '</div>'+
           '<div class="gallery">'+(imgs.length?imgs.map(function(img){
             var meta=img.analysis||{};
@@ -239,9 +251,20 @@
       finally{elLogin.disabled=false; elLogin.textContent='เข้าสู่ระบบ';}
     }
 
-    elDate.value=today(); elDate.max=today();
+    function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); }
+    function shiftDate(delta){
+      var base=elDate.value||today(); var d=new Date(base+'T00:00:00');
+      d.setDate(d.getDate()+delta);
+      var v=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(v>today()) v=today();
+      elDate.value=v; syncNav(); load();
+    }
+
+    elDate.value=today(); elDate.max=today(); syncNav();
     elReload.addEventListener('click',load);
-    elDate.addEventListener('change',load);
+    elDate.addEventListener('change',function(){syncNav(); load();});
+    elPrev.addEventListener('click',function(){shiftDate(-1);});
+    elNext.addEventListener('click',function(){shiftDate(1);});
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});
