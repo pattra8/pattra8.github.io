@@ -856,7 +856,11 @@
       return n + ' B';
     }
     function normalizeDocTitle(title) {
-      return String(title || '').replace(/\s*\(\d+\)\s*$/, '').trim();
+      return String(title || '').replace(/(?:\s*\(\d+\)\s*)+$/, '').trim();
+    }
+    function docTitleSuffix(title) {
+      const m = String(title || '').match(/\((\d+)\)\s*$/);
+      return m ? `(${m[1]})` : '';
     }
     function fileExtension(name) {
       const m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
@@ -1598,7 +1602,7 @@
       const meta = parseStructuredNotes(data.notes || '');
       _editingDocId = data.edit;
       $('category').value = data.category || $('category').options[0].value;
-      $('title').value = data.title || '';
+      $('title').value = normalizeDocTitle(data.title || '');
       $('version').value = meta.version || '';
       $('responsible').value = meta.responsible || '';
       $('notes').value = meta.extraNotes || meta.legacyNotes || '';
@@ -1628,7 +1632,7 @@
       if (!auth) { setStatus('uploadStatus', 'กรุณาเข้าสู่ระบบ admin', 'error'); return; }
 
       const category = $('category').value;
-      const title    = $('title').value.trim();
+      const title    = normalizeDocTitle($('title').value.trim());
       const notes    = buildStructuredNotes({
         version:     $('version').value.trim(),
         responsible: $('responsible').value.trim(),
@@ -1658,8 +1662,8 @@
           // all of them and the group doesn't split. Each keeps its "(n)" suffix.
           for (let i = 0; i < targets.length; i++) {
             const t = targets[i];
-            const m = String(t.title || '').match(/(\(\d+\))\s*$/);
-            const docTitle = (m && totalAfter > 1) ? `${title} ${m[1]}` : title;
+            const suffix = docTitleSuffix(t.title);
+            const docTitle = (suffix && totalAfter > 1) ? `${title} ${suffix}` : title;
             if (targets.length > 1) setStatus('uploadStatus', `กำลังบันทึก ${i + 1}/${targets.length}...`);
             await api({ action: 'update', ...auth, documentId: t.id, category, title: docTitle, notes });
           }
