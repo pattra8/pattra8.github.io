@@ -278,7 +278,7 @@
           <option value="guest">มาหาลูกบ้าน</option>
           <option value="food_delivery">ส่งอาหาร</option>
           <option value="delivery">ส่งพัสดุ/ขนส่ง</option>
-          <option value="pickup">รับ-ส่ง</option>
+          <option value="pickup">รับ-ส่ง (Grab/แท็กซี่)</option>
           <option value="contractor">ช่าง/ซ่อมบำรุง</option>
           <option value="utility">หน่วยงานสาธารณูปโภค</option>
           <option value="office">ติดต่อนิติ</option>
@@ -348,7 +348,7 @@
     function fmtDate(v){try{var parts=String(v||'').split('-'); if(parts.length!==3) return ''; var d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2])); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return v||'';}}
     function syncDaycap(){elDaycap.textContent=fmtDate(elDate.value);}
     function statusLabel(s){return s==='complete'?'ครบถ้วน':'รอข้อมูล';}
-    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
+    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง (Grab/แท็กซี่)',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'บัตรประชาชน / ใบขับขี่':k==='vehicle'?'รูปรถ':'รูปภาพ';}
     function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}
     function plateParts(v){
