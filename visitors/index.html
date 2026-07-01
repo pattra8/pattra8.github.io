@@ -100,6 +100,18 @@
     .del-btn { border:1px solid var(--line); background:var(--card); color:var(--red); border-radius:9px; padding:3px 10px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
     .del-btn:hover { background:var(--red-bg); border-color:#efc5bf; }
     .del-btn:disabled { opacity:.5; cursor:default; }
+    .sel { width:19px; height:19px; margin:2px 2px 0 0; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
+    .ch-main { flex:1; min-width:0; }
+    .card.selected { outline:2px solid var(--amber); outline-offset:-2px; }
+    .bulkbar { position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:30;
+      display:none; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line);
+      box-shadow:0 10px 30px rgba(55,40,20,.18); border-radius:14px; padding:10px 10px 10px 16px; }
+    .bulkbar.show { display:flex; }
+    .bulkbar .n { font-weight:800; font-size:14px; }
+    .bulk-btn { border:0; border-radius:10px; padding:9px 15px; font:inherit; font-weight:700; cursor:pointer; }
+    .bulk-btn.danger { background:var(--red); color:#fff; }
+    .bulk-btn.ghost { background:transparent; color:var(--muted); }
+    .bulk-btn:disabled { opacity:.55; cursor:default; }
     .house { font-size:22px; font-weight:800; line-height:1.1; }
     .purpose { margin-top:3px; color:var(--muted); font-size:14px; }
     .time { color:var(--soft); font-size:13px; white-space:nowrap; text-align:right; }
@@ -170,6 +182,11 @@
     </div>
     <div id="stats" class="stats" style="display:none"></div>
     <main id="list"></main>
+    <div id="bulkbar" class="bulkbar">
+      <span class="n"><span id="bulkcount">0</span> รายการ</span>
+      <button id="bulkclear" class="bulk-btn ghost">ล้าง</button>
+      <button id="bulkdel" class="bulk-btn danger">ลบที่เลือก</button>
+    </div>
     <footer>เฉพาะกรรมการ · รูปเต็มเก็บ 90 วัน / ข้อมูล OCR 365 วัน</footer>
   </div>
 
@@ -244,12 +261,13 @@
     }
 
     function render(records){
-      if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มี Visitor Intake ในวันนี้</div>'; return;}
+      if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มี Visitor Intake ในวันนี้</div>'; refreshBulk(); return;}
       elList.innerHTML='<div class="list">'+records.map(function(r){
         var o=r.ocr||{}, vc=r.vehicleCapture||{}, imgs=r.images||[];
         var raw=(r.rawTexts||[]).map(function(t){return t.text;}).filter(Boolean).join(' · ');
         return '<article class="card" data-id="'+esc(r.id||'')+'">'+
-          '<div class="card-head"><div><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div>'+
+          '<div class="card-head"><input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
+            '<div class="ch-main"><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div>'+
             '<div class="purpose">'+esc(r.purposeText||'ไม่พบเหตุผล')+' · '+esc(categoryLabel(r.purposeCategory))+'</div>'+
             '<span class="badge '+esc(r.status||'unknown')+'">'+esc(statusLabel(r.status))+'</span></div>'+
             '<div class="ch-side"><div class="time">'+esc(fmtTs(r.createdAt))+'</div>'+
@@ -277,6 +295,7 @@
           }).join(''):'<div class="empty" style="box-shadow:none;grid-column:1/-1">ยังไม่มีรูป</div>')+'</div>'+
           '</div></article>';
       }).join('')+'</div>';
+      refreshBulk();
     }
 
     async function load(){
@@ -321,11 +340,40 @@
       }
     }
 
+    var elBulk=document.getElementById('bulkbar'), elBulkCount=document.getElementById('bulkcount'),
+      elBulkClear=document.getElementById('bulkclear'), elBulkDel=document.getElementById('bulkdel');
+
+    function selectedIds(){return Array.prototype.map.call(elList.querySelectorAll('.sel:checked'),function(c){return c.getAttribute('data-sel');}).filter(Boolean);}
+    function refreshBulk(){var n=elList.querySelectorAll('.sel:checked').length; elBulkCount.textContent=n; elBulk.classList.toggle('show',n>0);}
+
     elList.addEventListener('click',function(e){
+      if(e.target.closest('.sel')) return; // checkbox handles its own toggle
       var delBtn=e.target.closest('.del-btn');
       if(delBtn){e.stopPropagation(); del(delBtn.getAttribute('data-del')); return;}
       var head=e.target.closest('.card-head');
       if(head){var card=head.closest('.card'); if(card) card.classList.toggle('collapsed');}
+    });
+    elList.addEventListener('change',function(e){
+      var cb=e.target.closest('.sel'); if(!cb) return;
+      var card=cb.closest('.card'); if(card) card.classList.toggle('selected',cb.checked);
+      refreshBulk();
+    });
+    elBulkClear.addEventListener('click',function(){
+      Array.prototype.forEach.call(elList.querySelectorAll('.sel:checked'),function(c){c.checked=false; var card=c.closest('.card'); if(card) card.classList.remove('selected');});
+      refreshBulk();
+    });
+    elBulkDel.addEventListener('click',async function(){
+      var ids=selectedIds(); if(!ids.length) return;
+      var s=session(); if(!s){showLogin(); return;}
+      if(!confirm('ลบ '+ids.length+' รายการถาวร? รูปทั้งหมดจะถูกลบด้วย')) return;
+      elBulkDel.disabled=true; elBulkDel.textContent='กำลังลบ…';
+      try{
+        await call({action:'delete',houseNo:s.houseNo,pin:s.pin,recordIds:ids});
+        load();
+      }catch(err){
+        if(err.status===401||err.status===403){localStorage.removeItem(KEY); showLogin('หมดสิทธิ์ กรุณาเข้าสู่ระบบใหม่'); return;}
+        alert('ลบไม่สำเร็จ: '+err.message);
+      }finally{elBulkDel.disabled=false; elBulkDel.textContent='ลบที่เลือก';}
     });
 
     function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); }
