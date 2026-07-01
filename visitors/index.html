@@ -328,6 +328,13 @@
       return s;
     }
     function personName(o){return (o&&((/[ก-๙]/.test(o.personName||'')&&o.personName)||o.thaiPersonName||o.personName||o.englishPersonName))||'';}
+    function maskDocNo(v){var d=String(v||'').replace(/\D/g,''); return d.length>=4?'*'.repeat(Math.max(4,d.length-4))+d.slice(-4):'';}
+    function docNo(o){return (o&&(o.maskedDocumentNo||maskDocNo(o.documentNumber)))||'';}
+    function purposeDisplay(r){
+      var c=String(r.purposeCategory||'unknown');
+      if(c==='other'||c==='unknown') return r.purposeText||categoryLabel(c);
+      return categoryLabel(c);
+    }
 
     async function call(body){
       var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify(body)});
@@ -354,10 +361,12 @@
         var plate=vc.plateText?plateText(vc.plateText):'';
         var vtype=vehicleTypeLabel(vc.vehicleType);
         var name=personName(o);
+        var documentNo=docNo(o);
+        var purpose=purposeDisplay(r);
         return '<article class="card" data-id="'+esc(r.id||'')+'">'+
           '<div class="card-head"><input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
             '<div class="ch-main"><div class="title-row"><span class="runno">'+esc(i+1)+'</span><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div></div>'+
-            '<div class="purpose">'+esc(r.purposeText||'ไม่พบเหตุผล')+' · '+esc(categoryLabel(r.purposeCategory))+'</div>'+
+            '<div class="purpose">'+esc(purpose||'ไม่พบเหตุผล')+'</div>'+
             '<span class="badge '+esc(r.status||'unknown')+'">'+esc(statusLabel(r.status))+'</span></div>'+
             '<div class="ch-side"><div class="time">'+esc(fmtTs(r.createdAt))+'</div>'+
             '<div class="ch-actions"><button class="del-btn" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
@@ -366,6 +375,9 @@
             '<div class="info"><div class="label">ชื่อ</div><div class="value">'+
               (name?esc(name):'—')+
             '</div></div>'+
+            '<div class="info"><div class="label">เลขบัตร/ใบขับขี่</div><div class="value">'+
+              (documentNo?'<span class="mono">'+esc(documentNo)+'</span>':'—')+
+            '</div></div>'+
             '<div class="info"><div class="label">เลขทะเบียน</div><div class="value">'+
               (plate?'<span class="mono">'+esc(plate)+'</span>':'—')+
             '</div></div>'+
@@ -373,8 +385,7 @@
               esc(vtype)+
             '</div></div>'+
             '<div class="info"><div class="label">เหตุผลการเข้าหมู่บ้าน</div><div class="value">'+
-              esc(categoryLabel(r.purposeCategory))+
-              (r.purposeText?'<br><small>'+esc(r.purposeText)+'</small>':'')+
+              esc(purpose||'—')+
             '</div></div>'+
             '<div class="info wide"><div class="label">ข้อความ รปภ</div><div class="value rawtext">'+rawHtml+'</div></div>'+
           '</div>'+
