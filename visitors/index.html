@@ -21,11 +21,11 @@
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html, body { margin:0; padding:0; }
     body {
-      min-height:100dvh; background:linear-gradient(180deg,#f8f3e9 0%,var(--bg) 42%);
+      min-height:100dvh; background:var(--bg);
       color:var(--text); font-family:"IBM Plex Sans Thai", system-ui, sans-serif;
       padding:0 0 70px;
     }
-    .wrap { width:100%; max-width:760px; margin:0 auto; padding:0 14px; }
+    .wrap { width:100%; max-width:620px; margin:0 auto; padding:0 14px; }
     /* ── Canonical Pattra Villa 8 header (matches pattra8.com) ── */
     .site-header {
       display:flex; align-items:center; justify-content:space-between; gap:12px;
@@ -54,70 +54,47 @@
     }
     .pill-house { font-size:.8rem; font-weight:700; color:var(--text); line-height:1.2; }
     .pill-name { font-size:.72rem; color:var(--muted); line-height:1.2; }
-    .hero { text-align:center; margin:24px 0 6px; }
-    .ornament { display:none; }
-    h1 { margin:3px 0 4px; font-size:30px; line-height:1.1; letter-spacing:-.03em; }
-    .sub { margin:0 auto; color:var(--muted); font-size:14px; line-height:1.55; max-width:560px; }
-    .toolbar { display:flex; gap:10px; align-items:center; margin:16px 0 14px; }
+    .hero { text-align:center; margin:22px 0 4px; background:var(--card); border:1px solid var(--line);
+      border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin:16px 0 10px; }
+    .ornament { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; }
+    .o-line { width:56px; height:1px; background:linear-gradient(90deg,transparent,var(--amber)); }
+    .o-line.r { background:linear-gradient(90deg,var(--amber),transparent); }
+    .o-diamond { width:6px; height:6px; background:var(--amber); transform:rotate(45deg); opacity:.8; }
+    h1 { margin:0; font-size:23px; font-weight:700; line-height:1.1; letter-spacing:-.01em; color:var(--text); }
+    .sub { margin:4px auto 0; color:var(--muted); font-size:13px; line-height:1.5; max-width:560px; }
+    .toolbar { display:flex; gap:8px; align-items:center; }
     .navbtn {
-      flex:0 0 auto; border:1.5px solid var(--line); border-radius:14px;
-      background:var(--card); color:var(--amber-text); width:46px; height:46px;
-      font:inherit; font-size:22px; font-weight:700; line-height:1; cursor:pointer;
-      box-shadow:var(--shadow);
+      flex:0 0 auto; font-family:inherit; font-size:18px; font-weight:700; line-height:1;
+      width:46px; min-width:46px; height:46px; border:1.5px solid var(--line);
+      border-radius:12px; background:var(--card); color:var(--amber-text);
+      cursor:pointer; box-shadow:var(--shadow);
     }
+    .navbtn:active { transform:scale(0.97); }
     .navbtn:disabled { opacity:.4; cursor:default; }
-    .datebox {
-      position:relative; flex:1; min-width:0; height:48px;
-      border:1.5px solid var(--line); border-radius:14px;
-      background:var(--card); box-shadow:var(--shadow);
+    .toolbar input[type=date] {
+      flex:1; font-family:inherit; font-size:16px; font-weight:600;
+      padding:12px 14px; border:1.5px solid var(--line); border-radius:12px;
+      background:var(--card); color:var(--text); box-shadow:var(--shadow); min-width:0;
     }
-    .datebox:focus-within {
-      border-color:#0b6bd3;
-      box-shadow:0 0 0 2px rgba(11,107,211,.14), var(--shadow);
-    }
-    .date-display {
-      position:absolute; left:14px; right:54px; top:50%; transform:translateY(-50%);
-      color:var(--text); font-size:16px; font-weight:800; pointer-events:none; z-index:1;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .date-icon {
-      position:absolute; right:15px; top:50%; transform:translateY(-50%);
-      width:20px; height:20px; pointer-events:none; z-index:1;
-    }
-    .date-icon::before {
-      content:""; position:absolute; inset:3px 2px 2px; border:2px solid #17130f;
-      border-radius:4px; background:transparent;
-    }
-    .date-icon::after {
-      content:""; position:absolute; left:5px; right:5px; top:7px;
-      border-top:2px solid #17130f; box-shadow:0 -5px 0 -1px #17130f;
-    }
-    input[type=date] {
-      position:absolute; inset:0; width:100%; height:100%; border:0; border-radius:14px;
-      background:transparent; color:transparent; padding:0 12px; font:inherit;
-      font-size:16px; font-weight:700; opacity:.01; cursor:pointer; z-index:2;
-      appearance:none; -webkit-appearance:none;
-    }
-    input[type=date]:focus { outline:0; }
-    input[type=date]::-webkit-datetime-edit { color:transparent; opacity:0; }
-    input[type=date]::-webkit-datetime-edit-fields-wrapper { opacity:0; }
-    input[type=date]::-webkit-calendar-picker-indicator { opacity:1; cursor:pointer; }
+    .daycaption { text-align:center; font-size:13px; color:var(--soft); margin:10px 2px 2px; }
     .btn {
-      border:0; border-radius:14px; background:var(--amber); color:#fff;
+      border:0; border-radius:12px; background:var(--amber); color:#fff;
       padding:13px 17px; font:inherit; font-weight:700; cursor:pointer;
       box-shadow:0 8px 22px rgba(196,122,44,.20); white-space:nowrap;
     }
+    .btn:hover { background:var(--amber-deep); }
     .btn:disabled { opacity:.55; cursor:default; }
-    .view-actions { display:flex; gap:8px; margin:-4px 0 12px; }
+    .view-actions { display:flex; gap:8px; margin:12px 0 12px; }
     .view-btn {
       border:1px solid var(--line); border-radius:12px; background:var(--card);
       color:var(--amber-text); padding:9px 13px; font:inherit; font-size:13px;
       font-weight:800; cursor:pointer; box-shadow:var(--shadow);
     }
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0; }
-    .stat { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 10px; box-shadow:var(--shadow); }
-    .stat .n { font-size:26px; line-height:1; font-weight:800; }
-    .stat .l { margin-top:5px; color:var(--muted); font-size:12.5px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin:14px 0 8px; }
+    .stat { background:var(--card); border:1px solid var(--line); border-radius:13px; padding:13px 6px 11px; text-align:center; box-shadow:none; }
+    .stat .ico { font-size:17px; line-height:1; }
+    .stat .n { font-size:24px; font-weight:700; line-height:1.1; margin-top:3px; }
+    .stat .l { margin-top:3px; color:var(--muted); font-size:12px; line-height:1.3; }
     .ok .n { color:var(--green); } .pending .n { color:var(--amber-text); } .plate .n { color:var(--blue); }
     .list { display:grid; gap:12px; margin-top:14px; }
     .card {
@@ -165,14 +142,14 @@
     .badge.pending_text, .badge.pending_image, .badge.unknown { color:var(--amber-deep); background:var(--amber-bg); }
     .body { padding:14px 16px 16px; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .info { background:var(--card-soft); border:1px solid var(--line-soft); border-radius:14px; padding:11px 12px; min-height:78px; }
+    .info { background:var(--card-soft); border:1px solid var(--line-soft); border-radius:12px; padding:11px 12px; min-height:78px; }
     .info.wide { grid-column:1/-1; }
     .label { color:var(--soft); font-size:12px; font-weight:700; letter-spacing:.02em; }
     .value { margin-top:5px; font-size:14.5px; line-height:1.45; }
     .rawtext { white-space:pre-wrap; }
     .mono { font-family:"IBM Plex Mono", monospace; font-weight:700; letter-spacing:.02em; }
     .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:10px; margin-top:12px; }
-    .thumb { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card-soft); }
+    .thumb { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card-soft); }
     .thumb a { display:block; color:inherit; text-decoration:none; }
     .thumb img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:#eee; }
     .cap { padding:8px 9px 9px; font-size:12px; color:var(--muted); line-height:1.35; }
@@ -186,24 +163,24 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     .overlay { position:fixed; inset:0; background:rgba(35,26,16,.48); display:none; align-items:center; justify-content:center; padding:20px; z-index:20; }
     .overlay.open { display:flex; }
-    .modal { width:100%; max-width:370px; background:var(--card); border-radius:22px; padding:25px 22px; box-shadow:var(--shadow); }
+    .modal { width:100%; max-width:370px; background:var(--card); border-radius:20px; padding:26px 22px; box-shadow:var(--shadow); }
     .modal h2 { margin:0 0 5px; font-size:21px; }
     .modal p { margin:0 0 17px; color:var(--muted); font-size:13.5px; line-height:1.5; }
     .field { margin:13px 0; }
     .field label { display:block; margin-bottom:6px; color:var(--soft); font-size:12.5px; font-weight:700; }
-    .row { display:flex; border:1.5px solid var(--line); border-radius:13px; overflow:hidden; background:#fff; }
+    .row { display:flex; border:1.5px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; }
     .prefix { display:flex; align-items:center; padding:0 12px; background:var(--card-soft); color:var(--muted); font-weight:800; }
     .row input, .row select, .pin { width:100%; border:0; outline:0; background:transparent; padding:12px; font:inherit; font-size:17px; font-weight:700; }
+    .field:focus-within .row, .pin:focus { border-color:var(--amber); }
     .edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .edit-modal { max-width:560px; }
     .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
     .btn.secondary { background:var(--card); color:var(--amber-text); border:1px solid var(--line); box-shadow:none; }
-    .pin { border:1.5px solid var(--line); border-radius:13px; letter-spacing:.28em; font-family:"IBM Plex Mono", monospace; }
+    .pin { border:1.5px solid var(--line); border-radius:12px; letter-spacing:.28em; font-family:"IBM Plex Mono", monospace; }
     .merr { display:none; color:var(--red); background:var(--red-bg); border-radius:11px; padding:10px 12px; font-size:13px; margin-bottom:10px; }
     .merr.show { display:block; }
     footer { text-align:center; color:var(--soft); font-size:12px; margin-top:28px; }
     @media (max-width:620px) {
-      h1 { font-size:27px; }
       .stats { grid-template-columns:repeat(2,1fr); }
       .grid { grid-template-columns:1fr; }
       .toolbar { align-items:stretch; gap:8px; }
@@ -229,14 +206,11 @@
     </section>
     <div class="toolbar">
       <button id="prev" class="navbtn" aria-label="วันก่อนหน้า">‹</button>
-      <div class="datebox">
-        <input id="date" type="date" aria-label="วันที่" />
-        <div id="dateDisplay" class="date-display"></div>
-        <span class="date-icon" aria-hidden="true"></span>
-      </div>
+      <input id="date" type="date" aria-label="วันที่" />
       <button id="next" class="navbtn" aria-label="วันถัดไป">›</button>
       <button id="reload" class="btn">โหลด</button>
     </div>
+    <div id="daycap" class="daycaption"></div>
     <div class="view-actions">
       <button id="expandAll" class="view-btn">Expand all</button>
       <button id="collapseAll" class="view-btn">Collapse all</button>
@@ -248,7 +222,7 @@
       <button id="bulkclear" class="bulk-btn ghost">ล้าง</button>
       <button id="bulkdel" class="bulk-btn danger">ลบที่เลือก</button>
     </div>
-    <footer>เฉพาะกรรมการ</footer>
+    <footer>Pattra Villa 8 · เฉพาะกรรมการ</footer>
   </div>
 
   <div id="overlay" class="overlay">
@@ -313,7 +287,7 @@
     var TTL=30*24*60*60*1000;
     var elDate=document.getElementById('date'), elReload=document.getElementById('reload'),
       elPrev=document.getElementById('prev'), elNext=document.getElementById('next'),
-      elDateDisplay=document.getElementById('dateDisplay'),
+      elDaycap=document.getElementById('daycap'),
       elExpandAll=document.getElementById('expandAll'), elCollapseAll=document.getElementById('collapseAll'),
       elStats=document.getElementById('stats'), elList=document.getElementById('list'),
       elOverlay=document.getElementById('overlay'), elHouse=document.getElementById('house'),
@@ -347,7 +321,7 @@
     function hideLogin(){elOverlay.classList.remove('open'); elErr.classList.remove('show');}
     function fmtTs(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return ''; return new Date(ms).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'});}catch(e){return '';}}
     function fmtDate(v){try{var parts=String(v||'').split('-'); if(parts.length!==3) return ''; var d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2])); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return v||'';}}
-    function syncDateDisplay(){elDateDisplay.textContent=fmtDate(elDate.value);}
+    function syncDaycap(){elDaycap.textContent=fmtDate(elDate.value);}
     function statusLabel(s){return s==='complete'?'ครบแล้ว':s==='pending_text'?'รอข้อความ':s==='pending_image'?'รอรูป':'รอตรวจ';}
     function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'เอกสาร':k==='vehicle'?'รถ/ทะเบียน':'อื่น ๆ';}
@@ -399,10 +373,10 @@
     function renderStats(st){
       elStats.style.display='grid';
       elStats.innerHTML=
-        '<div class="stat"><div class="n">'+(st.total||0)+'</div><div class="l">รายการทั้งหมด</div></div>'+
-        '<div class="stat ok"><div class="n">'+(st.complete||0)+'</div><div class="l">ข้อมูลครบ</div></div>'+
-        '<div class="stat pending"><div class="n">'+(st.pending||0)+'</div><div class="l">รอข้อมูล</div></div>'+
-        '<div class="stat plate"><div class="n">'+(st.withVehiclePlate||0)+'</div><div class="l">อ่านทะเบียนได้</div></div>';
+        '<div class="stat"><div class="ico">📋</div><div class="n">'+(st.total||0)+'</div><div class="l">รายการทั้งหมด</div></div>'+
+        '<div class="stat ok"><div class="ico">✅</div><div class="n">'+(st.complete||0)+'</div><div class="l">ข้อมูลครบ</div></div>'+
+        '<div class="stat pending"><div class="ico">⏳</div><div class="n">'+(st.pending||0)+'</div><div class="l">รอข้อมูล</div></div>'+
+        '<div class="stat plate"><div class="ico">🚗</div><div class="n">'+(st.withVehiclePlate||0)+'</div><div class="l">อ่านทะเบียนได้</div></div>';
     }
 
     function render(records){
@@ -582,7 +556,7 @@
       }finally{elBulkDel.disabled=false; elBulkDel.textContent='ลบที่เลือก';}
     });
 
-    function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); syncDateDisplay(); }
+    function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); syncDaycap(); }
     function shiftDate(delta){
       var base=elDate.value||today(); var d=new Date(base+'T00:00:00');
       d.setDate(d.getDate()+delta);
