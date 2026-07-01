@@ -217,10 +217,14 @@
       width:min(92vw,880px); max-height:88dvh; padding:0; overflow:hidden;
       border-radius:16px; background:#15120f;
     }
+    #previewOverlay {
+      align-items:flex-start; overflow:auto;
+      padding-top:clamp(72px,10dvh,112px); padding-bottom:32px;
+    }
     .preview-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#231d17; color:#fff; }
     .preview-title { font-size:13px; font-weight:600; color:#f5ead9; }
     .preview-close { border:0; background:transparent; color:#fff; font:inherit; font-size:22px; line-height:1; cursor:pointer; padding:2px 8px; }
-    .preview-img { display:block; width:100%; max-height:calc(88dvh - 48px); object-fit:contain; background:#15120f; }
+    .preview-img { display:block; width:100%; max-height:calc(88dvh - 92px); object-fit:contain; background:#15120f; }
     .pin { border:1.5px solid var(--line); border-radius:12px; letter-spacing:.28em; font-family:"IBM Plex Mono", monospace; }
     .merr { display:none; color:var(--red); background:var(--red-bg); border-radius:11px; padding:10px 12px; font-size:13px; margin-bottom:10px; }
     .merr.show { display:block; }
