@@ -328,7 +328,7 @@
     function syncDaycap(){elDaycap.textContent=fmtDate(elDate.value);}
     function statusLabel(s){return s==='complete'?'ครบถ้วน':'รอข้อมูล';}
     function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
-    function imageKind(k){return k==='document'?'เอกสาร':k==='vehicle'?'รถ/ทะเบียน':'อื่น ๆ';}
+    function imageKind(k){return k==='document'?'บัตรประชาชน / ใบขับขี่':k==='vehicle'?'รูปรถ':'รูปภาพ';}
     function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}
     function plateText(v){
       var clean=normalizeProvince(v).replace(/\s+/g,'').replace(/จังหวัด/g,'').trim();
@@ -422,10 +422,8 @@
               '</div>'+
               '<div class="rawbox"><div class="rlabel">ข้อความ รปภ</div><div class="rval">'+(raw?esc(raw):'<span class="dash">—</span>')+'</div></div>'+
               '<div class="gallery">'+(imgs.length?imgs.map(function(img){
-                var meta=img.analysis||{};
-                var sub=[imageKind(img.kind), meta.vehiclePlate?plateText(meta.vehiclePlate):'', meta.personName||''].filter(Boolean).join(' · ');
                 var media=img.imageUrl?'<a href="'+esc(img.imageUrl)+'" target="_blank" rel="noopener"><img src="'+esc(img.imageUrl)+'" loading="lazy" alt="'+esc(imageKind(img.kind))+'"></a>':'<div class="empty" style="box-shadow:none;border:0;border-radius:0;padding:22px 8px">ลบรูปแล้ว</div>';
-                return '<div class="thumb">'+media+'<div class="cap">'+esc(sub||imageKind(img.kind))+'</div></div>';
+                return '<div class="thumb">'+media+'<div class="cap">'+esc(imageKind(img.kind))+'</div></div>';
               }).join(''):'<div class="empty" style="box-shadow:none;grid-column:1/-1">ยังไม่มีรูป</div>')+'</div>'+
               '<div class="cardfoot"><span class="ts">บันทึกเมื่อ '+esc(fmtTs(r.createdAt))+' น.</span>'+
                 '<div class="acts">'+
