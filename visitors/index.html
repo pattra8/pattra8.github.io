@@ -131,9 +131,12 @@
     .card.collapsed .chevron { transform:rotate(-90deg); }
     .card.collapsed .body { display:none; }
     .card.collapsed .card-head { border-bottom:0; }
-    .del-btn { border:1px solid var(--line); background:var(--card); color:var(--red); border-radius:9px; padding:3px 10px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
-    .del-btn:hover { background:var(--red-bg); border-color:#efc5bf; }
-    .del-btn:disabled { opacity:.5; cursor:default; }
+    .mini-btn { border:1px solid var(--line); background:var(--card); border-radius:9px; padding:3px 10px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+    .mini-btn.edit { color:var(--amber-text); }
+    .mini-btn.danger { color:var(--red); }
+    .mini-btn.edit:hover { background:var(--amber-bg); border-color:#e8c898; }
+    .mini-btn.danger:hover { background:var(--red-bg); border-color:#efc5bf; }
+    .mini-btn:disabled { opacity:.5; cursor:default; }
     .sel { width:19px; height:19px; margin:2px 2px 0 0; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
     .ch-main { flex:1; min-width:0; }
     .title-row { display:flex; align-items:center; gap:10px; min-width:0; }
@@ -190,7 +193,11 @@
     .field label { display:block; margin-bottom:6px; color:var(--soft); font-size:12.5px; font-weight:700; }
     .row { display:flex; border:1.5px solid var(--line); border-radius:13px; overflow:hidden; background:#fff; }
     .prefix { display:flex; align-items:center; padding:0 12px; background:var(--card-soft); color:var(--muted); font-weight:800; }
-    .row input, .pin { width:100%; border:0; outline:0; background:transparent; padding:12px; font:inherit; font-size:17px; font-weight:700; }
+    .row input, .row select, .pin { width:100%; border:0; outline:0; background:transparent; padding:12px; font:inherit; font-size:17px; font-weight:700; }
+    .edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .edit-modal { max-width:560px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+    .btn.secondary { background:var(--card); color:var(--amber-text); border:1px solid var(--line); box-shadow:none; }
     .pin { border:1.5px solid var(--line); border-radius:13px; letter-spacing:.28em; font-family:"IBM Plex Mono", monospace; }
     .merr { display:none; color:var(--red); background:var(--red-bg); border-radius:11px; padding:10px 12px; font-size:13px; margin-bottom:10px; }
     .merr.show { display:block; }
@@ -202,6 +209,7 @@
       .toolbar { align-items:stretch; gap:8px; }
       .btn { padding-left:14px; padding-right:14px; }
       .view-actions { display:grid; grid-template-columns:1fr 1fr; }
+      .edit-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -230,8 +238,8 @@
       <button id="reload" class="btn">โหลด</button>
     </div>
     <div class="view-actions">
-      <button id="expandAll" class="view-btn">แสดงทั้งหมด</button>
-      <button id="collapseAll" class="view-btn">ย่อทั้งหมด</button>
+      <button id="expandAll" class="view-btn">Expand all</button>
+      <button id="collapseAll" class="view-btn">Collapse all</button>
     </div>
     <div id="stats" class="stats" style="display:none"></div>
     <main id="list"></main>
@@ -260,6 +268,43 @@
     </div>
   </div>
 
+  <div id="editOverlay" class="overlay">
+    <div class="modal edit-modal">
+      <h2>Edit visitor data</h2>
+      <p>Manual correction for OCR or guard message parsing.</p>
+      <div id="editErr" class="merr"></div>
+      <div class="edit-grid">
+        <div class="field"><label>House no.</label><div class="row"><input id="editHouse" autocomplete="off" /></div></div>
+        <div class="field"><label>Purpose category</label><div class="row"><select id="editPurposeCategory">
+          <option value="contact">มาติดต่อ</option>
+          <option value="guest">มาหาลูกบ้าน</option>
+          <option value="food_delivery">ส่งอาหาร</option>
+          <option value="delivery">ส่งพัสดุ/ขนส่ง</option>
+          <option value="pickup">รับ-ส่ง</option>
+          <option value="contractor">ช่าง/ซ่อมบำรุง</option>
+          <option value="utility">หน่วยงานสาธารณูปโภค</option>
+          <option value="office">ติดต่อนิติ</option>
+          <option value="other">อื่น ๆ</option>
+        </select></div></div>
+        <div class="field"><label>Purpose text</label><div class="row"><input id="editPurposeText" autocomplete="off" /></div></div>
+        <div class="field"><label>Name</label><div class="row"><input id="editName" autocomplete="off" /></div></div>
+        <div class="field"><label>ID / License no.</label><div class="row"><input id="editDocNo" inputmode="numeric" autocomplete="off" /></div></div>
+        <div class="field"><label>License plate</label><div class="row"><input id="editPlate" autocomplete="off" /></div></div>
+        <div class="field"><label>Vehicle type</label><div class="row"><select id="editVehicleType">
+          <option value="">—</option>
+          <option value="รถยนต์">รถยนต์</option>
+          <option value="รถมอเตอร์ไซค์">รถมอเตอร์ไซค์</option>
+          <option value="รถบรรทุก">รถบรรทุก</option>
+          <option value="รถขยะ">รถขยะ</option>
+        </select></div></div>
+      </div>
+      <div class="modal-actions">
+        <button id="editCancel" class="btn secondary">Cancel</button>
+        <button id="editSave" class="btn">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
   (function(){
     'use strict';
@@ -273,7 +318,14 @@
       elStats=document.getElementById('stats'), elList=document.getElementById('list'),
       elOverlay=document.getElementById('overlay'), elHouse=document.getElementById('house'),
       elPin=document.getElementById('pin'), elLogin=document.getElementById('login'),
-      elErr=document.getElementById('merr'), elIdentity=document.getElementById('headerIdentity');
+      elErr=document.getElementById('merr'), elIdentity=document.getElementById('headerIdentity'),
+      elEditOverlay=document.getElementById('editOverlay'), elEditErr=document.getElementById('editErr'),
+      elEditHouse=document.getElementById('editHouse'), elEditPurposeCategory=document.getElementById('editPurposeCategory'),
+      elEditPurposeText=document.getElementById('editPurposeText'), elEditName=document.getElementById('editName'),
+      elEditDocNo=document.getElementById('editDocNo'), elEditPlate=document.getElementById('editPlate'),
+      elEditVehicleType=document.getElementById('editVehicleType'), elEditCancel=document.getElementById('editCancel'),
+      elEditSave=document.getElementById('editSave');
+    var currentRecords=[], editingId='';
 
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
     function residentName(houseNo){try{var r=JSON.parse(localStorage.getItem('pattra_resident_session_v1')||'null'); if(r&&r.houseNo===houseNo&&r.residentName) return r.residentName;}catch(e){} return '';}
@@ -335,6 +387,7 @@
       if(c==='other'||c==='unknown') return r.purposeText||categoryLabel(c);
       return categoryLabel(c);
     }
+    function docRaw(o){return (o&&String(o.documentNumber||'').replace(/\D/g,''))||'';}
 
     async function call(body){
       var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify(body)});
@@ -353,6 +406,7 @@
     }
 
     function render(records){
+      currentRecords=records||[];
       if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มีรายการผู้มาติดต่อในวันนี้</div>'; refreshBulk(); return;}
       elList.innerHTML='<div class="list">'+records.map(function(r,i){
         var o=r.ocr||{}, vc=r.vehicleCapture||{}, imgs=r.images||[];
@@ -369,7 +423,8 @@
             '<div class="purpose">'+esc(purpose||'ไม่พบเหตุผล')+'</div>'+
             '<span class="badge '+esc(r.status||'unknown')+'">'+esc(statusLabel(r.status))+'</span></div>'+
             '<div class="ch-side"><div class="time">'+esc(fmtTs(r.createdAt))+'</div>'+
-            '<div class="ch-actions"><button class="del-btn" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
+            '<div class="ch-actions"><button class="mini-btn edit" data-edit="'+esc(r.id||'')+'" title="Edit this record">Edit</button>'+
+            '<button class="mini-btn danger" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
             '<span class="chevron">⌄</span></div></div></div>'+
           '<div class="body"><div class="grid">'+
             '<div class="info"><div class="label">ชื่อ</div><div class="value">'+
@@ -430,7 +485,7 @@
       if(!id) return;
       var s=session(); if(!s){showLogin(); return;}
       if(!confirm('ลบรายการนี้ถาวร? รูปทั้งหมดจะถูกลบด้วย')) return;
-      var btn=elList.querySelector('.del-btn[data-del="'+id+'"]');
+      var btn=elList.querySelector('.mini-btn[data-del="'+id+'"]');
       if(btn){btn.disabled=true; btn.textContent='กำลังลบ…';}
       try{
         await call({action:'delete',houseNo:s.houseNo,pin:s.pin,recordId:id});
@@ -442,6 +497,53 @@
       }
     }
 
+    function openEdit(id){
+      var r=currentRecords.find(function(x){return x.id===id;});
+      if(!r) return;
+      editingId=id;
+      var o=r.ocr||{}, vc=r.vehicleCapture||{};
+      elEditErr.classList.remove('show');
+      elEditHouse.value=r.houseNo||'';
+      elEditPurposeCategory.value=r.purposeCategory||'other';
+      elEditPurposeText.value=r.purposeText||'';
+      elEditName.value=personName(o);
+      elEditDocNo.value=docRaw(o);
+      elEditPlate.value=vc.plateText||'';
+      elEditVehicleType.value=vehicleTypeLabel(vc.vehicleType);
+      elEditOverlay.classList.add('open');
+      setTimeout(function(){elEditPurposeText.focus();},80);
+    }
+    function closeEdit(){
+      editingId='';
+      elEditOverlay.classList.remove('open');
+      elEditErr.classList.remove('show');
+    }
+    async function saveEdit(){
+      var s=session(); if(!s){closeEdit(); showLogin(); return;}
+      if(!editingId) return;
+      elEditErr.classList.remove('show');
+      elEditSave.disabled=true; elEditSave.textContent='Saving…';
+      try{
+        await call({action:'update',houseNo:s.houseNo,pin:s.pin,recordId:editingId,record:{
+          houseNo:elEditHouse.value,
+          purposeCategory:elEditPurposeCategory.value,
+          purposeText:elEditPurposeText.value,
+          personName:elEditName.value,
+          documentNumber:elEditDocNo.value,
+          plateText:elEditPlate.value,
+          vehicleType:elEditVehicleType.value
+        }});
+        closeEdit();
+        load();
+      }catch(err){
+        if(err.status===401||err.status===403){localStorage.removeItem(KEY); closeEdit(); showLogin('หมดสิทธิ์ กรุณาเข้าสู่ระบบใหม่'); return;}
+        elEditErr.textContent='Save failed: '+err.message;
+        elEditErr.classList.add('show');
+      }finally{
+        elEditSave.disabled=false; elEditSave.textContent='Save';
+      }
+    }
+
     var elBulk=document.getElementById('bulkbar'), elBulkCount=document.getElementById('bulkcount'),
       elBulkClear=document.getElementById('bulkclear'), elBulkDel=document.getElementById('bulkdel');
 
@@ -450,7 +552,9 @@
 
     elList.addEventListener('click',function(e){
       if(e.target.closest('.sel')) return; // checkbox handles its own toggle
-      var delBtn=e.target.closest('.del-btn');
+      var editBtn=e.target.closest('[data-edit]');
+      if(editBtn){e.stopPropagation(); openEdit(editBtn.getAttribute('data-edit')); return;}
+      var delBtn=e.target.closest('[data-del]');
       if(delBtn){e.stopPropagation(); del(delBtn.getAttribute('data-del')); return;}
       var head=e.target.closest('.card-head');
       if(head){var card=head.closest('.card'); if(card) card.classList.toggle('collapsed');}
@@ -500,6 +604,9 @@
     elNext.addEventListener('click',function(){shiftDate(1);});
     elExpandAll.addEventListener('click',function(){setCollapsedAll(false);});
     elCollapseAll.addEventListener('click',function(){setCollapsedAll(true);});
+    elEditCancel.addEventListener('click',closeEdit);
+    elEditSave.addEventListener('click',saveEdit);
+    elEditOverlay.addEventListener('click',function(e){if(e.target===elEditOverlay) closeEdit();});
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});
