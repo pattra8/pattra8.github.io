@@ -56,7 +56,7 @@
     display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
   }
-  .header-brand { display:flex; align-items:center; gap:10px; }
+  .header-brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
   .header-back {
     display:flex; align-items:center; justify-content:center;
     width:34px; height:34px; border-radius:50%; flex-shrink:0;
@@ -652,15 +652,14 @@
 
 <!-- HEADER -->
 <header>
-  <div class="header-brand">
+  <a href="/" class="header-brand" onclick="return returnToCenter(event)">
     <div>
       <div class="header-title">Pattra Villa 8</div>
       <div class="header-sub">Management Expenses</div>
     </div>
-  </div>
+  </a>
   <div class="header-right">
     <span class="badge-admin" id="badgeAdmin" style="display:none"></span>
-    <button class="btn-admin-toggle" id="adminToggleBtn" onclick="returnToCenter()">กลับหน้าหลัก</button>
   </div>
 </header>
 
@@ -1128,10 +1127,12 @@ async function performServerExpenseAuth(resident) {
   applyAccessRole(data.role);
 }
 
-async function returnToCenter() {
+async function returnToCenter(event) {
+  if (event) event.preventDefault();
   if (auth) await signOut(auth).catch(() => {});
   localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
   location.href = 'https://pattra8.com/';
+  return false;
 }
 
 function isDashboardPageVisible() {

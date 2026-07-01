@@ -722,6 +722,13 @@
       line-height: 1.6;
       margin-bottom: 18px;
     }
+    .resident-pin-hint {
+      color: var(--text-soft);
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 4px 2px 0;
+      text-align: left;
+    }
     .resident-pin-house,
     .resident-pin-input {
       width: 100%;
@@ -1247,7 +1254,6 @@
   <div class="header-actions">
     <a href="/vehicle/" class="header-btn" id="navVehicle">ทะเบียนรถ</a>
     <a href="admin.html" class="header-btn">Admin</a>
-    <a href="/" class="header-btn">← หน้าแรก</a>
   </div>
 </header>
 
@@ -1676,7 +1682,8 @@
         <input class="resident-pin-house" value="${esc(houseNo)}" readonly />
         <input class="resident-pin-input" id="resetNameInput" type="text" placeholder="ชื่อ-นามสกุล" autocomplete="name" />
         <div style="height:10px"></div>
-        <input class="resident-pin-input" id="resetPhoneInput" type="tel" placeholder="เบอร์โทรศัพท์" autocomplete="tel" />
+        <input class="resident-pin-input" id="resetPhoneInput" type="tel" placeholder="เบอร์โทร 10 หลัก (เช่น 081-234-5678)" autocomplete="tel" />
+        <div class="resident-pin-hint">📱 ใช้เบอร์ในประเทศ 10 หลักขึ้นต้น 0 — ไม่ต้องใส่ +66</div>
         <div style="height:10px"></div>
         <input class="resident-pin-input" id="resetEmailInput" type="email" placeholder="อีเมล" autocomplete="email" />
         <div style="height:10px"></div>
