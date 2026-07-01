@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Visitor Intake · Pattra Villa 8</title>
+  <title>รายการผู้มาติดต่อ · Pattra Villa 8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -54,11 +54,8 @@
     }
     .pill-house { font-size:.8rem; font-weight:700; color:var(--text); line-height:1.2; }
     .pill-name { font-size:.72rem; color:var(--muted); line-height:1.2; }
-    .hero { text-align:center; margin:22px 0 4px; }
-    .ornament { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; }
-    .o-line { width:56px; height:1px; background:linear-gradient(90deg,transparent,var(--amber)); }
-    .o-line.r { background:linear-gradient(90deg,var(--amber),transparent); }
-    .o-diamond { width:6px; height:6px; background:var(--amber); transform:rotate(45deg); opacity:.8; }
+    .hero { text-align:center; margin:24px 0 6px; }
+    .ornament { display:none; }
     h1 { margin:3px 0 4px; font-size:30px; line-height:1.1; letter-spacing:-.03em; }
     .sub { margin:0 auto; color:var(--muted); font-size:14px; line-height:1.55; max-width:560px; }
     .toolbar { display:flex; gap:10px; align-items:center; margin:16px 0 14px; }
@@ -69,17 +66,32 @@
       box-shadow:var(--shadow);
     }
     .navbtn:disabled { opacity:.4; cursor:default; }
+    .datebox { position:relative; flex:1; min-width:0; }
+    .date-display {
+      position:absolute; left:14px; right:46px; top:50%; transform:translateY(-50%);
+      color:var(--text); font-size:16px; font-weight:800; pointer-events:none;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
     input[type=date] {
       flex:1; min-width:0; border:1.5px solid var(--line); border-radius:14px;
-      background:var(--card); color:var(--text); padding:12px 14px; font:inherit;
+      background:var(--card); color:transparent; padding:12px 14px; font:inherit;
       font-size:16px; font-weight:700; box-shadow:var(--shadow);
+      width:100%; height:48px;
     }
+    input[type=date]::-webkit-datetime-edit { color:transparent; }
+    input[type=date]::-webkit-calendar-picker-indicator { opacity:1; cursor:pointer; }
     .btn {
       border:0; border-radius:14px; background:var(--amber); color:#fff;
       padding:13px 17px; font:inherit; font-weight:700; cursor:pointer;
       box-shadow:0 8px 22px rgba(196,122,44,.20); white-space:nowrap;
     }
     .btn:disabled { opacity:.55; cursor:default; }
+    .view-actions { display:flex; gap:8px; margin:-4px 0 12px; }
+    .view-btn {
+      border:1px solid var(--line); border-radius:12px; background:var(--card);
+      color:var(--amber-text); padding:9px 13px; font:inherit; font-size:13px;
+      font-weight:800; cursor:pointer; box-shadow:var(--shadow);
+    }
     .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0; }
     .stat { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 10px; box-shadow:var(--shadow); }
     .stat .n { font-size:26px; line-height:1; font-weight:800; }
@@ -102,6 +114,14 @@
     .del-btn:disabled { opacity:.5; cursor:default; }
     .sel { width:19px; height:19px; margin:2px 2px 0 0; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
     .ch-main { flex:1; min-width:0; }
+    .title-row { display:flex; align-items:center; gap:10px; min-width:0; }
+    .runno {
+      flex:0 0 auto; min-width:32px; height:32px; border-radius:10px;
+      display:inline-flex; align-items:center; justify-content:center;
+      background:var(--card-soft); border:1px solid var(--line-soft);
+      color:var(--amber-text); font-family:"IBM Plex Mono", monospace;
+      font-size:14px; font-weight:800;
+    }
     .card.selected { outline:2px solid var(--amber); outline-offset:-2px; }
     .bulkbar { position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:30;
       display:none; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line);
@@ -155,8 +175,9 @@
       h1 { font-size:27px; }
       .stats { grid-template-columns:repeat(2,1fr); }
       .grid { grid-template-columns:1fr; }
-      .toolbar { align-items:stretch; }
+      .toolbar { align-items:stretch; gap:8px; }
       .btn { padding-left:14px; padding-right:14px; }
+      .view-actions { display:grid; grid-template-columns:1fr 1fr; }
     }
   </style>
 </head>
@@ -171,14 +192,21 @@
   <div class="wrap">
     <section class="hero">
       <div class="ornament"><span class="o-line"></span><span class="o-diamond"></span><span class="o-line r"></span></div>
-      <h1>Visitor Intake</h1>
-      <p class="sub">ข้อมูล Visitor จาก รปภ: บ้านที่ไป เหตุผล รูปเอกสาร และรูปรถ/ทะเบียน · เฉพาะกรรมการ</p>
+      <h1>รายการผู้มาติดต่อ</h1>
+      <p class="sub">ดูข้อมูลที่ รปภ. ส่งเข้า LINE: บ้านที่ติดต่อ เหตุผล รูปเอกสาร รูปรถ และทะเบียน</p>
     </section>
     <div class="toolbar">
       <button id="prev" class="navbtn" aria-label="วันก่อนหน้า">‹</button>
-      <input id="date" type="date" />
+      <div class="datebox">
+        <input id="date" type="date" aria-label="วันที่" />
+        <div id="dateDisplay" class="date-display"></div>
+      </div>
       <button id="next" class="navbtn" aria-label="วันถัดไป">›</button>
       <button id="reload" class="btn">โหลด</button>
+    </div>
+    <div class="view-actions">
+      <button id="expandAll" class="view-btn">แสดงทั้งหมด</button>
+      <button id="collapseAll" class="view-btn">ย่อทั้งหมด</button>
     </div>
     <div id="stats" class="stats" style="display:none"></div>
     <main id="list"></main>
@@ -193,7 +221,7 @@
   <div id="overlay" class="overlay">
     <div class="modal">
       <h2>เข้าสู่ระบบกรรมการ</h2>
-      <p>ใช้บ้านเลขที่และ PIN ของกรรมการ เพื่อดู Visitor Intake</p>
+      <p>ใช้บ้านเลขที่และ PIN ของกรรมการ เพื่อดูรายการผู้มาติดต่อ</p>
       <div id="merr" class="merr"></div>
       <div class="field">
         <label>บ้านเลขที่</label>
@@ -215,6 +243,8 @@
     var TTL=30*24*60*60*1000;
     var elDate=document.getElementById('date'), elReload=document.getElementById('reload'),
       elPrev=document.getElementById('prev'), elNext=document.getElementById('next'),
+      elDateDisplay=document.getElementById('dateDisplay'),
+      elExpandAll=document.getElementById('expandAll'), elCollapseAll=document.getElementById('collapseAll'),
       elStats=document.getElementById('stats'), elList=document.getElementById('list'),
       elOverlay=document.getElementById('overlay'), elHouse=document.getElementById('house'),
       elPin=document.getElementById('pin'), elLogin=document.getElementById('login'),
@@ -239,6 +269,8 @@
     function showLogin(msg){elOverlay.classList.add('open'); renderIdentity(null); if(msg){elErr.textContent=msg; elErr.classList.add('show');} setTimeout(function(){elHouse.focus();},80);}
     function hideLogin(){elOverlay.classList.remove('open'); elErr.classList.remove('show');}
     function fmtTs(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return ''; return new Date(ms).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'});}catch(e){return '';}}
+    function fmtDate(v){try{var parts=String(v||'').split('-'); if(parts.length!==3) return ''; var d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2])); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return v||'';}}
+    function syncDateDisplay(){elDateDisplay.textContent=fmtDate(elDate.value);}
     function statusLabel(s){return s==='complete'?'ครบแล้ว':s==='pending_text'?'รอข้อความ':s==='pending_image'?'รอรูป':'รอตรวจ';}
     function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'พัสดุ/ขนส่ง',pickup:'รถรับ-ส่ง',contractor:'ช่าง/ผู้รับเหมา',utility:'งานสาธารณูปโภค (ไฟ/ประปา)',office:'ติดต่อนิติบุคคล',guest:'ญาติ/แขกมาเยี่ยม',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'เอกสาร':k==='vehicle'?'รถ/ทะเบียน':'อื่น ๆ';}
@@ -261,13 +293,13 @@
     }
 
     function render(records){
-      if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มี Visitor Intake ในวันนี้</div>'; refreshBulk(); return;}
-      elList.innerHTML='<div class="list">'+records.map(function(r){
+      if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มีรายการผู้มาติดต่อในวันนี้</div>'; refreshBulk(); return;}
+      elList.innerHTML='<div class="list">'+records.map(function(r,i){
         var o=r.ocr||{}, vc=r.vehicleCapture||{}, imgs=r.images||[];
         var raw=(r.rawTexts||[]).map(function(t){return t.text;}).filter(Boolean).join(' · ');
         return '<article class="card" data-id="'+esc(r.id||'')+'">'+
           '<div class="card-head"><input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
-            '<div class="ch-main"><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div>'+
+            '<div class="ch-main"><div class="title-row"><span class="runno">'+esc(i+1)+'</span><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div></div>'+
             '<div class="purpose">'+esc(r.purposeText||'ไม่พบเหตุผล')+' · '+esc(categoryLabel(r.purposeCategory))+'</div>'+
             '<span class="badge '+esc(r.status||'unknown')+'">'+esc(statusLabel(r.status))+'</span></div>'+
             '<div class="ch-side"><div class="time">'+esc(fmtTs(r.createdAt))+'</div>'+
@@ -300,7 +332,7 @@
 
     async function load(){
       var s=session(); if(!s){showLogin(); return;}
-      elReload.disabled=true; elList.innerHTML='<div class="loading"><span class="spinner"></span>กำลังโหลด Visitor Intake…</div>';
+      elReload.disabled=true; elList.innerHTML='<div class="loading"><span class="spinner"></span>กำลังโหลดรายการผู้มาติดต่อ…</div>';
       try{
         var data=await call({action:'list',houseNo:s.houseNo,pin:s.pin,visitDate:elDate.value});
         renderIdentity(s); renderStats(data.stats||{}); render(data.records||[]);
@@ -376,7 +408,7 @@
       }finally{elBulkDel.disabled=false; elBulkDel.textContent='ลบที่เลือก';}
     });
 
-    function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); }
+    function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); syncDateDisplay(); }
     function shiftDate(delta){
       var base=elDate.value||today(); var d=new Date(base+'T00:00:00');
       d.setDate(d.getDate()+delta);
@@ -385,11 +417,19 @@
       elDate.value=v; syncNav(); load();
     }
 
+    function setCollapsedAll(collapsed){
+      Array.prototype.forEach.call(elList.querySelectorAll('.card'),function(card){
+        card.classList.toggle('collapsed',collapsed);
+      });
+    }
+
     elDate.value=today(); elDate.max=today(); syncNav();
     elReload.addEventListener('click',load);
     elDate.addEventListener('change',function(){syncNav(); load();});
     elPrev.addEventListener('click',function(){shiftDate(-1);});
     elNext.addEventListener('click',function(){shiftDate(1);});
+    elExpandAll.addEventListener('click',function(){setCollapsedAll(false);});
+    elCollapseAll.addEventListener('click',function(){setCollapsedAll(true);});
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});
