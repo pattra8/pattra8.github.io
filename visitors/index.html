@@ -97,34 +97,33 @@
     .stat .l { margin-top:3px; color:var(--muted); font-size:12px; line-height:1.3; }
     .ok .n { color:var(--green); } .pending .n { color:var(--amber-text); } .plate .n { color:var(--blue); }
     .list { display:grid; gap:12px; margin-top:14px; }
-    .card {
-      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-      box-shadow:var(--shadow); overflow:hidden;
-    }
-    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:15px 16px 12px; border-bottom:1px solid var(--line-soft); cursor:pointer; user-select:none; }
-    .ch-side { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
-    .ch-actions { display:flex; align-items:center; gap:8px; }
-    .chevron { font-size:17px; color:var(--soft); line-height:1; transition:transform .2s; }
+    .card { display:flex; background:var(--card); border:1px solid var(--line);
+      border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .card.selected { outline:2px solid var(--amber); outline-offset:-2px; }
+    .rail { flex:0 0 48px; background:var(--amber-bg); border-right:1px solid #eccf9f;
+      display:flex; flex-direction:column; align-items:center; padding:15px 0; }
+    .rail .sel { margin:0 0 13px; }
+    .rail .runno { font-family:"IBM Plex Mono", monospace;
+      font-size:20px; font-weight:700; color:var(--amber-text); line-height:1; }
+    .sel { width:18px; height:18px; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
+    .cardmain { flex:1; min-width:0; }
+    .card-head { padding:15px 16px 14px; cursor:pointer; user-select:none; }
+    .head-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .head-id { display:flex; align-items:baseline; gap:12px; min-width:0; }
+    .time { font-family:"IBM Plex Mono", monospace; font-size:22px; font-weight:700;
+      color:var(--text); line-height:1; letter-spacing:.01em; }
+    .house { font-size:15px; font-weight:600; color:var(--text); }
+    .head-meta { display:flex; align-items:center; gap:9px; flex-shrink:0; }
+    .chevron { font-size:16px; color:var(--soft); line-height:1; transition:transform .2s; }
     .card.collapsed .chevron { transform:rotate(-90deg); }
     .card.collapsed .body { display:none; }
-    .card.collapsed .card-head { border-bottom:0; }
-    .mini-btn { border:1px solid var(--line); background:var(--card); border-radius:9px; padding:3px 10px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+    .purpose { margin-top:6px; font-size:13.5px; color:var(--muted); line-height:1.4; }
+    .mini-btn { border:1px solid var(--line); background:var(--card); border-radius:9px; padding:5px 12px; font:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
     .mini-btn.edit { color:var(--amber-text); }
     .mini-btn.danger { color:var(--red); }
     .mini-btn.edit:hover { background:var(--amber-bg); border-color:#e8c898; }
     .mini-btn.danger:hover { background:var(--red-bg); border-color:#efc5bf; }
     .mini-btn:disabled { opacity:.5; cursor:default; }
-    .sel { width:19px; height:19px; margin:2px 2px 0 0; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
-    .ch-main { flex:1; min-width:0; }
-    .title-row { display:flex; align-items:center; gap:10px; min-width:0; }
-    .runno {
-      flex:0 0 auto; min-width:32px; height:32px; border-radius:10px;
-      display:inline-flex; align-items:center; justify-content:center;
-      background:var(--card-soft); border:1px solid var(--line-soft);
-      color:var(--amber-text); font-family:"IBM Plex Mono", monospace;
-      font-size:14px; font-weight:800;
-    }
-    .card.selected { outline:2px solid var(--amber); outline-offset:-2px; }
     .bulkbar { position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:30;
       display:none; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line);
       box-shadow:0 10px 30px rgba(55,40,20,.18); border-radius:14px; padding:10px 10px 10px 16px; }
@@ -134,19 +133,23 @@
     .bulk-btn.danger { background:var(--red); color:#fff; }
     .bulk-btn.ghost { background:transparent; color:var(--muted); }
     .bulk-btn:disabled { opacity:.55; cursor:default; }
-    .house { font-size:22px; font-weight:800; line-height:1.1; }
-    .purpose { margin-top:3px; color:var(--muted); font-size:14px; }
-    .time { color:var(--soft); font-size:13px; white-space:nowrap; text-align:right; }
-    .badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:3px 9px; font-size:12px; font-weight:700; margin-top:7px; }
+    .badge { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:4px 10px; font-size:12.5px; font-weight:600; white-space:nowrap; }
+    .badge .dot { width:7px; height:7px; border-radius:50%; }
     .badge.complete { color:var(--green); background:var(--green-bg); }
-    .badge.pending_text, .badge.pending_image, .badge.unknown { color:var(--amber-deep); background:var(--amber-bg); }
-    .body { padding:14px 16px 16px; }
-    .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .info { background:var(--card-soft); border:1px solid var(--line-soft); border-radius:12px; padding:11px 12px; min-height:78px; }
-    .info.wide { grid-column:1/-1; }
-    .label { color:var(--soft); font-size:12px; font-weight:700; letter-spacing:.02em; }
-    .value { margin-top:5px; font-size:14.5px; line-height:1.45; }
-    .rawtext { white-space:pre-wrap; }
+    .badge.complete .dot { background:var(--green); }
+    .badge.pending { color:var(--amber-text); background:var(--amber-bg); }
+    .badge.pending .dot { background:var(--amber); }
+    .body { padding:14px 16px 16px; border-top:1px solid var(--line-soft); }
+    .kv { display:grid; grid-template-columns:104px 1fr; row-gap:10px; font-size:14px; line-height:1.35; }
+    .kl { color:var(--soft); }
+    .kval { color:var(--text); }
+    .dash { color:#b6a487; }
+    .rawbox { margin-top:14px; background:var(--card-soft); border:1px solid var(--line-soft); border-radius:12px; padding:11px 13px; }
+    .rawbox .rlabel { color:var(--soft); font-size:12px; font-weight:700; letter-spacing:.02em; }
+    .rawbox .rval { margin-top:5px; font-size:14px; line-height:1.5; white-space:pre-wrap; }
+    .cardfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:15px; padding-top:12px; border-top:1px solid var(--line-soft); }
+    .cardfoot .ts { font-size:12px; color:#a08a6b; }
+    .acts { display:flex; gap:8px; }
     .mono { font-family:"IBM Plex Mono", monospace; font-weight:700; letter-spacing:.02em; }
     .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:10px; margin-top:12px; }
     .thumb { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card-soft); }
@@ -182,7 +185,7 @@
     footer { text-align:center; color:var(--soft); font-size:12px; margin-top:28px; }
     @media (max-width:620px) {
       .stats { grid-template-columns:repeat(2,1fr); }
-      .grid { grid-template-columns:1fr; }
+      .kv { grid-template-columns:92px 1fr; }
       .toolbar { align-items:stretch; gap:8px; }
       .btn { padding-left:14px; padding-right:14px; }
       .view-actions { display:grid; grid-template-columns:1fr 1fr; }
@@ -320,9 +323,10 @@
     function showLogin(msg){elOverlay.classList.add('open'); renderIdentity(null); if(msg){elErr.textContent=msg; elErr.classList.add('show');} setTimeout(function(){elHouse.focus();},80);}
     function hideLogin(){elOverlay.classList.remove('open'); elErr.classList.remove('show');}
     function fmtTs(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return ''; return new Date(ms).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Bangkok'});}catch(e){return '';}}
+    function fmtTime(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return '--:--'; return new Date(ms).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Bangkok'});}catch(e){return '--:--';}}
     function fmtDate(v){try{var parts=String(v||'').split('-'); if(parts.length!==3) return ''; var d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2])); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return v||'';}}
     function syncDaycap(){elDaycap.textContent=fmtDate(elDate.value);}
-    function statusLabel(s){return s==='complete'?'ครบแล้ว':s==='pending_text'?'รอข้อความ':s==='pending_image'?'รอรูป':'รอตรวจ';}
+    function statusLabel(s){return s==='complete'?'ครบถ้วน':'รอข้อมูล';}
     function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'เอกสาร':k==='vehicle'?'รถ/ทะเบียน':'อื่น ๆ';}
     function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}
@@ -379,51 +383,57 @@
         '<div class="stat plate"><div class="ico">🚗</div><div class="n">'+(st.withVehiclePlate||0)+'</div><div class="l">อ่านทะเบียนได้</div></div>';
     }
 
+    function dashOr(v,cls){return v?('<span'+(cls?' class="'+cls+'"':'')+'>'+esc(v)+'</span>'):'<span class="dash">—</span>';}
     function render(records){
       currentRecords=records||[];
       if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มีรายการผู้มาติดต่อในวันนี้</div>'; refreshBulk(); return;}
       elList.innerHTML='<div class="list">'+records.map(function(r,i){
         var o=r.ocr||{}, vc=r.vehicleCapture||{}, imgs=r.images||[];
         var raw=(r.rawTexts||[]).map(function(t){return t.text;}).filter(Boolean).join('\n');
-        var rawHtml=esc(raw||'—');
         var plate=vc.plateText?plateText(vc.plateText):'';
         var vtype=vehicleTypeLabel(vc.vehicleType);
         var name=personName(o);
         var documentNo=docNo(o);
         var purpose=purposeDisplay(r);
+        var isComplete=r.status==='complete';
+        var badgeCls=isComplete?'complete':'pending';
         return '<article class="card" data-id="'+esc(r.id||'')+'">'+
-          '<div class="card-head"><input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
-            '<div class="ch-main"><div class="title-row"><span class="runno">'+esc(i+1)+'</span><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div></div>'+
-            '<div class="purpose">'+esc(purpose||'ไม่พบเหตุผล')+'</div>'+
-            '<span class="badge '+esc(r.status||'unknown')+'">'+esc(statusLabel(r.status))+'</span></div>'+
-            '<div class="ch-side"><div class="time">'+esc(fmtTs(r.createdAt))+'</div>'+
-            '<div class="ch-actions"><button class="mini-btn edit" data-edit="'+esc(r.id||'')+'" title="Edit this record">Edit</button>'+
-            '<button class="mini-btn danger" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
-            '<span class="chevron">⌄</span></div></div></div>'+
-          '<div class="body"><div class="grid">'+
-            '<div class="info"><div class="label">ชื่อ</div><div class="value">'+
-              (name?esc(name):'—')+
-            '</div></div>'+
-            '<div class="info"><div class="label">เลขบัตร/ใบขับขี่</div><div class="value">'+
-              (documentNo?'<span class="mono">'+esc(documentNo)+'</span>':'—')+
-            '</div></div>'+
-            '<div class="info"><div class="label">เลขทะเบียน</div><div class="value">'+
-              (plate?'<span class="mono">'+esc(plate)+'</span>':'—')+
-            '</div></div>'+
-            '<div class="info"><div class="label">ประเภทพาหนะ</div><div class="value">'+
-              esc(vtype)+
-            '</div></div>'+
-            '<div class="info"><div class="label">เหตุผลการเข้าหมู่บ้าน</div><div class="value">'+
-              esc(purpose||'—')+
-            '</div></div>'+
-            '<div class="info wide"><div class="label">ข้อความ รปภ</div><div class="value rawtext">'+rawHtml+'</div></div>'+
+          '<div class="rail">'+
+            '<input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
+            '<span class="runno">'+esc(i+1)+'</span>'+
           '</div>'+
-          '<div class="gallery">'+(imgs.length?imgs.map(function(img){
-            var meta=img.analysis||{};
-            var sub=[imageKind(img.kind), meta.vehiclePlate?plateText(meta.vehiclePlate):'', meta.personName||''].filter(Boolean).join(' · ');
-            var media=img.imageUrl?'<a href="'+esc(img.imageUrl)+'" target="_blank" rel="noopener"><img src="'+esc(img.imageUrl)+'" loading="lazy" alt="'+esc(imageKind(img.kind))+'"></a>':'<div class="empty" style="box-shadow:none;border:0;border-radius:0;padding:22px 8px">ลบรูปแล้ว</div>';
-            return '<div class="thumb">'+media+'<div class="cap">'+esc(sub||imageKind(img.kind))+'</div></div>';
-          }).join(''):'<div class="empty" style="box-shadow:none;grid-column:1/-1">ยังไม่มีรูป</div>')+'</div>'+
+          '<div class="cardmain">'+
+            '<div class="card-head">'+
+              '<div class="head-top">'+
+                '<div class="head-id"><span class="time">'+esc(fmtTime(r.createdAt))+'</span>'+
+                  '<span class="house">บ้าน '+esc(r.houseNo||'ไม่พบ')+'</span></div>'+
+                '<div class="head-meta">'+
+                  '<span class="badge '+badgeCls+'"><span class="dot"></span>'+esc(statusLabel(r.status))+'</span>'+
+                  '<span class="chevron">⌄</span></div>'+
+              '</div>'+
+              '<div class="purpose">'+esc(purpose||'ไม่พบเหตุผล')+'</div>'+
+            '</div>'+
+            '<div class="body">'+
+              '<div class="kv">'+
+                '<div class="kl">ผู้มาติดต่อ</div><div>'+dashOr(name,'kval')+'</div>'+
+                '<div class="kl">ทะเบียนรถ</div><div>'+dashOr(plate,'mono')+'</div>'+
+                '<div class="kl">บัตร / ใบขับขี่</div><div>'+dashOr(documentNo,'mono')+'</div>'+
+                '<div class="kl">ประเภทพาหนะ</div><div>'+dashOr(vtype==='—'?'':vtype,'kval')+'</div>'+
+              '</div>'+
+              '<div class="rawbox"><div class="rlabel">ข้อความ รปภ</div><div class="rval">'+(raw?esc(raw):'<span class="dash">—</span>')+'</div></div>'+
+              '<div class="gallery">'+(imgs.length?imgs.map(function(img){
+                var meta=img.analysis||{};
+                var sub=[imageKind(img.kind), meta.vehiclePlate?plateText(meta.vehiclePlate):'', meta.personName||''].filter(Boolean).join(' · ');
+                var media=img.imageUrl?'<a href="'+esc(img.imageUrl)+'" target="_blank" rel="noopener"><img src="'+esc(img.imageUrl)+'" loading="lazy" alt="'+esc(imageKind(img.kind))+'"></a>':'<div class="empty" style="box-shadow:none;border:0;border-radius:0;padding:22px 8px">ลบรูปแล้ว</div>';
+                return '<div class="thumb">'+media+'<div class="cap">'+esc(sub||imageKind(img.kind))+'</div></div>';
+              }).join(''):'<div class="empty" style="box-shadow:none;grid-column:1/-1">ยังไม่มีรูป</div>')+'</div>'+
+              '<div class="cardfoot"><span class="ts">บันทึกเมื่อ '+esc(fmtTs(r.createdAt))+' น.</span>'+
+                '<div class="acts">'+
+                  '<button class="mini-btn edit" data-edit="'+esc(r.id||'')+'" title="แก้ไขรายการนี้">แก้ไข</button>'+
+                  '<button class="mini-btn danger" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
+                '</div>'+
+              '</div>'+
+            '</div>'+
           '</div></article>';
       }).join('')+'</div>';
       refreshBulk();
