@@ -242,6 +242,38 @@
       .edit-grid { grid-template-columns:1fr; }
       .edit-modal { width:min(94vw,520px); max-height:82dvh; }
     }
+    /* ── Desktop: 2-column workspace (sidebar + list) ── */
+    @media (min-width:980px) {
+      .wrap {
+        max-width:1180px;
+        display:grid; align-items:start; column-gap:30px;
+        grid-template-columns:360px minmax(0,1fr);
+        grid-template-areas:"hero hero" "side list" "foot foot";
+      }
+      .hero {
+        grid-area:hero; display:flex; align-items:baseline; gap:14px;
+        text-align:left; background:transparent; border:0; box-shadow:none;
+        padding:6px 2px 12px; margin:14px 0 8px; border-bottom:1px solid var(--line);
+      }
+      .hero .ornament { display:none; }
+      .hero h1 { font-size:21px; }
+      .hero .sub { margin:0; font-size:13px; }
+      .sidecol { grid-area:side; position:sticky; top:84px; }
+      .listcol { grid-area:list; min-width:0; }
+      footer { grid-area:foot; }
+      .daycaption { text-align:left; }
+      .view-actions { margin-top:0; }
+      /* Expanded card body splits into info | images so it stays short */
+      .card .body {
+        display:grid; align-items:start; column-gap:20px;
+        grid-template-columns:minmax(0,1fr) 300px;
+        grid-template-areas:"kv gallery" "raw gallery" "foot foot";
+      }
+      .card .body .kv { grid-area:kv; }
+      .card .body .rawbox { grid-area:raw; }
+      .card .body .gallery { grid-area:gallery; margin-top:0; }
+      .card .body .cardfoot { grid-area:foot; }
+    }
   </style>
 </head>
 <body>
@@ -258,19 +290,23 @@
       <h1>รายการผู้มาติดต่อ</h1>
       <p class="sub">ดูข้อมูลที่ รปภ. ส่งเข้า LINE: บ้านที่ติดต่อ เหตุผล รูปเอกสาร รูปรถ และทะเบียน</p>
     </section>
-    <div class="toolbar">
-      <button id="prev" class="navbtn" aria-label="วันก่อนหน้า">‹</button>
-      <input id="date" type="date" aria-label="วันที่" />
-      <button id="next" class="navbtn" aria-label="วันถัดไป">›</button>
-      <button id="reload" class="btn">โหลด</button>
+    <div class="sidecol">
+      <div class="toolbar">
+        <button id="prev" class="navbtn" aria-label="วันก่อนหน้า">‹</button>
+        <input id="date" type="date" aria-label="วันที่" />
+        <button id="next" class="navbtn" aria-label="วันถัดไป">›</button>
+        <button id="reload" class="btn">โหลด</button>
+      </div>
+      <div id="daycap" class="daycaption"></div>
+      <div id="stats" class="stats" style="display:none"></div>
     </div>
-    <div id="daycap" class="daycaption"></div>
-    <div class="view-actions">
-      <button id="expandAll" class="view-btn">Expand all</button>
-      <button id="collapseAll" class="view-btn">Collapse all</button>
+    <div class="listcol">
+      <div class="view-actions">
+        <button id="expandAll" class="view-btn">Expand all</button>
+        <button id="collapseAll" class="view-btn">Collapse all</button>
+      </div>
+      <main id="list"></main>
     </div>
-    <div id="stats" class="stats" style="display:none"></div>
-    <main id="list"></main>
     <div id="bulkbar" class="bulkbar">
       <span class="n"><span id="bulkcount">0</span> รายการ</span>
       <button id="bulkclear" class="bulk-btn ghost">ล้าง</button>
@@ -505,7 +541,7 @@
         var purpose=purposeDisplay(r);
         var isComplete=r.status==='complete';
         var badgeCls=isComplete?'complete':'pending';
-        return '<article class="card" data-id="'+esc(r.id||'')+'">'+
+        return '<article class="card collapsed" data-id="'+esc(r.id||'')+'">'+
           '<div class="rail">'+
             '<input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
             '<span class="runno">'+esc(i+1)+'</span>'+
