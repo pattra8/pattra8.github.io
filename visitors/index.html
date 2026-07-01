@@ -76,9 +76,21 @@
       box-shadow:0 0 0 2px rgba(11,107,211,.14), var(--shadow);
     }
     .date-display {
-      position:absolute; left:14px; right:46px; top:50%; transform:translateY(-50%);
+      position:absolute; left:14px; right:54px; top:50%; transform:translateY(-50%);
       color:var(--text); font-size:16px; font-weight:800; pointer-events:none; z-index:1;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .date-icon {
+      position:absolute; right:15px; top:50%; transform:translateY(-50%);
+      width:20px; height:20px; pointer-events:none; z-index:1;
+    }
+    .date-icon::before {
+      content:""; position:absolute; inset:3px 2px 2px; border:2px solid #17130f;
+      border-radius:4px; background:transparent;
+    }
+    .date-icon::after {
+      content:""; position:absolute; left:5px; right:5px; top:7px;
+      border-top:2px solid #17130f; box-shadow:0 -5px 0 -1px #17130f;
     }
     input[type=date] {
       position:absolute; inset:0; width:100%; height:100%; border:0; border-radius:14px;
@@ -151,8 +163,10 @@
     .body { padding:14px 16px 16px; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .info { background:var(--card-soft); border:1px solid var(--line-soft); border-radius:14px; padding:11px 12px; min-height:78px; }
+    .info.wide { grid-column:1/-1; }
     .label { color:var(--soft); font-size:12px; font-weight:700; letter-spacing:.02em; }
     .value { margin-top:5px; font-size:14.5px; line-height:1.45; }
+    .rawtext { white-space:pre-wrap; }
     .mono { font-family:"IBM Plex Mono", monospace; font-weight:700; letter-spacing:.02em; }
     .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:10px; margin-top:12px; }
     .thumb { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card-soft); }
@@ -210,6 +224,7 @@
       <div class="datebox">
         <input id="date" type="date" aria-label="วันที่" />
         <div id="dateDisplay" class="date-display"></div>
+        <span class="date-icon" aria-hidden="true"></span>
       </div>
       <button id="next" class="navbtn" aria-label="วันถัดไป">›</button>
       <button id="reload" class="btn">โหลด</button>
@@ -225,7 +240,7 @@
       <button id="bulkclear" class="bulk-btn ghost">ล้าง</button>
       <button id="bulkdel" class="bulk-btn danger">ลบที่เลือก</button>
     </div>
-    <footer>เฉพาะกรรมการ · รูปเต็มเก็บ 90 วัน / ข้อมูล OCR 365 วัน</footer>
+    <footer>เฉพาะกรรมการ</footer>
   </div>
 
   <div id="overlay" class="overlay">
@@ -282,9 +297,37 @@
     function fmtDate(v){try{var parts=String(v||'').split('-'); if(parts.length!==3) return ''; var d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2])); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return v||'';}}
     function syncDateDisplay(){elDateDisplay.textContent=fmtDate(elDate.value);}
     function statusLabel(s){return s==='complete'?'ครบแล้ว':s==='pending_text'?'รอข้อความ':s==='pending_image'?'รอรูป':'รอตรวจ';}
-    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'พัสดุ/ขนส่ง',pickup:'รถรับ-ส่ง',contractor:'ช่าง/ผู้รับเหมา',utility:'งานสาธารณูปโภค (ไฟ/ประปา)',office:'ติดต่อนิติบุคคล',guest:'ญาติ/แขกมาเยี่ยม',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
+    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'เอกสาร':k==='vehicle'?'รถ/ทะเบียน':'อื่น ๆ';}
-    function plateText(v){return String(v||'').replace(/\s+/g,'').replace(/^(.+?)(\d{1,4})$/,'$1 $2');}
+    function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}
+    function plateText(v){
+      var clean=normalizeProvince(v).replace(/\s+/g,'').replace(/จังหวัด/g,'').trim();
+      var provinces=[
+        'กรุงเทพมหานคร','กรุงเทพ','กระบี่','กาญจนบุรี','กาฬสินธุ์','กำแพงเพชร','ขอนแก่น','จันทบุรี','ฉะเชิงเทรา','ชลบุรี',
+        'ชัยนาท','ชัยภูมิ','ชุมพร','เชียงราย','เชียงใหม่','ตรัง','ตราด','ตาก','นครนายก','นครปฐม','นครพนม','นครราชสีมา',
+        'นครศรีธรรมราช','นครสวรรค์','นนทบุรี','นราธิวาส','น่าน','บึงกาฬ','บุรีรัมย์','ปทุมธานี','ประจวบคีรีขันธ์',
+        'ปราจีนบุรี','ปัตตานี','พระนครศรีอยุธยา','พะเยา','พังงา','พัทลุง','พิจิตร','พิษณุโลก','เพชรบุรี','เพชรบูรณ์',
+        'แพร่','ภูเก็ต','มหาสารคาม','มุกดาหาร','แม่ฮ่องสอน','ยโสธร','ยะลา','ร้อยเอ็ด','ระนอง','ระยอง','ราชบุรี',
+        'ลพบุรี','ลำปาง','ลำพูน','เลย','ศรีสะเกษ','สกลนคร','สงขลา','สตูล','สมุทรปราการ','สมุทรสงคราม','สมุทรสาคร',
+        'สระแก้ว','สระบุรี','สิงห์บุรี','สุโขทัย','สุพรรณบุรี','สุราษฎร์ธานี','สุรินทร์','หนองคาย','หนองบัวลำภู',
+        'อ่างทอง','อำนาจเจริญ','อุดรธานี','อุตรดิตถ์','อุทัยธานี','อุบลราชธานี'
+      ];
+      var prov='';
+      provinces.sort(function(a,b){return b.length-a.length;}).some(function(p){if(clean.indexOf(p)>-1){prov=p; clean=clean.replace(p,''); return true;} return false;});
+      prov=normalizeProvince(prov);
+      var m=clean.match(/^([0-9]?[ก-ฮ]{1,3})([0-9]{1,4})$/);
+      return m?[m[1],m[2],prov].filter(Boolean).join(' '):[clean,prov].filter(Boolean).join(' ');
+    }
+    function vehicleTypeLabel(v){
+      var s=String(v||'').trim().toLowerCase();
+      if(!s||s==='unknown') return '—';
+      if(/ขยะ|garbage|trash|waste|refuse/.test(s)) return 'รถขยะ';
+      if(/motor|มอเตอร์|มอเตอ|จักรยานยนต์|scooter|bike/.test(s)) return 'รถมอเตอร์ไซค์';
+      if(/truck|บรรทุก|lorry|สิบล้อ|หกล้อ/.test(s)) return 'รถบรรทุก';
+      if(/car|sedan|suv|van|pickup|รถยนต์|รถเก๋ง|รถตู้|กระบะ/.test(s)) return 'รถยนต์';
+      return s;
+    }
+    function personName(o){return (o&&((/[ก-๙]/.test(o.personName||'')&&o.personName)||o.thaiPersonName||o.personName||o.englishPersonName))||'';}
 
     async function call(body){
       var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify(body)});
@@ -306,7 +349,11 @@
       if(!records.length){elList.innerHTML='<div class="empty">ยังไม่มีรายการผู้มาติดต่อในวันนี้</div>'; refreshBulk(); return;}
       elList.innerHTML='<div class="list">'+records.map(function(r,i){
         var o=r.ocr||{}, vc=r.vehicleCapture||{}, imgs=r.images||[];
-        var raw=(r.rawTexts||[]).map(function(t){return t.text;}).filter(Boolean).join(' · ');
+        var raw=(r.rawTexts||[]).map(function(t){return t.text;}).filter(Boolean).join('\n');
+        var rawHtml=esc(raw||'—');
+        var plate=vc.plateText?plateText(vc.plateText):'';
+        var vtype=vehicleTypeLabel(vc.vehicleType);
+        var name=personName(o);
         return '<article class="card" data-id="'+esc(r.id||'')+'">'+
           '<div class="card-head"><input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
             '<div class="ch-main"><div class="title-row"><span class="runno">'+esc(i+1)+'</span><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div></div>'+
@@ -316,18 +363,20 @@
             '<div class="ch-actions"><button class="del-btn" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
             '<span class="chevron">⌄</span></div></div></div>'+
           '<div class="body"><div class="grid">'+
-            '<div class="info"><div class="label">OCR เอกสาร</div><div class="value">'+
-              (o.personName?esc(o.personName):'—')+
-              (o.documentType?'<br>'+esc(o.documentType):'')+
-              (o.maskedDocumentNo?'<br><span class="mono">'+esc(o.maskedDocumentNo)+'</span>':'')+
+            '<div class="info"><div class="label">ชื่อ</div><div class="value">'+
+              (name?esc(name):'—')+
             '</div></div>'+
-            '<div class="info"><div class="label">รูปรถ/ทะเบียน</div><div class="value">'+
-              (vc.plateText?'<span class="mono">'+esc(plateText(vc.plateText))+'</span>':'—')+
-              (vc.vehicleType?'<br>'+esc(vc.vehicleType):'')+
+            '<div class="info"><div class="label">เลขทะเบียน</div><div class="value">'+
+              (plate?'<span class="mono">'+esc(plate)+'</span>':'—')+
             '</div></div>'+
-            '<div class="info"><div class="label">ข้อความ รปภ</div><div class="value">'+esc(raw||'—')+'</div></div>'+
-            '<div class="info"><div class="label">การเก็บรูป</div><div class="value">'+
-              (r.imagesPurged?'ลบรูปแล้ว (พ้น 90 วัน)':'เก็บรูปไว้ 90 วัน')+'</div></div>'+
+            '<div class="info"><div class="label">ประเภทพาหนะ</div><div class="value">'+
+              esc(vtype)+
+            '</div></div>'+
+            '<div class="info"><div class="label">เหตุผลการเข้าหมู่บ้าน</div><div class="value">'+
+              esc(categoryLabel(r.purposeCategory))+
+              (r.purposeText?'<br><small>'+esc(r.purposeText)+'</small>':'')+
+            '</div></div>'+
+            '<div class="info wide"><div class="label">ข้อความ รปภ</div><div class="value rawtext">'+rawHtml+'</div></div>'+
           '</div>'+
           '<div class="gallery">'+(imgs.length?imgs.map(function(img){
             var meta=img.analysis||{};
