@@ -90,7 +90,16 @@
       background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
       box-shadow:var(--shadow); overflow:hidden;
     }
-    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:15px 16px 12px; border-bottom:1px solid var(--line-soft); }
+    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:15px 16px 12px; border-bottom:1px solid var(--line-soft); cursor:pointer; user-select:none; }
+    .ch-side { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
+    .ch-actions { display:flex; align-items:center; gap:8px; }
+    .chevron { font-size:17px; color:var(--soft); line-height:1; transition:transform .2s; }
+    .card.collapsed .chevron { transform:rotate(-90deg); }
+    .card.collapsed .body { display:none; }
+    .card.collapsed .card-head { border-bottom:0; }
+    .del-btn { border:1px solid var(--line); background:var(--card); color:var(--red); border-radius:9px; padding:3px 10px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+    .del-btn:hover { background:var(--red-bg); border-color:#efc5bf; }
+    .del-btn:disabled { opacity:.5; cursor:default; }
     .house { font-size:22px; font-weight:800; line-height:1.1; }
     .purpose { margin-top:3px; color:var(--muted); font-size:14px; }
     .time { color:var(--soft); font-size:13px; white-space:nowrap; text-align:right; }
@@ -239,11 +248,13 @@
       elList.innerHTML='<div class="list">'+records.map(function(r){
         var o=r.ocr||{}, vc=r.vehicleCapture||{}, imgs=r.images||[];
         var raw=(r.rawTexts||[]).map(function(t){return t.text;}).filter(Boolean).join(' · ');
-        return '<article class="card">'+
+        return '<article class="card" data-id="'+esc(r.id||'')+'">'+
           '<div class="card-head"><div><div class="house">'+esc(r.houseNo||'ไม่พบบ้าน')+'</div>'+
             '<div class="purpose">'+esc(r.purposeText||'ไม่พบเหตุผล')+' · '+esc(categoryLabel(r.purposeCategory))+'</div>'+
             '<span class="badge '+esc(r.status||'unknown')+'">'+esc(statusLabel(r.status))+'</span></div>'+
-            '<div class="time">'+esc(fmtTs(r.createdAt))+'</div></div>'+
+            '<div class="ch-side"><div class="time">'+esc(fmtTs(r.createdAt))+'</div>'+
+            '<div class="ch-actions"><button class="del-btn" data-del="'+esc(r.id||'')+'" title="ลบรายการนี้">ลบ</button>'+
+            '<span class="chevron">⌄</span></div></div></div>'+
           '<div class="body"><div class="grid">'+
             '<div class="info"><div class="label">OCR เอกสาร</div><div class="value">'+
               (o.personName?esc(o.personName):'—')+
@@ -293,6 +304,29 @@
       }catch(err){elErr.textContent=err.status===401||err.status===403?'เลขบ้าน/PIN ไม่ถูกต้อง หรือไม่มีสิทธิ์กรรมการ':'เชื่อมต่อไม่ได้: '+err.message; elErr.classList.add('show');}
       finally{elLogin.disabled=false; elLogin.textContent='เข้าสู่ระบบ';}
     }
+
+    async function del(id){
+      if(!id) return;
+      var s=session(); if(!s){showLogin(); return;}
+      if(!confirm('ลบรายการนี้ถาวร? รูปทั้งหมดจะถูกลบด้วย')) return;
+      var btn=elList.querySelector('.del-btn[data-del="'+id+'"]');
+      if(btn){btn.disabled=true; btn.textContent='กำลังลบ…';}
+      try{
+        await call({action:'delete',houseNo:s.houseNo,pin:s.pin,recordId:id});
+        load();
+      }catch(err){
+        if(err.status===401||err.status===403){localStorage.removeItem(KEY); showLogin('หมดสิทธิ์ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(btn){btn.disabled=false; btn.textContent='ลบ';}
+        alert('ลบไม่สำเร็จ: '+err.message);
+      }
+    }
+
+    elList.addEventListener('click',function(e){
+      var delBtn=e.target.closest('.del-btn');
+      if(delBtn){e.stopPropagation(); del(delBtn.getAttribute('data-del')); return;}
+      var head=e.target.closest('.card-head');
+      if(head){var card=head.closest('.card'); if(card) card.classList.toggle('collapsed');}
+    });
 
     function syncNav(){ elNext.disabled = !elDate.value || elDate.value>=today(); }
     function shiftDate(delta){
