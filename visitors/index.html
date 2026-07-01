@@ -174,7 +174,7 @@
     .mono { font-family:"IBM Plex Mono", monospace; font-weight:700; letter-spacing:.02em; }
     .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:10px; margin-top:12px; }
     .thumb { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card-soft); }
-    .thumb a { display:block; color:inherit; text-decoration:none; }
+    .thumb button { display:block; width:100%; border:0; padding:0; background:transparent; cursor:zoom-in; color:inherit; text-align:left; }
     .thumb img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:#eee; }
     .cap { padding:8px 9px 9px; font-size:12px; color:var(--muted); line-height:1.35; }
     .empty, .note {
@@ -197,9 +197,30 @@
     .row input, .row select, .pin { width:100%; border:0; outline:0; background:transparent; padding:12px; font:inherit; font-size:17px; font-weight:700; }
     .field:focus-within .row, .pin:focus { border-color:var(--amber); }
     .edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .edit-modal { max-width:560px; }
-    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+    .edit-modal {
+      max-width:520px; max-height:min(82dvh,720px); overflow:auto;
+      padding:20px; border-radius:16px;
+    }
+    .edit-modal h2 { font-size:18px; line-height:1.2; }
+    .edit-modal p { font-size:12.5px; margin-bottom:12px; }
+    .edit-modal .field { margin:9px 0; }
+    .edit-modal .field label { font-size:12px; margin-bottom:5px; font-weight:600; }
+    .edit-modal .row { border-width:1px; border-radius:10px; }
+    .edit-modal .row input,
+    .edit-modal .row select {
+      padding:9px 10px; font-size:14.5px; font-weight:500; line-height:1.35;
+    }
+    .edit-modal .modal-actions { position:sticky; bottom:-20px; background:linear-gradient(180deg,rgba(255,255,255,0),var(--card) 24%); padding-top:18px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
     .btn.secondary { background:var(--card); color:var(--amber-text); border:1px solid var(--line); box-shadow:none; }
+    .preview-modal {
+      width:min(92vw,880px); max-height:88dvh; padding:0; overflow:hidden;
+      border-radius:16px; background:#15120f;
+    }
+    .preview-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#231d17; color:#fff; }
+    .preview-title { font-size:13px; font-weight:600; color:#f5ead9; }
+    .preview-close { border:0; background:transparent; color:#fff; font:inherit; font-size:22px; line-height:1; cursor:pointer; padding:2px 8px; }
+    .preview-img { display:block; width:100%; max-height:calc(88dvh - 48px); object-fit:contain; background:#15120f; }
     .pin { border:1.5px solid var(--line); border-radius:12px; letter-spacing:.28em; font-family:"IBM Plex Mono", monospace; }
     .merr { display:none; color:var(--red); background:var(--red-bg); border-radius:11px; padding:10px 12px; font-size:13px; margin-bottom:10px; }
     .merr.show { display:block; }
@@ -211,6 +232,7 @@
       .btn { padding-left:14px; padding-right:14px; }
       .view-actions { display:grid; grid-template-columns:1fr 1fr; }
       .edit-grid { grid-template-columns:1fr; }
+      .edit-modal { width:min(94vw,520px); max-height:82dvh; }
     }
   </style>
 </head>
@@ -303,6 +325,16 @@
     </div>
   </div>
 
+  <div id="previewOverlay" class="overlay">
+    <div class="modal preview-modal">
+      <div class="preview-head">
+        <div id="previewTitle" class="preview-title">Photo preview</div>
+        <button id="previewClose" class="preview-close" aria-label="Close preview">×</button>
+      </div>
+      <img id="previewImg" class="preview-img" alt="Visitor photo preview" />
+    </div>
+  </div>
+
   <script>
   (function(){
     'use strict';
@@ -322,7 +354,9 @@
       elEditPurposeText=document.getElementById('editPurposeText'), elEditName=document.getElementById('editName'),
       elEditDocNo=document.getElementById('editDocNo'), elEditPlate=document.getElementById('editPlate'),
       elEditVehicleType=document.getElementById('editVehicleType'), elEditCancel=document.getElementById('editCancel'),
-      elEditSave=document.getElementById('editSave');
+      elEditSave=document.getElementById('editSave'),
+      elPreviewOverlay=document.getElementById('previewOverlay'), elPreviewImg=document.getElementById('previewImg'),
+      elPreviewTitle=document.getElementById('previewTitle'), elPreviewClose=document.getElementById('previewClose');
     var currentRecords=[], editingId='';
 
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -488,7 +522,8 @@
               '</div>'+
               '<div class="rawbox"><div class="rlabel">ข้อความ รปภ</div><div class="rval">'+(raw?esc(raw):'<span class="dash">—</span>')+'</div></div>'+
               '<div class="gallery">'+(imgs.length?imgs.map(function(img){
-                var media=img.imageUrl?'<a href="'+esc(img.imageUrl)+'" target="_blank" rel="noopener"><img src="'+esc(img.imageUrl)+'" loading="lazy" alt="'+esc(imageKind(img.kind))+'"></a>':'<div class="empty" style="box-shadow:none;border:0;border-radius:0;padding:22px 8px">ลบรูปแล้ว</div>';
+                var label=imageKind(img.kind);
+                var media=img.imageUrl?'<button type="button" data-preview="'+esc(img.imageUrl)+'" data-preview-title="'+esc(label)+'"><img src="'+esc(img.imageUrl)+'" loading="lazy" alt="'+esc(label)+'"></button>':'<div class="empty" style="box-shadow:none;border:0;border-radius:0;padding:22px 8px">ลบรูปแล้ว</div>';
                 return '<div class="thumb">'+media+'<div class="cap">'+esc(imageKind(img.kind))+'</div></div>';
               }).join(''):'<div class="empty" style="box-shadow:none;grid-column:1/-1">ยังไม่มีรูป</div>')+'</div>'+
               '<div class="cardfoot"><span class="ts">บันทึกเมื่อ '+esc(fmtTs(r.createdAt))+' น.</span>'+
@@ -566,6 +601,16 @@
       elEditOverlay.classList.remove('open');
       elEditErr.classList.remove('show');
     }
+    function openPreview(url,title){
+      if(!url) return;
+      elPreviewImg.src=url;
+      elPreviewTitle.textContent=title||'Photo preview';
+      elPreviewOverlay.classList.add('open');
+    }
+    function closePreview(){
+      elPreviewOverlay.classList.remove('open');
+      elPreviewImg.removeAttribute('src');
+    }
     async function saveEdit(){
       var s=session(); if(!s){closeEdit(); showLogin(); return;}
       if(!editingId) return;
@@ -600,6 +645,8 @@
 
     elList.addEventListener('click',function(e){
       if(e.target.closest('.sel')) return; // checkbox handles its own toggle
+      var previewBtn=e.target.closest('[data-preview]');
+      if(previewBtn){e.stopPropagation(); openPreview(previewBtn.getAttribute('data-preview'),previewBtn.getAttribute('data-preview-title')); return;}
       var editBtn=e.target.closest('[data-edit]');
       if(editBtn){e.stopPropagation(); openEdit(editBtn.getAttribute('data-edit')); return;}
       var delBtn=e.target.closest('[data-del]');
@@ -655,6 +702,14 @@
     elEditCancel.addEventListener('click',closeEdit);
     elEditSave.addEventListener('click',saveEdit);
     elEditOverlay.addEventListener('click',function(e){if(e.target===elEditOverlay) closeEdit();});
+    elPreviewClose.addEventListener('click',closePreview);
+    elPreviewOverlay.addEventListener('click',function(e){if(e.target===elPreviewOverlay) closePreview();});
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){
+        if(elPreviewOverlay.classList.contains('open')) closePreview();
+        else if(elEditOverlay.classList.contains('open')) closeEdit();
+      }
+    });
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});
