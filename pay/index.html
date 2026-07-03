@@ -20,7 +20,7 @@ Error generating stack: `+e.message+`
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>ใบเสร็จรับเงิน ${e.receiptNo??``}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Charmonman:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sriracha&family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;color:#2a2218;background:#efe7d8;padding:28px 16px;-webkit-font-smoothing:antialiased}
@@ -53,10 +53,10 @@ Error generating stack: `+e.message+`
   .foot{margin:14px 30px 26px;padding-top:14px;border-top:1px solid #efe6d4}
   .foot table{width:100%;border-collapse:collapse}
   .foot .note{font-size:11.5px;color:#6b5d4a;line-height:1.6;text-align:left;vertical-align:bottom}
-  .foot .signcell{text-align:right;vertical-align:bottom;width:180px}
-  .sign{display:inline-block;text-align:center;min-width:170px}
-  .sign .sig{font-family:"Charmonman",cursive;font-size:24px;font-weight:700;color:#2a2218;line-height:1}
-  .sign .line{border-top:1px solid #c9b89c;margin:3px 0 4px}
+  .foot .signcell{text-align:right;vertical-align:bottom;white-space:nowrap}
+  .sign{display:inline-block;text-align:center}
+  .sign .sig{font-family:"Sriracha",cursive;font-size:19px;color:#2a2218;line-height:1.2;white-space:nowrap}
+  .sign .line{border-top:1px solid #c9b89c;margin:2px 0 4px}
   .sign .cap{font-size:10.5px;color:#9a8b75}
   .fine{padding:16px 30px 24px;font-size:10px;color:#b9a98f;text-align:center}
   @media print{body{background:#fff;padding:0}.doc{box-shadow:none;border-radius:0}}
@@ -90,7 +90,7 @@ Error generating stack: `+e.message+`
     <div class="klist">
       <table class="krow" role="presentation" cellpadding="0" cellspacing="0"><tr><td class="k">ผู้ชำระ</td><td class="v">${e.payerName||`บ้าน `+r}</td></tr></table>
       <table class="krow" role="presentation" cellpadding="0" cellspacing="0"><tr><td class="k">วันที่</td><td class="v">${se(n)}</td></tr></table>
-      <table class="krow" role="presentation" cellpadding="0" cellspacing="0"><tr><td class="k">ช่องทาง</td><td class="v">โอนผ่าน ${t.bankName}</td></tr></table>
+      <table class="krow" role="presentation" cellpadding="0" cellspacing="0"><tr><td class="k">โอนผ่าน</td><td class="v">${t.bankName}</td></tr></table>
     </div>
 
     <div class="foot"><table role="presentation" cellpadding="0" cellspacing="0"><tr>
