@@ -30,9 +30,9 @@ Error generating stack: `+e.message+`
   .brand{padding:28px 30px 0;text-align:center}
   .wm{font-family:"Cormorant Garamond",serif;font-size:40px;font-weight:600;letter-spacing:.05em;color:#2a2218;line-height:1}
   .wmsub{font-size:14.5px;color:#6b5d4a;margin-top:7px}
-  .doctitle{margin:20px 30px 0;display:flex;align-items:center;gap:14px;text-align:center}
-  .doctitle::before,.doctitle::after{content:"";flex:1;height:1px;background:#e6dcc7}
-  .doctitle span{font-size:18px;font-weight:600;letter-spacing:.3em;color:#c47a2c;white-space:nowrap}
+  .doctitle{width:100%;border-collapse:collapse}
+  .doctitle .rule{border-bottom:1px solid #e6dcc7;width:50%;font-size:0;line-height:0}
+  .doctitle .ttl{white-space:nowrap;padding:0 14px;text-align:center;font-size:18px;font-weight:600;letter-spacing:.3em;color:#c47a2c}
   .docmeta{margin:13px 30px 0;text-align:center;font-size:13.5px;color:#6b5d4a}
   .paid{display:inline-block;background:#e2ecd6;color:#4a6238;font-size:12.5px;font-weight:600;padding:5px 13px;border-radius:999px;white-space:nowrap;margin-right:8px}
   .rno2 b{color:#2a2218;font-weight:600}
@@ -68,7 +68,7 @@ Error generating stack: `+e.message+`
       <div class="wmsub">นิติบุคคล ภัทราวิลล่า 8</div>
     </div>
 
-    <div class="doctitle"><span>ใบเสร็จรับเงิน</span></div>
+    <div style="padding:20px 30px 0"><table class="doctitle" role="presentation" cellpadding="0" cellspacing="0"><tr><td class="rule"></td><td class="ttl">ใบเสร็จรับเงิน</td><td class="rule"></td></tr></table></div>
     <div class="docmeta">
       <span class="paid">✓ ชำระแล้ว</span>
       ${e.receiptNo?`<span class="rno2"><b class="num">${e.receiptNo}</b></span>`:``}
