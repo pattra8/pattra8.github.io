@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ข้อมูล Visitor ประจำวัน · Pattra Villa 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f9f3e9; --bg-soft:#f3ecdd; --card:#ffffff; --border:#e6dcc7;
+    --border-soft:#efe8d6; --text:#2a2218; --text-body:#3a3024;
+    --text-soft:#6b5d4a; --text-muted:#8a7960; --accent:#c47a2c;
+    --accent-text:#9a5c1f; --accent-deep:#855015;
+    --ok:#3f6431; --ok-bg:#e8efd9; --warn:#855015; --warn-bg:#f7e6cd;
+    --err:#86341e; --err-bg:#f7dfd5; --neutral:#6b5d4a; --neutral-bg:#efe8d6;
+    --radius:16px; --shadow:0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
+    background:var(--bg); color:var(--text-body);
+    min-height:100dvh; padding:0 0 70px;
+  }
+  .mono { font-family:'IBM Plex Mono', monospace; }
+  .wrap { width:100%; max-width:560px; margin:0 auto; padding:0 14px; }
+
+  .site-header {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--bg); border-bottom:1px solid var(--border);
+    padding:14px 0; margin-bottom:16px;
+  }
+  .home-link { color:var(--accent-text); text-decoration:none; font-size:14px; font-weight:600; }
+  .brand { font-size:13px; color:var(--text-muted); letter-spacing:.03em; }
+
+  h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
+  .sub { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
+
+  /* login modal (fallback if no shared resident session yet) */
+  #loginOverlay {
+    position:fixed; inset:0; background:rgba(42,34,24,.45);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:50;
+  }
+  #loginOverlay.open { display:flex; }
+  .login-card {
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    width:100%; max-width:360px; padding:24px 22px;
+  }
+  .login-card h2 { font-size:17px; margin:0 0 4px; color:var(--text); }
+  .login-card p { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
+  .house-row { display:flex; align-items:center; gap:6px; margin-bottom:12px; }
+  .house-prefix {
+    font-family:'IBM Plex Mono'; font-weight:600; color:var(--text-muted);
+    background:var(--bg-soft); border:1px solid var(--border); border-radius:10px;
+    padding:11px 10px; font-size:15px;
+  }
+  input[type=text], input[type=tel], input[type=password], input[type=date] {
+    font-family:'IBM Plex Mono'; font-size:15px; font-weight:600;
+    border:1px solid var(--border); border-radius:10px; padding:11px 12px;
+    background:var(--bg-soft); color:var(--text); width:100%; outline:none;
+  }
+  input:focus { border-color:var(--accent); }
+  .pin-row { margin-bottom:16px; }
+  .btn-primary {
+    width:100%; background:var(--accent); color:#fff; border:none; border-radius:12px;
+    padding:12px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .btn-primary:active { background:var(--accent-deep); }
+  .login-err { color:var(--err); font-size:12.5px; margin-top:10px; display:none; }
+  .login-err.show { display:block; }
+
+  .card {
+    background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:18px; margin-bottom:16px;
+  }
+  .date-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .date-nav-btn {
+    flex:none; width:38px; height:38px; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg-soft); color:var(--text-soft); font-size:16px; cursor:pointer;
+  }
+  .date-pill {
+    flex:1; background:#fbe9a8; color:#6b5010; border-radius:12px; padding:10px 14px;
+    font-weight:700; font-size:14.5px; text-align:center;
+  }
+  .date-pill .range { font-weight:500; font-size:12px; color:#8a6d1f; margin-top:2px; }
+  .total-box {
+    background:var(--bg-soft); border-radius:14px; padding:16px; text-align:center; margin-bottom:14px;
+  }
+  .total-box .label { font-size:13px; color:var(--text-soft); margin-bottom:4px; }
+  .total-box .num { font-size:34px; font-weight:700; color:var(--ok); }
+  .stat-grid { display:flex; justify-content:space-around; text-align:center; }
+  .stat-grid .num { font-size:26px; font-weight:700; }
+  .stat-grid .lab { font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+  .stat-grid .inout { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+  .stat-grid .inout b.in { color:var(--ok); }
+  .stat-grid .inout b.out { color:var(--err); }
+  .c-ok { color:var(--ok); } .c-accent { color:var(--accent-text); } .c-err { color:var(--err); }
+
+  .trust-banner {
+    display:flex; align-items:center; gap:10px;
+    border-radius:12px; padding:11px 13px; font-size:13px; margin-bottom:16px; font-weight:600;
+  }
+  .trust-banner.ok { background:var(--ok-bg); border:1px solid #cfe0bb; color:var(--ok); }
+  .trust-banner.warn { background:var(--warn-bg); border:1px solid #ecd2a9; color:var(--warn); }
+  .trust-banner .dot { width:8px; height:8px; border-radius:50%; background:currentColor; flex:none; }
+
+  .search-box {
+    display:flex; align-items:center; gap:8px; background:var(--card);
+    border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-bottom:12px;
+  }
+  .search-box svg { flex:none; color:var(--text-muted); }
+  .search-box input {
+    border:none; background:transparent; padding:0; font-family:'IBM Plex Sans Thai';
+    font-weight:500; font-size:14.5px; width:100%;
+  }
+  .search-box input::placeholder { color:var(--text-muted); font-weight:400; }
+
+  .tabs { display:flex; gap:8px; margin-bottom:14px; }
+  .tab {
+    flex:1; text-align:center; padding:9px; border-radius:10px; font-size:13.5px; font-weight:600;
+    background:var(--bg-soft); color:var(--text-soft); border:1px solid var(--border-soft); cursor:pointer;
+  }
+  .tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .section-title {
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:14px; font-weight:700; color:var(--text); margin:18px 0 10px;
+  }
+  .section-title .count { color:var(--accent-text); font-weight:700; }
+
+  .visitor-item {
+    display:flex; align-items:center; gap:12px; background:var(--card);
+    border:1px solid var(--border-soft); border-radius:14px; padding:12px 14px; margin-bottom:9px;
+  }
+  .plate-chip {
+    font-family:'IBM Plex Mono'; font-weight:700; font-size:13.5px; color:var(--text);
+    border:1.5px solid var(--text); border-radius:8px; padding:6px 10px; text-align:center;
+    min-width:78px; flex:none; background:#fff;
+  }
+  .v-info { flex:1; min-width:0; }
+  .v-car { font-size:14px; font-weight:600; color:var(--text); }
+  .v-car .dot-sep { color:var(--text-muted); margin:0 4px; }
+  .v-color { color:var(--text-soft); font-weight:400; }
+  .v-times { text-align:right; font-family:'IBM Plex Mono'; font-size:13px; flex:none; }
+  .v-times .in { color:var(--ok); font-weight:600; }
+  .v-times .out { color:var(--err); font-weight:600; }
+  .v-times .arrow { color:var(--text-muted); }
+  .badge-inside {
+    display:inline-block; margin-top:3px; font-size:10.5px; font-weight:700;
+    background:var(--warn-bg); color:var(--warn); border-radius:6px; padding:2px 6px;
+  }
+
+  .empty-state, .loading-state {
+    text-align:center; padding:40px 20px; color:var(--text-muted); font-size:13.5px;
+  }
+  .spinner {
+    display:inline-block; width:14px; height:14px; margin-right:6px;
+    border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%;
+    animation:spin .7s linear infinite; vertical-align:-2px;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .footer-note {
+    text-align:center; font-size:11.5px; color:var(--text-muted); line-height:1.6; margin-top:24px;
+  }
+
+  #app { display:none; }
+</style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>เข้าสู่ระบบลูกบ้าน</h2>
+    <p>กรอกบ้านเลขที่และ PIN 6 หลัก เพื่อดูข้อมูลรถผ่านเข้า-ออกวันนี้</p>
+    <div class="house-row">
+      <span class="house-prefix mono">38/</span>
+      <input type="text" id="houseSuffix" inputmode="numeric" placeholder="เลขที่บ้าน เช่น 12">
+    </div>
+    <div class="pin-row">
+      <input type="password" id="pin" inputmode="numeric" maxlength="6" placeholder="PIN 6 หลัก">
+    </div>
+    <button class="btn-primary" id="loginBtn">เข้าสู่ระบบ</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="wrap">
+    <div class="site-header">
+      <a href="/" class="home-link">← หน้าแรก</a>
+      <span class="brand">Pattra Villa 8</span>
+    </div>
+
+    <h1>🔎 ข้อมูล Visitor ประจำวัน</h1>
+    <p class="sub">ตรวจสอบรถที่ผ่านเข้า-ออกหมู่บ้าน เพื่อความอุ่นใจของลูกบ้านทุกคน</p>
+
+    <div id="trustBanner"></div>
+
+    <div class="card">
+      <div class="date-row">
+        <button class="date-nav-btn" id="prevDayBtn">‹</button>
+        <div class="date-pill" id="datePill">—</div>
+        <button class="date-nav-btn" id="nextDayBtn">›</button>
+      </div>
+      <div class="total-box">
+        <div class="label">รถยนต์ผ่านประตูทั้งหมด</div>
+        <div class="num" id="totalNum">—</div>
+      </div>
+      <div class="stat-grid">
+        <div>
+          <div class="num c-ok" id="residentNum">—</div>
+          <div class="lab">รถลูกบ้าน</div>
+          <div class="inout" id="residentInOut"></div>
+        </div>
+        <div>
+          <div class="num c-accent" id="externalNum">—</div>
+          <div class="lab">รถภายนอก</div>
+          <div class="inout" id="externalInOut"></div>
+        </div>
+        <div>
+          <div class="num c-err" id="unreadableNum">—</div>
+          <div class="lab">สแกนไม่พบ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="ค้นหาทะเบียน, ยี่ห้อ หรือสี...">
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="day">☀️ กลางวัน (07:00–22:00)</div>
+      <div class="tab" data-tab="night">🌙 กลางคืน (22:00–07:00)</div>
+    </div>
+
+    <div class="section-title">🚗 รถภายนอก (Visitor) <span class="count" id="listCount">—</span></div>
+    <div id="visitorList"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">ไม่พบรถที่ตรงกับคำค้นหา</div>
+    <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
+
+    <div class="footer-note">
+      ข้อมูลนี้แสดงเฉพาะลูกบ้านที่ยืนยันตัวตนแล้วเท่านั้น (เฉพาะกรรมการ/ลูกบ้าน)<br>
+      เก็บภาพ 90 วัน · เก็บข้อมูลทะเบียน/OCR 365 วัน ตามนโยบายความเป็นส่วนตัว
+    </div>
+  </div>
+</div>
+
+<script>
+  var SESSION_KEY = 'pattra_resident_session_v1';
+  var TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  var API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/dailyTrafficReport';
+
+  var COLOR_PHRASE = {'dark blue':'น้ำเงินเข้ม','light blue':'ฟ้า','dark gray':'เทาเข้ม',
+    'dark grey':'เทาเข้ม','light gray':'เทาอ่อน','light grey':'เทาอ่อน','dark green':'เขียวเข้ม'};
+  var COLOR_TH = {white:'ขาว',black:'ดำ',silver:'เงิน',gray:'เทา',grey:'เทา',red:'แดง',
+    blue:'น้ำเงิน',navy:'กรมท่า',green:'เขียว',yellow:'เหลือง',brown:'น้ำตาล',orange:'ส้ม',
+    gold:'ทอง',beige:'เบจ',cream:'ครีม',purple:'ม่วง',violet:'ม่วง',pink:'ชมพู',
+    maroon:'เลือดหมู',tan:'น้ำตาลอ่อน',bronze:'ทองแดง',cyan:'ฟ้าอมเขียว',
+    turquoise:'ฟ้าอมเขียว',teal:'เขียวอมฟ้า'};
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
+    });
+  }
+  function colorTh(c) {
+    if (!c) return '';
+    var s = String(c).toLowerCase().trim();
+    var th = COLOR_PHRASE[s] || s.split(/\s+/).map(function(w){ return COLOR_TH[w] || w; }).join(' ');
+    return 'สี' + th;
+  }
+  function displayPlate(plate) {
+    var compact = String(plate || '').replace(/\s+/g, '');
+    return compact.replace(/^(.+?)(\d{1,4})$/, '$1 $2');
+  }
+  function todayStr() {
+    var d = new Date();
+    var bkk = new Date(d.toLocaleString('en-US', {timeZone: 'Asia/Bangkok'}));
+    var y = bkk.getFullYear(), m = String(bkk.getMonth()+1).padStart(2,'0'), day = String(bkk.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + day;
+  }
+  function shiftDate(dateStr, days) {
+    var d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+  function thaiDateLabel(dateStr) {
+    var THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+      'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    var d = new Date(dateStr + 'T00:00:00');
+    return d.getDate() + ' ' + THAI_MONTHS[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+  }
+
+  function getSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (!s || Number(s.expiresAt) <= Date.now()) { localStorage.removeItem(SESSION_KEY); return null; }
+      return s;
+    } catch (e) { return null; }
+  }
+  function storeSession(houseNo, pin, residentName) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      houseNo: houseNo, pin: pin, residentName: residentName || '',
+      expiresAt: Date.now() + TTL_MS
+    }));
+  }
+
+  var currentTab = 'day';
+  var currentDate = todayStr();
+  var lastReport = null;
+  var elLoginOverlay = document.getElementById('loginOverlay');
+  var elApp = document.getElementById('app');
+
+  function showLogin(msg) {
+    elApp.style.display = 'none';
+    elLoginOverlay.classList.add('open');
+    var err = document.getElementById('loginErr');
+    if (msg) { err.textContent = msg; err.classList.add('show'); }
+    else { err.classList.remove('show'); }
+  }
+  function showApp() {
+    elLoginOverlay.classList.remove('open');
+    elApp.style.display = 'block';
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('pin').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+
+  function doLogin() {
+    var suffix = document.getElementById('houseSuffix').value.trim();
+    var pin = document.getElementById('pin').value.trim();
+    var err = document.getElementById('loginErr');
+    if (!suffix || pin.length < 4) {
+      err.textContent = 'กรอกบ้านเลขที่และ PIN ให้ครบ';
+      err.classList.add('show');
+      return;
+    }
+    var houseNo = '38/' + suffix;
+    fetch('https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({houseNo: houseNo, pin: pin})
+    }).then(function(res) { return res.json().then(function(data) { return {ok: res.ok, data: data}; }); })
+      .then(function(r) {
+        if (!r.ok || !r.data.ok) {
+          err.textContent = 'บ้านเลขที่หรือ PIN ไม่ถูกต้อง';
+          err.classList.add('show');
+          return;
+        }
+        var residentName = r.data.resident ? r.data.resident.name : '';
+        storeSession(houseNo, pin, residentName);
+        showApp();
+        loadReport();
+      })
+      .catch(function() {
+        err.textContent = 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่';
+        err.classList.add('show');
+      });
+  }
+
+  function setTab(t) {
+    currentTab = t;
+    document.querySelectorAll('.tab').forEach(function(el) { el.classList.toggle('active', el.dataset.tab === t); });
+    renderList();
+  }
+  document.querySelectorAll('.tab').forEach(function(el) {
+    el.addEventListener('click', function() { setTab(el.dataset.tab); });
+  });
+  document.getElementById('searchInput').addEventListener('input', renderList);
+  document.getElementById('prevDayBtn').addEventListener('click', function() {
+    currentDate = shiftDate(currentDate, -1);
+    loadReport();
+  });
+  document.getElementById('nextDayBtn').addEventListener('click', function() {
+    if (currentDate >= todayStr()) return;
+    currentDate = shiftDate(currentDate, 1);
+    loadReport();
+  });
+
+  function hourOf(hm) {
+    if (!hm) return null;
+    var h = parseInt(hm.split(':')[0], 10);
+    return Number.isFinite(h) ? h : null;
+  }
+  function isNightRow(row) {
+    var h = hourOf(row.entryTime) !== null ? hourOf(row.entryTime) : hourOf(row.firstTime);
+    if (h === null) return false;
+    return h >= 22 || h < 7;
+  }
+
+  function renderList() {
+    if (!lastReport) return;
+    var q = document.getElementById('searchInput').value.trim().toLowerCase();
+    var rows = (lastReport.externalPlates || []).filter(function(r) {
+      return currentTab === 'night' ? isNightRow(r) : !isNightRow(r);
+    });
+    var filtered = rows.filter(function(r) {
+      var v = r.vehicleVision || {};
+      var brand = [v.make, v.model].filter(Boolean).join(' ');
+      return r.plate.toLowerCase().indexOf(q) !== -1 ||
+        brand.toLowerCase().indexOf(q) !== -1 ||
+        (v.color || '').toLowerCase().indexOf(q) !== -1;
+    });
+    document.getElementById('listCount').textContent = filtered.length + ' คัน';
+    var list = document.getElementById('visitorList');
+    var empty = document.getElementById('emptyState');
+    if (!filtered.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = filtered.map(function(r) {
+      var v = r.vehicleVision || {};
+      var brand = [v.make, v.model].filter(Boolean).join(' ');
+      var cth = colorTh(v.color);
+      var carLine = (brand || cth) ?
+        (esc(brand) + (brand && cth ? ' <span class="dot-sep">·</span><span class="v-color">' : '<span class="v-color">') + esc(cth) + '</span>')
+        : '<span class="v-color">ไม่มีข้อมูลรถ</span>';
+      return '<div class="visitor-item">' +
+        '<div class="plate-chip mono">' + esc(displayPlate(r.plate)) + '</div>' +
+        '<div class="v-info">' +
+          '<div class="v-car">' + carLine + '</div>' +
+          (!r.exitTime ? '<span class="badge-inside">อยู่ในหมู่บ้าน</span>' : '') +
+        '</div>' +
+        '<div class="v-times">' +
+          '<span class="in">' + esc(r.entryTime || '—') + '</span> <span class="arrow">→</span> ' +
+          '<span class="' + (r.exitTime ? 'out' : '') + '">' + esc(r.exitTime || '—') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderReport(report) {
+    lastReport = report;
+    document.getElementById('datePill').innerHTML =
+      esc(thaiDateLabel(currentDate)) +
+      (report.timeRange ? '<div class="range">ช่วงเวลา ' + esc(report.timeRange) + ' น.</div>' : '<div class="range">ยังไม่มีรถผ่านวันนี้</div>');
+    document.getElementById('totalNum').textContent = (report.totalDetections || 0) + ' คัน';
+    document.getElementById('residentNum').textContent = report.residentCars || 0;
+    document.getElementById('residentInOut').innerHTML =
+      'เข้า <b class="in">' + (report.residentEntryCars || 0) + '</b> · ออก <b class="out">' + (report.residentExitCars || 0) + '</b>';
+    document.getElementById('externalNum').textContent = report.externalCars || 0;
+    document.getElementById('externalInOut').innerHTML =
+      'เข้า <b class="in">' + (report.externalEntryCars || 0) + '</b> · ออก <b class="out">' + (report.externalExitCars || 0) + '</b>';
+    document.getElementById('unreadableNum').textContent = report.unreadableDetections || 0;
+
+    var stillInside = (report.externalPlates || []).filter(function(r) { return r.entryTime && !r.exitTime; }).length;
+    var banner = document.getElementById('trustBanner');
+    if (stillInside === 0) {
+      banner.innerHTML = '<div class="trust-banner ok"><span class="dot"></span> วันนี้ไม่มีรถภายนอกค้างอยู่ผิดปกติ · ปกติดี</div>';
+    } else {
+      banner.innerHTML = '<div class="trust-banner warn"><span class="dot"></span> มีรถภายนอก ' + stillInside + ' คัน ที่ยังไม่พบข้อมูลออก</div>';
+    }
+    renderList();
+  }
+
+  function loadReport() {
+    var s = getSession();
+    if (!s) { showLogin(); return; }
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('visitorList').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'none';
+    fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({action: 'visitorBoard', houseNo: s.houseNo, pin: s.pin, reportDate: currentDate})
+    }).then(function(res) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      return res.json().then(function(data) { return {ok: res.ok, data: data}; });
+    }).then(function(r) {
+      document.getElementById('loadingState').style.display = 'none';
+      if (!r) return;
+      if (!r.ok || !r.data.ok) {
+        document.getElementById('visitorList').innerHTML =
+          '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ<br><small>' + esc(r.data.error || '') + '</small></div>';
+        return;
+      }
+      showApp();
+      renderReport(r.data.report);
+    }).catch(function() {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('visitorList').innerHTML = '<div class="empty-state">เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่</div>';
+    });
+  }
+
+  loadReport();
+</script>
+
+</body>
+</html>
