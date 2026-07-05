@@ -285,7 +285,8 @@
   function shiftDate(dateStr, days) {
     var d = new Date(dateStr + 'T00:00:00');
     d.setDate(d.getDate() + days);
-    return d.toISOString().slice(0, 10);
+    var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + day;
   }
   function thaiDateLabel(dateStr) {
     var THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
