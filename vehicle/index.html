@@ -434,6 +434,12 @@
       font-weight: 400;
       margin-left: 4px;
     }
+    .vehicles-subnote {
+      margin: -4px 4px 16px;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
 
     .add-btn {
       background: var(--accent);
@@ -1927,6 +1933,7 @@
         <div class="vehicles-title">ทะเบียนรถ<span class="vehicles-title-count">(รวม ${total} คัน · 🚗 รถยนต์ ${cars.length}/${carQuota} · 🏍️ มอเตอร์ไซค์ ${motos.length} คัน)</span></div>
         <button class="add-btn" id="addBtn"><span class="plus">+</span> เพิ่มรถ</button>
       </div>
+      <div class="vehicles-subnote">โควต้านี้ใช้เฉพาะทะเบียนรถยนต์ที่ sync LPR ได้ และไม่เกี่ยวกับมอเตอร์ไซค์</div>
     `;
 
     let listHtml = '';
@@ -2079,7 +2086,7 @@
     const isCar2 = editingType === 'car';
 
     const carDisabledHtml = carFull
-      ? `<div style="font-size:.72rem;color:var(--status-error,#ef4444);margin-top:2px;">ครบโควต้า ${carQuota} คัน</div>`
+      ? `<div style="font-size:.72rem;color:var(--status-error,#ef4444);margin-top:2px;">ครบโควต้ารถยนต์ ${carQuota} คันสำหรับ sync LPR</div>`
       : '';
 
     modalContent.innerHTML = `
@@ -2151,7 +2158,7 @@
             currentRecord.car_quota ?? currentRecord.carQuota
           );
           if (newCars.length >= quota) {
-            alert(`บ้านนี้มีสิทธิ์จอดรถยนต์สูงสุด ${quota} คัน`);
+            alert(`บ้านนี้คีย์ทะเบียนรถยนต์เพื่อ sync LPR ได้สูงสุด ${quota} คัน`);
             return;
           }
           newCars.push(plate);
@@ -2186,7 +2193,7 @@
 
       const json = await res.json().catch(() => ({}));
       if (json.error === 'car_quota_exceeded') {
-        alert(`เพิ่มไม่ได้ — บ้านนี้มีสิทธิ์จอดรถยนต์สูงสุด ${json.quota} คัน`);
+        alert(`เพิ่มไม่ได้ — บ้านนี้คีย์ทะเบียนรถยนต์เพื่อ sync LPR ได้สูงสุด ${json.quota} คัน`);
         btn.disabled = false; btn.textContent = 'บันทึก';
         return;
       }
