@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — หมู่บ้านภัทราวิลล่า 8</title>
+  <!-- release: car-quota-admin-2026-07-05 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet" />
@@ -34,6 +35,10 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; }
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+    }
     body {
       font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
@@ -48,7 +53,13 @@
     .hidden { display: none !important; }
 
     /* ─── DASHBOARD ─── */
-    .dashboard { min-height: 100vh; display: none; flex-direction: column; }
+    .dashboard {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      overflow-x: hidden;
+    }
     .dashboard.active { display: flex; }
 
     .dashboard > header {
@@ -56,7 +67,7 @@
       backdrop-filter: saturate(140%) blur(8px);
       -webkit-backdrop-filter: saturate(140%) blur(8px);
       border-bottom: 1px solid var(--border-soft);
-      padding: 16px 28px;
+      padding: 14px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -65,6 +76,7 @@
       z-index: 100;
       gap: 14px;
       flex-wrap: wrap;
+      width: 100%;
     }
     .dashboard > header h1 {
       font-family: 'Cormorant Garamond', serif;
@@ -108,6 +120,8 @@
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
+      min-width: 0;
+      flex: 1 1 auto;
     }
     .admin-link-btn {
       display: inline-flex;
@@ -151,9 +165,11 @@
     .tabs {
       display: flex;
       gap: 4px;
-      padding: 16px 28px 0;
+      padding: 14px 22px 0;
       border-bottom: 1px solid var(--border-soft);
       background: var(--bg);
+      flex-wrap: wrap;
+      row-gap: 4px;
     }
     .tab-btn {
       background: transparent;
@@ -170,6 +186,7 @@
       align-items: center;
       gap: 6px;
       transition: color 0.15s, border-color 0.15s;
+      flex: 0 0 auto;
     }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active {
@@ -189,7 +206,7 @@
 
     /* ─── AUTHORIZATION MATRIX ─── */
     .access-shell {
-      padding: 26px 28px 40px;
+      padding: 24px 22px 36px;
       max-width: 920px;
       width: 100%;
       margin: 0 auto;
@@ -579,13 +596,14 @@
       display: flex;
       gap: 10px;
       align-items: center;
-      padding: 18px 28px;
+      padding: 16px 22px;
       flex-wrap: wrap;
       background: var(--bg);
+      min-width: 0;
     }
     .toolbar input[type="text"] {
-      flex: 1;
-      min-width: 220px;
+      flex: 1 1 320px;
+      min-width: 0;
       border: 1.5px solid var(--border);
       border-radius: 10px;
       padding: 10px 14px;
@@ -625,11 +643,12 @@
       font-size: 12px;
       color: var(--text-muted);
       margin-left: auto;
+      min-width: 0;
     }
 
     /* ─── TABLE ─── */
     .table-wrap {
-      margin: 0 28px 28px;
+      margin: 0 22px 22px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -1333,7 +1352,7 @@
     <div>
       <h1>Admin — หมู่บ้านภัทราวิลล่า 8</h1>
     </div>
-    <div style="display:flex; align-items:center; gap:12px;">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
       <span class="badge">ADMIN</span>
       <nav class="admin-quick-links" aria-label="Admin quick links">
         <a class="admin-link-btn" href="/" target="_blank" rel="noopener">🏠 Home</a>
@@ -1867,9 +1886,9 @@
         <input id="edit_motorcycles" type="text" placeholder="เช่น 1กฐ1717" />
       </div>
       <div class="form-group">
-        <label for="edit_car_quota">โควต้ารถยนต์ (คัน)</label>
+        <label for="edit_car_quota">โควต้าทะเบียนรถยนต์สำหรับ sync LPR (คัน)</label>
         <input id="edit_car_quota" type="number" min="1" step="1" placeholder="เช่น 3" />
-        <span class="readonly-hint">ใช้ค่าปัจจุบันจากระบบก่อนแก้ไข</span>
+        <span class="readonly-hint">โควต้านี้ใช้เฉพาะรถยนต์ที่คีย์เพื่อ sync LPR ได้ ไม่เกี่ยวกับมอเตอร์ไซค์</span>
       </div>
     </div>
     <div class="modal-footer">
