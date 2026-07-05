@@ -3836,7 +3836,7 @@
         <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
         <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
         <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
-        <td class="col-name" title="${escHtml(r.name || '')}">${showVal(r.name)}</td>
+        <td class="col-name" title="${escHtml(r.name || '')}">${showVal(shortenCompanyName(r.name))}</td>
         <td class="col-email">${showVal(r.email)}</td>
         <td class="col-phone">${showVal(formatPhone(r.phone))}</td>
         <td class="col-deed">${showVal(r.deed_no)}</td>
@@ -3857,6 +3857,16 @@
     catch(e) { return raw; }
   }
   function showVal(v) { return v ? escHtml(String(v)) : '<span class="no-val">—</span>'; }
+  function shortenCompanyName(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    const compact = text
+      .replace(/^(?:บริษัท(?:\s*(?:จำกัด|มหาชน|จำกัดมหาชน))?\s*)+/i, '')
+      .replace(/^(?:ห้างหุ้นส่วนจำกัด\s*)+/i, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    return compact || text;
+  }
   function formatPhone(v) {
     const d = String(v||'').replace(/\D/g,'');
     return d.length === 10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : (v||'');
