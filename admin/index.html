@@ -676,6 +676,7 @@
 
     table {
       width: 100%;
+      table-layout: fixed;
       border-collapse: separate;
       border-spacing: 0;
       font-size: 13px;
@@ -687,7 +688,7 @@
       font-size: 11.5px;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 12px 14px;
+      padding: 10px 10px;
       text-align: left;
       border-bottom: 1px solid var(--border);
       position: sticky;
@@ -696,7 +697,7 @@
       white-space: nowrap;
     }
     tbody td {
-      padding: 12px 14px;
+      padding: 10px 10px;
       border-bottom: 1px solid var(--border-soft);
       vertical-align: middle;
       color: var(--text);
@@ -704,18 +705,32 @@
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: var(--bg-soft); }
 
-    .col-actions { width: 78px; }
-    .col-house   { width: 100px; }
+    #adminTable th:nth-child(1), #adminTable td:nth-child(1) { width: 36px; }
+    #adminTable th:nth-child(2), #adminTable td:nth-child(2) { width: 64px; }
+    #adminTable th:nth-child(3), #adminTable td:nth-child(3) { width: 84px; }
+    #adminTable th:nth-child(4), #adminTable td:nth-child(4) { width: 176px; }
+    #adminTable th:nth-child(5), #adminTable td:nth-child(5) { width: 170px; }
+    #adminTable th:nth-child(6), #adminTable td:nth-child(6) { width: 124px; }
+    #adminTable th:nth-child(7), #adminTable td:nth-child(7) { width: 78px; }
+    #adminTable th:nth-child(8), #adminTable td:nth-child(8) { width: 56px; }
+    #adminTable th:nth-child(9), #adminTable td:nth-child(9) { width: 56px; }
+    #adminTable th:nth-child(10), #adminTable td:nth-child(10) { width: 126px; }
+    #adminTable th:nth-child(11), #adminTable td:nth-child(11) { width: 126px; }
+    #adminTable th:nth-child(12), #adminTable td:nth-child(12) { width: 70px; }
+    #adminTable th:nth-child(13), #adminTable td:nth-child(13) { width: 92px; }
+
+    .col-actions { width: 64px; }
+    .col-house   { width: 86px; }
     .col-name    {
-      width: 240px;
-      min-width: 190px;
-      max-width: 240px;
+      width: 176px;
+      min-width: 0;
+      max-width: none;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .col-phone   { white-space: nowrap; }
-    .col-email   { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .col-phone   { width: 124px; white-space: nowrap; }
+    .col-email   { width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .arrow-col   { color: var(--text-muted); font-size: 11px; }
 
     .edit-btn {
