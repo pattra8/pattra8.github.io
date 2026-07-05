@@ -1399,6 +1399,7 @@
           <th>แปลง</th>
           <th>🚗 รถยนต์</th>
           <th>🏍 มอเตอร์ไซค์</th>
+          <th>🚗 โควต้า</th>
           <th style="color:#94a3b8;font-weight:500;font-size:0.72rem;">Updated</th>
         </tr>
       </thead>
@@ -1865,6 +1866,11 @@
         <label for="edit_motorcycles">ทะเบียนมอเตอร์ไซค์ (คั่นด้วยลูกน้ำ)</label>
         <input id="edit_motorcycles" type="text" placeholder="เช่น 1กฐ1717" />
       </div>
+      <div class="form-group">
+        <label for="edit_car_quota">โควต้ารถยนต์ (คัน)</label>
+        <input id="edit_car_quota" type="number" min="1" step="1" placeholder="เช่น 3" />
+        <span class="readonly-hint">ใช้ค่าปัจจุบันจากระบบก่อนแก้ไข</span>
+      </div>
     </div>
     <div class="modal-footer">
       <div class="save-note" id="editSaveNote">บันทึกและ commit ขึ้น GitHub อัตโนมัติ</div>
@@ -2210,8 +2216,28 @@
   const GH_OWNER  = 'pattra8';
   const GH_REPO   = 'pattra8.github.io';
   const TEXT_FIELDS = ['house_no', 'name', 'email', 'phone', 'deed_no', 'zone', 'plot'];
+  const CAR_QUOTA_DEFAULT = 3;
+  const CAR_QUOTA_BY_HOUSE = new Map([
+    ['38/19', 4],
+    ['38/41', 5],
+  ]);
   // GitHub token — ยังใช้กับ LPR sync
   let GH_TOKEN = localStorage.getItem('gh_admin_token') || '';
+
+  function normalizeHouseNo(houseNo) {
+    return String(houseNo || '').trim().replace(/\s+/g, '');
+  }
+  function parseCarQuota(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const quota = Number(value);
+    return Number.isInteger(quota) && quota > 0 ? quota : null;
+  }
+  function getCarQuota(houseNo, residentQuota) {
+    const explicitQuota = parseCarQuota(residentQuota);
+    if (explicitQuota) return explicitQuota;
+    const fallback = CAR_QUOTA_BY_HOUSE.get(normalizeHouseNo(houseNo));
+    return fallback || CAR_QUOTA_DEFAULT;
+  }
 
   function getAdminAuth() {
     try {
@@ -3750,7 +3776,7 @@
       } catch(e) {
         if (!cached) {
           document.getElementById('adminBody').innerHTML =
-            `<tr><td colspan="12" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+            `<tr><td colspan="13" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
           setToolbarNote('โหลดไม่สำเร็จ', 'error');
         } else {
           setToolbarNote(`⚠️ แสดงข้อมูล cache · อัปเดตล่าสุดไม่สำเร็จ`, 'error');
@@ -3780,6 +3806,7 @@
         <td class="col-plot">${showVal(r.plot)}</td>
         <td style="font-size:0.77rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
         <td style="font-size:0.77rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
+        <td style="font-size:0.77rem;color:#7c5a2e;font-weight:700;">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</td>
         <td style="color:#94a3b8;font-size:0.72rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
       </tr>`;
     }).join('');
@@ -3900,6 +3927,7 @@
     editingIndex = index;
     const r = allData[index];
     if (!r) return;
+    const effectiveQuota = getCarQuota(r.house_no, r.car_quota ?? r.carQuota);
     document.getElementById('editHouseLabel').textContent = `บ้านเลขที่ ${r.house_no || '—'}`;
     TEXT_FIELDS.forEach(k => {
       const el = document.getElementById(`edit_${k}`);
@@ -3907,6 +3935,7 @@
     });
     document.getElementById('edit_cars').value        = plateDisplayValue(r.cars);
     document.getElementById('edit_motorcycles').value = plateDisplayValue(r.motorcycles);
+    document.getElementById('edit_car_quota').value   = effectiveQuota || '';
     originalSnap = getFormValues();
     document.getElementById('editModal').classList.add('active');
   }
@@ -3921,6 +3950,7 @@
     TEXT_FIELDS.forEach(k => { const el = document.getElementById(`edit_${k}`); if(el) rec[k] = el.value.trim(); });
     rec.cars        = cleanPlates(document.getElementById('edit_cars').value);
     rec.motorcycles = cleanPlates(document.getElementById('edit_motorcycles').value);
+    rec.car_quota   = document.getElementById('edit_car_quota').value.trim();
     return rec;
   }
 
@@ -4322,6 +4352,7 @@
       'แปลงที่':              r.plot        || '',
       'ทะเบียนรถยนต์':        (r.cars        || []).join(', '),
       'ทะเบียนมอเตอร์ไซค์':   (r.motorcycles || []).join(', '),
+      'โควต้ารถยนต์':         getCarQuota(r.house_no, r.car_quota ?? r.carQuota),
       'อัปเดตล่าสุด':         r.last_updated || '',
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
