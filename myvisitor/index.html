@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Visitor · Pattra Villa 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f9f3e9; --bg-soft:#f3ecdd; --card:#ffffff; --border:#e6dcc7;
+    --border-soft:#efe8d6; --text:#2a2218; --text-body:#3a3024;
+    --text-soft:#6b5d4a; --text-muted:#8a7960; --accent:#c47a2c;
+    --accent-text:#9a5c1f; --accent-deep:#855015;
+    --ok:#3f6431; --ok-bg:#e8efd9; --warn:#855015; --warn-bg:#f7e6cd;
+    --err:#86341e; --err-bg:#f7dfd5; --neutral:#6b5d4a; --neutral-bg:#efe8d6;
+    --radius:16px; --shadow:0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
+    background:var(--bg); color:var(--text-body);
+    min-height:100dvh; padding:0 0 70px;
+  }
+  .mono { font-family:'IBM Plex Mono', monospace; }
+  .wrap { width:100%; max-width:620px; margin:0 auto; padding:0 14px; }
+
+  .site-header {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--bg); border-bottom:1px solid var(--border);
+    padding:14px 0; margin-bottom:16px;
+  }
+  .home-link { color:var(--accent-text); text-decoration:none; font-size:14px; font-weight:600; }
+  .brand { font-size:13px; color:var(--text-muted); letter-spacing:.03em; }
+
+  h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
+  .sub { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
+
+  #loginOverlay {
+    position:fixed; inset:0; background:rgba(42,34,24,.45);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:50;
+  }
+  #loginOverlay.open { display:flex; }
+  .login-card {
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    width:100%; max-width:360px; padding:24px 22px;
+  }
+  .login-card h2 { font-size:17px; margin:0 0 4px; color:var(--text); }
+  .login-card p { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
+  .house-row { display:flex; align-items:center; gap:6px; margin-bottom:12px; }
+  .house-prefix {
+    font-family:'IBM Plex Mono'; font-weight:600; color:var(--text-muted);
+    background:var(--bg-soft); border:1px solid var(--border); border-radius:10px;
+    padding:11px 10px; font-size:15px;
+  }
+  input[type=text], input[type=password] {
+    font-family:'IBM Plex Mono'; font-size:15px; font-weight:600;
+    border:1px solid var(--border); border-radius:10px; padding:11px 12px;
+    background:var(--bg-soft); color:var(--text); width:100%; outline:none;
+  }
+  input:focus { border-color:var(--accent); }
+  .pin-row { margin-bottom:16px; }
+  .btn-primary {
+    width:100%; background:var(--accent); color:#fff; border:none; border-radius:12px;
+    padding:12px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .btn-primary:active { background:var(--accent-deep); }
+  .login-err { color:var(--err); font-size:12.5px; margin-top:10px; display:none; }
+  .login-err.show { display:block; }
+
+  .search-box {
+    display:flex; align-items:center; gap:8px; background:var(--card);
+    border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-bottom:16px;
+  }
+  .search-box svg { flex:none; color:var(--text-muted); }
+  .search-box input {
+    border:none; background:transparent; padding:0; font-family:'IBM Plex Sans Thai';
+    font-weight:500; font-size:14.5px; width:100%;
+  }
+  .search-box input::placeholder { color:var(--text-muted); font-weight:400; }
+
+  .date-heading {
+    font-size:12.5px; font-weight:700; color:var(--text-muted);
+    letter-spacing:.03em; margin:18px 2px 8px;
+  }
+  .date-heading:first-child { margin-top:0; }
+
+  .card {
+    background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:10px;
+  }
+  .card-head { padding:13px 14px; cursor:pointer; user-select:none; display:flex; align-items:center; gap:12px; }
+  .card-icon {
+    flex:none; width:36px; height:36px; border-radius:10px; background:var(--bg-soft);
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+  }
+  .card-main { flex:1; min-width:0; }
+  .card-top { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+  .card-time { font-family:'IBM Plex Mono'; font-weight:700; font-size:13px; color:var(--text); }
+  .card-cat { font-size:13.5px; font-weight:600; color:var(--text); }
+  .card-purpose { font-size:12.5px; color:var(--text-soft); margin-top:2px; line-height:1.35; }
+  .chevron { font-size:15px; color:var(--text-muted); transition:transform .15s; flex:none; }
+  .card.collapsed .chevron { transform:rotate(-90deg); }
+  .card.collapsed .body { display:none; }
+
+  .badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; flex:none; }
+  .badge .dot { width:6px; height:6px; border-radius:50%; }
+  .badge.complete { color:var(--ok); background:var(--ok-bg); }
+  .badge.complete .dot { background:var(--ok); }
+  .badge.pending { color:var(--warn); background:var(--warn-bg); }
+  .badge.pending .dot { background:var(--warn); }
+
+  .body { padding:2px 14px 14px; border-top:1px solid var(--border-soft); margin-top:2px; }
+  .kv { display:grid; grid-template-columns:96px 1fr; row-gap:9px; align-items:center; font-size:13.5px; line-height:1.35; margin-top:12px; }
+  .kl { color:var(--text-muted); }
+  .kval { color:var(--text); }
+  .dash { color:#b6a487; }
+  .platebadge { display:inline-flex; flex-direction:column; align-items:center; border:1.5px solid var(--text);
+    border-radius:7px; background:#fffdf9; padding:2px 10px 3px; line-height:1.15; }
+  .platebadge .pl-no { font-family:'IBM Plex Mono'; font-weight:700; font-size:14px; letter-spacing:.03em; color:var(--text); }
+  .platebadge .pl-prov { font-size:10px; color:var(--text-muted); margin-top:1px; }
+
+  .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:9px; margin-top:12px; }
+  .thumb { border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--bg-soft); }
+  .thumb button { display:block; width:100%; border:0; padding:0; background:transparent; cursor:zoom-in; color:inherit; text-align:left; }
+  .thumb img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:#eee; }
+  .thumb .purged { padding:16px 8px; text-align:center; font-size:11px; color:var(--text-muted); line-height:1.4; }
+  .cap { padding:7px 8px 8px; font-size:11.5px; color:var(--text-soft); line-height:1.3; }
+
+  .empty-state, .loading-state {
+    text-align:center; padding:40px 20px; color:var(--text-muted); font-size:13.5px;
+  }
+  .spinner {
+    display:inline-block; width:14px; height:14px; margin-right:6px;
+    border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%;
+    animation:spin .7s linear infinite; vertical-align:-2px;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  #previewOverlay {
+    position:fixed; inset:0; background:rgba(21,18,15,.75); display:none;
+    align-items:center; justify-content:center; padding:20px; z-index:80;
+  }
+  #previewOverlay.open { display:flex; }
+  .preview-modal { width:auto; max-width:min(90vw,700px); max-height:calc(100dvh - 120px); border-radius:14px; overflow:hidden; background:#15120f; }
+  .preview-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 12px; background:#231d17; color:#fff; }
+  .preview-title { font-size:12.5px; font-weight:600; color:#f5ead9; }
+  .preview-close { border:0; background:transparent; color:#fff; font-size:20px; line-height:1; cursor:pointer; padding:2px 8px; }
+  .preview-img { display:block; width:auto; height:auto; max-width:min(90vw,700px); max-height:calc(100dvh - 170px); object-fit:contain; }
+
+  .footer-note {
+    text-align:center; font-size:11.5px; color:var(--text-muted); line-height:1.6; margin-top:24px;
+  }
+
+  #app { display:none; }
+</style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>เข้าสู่ระบบลูกบ้าน</h2>
+    <p>กรอกบ้านเลขที่และ PIN 6 หลัก เพื่อดูประวัติผู้มาติดต่อบ้านของคุณ</p>
+    <div class="house-row">
+      <span class="house-prefix mono">38/</span>
+      <input type="text" id="houseSuffix" inputmode="numeric" placeholder="เลขที่บ้าน เช่น 12">
+    </div>
+    <div class="pin-row">
+      <input type="password" id="pin" inputmode="numeric" maxlength="6" placeholder="PIN 6 หลัก">
+    </div>
+    <button class="btn-primary" id="loginBtn">เข้าสู่ระบบ</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="wrap">
+    <div class="site-header">
+      <a href="/" class="home-link">← หน้าแรก</a>
+      <span class="brand">Pattra Villa 8</span>
+    </div>
+
+    <h1>🪪 My Visitor</h1>
+    <p class="sub">ประวัติผู้มาติดต่อบ้านคุณ (พัสดุ / ช่าง / แขก ฯลฯ) พร้อมรูปถ่าย ย้อนหลังได้</p>
+
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, ทะเบียนรถ หรือประเภท...">
+    </div>
+
+    <div id="listRoot"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">ยังไม่มีประวัติผู้มาติดต่อบ้านนี้</div>
+    <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
+
+    <div class="footer-note">
+      ข้อมูลนี้แสดงเฉพาะประวัติผู้มาติดต่อ "บ้านคุณ" เท่านั้น<br>
+      เก็บภาพ 90 วัน · เก็บข้อมูลทะเบียน/OCR 365 วัน ตามนโยบายความเป็นส่วนตัว
+    </div>
+  </div>
+</div>
+
+<div id="previewOverlay">
+  <div class="preview-modal">
+    <div class="preview-head">
+      <span class="preview-title" id="previewTitle"></span>
+      <button class="preview-close" id="previewClose">&times;</button>
+    </div>
+    <img class="preview-img" id="previewImg" alt="">
+  </div>
+</div>
+
+<script>
+  var SESSION_KEY = 'pattra_resident_session_v1';
+  var TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  var API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/visitorIntakeAdmin';
+
+  var CATEGORY = {
+    food_delivery: {label:'ส่งอาหาร', icon:'🍔'},
+    delivery:      {label:'ส่งพัสดุ/ขนส่ง', icon:'📦'},
+    pickup:        {label:'รับ-ส่ง (Grab/แท็กซี่)', icon:'🚕'},
+    contractor:    {label:'ช่าง/ซ่อมบำรุง', icon:'🔧'},
+    utility:       {label:'หน่วยงานสาธารณูปโภค', icon:'🏢'},
+    office:        {label:'ติดต่อนิติ/ส่วนกลาง', icon:'🏛️'},
+    contact:       {label:'มาติดต่อ', icon:'👋'},
+    guest:         {label:'มาหาลูกบ้าน', icon:'🙋'},
+    other:         {label:'อื่น ๆ', icon:'❓'},
+    unknown:       {label:'ไม่ทราบ', icon:'❓'}
+  };
+
+  var PROVINCES = ['กรุงเทพมหานคร','กรุงเทพ','กระบี่','กาญจนบุรี','กาฬสินธุ์','กำแพงเพชร','ขอนแก่น','จันทบุรี','ฉะเชิงเทรา','ชลบุรี',
+    'ชัยนาท','ชัยภูมิ','ชุมพร','เชียงราย','เชียงใหม่','ตรัง','ตราด','ตาก','นครนายก','นครปฐม','นครพนม','นครราชสีมา',
+    'นครศรีธรรมราช','นครสวรรค์','นนทบุรี','นราธิวาส','น่าน','บึงกาฬ','บุรีรัมย์','ปทุมธานี','ประจวบคีรีขันธ์',
+    'ปราจีนบุรี','ปัตตานี','พระนครศรีอยุธยา','พะเยา','พังงา','พัทลุง','พิจิตร','พิษณุโลก','เพชรบุรี','เพชรบูรณ์',
+    'แพร่','ภูเก็ต','มหาสารคาม','มุกดาหาร','แม่ฮ่องสอน','ยโสธร','ยะลา','ร้อยเอ็ด','ระนอง','ระยอง','ราชบุรี',
+    'ลพบุรี','ลำปาง','ลำพูน','เลย','ศรีสะเกษ','สกลนคร','สงขลา','สตูล','สมุทรปราการ','สมุทรสงคราม','สมุทรสาคร',
+    'สระแก้ว','สระบุรี','สิงห์บุรี','สุโขทัย','สุพรรณบุรี','สุราษฎร์ธานี','สุรินทร์','หนองคาย','หนองบัวลำภู',
+    'อ่างทอง','อำนาจเจริญ','อุดรธานี','อุตรดิตถ์','อุทัยธานี','อุบลราชธานี'];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
+    });
+  }
+  function categoryInfo(s) { return CATEGORY[s] || CATEGORY.unknown; }
+  function purposeDisplay(r) {
+    var c = String(r.purposeCategory || 'unknown');
+    if (c === 'other' || c === 'unknown') return r.purposeText || categoryInfo(c).label;
+    return categoryInfo(c).label;
+  }
+  function personName(o) {
+    if (!o) return '';
+    return (/[ก-๙]/.test(o.personName || '') && o.personName) || o.thaiPersonName || o.personName || o.englishPersonName || '';
+  }
+  function plateParts(v) {
+    var clean = String(v || '').replace(/กรุงเทพมหานคร/g, 'กรุงเทพ').replace(/\s+/g, '').replace(/จังหวัด/g, '').trim();
+    var prov = '';
+    PROVINCES.slice().sort(function(a,b){ return b.length - a.length; }).some(function(p) {
+      if (clean.indexOf(p) > -1) { prov = p; clean = clean.replace(p, ''); return true; }
+      return false;
+    });
+    var m = clean.match(/^([0-9]?[ก-ฮ]{1,3})([0-9]{1,4})$/);
+    return {no: m ? [m[1], m[2]].join(' ') : clean, prov: prov};
+  }
+  function plateBadge(v) {
+    var p = plateParts(v);
+    if (!p.no) return '<span class="dash">—</span>';
+    return '<span class="platebadge"><span class="pl-no">' + esc(p.no) + '</span>' +
+      (p.prov ? '<span class="pl-prov">' + esc(p.prov) + '</span>' : '') + '</span>';
+  }
+  function vehicleTypeLabel(v) {
+    var s = String(v || '').trim().toLowerCase();
+    if (!s || s === 'unknown') return '—';
+    if (/ขยะ|garbage|trash|waste|refuse/.test(s)) return 'รถขยะ';
+    if (/motor|มอเตอร์|มอเตอ|จักรยานยนต์|scooter|bike/.test(s)) return 'รถมอเตอร์ไซค์';
+    if (/truck|บรรทุก|lorry|สิบล้อ|หกล้อ/.test(s)) return 'รถบรรทุก';
+    if (/car|sedan|suv|van|pickup|รถยนต์|รถเก๋ง|รถตู้|กระบะ/.test(s)) return 'รถยนต์';
+    return s;
+  }
+  function dashOr(v, cls) { return v ? ('<span' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(v) + '</span>') : '<span class="dash">—</span>'; }
+  function fmtTime(ts) {
+    try {
+      var ms = ts && ts._seconds ? ts._seconds * 1000 : (ts && ts.seconds ? ts.seconds * 1000 : 0);
+      if (!ms) return '--:--';
+      return new Date(ms).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Bangkok'});
+    } catch (e) { return '--:--'; }
+  }
+  function tsToMs(ts) {
+    try { return ts && ts._seconds ? ts._seconds * 1000 : (ts && ts.seconds ? ts.seconds * 1000 : 0); }
+    catch (e) { return 0; }
+  }
+  function dateHeading(ms) {
+    if (!ms) return 'ไม่ทราบวันที่';
+    var THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+      'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    var d = new Date(ms);
+    var bkkStr = d.toLocaleDateString('en-CA', {timeZone:'Asia/Bangkok'});
+    var now = new Date();
+    var todayStr = now.toLocaleDateString('en-CA', {timeZone:'Asia/Bangkok'});
+    var yesterday = new Date(now.getTime() - 24*60*60*1000);
+    var yestStr = yesterday.toLocaleDateString('en-CA', {timeZone:'Asia/Bangkok'});
+    if (bkkStr === todayStr) return 'วันนี้';
+    if (bkkStr === yestStr) return 'เมื่อวาน';
+    var bkkDate = new Date(bkkStr + 'T00:00:00');
+    return bkkDate.getDate() + ' ' + THAI_MONTHS[bkkDate.getMonth()] + ' ' + (bkkDate.getFullYear() + 543);
+  }
+
+  function getSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (!s || Number(s.expiresAt) <= Date.now()) { localStorage.removeItem(SESSION_KEY); return null; }
+      return s;
+    } catch (e) { return null; }
+  }
+  function storeSession(houseNo, pin, residentName) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      houseNo: houseNo, pin: pin, residentName: residentName || '',
+      expiresAt: Date.now() + TTL_MS
+    }));
+  }
+
+  var elLoginOverlay = document.getElementById('loginOverlay');
+  var elApp = document.getElementById('app');
+  var allRecords = [];
+
+  function showLogin(msg) {
+    elApp.style.display = 'none';
+    elLoginOverlay.classList.add('open');
+    var err = document.getElementById('loginErr');
+    if (msg) { err.textContent = msg; err.classList.add('show'); }
+    else { err.classList.remove('show'); }
+  }
+  function showApp() {
+    elLoginOverlay.classList.remove('open');
+    elApp.style.display = 'block';
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('pin').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+
+  function doLogin() {
+    var suffix = document.getElementById('houseSuffix').value.trim();
+    var pin = document.getElementById('pin').value.trim();
+    var err = document.getElementById('loginErr');
+    if (!suffix || pin.length < 4) {
+      err.textContent = 'กรอกบ้านเลขที่และ PIN ให้ครบ';
+      err.classList.add('show');
+      return;
+    }
+    var houseNo = '38/' + suffix;
+    fetch('https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({houseNo: houseNo, pin: pin})
+    }).then(function(res) { return res.json().then(function(data) { return {ok: res.ok, data: data}; }); })
+      .then(function(r) {
+        if (!r.ok || !r.data.ok) {
+          err.textContent = 'บ้านเลขที่หรือ PIN ไม่ถูกต้อง';
+          err.classList.add('show');
+          return;
+        }
+        var residentName = r.data.resident ? r.data.resident.name : '';
+        storeSession(houseNo, pin, residentName);
+        showApp();
+        loadRecords();
+      })
+      .catch(function() {
+        err.textContent = 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่';
+        err.classList.add('show');
+      });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', renderList);
+
+  function toggleCard(id) {
+    var el = document.querySelector('[data-card="' + id + '"]');
+    if (el) el.classList.toggle('collapsed');
+  }
+
+  function openPreview(url, title) {
+    if (!url) return;
+    document.getElementById('previewImg').src = url;
+    document.getElementById('previewTitle').textContent = title || '';
+    document.getElementById('previewOverlay').classList.add('open');
+  }
+  function closePreview() {
+    document.getElementById('previewOverlay').classList.remove('open');
+    document.getElementById('previewImg').removeAttribute('src');
+  }
+  document.getElementById('previewClose').addEventListener('click', closePreview);
+  document.getElementById('previewOverlay').addEventListener('click', function(e) {
+    if (e.target.id === 'previewOverlay') closePreview();
+  });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
+
+  function imageKindLabel(k) { return k === 'document' ? 'บัตรประชาชน / ใบขับขี่' : k === 'vehicle' ? 'รูปรถ' : 'รูปภาพ'; }
+
+  function renderGallery(images) {
+    if (!images || !images.length) return '';
+    return '<div class="gallery">' + images.map(function(img) {
+      var label = imageKindLabel(img.kind);
+      var media = img.imageUrl ?
+        '<button type="button" data-preview="' + esc(img.imageUrl) + '" data-preview-title="' + esc(label) + '"><img src="' + esc(img.imageUrl) + '" loading="lazy" alt="' + esc(label) + '"></button>' :
+        '<div class="purged">ภาพถูกลบตามนโยบายเก็บข้อมูล 90 วัน</div>';
+      return '<div class="thumb">' + media + '<div class="cap">' + esc(label) + '</div></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderCard(r) {
+    var o = r.ocr || {};
+    var vc = r.vehicleCapture || {};
+    var cat = categoryInfo(r.purposeCategory);
+    var isComplete = r.status === 'complete';
+    var name = personName(o);
+    var docMasked = o.maskedDocumentNo || '';
+    var vtype = vehicleTypeLabel(vc.vehicleType);
+    return '<div class="card collapsed" data-card="' + esc(r.id) + '">' +
+      '<div class="card-head" onclick="toggleCard(\'' + esc(r.id).replace(/'/g,"\\'") + '\')">' +
+        '<div class="card-icon">' + cat.icon + '</div>' +
+        '<div class="card-main">' +
+          '<div class="card-top">' +
+            '<span class="card-time mono">' + esc(fmtTime(r.createdAt)) + '</span>' +
+            '<span class="badge ' + (isComplete ? 'complete' : 'pending') + '"><span class="dot"></span>' + (isComplete ? 'ครบถ้วน' : 'กำลังประมวลผล') + '</span>' +
+          '</div>' +
+          '<div class="card-cat">' + esc(cat.label) + '</div>' +
+          '<div class="card-purpose">' + esc(purposeDisplay(r)) + '</div>' +
+        '</div>' +
+        '<span class="chevron">⌄</span>' +
+      '</div>' +
+      '<div class="body">' +
+        '<div class="kv">' +
+          '<div class="kl">ผู้มาติดต่อ</div>' + dashOr(name, 'kval') +
+          '<div class="kl">ทะเบียนรถ</div><div>' + (vc.plateText ? plateBadge(vc.plateText) : '<span class="dash">—</span>') + '</div>' +
+          '<div class="kl">บัตร / ใบขับขี่</div>' + dashOr(docMasked, 'mono') +
+          '<div class="kl">ประเภทพาหนะ</div>' + dashOr(vtype === '—' ? '' : vtype, 'kval') +
+        '</div>' +
+        renderGallery(r.images) +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderList() {
+    var q = document.getElementById('searchInput').value.trim().toLowerCase();
+    var filtered = allRecords.filter(function(r) {
+      if (!q) return true;
+      var o = r.ocr || {}, vc = r.vehicleCapture || {};
+      var hay = [personName(o), vc.plateText, r.purposeText, categoryInfo(r.purposeCategory).label]
+        .filter(Boolean).join(' ').toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    var root = document.getElementById('listRoot');
+    var empty = document.getElementById('emptyState');
+    if (!filtered.length) {
+      root.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    var html = '';
+    var lastHeading = null;
+    filtered.forEach(function(r) {
+      var ms = tsToMs(r.createdAt);
+      var heading = dateHeading(ms);
+      if (heading !== lastHeading) {
+        html += '<div class="date-heading">' + esc(heading) + '</div>';
+        lastHeading = heading;
+      }
+      html += renderCard(r);
+    });
+    root.innerHTML = html;
+  }
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-preview]');
+    if (btn) { openPreview(btn.getAttribute('data-preview'), btn.getAttribute('data-preview-title')); }
+  });
+
+  function loadRecords() {
+    var s = getSession();
+    if (!s) { showLogin(); return; }
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('listRoot').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'none';
+    fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({action: 'myVisitors', houseNo: s.houseNo, pin: s.pin, limit: 150})
+    }).then(function(res) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      return res.json().then(function(data) { return {ok: res.ok, data: data}; });
+    }).then(function(r) {
+      document.getElementById('loadingState').style.display = 'none';
+      if (!r) return;
+      if (!r.ok || !r.data.ok) {
+        document.getElementById('listRoot').innerHTML =
+          '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ<br><small>' + esc(r.data.error || '') + '</small></div>';
+        return;
+      }
+      showApp();
+      allRecords = r.data.records || [];
+      renderList();
+    }).catch(function() {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('listRoot').innerHTML = '<div class="empty-state">เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่</div>';
+    });
+  }
+
+  loadRecords();
+</script>
+
+</body>
+</html>
