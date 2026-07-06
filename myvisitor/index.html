@@ -182,7 +182,7 @@
     </div>
 
     <h1>🪪 My Visitor</h1>
-    <p class="sub">ประวัติผู้มาติดต่อบ้านคุณ (พัสดุ / ช่าง / แขก ฯลฯ) พร้อมรูปถ่าย ย้อนหลังได้</p>
+    <p class="sub">ประวัติผู้มาติดต่อบ้านคุณ เช่น แขกมาเยี่ยม, รับ-ส่งโดยสาร, รับ-ส่งพัสดุ, ส่งอาหาร, รวมถึงช่างต่าง ๆ ที่เข้ามาที่บ้านคุณ</p>
 
     <div class="search-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -278,6 +278,25 @@
     return s;
   }
   function dashOr(v, cls) { return v ? ('<span' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(v) + '</span>') : '<span class="dash">—</span>'; }
+  var COLOR_PHRASE = {'dark blue':'น้ำเงินเข้ม','light blue':'ฟ้า','dark gray':'เทาเข้ม',
+    'dark grey':'เทาเข้ม','light gray':'เทาอ่อน','light grey':'เทาอ่อน','dark green':'เขียวเข้ม'};
+  var COLOR_TH = {white:'ขาว',black:'ดำ',silver:'เงิน',gray:'เทา',grey:'เทา',red:'แดง',
+    blue:'น้ำเงิน',navy:'กรมท่า',green:'เขียว',yellow:'เหลือง',brown:'น้ำตาล',orange:'ส้ม',
+    gold:'ทอง',beige:'เบจ',cream:'ครีม',purple:'ม่วง',violet:'ม่วง',pink:'ชมพู',
+    maroon:'เลือดหมู',tan:'น้ำตาลอ่อน',bronze:'ทองแดง',cyan:'ฟ้าอมเขียว',
+    turquoise:'ฟ้าอมเขียว',teal:'เขียวอมฟ้า'};
+  function colorTh(c) {
+    if (!c) return '';
+    var s = String(c).toLowerCase().trim();
+    var th = COLOR_PHRASE[s] || s.split(/\s+/).map(function(w){ return COLOR_TH[w] || w; }).join(' ');
+    return 'สี' + th;
+  }
+  function brandColorLine(vv) {
+    if (!vv) return '';
+    var brand = [vv.make, vv.model].filter(Boolean).join(' ');
+    var cth = colorTh(vv.color);
+    return [brand, cth].filter(Boolean).join(' · ');
+  }
   function fmtTime(ts) {
     try {
       var ms = ts && ts._seconds ? ts._seconds * 1000 : (ts && ts.seconds ? ts.seconds * 1000 : 0);
@@ -414,6 +433,7 @@
     var name = personName(o);
     var docMasked = o.maskedDocumentNo || '';
     var vtype = vehicleTypeLabel(vc.vehicleType);
+    var brandColor = vtype === 'รถยนต์' ? brandColorLine(r.vehicleVision) : '';
     return '<div class="card collapsed" data-card="' + esc(r.id) + '">' +
       '<div class="card-head" onclick="toggleCard(\'' + esc(r.id).replace(/'/g,"\\'") + '\')">' +
         '<div class="card-icon">' + cat.icon + '</div>' +
@@ -433,6 +453,7 @@
           '<div class="kl">ทะเบียนรถ</div><div>' + (vc.plateText ? plateBadge(vc.plateText) : '<span class="dash">—</span>') + '</div>' +
           '<div class="kl">บัตร / ใบขับขี่</div>' + dashOr(docMasked, 'mono') +
           '<div class="kl">ประเภทพาหนะ</div>' + dashOr(vtype === '—' ? '' : vtype, 'kval') +
+          (brandColor ? '<div class="kl">ยี่ห้อ / สี</div>' + dashOr(brandColor, 'kval') : '') +
         '</div>' +
         renderGallery(r.images) +
       '</div>' +
