@@ -1428,6 +1428,9 @@
     <button class="tab-btn" id="tabUsage" onclick="switchTab('usage')">
       📶 การใช้งานบ้าน
     </button>
+    <button class="tab-btn" id="tabStorage" onclick="switchTab('storage')">
+      💾 ขนาดข้อมูล
+    </button>
   </div>
 
   <!-- Tab: Residents -->
@@ -1756,6 +1759,34 @@
 
       <div id="usageContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
         <div style="padding:40px;text-align:center;color:var(--text-muted);">กดปุ่ม "🔄 โหลดใหม่" เพื่อโหลดข้อมูล</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Storage Usage -->
+  <div id="storageTab" style="display:none">
+    <div style="max-width:1100px;margin:28px auto;padding:0 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <h2 style="margin:0 0 4px;font-size:1.3rem;">💾 ขนาดข้อมูล (โดยประมาณ)</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:.88rem;">สรุปคร่าวๆ ว่าแต่ละหน้าที่เก็บรูป/ไฟล์ใช้พื้นที่ไปเท่าไหร่ — ตัวเลขเป็นการประมาณจากข้อมูลที่อ่านได้ ไม่ใช่ค่าที่แน่นอน 100%</p>
+        </div>
+        <button class="toolbar-btn" onclick="loadStorageUsage()" id="storageRefreshBtn">🔄 โหลดข้อมูล</button>
+      </div>
+
+      <div id="storageStats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px;"></div>
+
+      <div id="storageContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px;">
+        <div style="padding:40px;text-align:center;color:var(--text-muted);">กดปุ่ม "🔄 โหลดข้อมูล" เพื่อเริ่มตรวจสอบ (จะอ่านข้อมูลจากหลายหน้า อาจใช้เวลาสักครู่)</div>
+      </div>
+
+      <div id="storageRiskContent"></div>
+
+      <div style="background:var(--bg);border:1px solid var(--border-soft);border-radius:14px;padding:18px 20px;font-size:.82rem;color:var(--text-soft);line-height:1.7;">
+        <strong style="color:var(--text);">📌 ลิมิตของ Firebase ที่ควรรู้ (Spark/free tier)</strong><br>
+        • Firestore: เก็บข้อมูลได้ฟรีรวม ~1 GiB, เอกสาร (document) แต่ละชิ้นห้ามเกิน <strong>1 MiB</strong> — ลิมิตนี้บังคับทุกแผน ไม่ใช่แค่ฟรี (หน้า "แจ้งปัญหา" เก็บรูปเป็น base64 ฝังในเอกสารโดยตรง จึงเสี่ยงชนลิมิตนี้ที่สุด)<br>
+        • Cloud Storage: พื้นที่ฟรี ~5 GB, ดาวน์โหลดฟรี ~1 GB/วัน — ถ้าเกินจะเริ่มมีค่าใช้จ่ายตามการใช้งานจริง (ไม่ได้ถูกบล็อกทันที ถ้าผูก billing account/Blaze plan ไว้)<br>
+        • ตัวเลขข้างบนเป็นการประมาณจากหน้านี้เท่านั้น หากต้องการตัวเลขที่แน่นอน 100% ของทั้งโปรเจกต์ ให้ดูที่ Firebase Console → Usage/Storage ของแต่ละโปรเจกต์ (pattra8-54c3f และ pattra8-expense)
       </div>
     </div>
   </div>
@@ -2419,7 +2450,8 @@
     announce: 'admin.announcements',
     pickup: 'admin.pickup',
     log: 'admin.audit',
-    usage: 'admin.audit'
+    usage: 'admin.audit',
+    storage: 'admin.audit'
   };
 
   const ADMIN_HASH_TABS = {
@@ -2438,7 +2470,8 @@
     access: 'access',
     log: 'log',
     audit: 'log',
-    usage: 'usage'
+    usage: 'usage',
+    storage: 'storage'
   };
 
   function getRequestedAdminTab() {
@@ -2868,6 +2901,7 @@
     document.getElementById('pickupTab').style.display     = tab === 'pickup'    ? 'block' : 'none';
     document.getElementById('accessTab').style.display     = tab === 'access'    ? 'block' : 'none';
     document.getElementById('usageTab').style.display      = tab === 'usage'     ? 'block' : 'none';
+    document.getElementById('storageTab').style.display    = tab === 'storage'   ? 'block' : 'none';
     if (tab !== 'pickup') {
       pickupSelected.clear();
       const bb = document.getElementById('pickupBulkBar');
@@ -2882,6 +2916,7 @@
     document.getElementById('tabPickup').classList.toggle('active', tab === 'pickup');
     document.getElementById('tabAccess').classList.toggle('active', tab === 'access');
     document.getElementById('tabUsage').classList.toggle('active', tab === 'usage');
+    document.getElementById('tabStorage').classList.toggle('active', tab === 'storage');
     if (tab === 'access') loadAccessMatrix();
     if (tab === 'vote') loadAdminPolls();
     if (tab === 'log') loadActivityLog();
@@ -3340,6 +3375,245 @@
         </table>
         <div style="padding:10px 14px;color:var(--text-muted);font-size:.78rem;border-top:1px solid var(--border);">${rows.length} บ้าน</div>
       </div>`;
+  }
+
+  // ── Storage Usage (rough estimate, client-side, no backend changes) ────────
+  const DOC_SOFT_LIMIT_BYTES = 1024 * 1024; // Firestore hard cap per document
+  const EXPENSE_FIREBASE_CONFIG = {
+    apiKey: 'AIzaSyAj8pSPvM22aA7ngOREZzECuvmgr3CM5OI',
+    authDomain: 'pattra8-expense.firebaseapp.com',
+    projectId: 'pattra8-expense',
+    storageBucket: 'pattra8-expense.firebasestorage.app',
+    messagingSenderId: '623248845031',
+    appId: '1:623248845031:web:c27387338325615d89da42',
+  };
+  const EXPENSE_SESSION_URL = 'https://asia-southeast1-pattra8-expense.cloudfunctions.net/expenseSession';
+  const DOC_VAULT_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminDocumentVault';
+
+  function fmtBytes(n) {
+    if (!n || n < 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
+  function getRawSession() {
+    try {
+      const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+      if (!s || Number(s.expiresAt) <= Date.now()) return null;
+      return { houseNo: s.houseNo, pin: s.pin };
+    } catch { return null; }
+  }
+
+  function estimateMediaBytes(mediaArr) {
+    return (mediaArr || []).reduce((sum, m) => sum + Math.floor((m?.dataUrl?.length || 0) * 0.75), 0);
+  }
+
+  async function measureIssuesCollection(db, collName, { collection, getDocs }) {
+    const snap = await getDocs(collection(db, collName));
+    let bytes = 0, mediaCount = 0;
+    const largeDocs = [];
+    snap.forEach(d => {
+      const data = d.data();
+      let docBytes = estimateMediaBytes(data.media);
+      mediaCount += (data.media || []).length;
+      (data.replies || []).forEach(r => {
+        docBytes += estimateMediaBytes(r.media);
+        mediaCount += (r.media || []).length;
+      });
+      bytes += docBytes;
+      if (docBytes > DOC_SOFT_LIMIT_BYTES * 0.7) {
+        largeDocs.push({ id: d.id, collection: collName, bytes: docBytes, title: data.title || data.detail || '(ไม่มีหัวข้อ)' });
+      }
+    });
+    return { docCount: snap.size, mediaCount, bytes, largeDocs };
+  }
+
+  async function measureAnnouncements(db, { collection, getDocs }) {
+    const snap = await getDocs(collection(db, 'announcements'));
+    let bytes = 0, fileCount = 0;
+    snap.forEach(d => {
+      const files = d.data().photos || [];
+      fileCount += files.length;
+      bytes += files.reduce((sum, f) => sum + (Number(f.sizeBytes) || 0), 0);
+    });
+    return { docCount: snap.size, fileCount, bytes };
+  }
+
+  async function measureExpenses() {
+    const session = getRawSession();
+    if (!session) return { available: false, reason: 'ไม่พบ session' };
+    const res = await fetch(EXPENSE_SESSION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(session)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok || !['superadmin', 'committee'].includes(data.role)) {
+      return { available: false, reason: 'ไม่มีสิทธิ์เข้าถึงข้อมูลค่าใช้จ่าย (ต้องเป็นกรรมการ/ผู้ดูแลระบบ)' };
+    }
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const { getAuth, signInWithCustomToken } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const app = getApps().find(a => a.name === 'storage-usage-expense') ||
+      initializeApp(EXPENSE_FIREBASE_CONFIG, 'storage-usage-expense');
+    const auth = getAuth(app);
+    if (!auth.currentUser) await signInWithCustomToken(auth, data.customToken);
+    const db = getFirestore(app);
+    const snap = await getDocs(collection(db, 'expenses'));
+    let bytes = 0, fileCount = 0;
+    snap.forEach(d => {
+      const slips = d.data().slips || [];
+      fileCount += slips.length;
+      bytes += slips.reduce((sum, s) => sum + (Number(s.size) || 0), 0);
+    });
+    return { available: true, docCount: snap.size, fileCount, bytes };
+  }
+
+  async function measureVault(vaultType) {
+    const session = getRawSession();
+    if (!session) return { available: false, reason: 'ไม่พบ session' };
+    const res = await fetch(DOC_VAULT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vaultType, action: 'list', ...session })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) return { available: false, reason: data.error || 'โหลดไม่สำเร็จ' };
+    return { available: true, docCount: (data.documents || []).length };
+  }
+
+  async function measurePickup() {
+    const res = await fetch(MANAGE_PICKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...getAdminAuth(), action: 'list' })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) return { available: false, reason: data.error || 'โหลดไม่สำเร็จ' };
+    const requests = data.requests || [];
+    const fileCount = requests.reduce((sum, r) => sum + pickupAllPhotos(r).length, 0);
+    return { available: true, docCount: requests.length, fileCount };
+  }
+
+  let storageResults = null;
+
+  async function loadStorageUsage() {
+    const statsEl = document.getElementById('storageStats');
+    const contentEl = document.getElementById('storageContent');
+    const riskEl = document.getElementById('storageRiskContent');
+    const btn = document.getElementById('storageRefreshBtn');
+    btn.disabled = true;
+    contentEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">⏳ กำลังอ่านข้อมูลจากหลายหน้า...</div>';
+    statsEl.innerHTML = '';
+    riskEl.innerHTML = '';
+    try {
+      const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+      const firestoreMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const { getFirestore } = firestoreMod;
+      const mainApp = getApps().find(a => a.name === 'storage-usage-main') || initializeApp({
+        apiKey: 'AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y',
+        authDomain: 'pattra8-54c3f.firebaseapp.com',
+        projectId: 'pattra8-54c3f',
+        storageBucket: 'pattra8-54c3f.firebasestorage.app',
+        messagingSenderId: '1045231989781',
+        appId: '1:1045231989781:web:ea20c8380787e82fcf4a1c'
+      }, 'storage-usage-main');
+      const mainDb = getFirestore(mainApp);
+
+      const [issues, privateIssues, announcements, expenses, pickup, insurance, blueprints] = await Promise.all([
+        measureIssuesCollection(mainDb, 'issues', firestoreMod).catch(e => ({ error: e.message })),
+        measureIssuesCollection(mainDb, 'private_issues', firestoreMod).catch(e => ({ error: e.message })),
+        measureAnnouncements(mainDb, firestoreMod).catch(e => ({ error: e.message })),
+        measureExpenses().catch(e => ({ available: false, reason: e.message })),
+        measurePickup().catch(e => ({ available: false, reason: e.message })),
+        measureVault('insurance').catch(e => ({ available: false, reason: e.message })),
+        measureVault('blueprints').catch(e => ({ available: false, reason: e.message })),
+      ]);
+
+      storageResults = { issues, privateIssues, announcements, expenses, pickup, insurance, blueprints };
+      renderStorageUsage(storageResults);
+    } catch (err) {
+      contentEl.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${escHtml(err.message)}</div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderStorageUsage(r) {
+    const statsEl = document.getElementById('storageStats');
+    const contentEl = document.getElementById('storageContent');
+    const riskEl = document.getElementById('storageRiskContent');
+
+    const measuredBytes = (r.issues.bytes || 0) + (r.privateIssues.bytes || 0) +
+      (r.announcements.bytes || 0) + (r.expenses.bytes || 0);
+
+    statsEl.innerHTML = [
+      ['รวมที่วัดขนาดได้', fmtBytes(measuredBytes)],
+      ['แจ้งปัญหา (issues)', fmtBytes((r.issues.bytes || 0) + (r.privateIssues.bytes || 0))],
+      ['ประกาศ', fmtBytes(r.announcements.bytes || 0)],
+      ['ค่าใช้จ่าย', r.expenses.available ? fmtBytes(r.expenses.bytes || 0) : '—'],
+    ].map(([label, num]) => `
+      <div class="stat-card">
+        <div class="stat-card-num" style="font-size:18px;">${num}</div>
+        <div class="stat-card-label">${label}</div>
+      </div>`).join('');
+
+    const rows = [
+      { label: '🧾 แจ้งปัญหา (สาธารณะ)', data: r.issues, sizeKnown: true },
+      { label: '🔒 แจ้งปัญหา (ส่วนตัว)', data: r.privateIssues, sizeKnown: true },
+      { label: '📢 ประกาศ', data: r.announcements, sizeKnown: true },
+      { label: '💰 ค่าใช้จ่าย (โครงการแยก)', data: r.expenses, sizeKnown: true },
+      { label: '🗑 ทิ้งของใหญ่', data: r.pickup, sizeKnown: false },
+      { label: '🛡 ประกันภัย', data: r.insurance, sizeKnown: false },
+      { label: '📐 แบบแปลน', data: r.blueprints, sizeKnown: false },
+    ];
+
+    const trs = rows.map(({ label, data, sizeKnown }) => {
+      if (data.error || data.available === false) {
+        return `<tr>
+          <td>${label}</td>
+          <td colspan="3" style="color:var(--text-muted);font-size:.82rem;">⚠️ อ่านไม่ได้: ${escHtml(data.error || data.reason || 'unknown')}</td>
+        </tr>`;
+      }
+      const fileCount = data.mediaCount ?? data.fileCount ?? 0;
+      return `<tr>
+        <td>${label}</td>
+        <td style="text-align:center;">${data.docCount ?? '—'}</td>
+        <td style="text-align:center;">${fileCount}</td>
+        <td style="text-align:right;">${sizeKnown ? fmtBytes(data.bytes || 0) : '<span style="color:var(--text-muted);">ไม่ทราบ (ดู Firebase Console)</span>'}</td>
+      </tr>`;
+    }).join('');
+
+    contentEl.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+          <thead>
+            <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">หมวด</th>
+              <th style="padding:10px 14px;text-align:center;font-weight:600;">จำนวนเอกสาร</th>
+              <th style="padding:10px 14px;text-align:center;font-weight:600;">จำนวนไฟล์/รูป</th>
+              <th style="padding:10px 14px;text-align:right;font-weight:600;">ขนาดโดยประมาณ</th>
+            </tr>
+          </thead>
+          <tbody>${trs}</tbody>
+        </table>
+      </div>`;
+
+    const largeDocs = [...(r.issues.largeDocs || []), ...(r.privateIssues.largeDocs || [])]
+      .sort((a, b) => b.bytes - a.bytes);
+    if (largeDocs.length) {
+      riskEl.innerHTML = `
+        <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:14px;padding:16px 20px;margin-bottom:20px;font-size:.85rem;">
+          <strong style="color:#92400e;">⚠️ เอกสารที่ใกล้ชนลิมิต 1 MB ต่อเอกสาร (Firestore)</strong>
+          <div style="margin-top:8px;color:#78350f;">
+            ${largeDocs.slice(0, 10).map(d => `<div style="padding:3px 0;">${escHtml(d.collection)} / ${escHtml(d.id)} — ${escHtml(d.title)} : <strong>${fmtBytes(d.bytes)}</strong></div>`).join('')}
+          </div>
+        </div>`;
+    } else {
+      riskEl.innerHTML = '';
+    }
   }
 
   async function generateResidentPinForAdmin() {
