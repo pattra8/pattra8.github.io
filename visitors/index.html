@@ -100,6 +100,7 @@
     .ds { font-size:12.5px; font-weight:600; padding:4px 11px; border-radius:999px; white-space:nowrap; }
     .ds.ok { color:var(--green); background:var(--green-bg); }
     .ds.pend { color:var(--amber-text); background:var(--amber-bg); }
+    .ds.warn { color:var(--red); background:var(--red-bg); }
     .dash-sec { margin-top:17px; }
     .dash-lbl { font-size:12px; font-weight:700; color:var(--soft); letter-spacing:.02em; margin-bottom:9px; }
     .vbar { display:flex; height:12px; border-radius:99px; overflow:hidden; background:var(--card-soft); gap:2px; }
@@ -158,6 +159,8 @@
     .badge.complete .dot { background:var(--green); }
     .badge.pending { color:var(--amber-text); background:var(--amber-bg); }
     .badge.pending .dot { background:var(--amber); }
+    .badge.warning { color:var(--red); background:var(--red-bg); }
+    .badge.warning .dot { background:var(--red); }
     .body { padding:14px 16px 16px; border-top:1px solid var(--line-soft); }
     .kv { display:grid; grid-template-columns:104px 1fr; row-gap:10px; align-items:center; font-size:14px; line-height:1.35; }
     .kl { color:var(--soft); }
@@ -166,6 +169,10 @@
     .rawbox { margin-top:14px; background:var(--card-soft); border:1px solid var(--line-soft); border-radius:12px; padding:11px 13px; }
     .rawbox .rlabel { color:var(--soft); font-size:12px; font-weight:700; letter-spacing:.02em; }
     .rawbox .rval { margin-top:5px; font-size:14px; line-height:1.5; white-space:pre-wrap; }
+    .warnbox { margin-top:12px; background:var(--red-bg); border:1px solid #efc5bf; border-radius:12px; padding:11px 13px; }
+    .warnbox .wlabel { color:var(--red); font-size:12px; font-weight:700; letter-spacing:.02em; }
+    .warnbox .wlist { margin:6px 0 0; padding:0 0 0 18px; color:var(--text); font-size:13.5px; line-height:1.5; }
+    .warnbox .wlist li { margin:0; }
     .cardfoot { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:15px; padding-top:12px; border-top:1px solid var(--line-soft); }
     .cardfoot .ts { font-size:12px; color:#a08a6b; }
     .acts { display:flex; gap:8px; }
@@ -265,10 +272,11 @@
       .card .body {
         display:grid; align-items:start; column-gap:20px;
         grid-template-columns:minmax(0,1fr) 300px;
-        grid-template-areas:"kv gallery" "raw gallery" "foot foot";
+        grid-template-areas:"kv gallery" "raw gallery" "warn gallery" "foot foot";
       }
       .card .body .kv { grid-area:kv; }
       .card .body .rawbox { grid-area:raw; }
+      .card .body .warnbox { grid-area:warn; }
       .card .body .gallery { grid-area:gallery; margin-top:0; }
       .card .body .cardfoot { grid-area:foot; }
     }
@@ -464,6 +472,7 @@
       if(c==='other'||c==='unknown') return r.purposeText||categoryLabel(c);
       return categoryLabel(c);
     }
+    function warningsFor(r){return Array.isArray(r.warnings)?r.warnings.filter(Boolean):[];}
     function docRaw(o){return (o&&String(o.documentNumber||'').replace(/\D/g,''))||'';}
 
     async function call(body){
@@ -479,6 +488,7 @@
       var total=records.length;
       var complete=records.filter(function(r){return r.status==='complete';}).length;
       var pending=total-complete;
+      var warningCount=records.filter(function(r){return warningsFor(r).length>0;}).length;
       var car=0, moto=0, other=0;
       records.forEach(function(r){
         var s=vehicleTypeLabel((r.vehicleCapture||{}).vehicleType);
@@ -510,7 +520,8 @@
               '<div class="dash-total">'+total+'<span>คัน</span></div></div>'+
             '<div class="dash-status">'+
               '<span class="ds ok">ครบ '+complete+'</span>'+
-              '<span class="ds pend">รอ '+pending+'</span></div>'+
+              '<span class="ds pend">รอ '+pending+'</span>'+
+              '<span class="ds warn">เตือน '+warningCount+'</span></div>'+
           '</div>'+
           '<div class="dash-sec"><div class="dash-lbl">ประเภทรถ</div>'+
             '<div class="vbar">'+(total?vseg:'<span style="width:100%;background:var(--card-soft)"></span>')+'</div>'+
@@ -534,6 +545,7 @@
         var purpose=purposeDisplay(r);
         var isComplete=r.status==='complete';
         var badgeCls=isComplete?'complete':'pending';
+        var warnings=warningsFor(r);
         return '<article class="card collapsed" data-id="'+esc(r.id||'')+'">'+
           '<div class="rail">'+
             '<input type="checkbox" class="sel" data-sel="'+esc(r.id||'')+'" title="เลือก" />'+
@@ -545,6 +557,7 @@
                   '<span class="house">บ้าน '+esc(r.houseNo||'ไม่พบ')+'</span></div>'+
                 '<div class="head-meta">'+
                   '<span class="badge '+badgeCls+'"><span class="dot"></span>'+esc(statusLabel(r.status))+'</span>'+
+                  (warnings.length?'<span class="badge warning"><span class="dot"></span>warning</span>':'')+
                   '<span class="chevron">⌄</span></div>'+
               '</div>'+
               '<div class="purpose">'+esc(purpose||'ไม่พบเหตุผล')+'</div>'+
@@ -557,6 +570,7 @@
                 '<div class="kl">ประเภทพาหนะ</div><div>'+dashOr(vtype==='—'?'':vtype,'kval')+'</div>'+
               '</div>'+
               '<div class="rawbox"><div class="rlabel">ข้อความ รปภ</div><div class="rval">'+(raw?esc(raw):'<span class="dash">—</span>')+'</div></div>'+
+              (warnings.length?'<div class="warnbox"><div class="wlabel">Warning</div><ul class="wlist">'+warnings.map(function(item){return '<li>'+esc(item)+'</li>';}).join('')+'</ul></div>':'')+
               '<div class="gallery">'+(imgs.length?imgs.map(function(img){
                 var label=imageKind(img.kind);
                 var media=img.imageUrl?'<button type="button" data-preview="'+esc(img.imageUrl)+'" data-preview-title="'+esc(label)+'"><img src="'+esc(img.imageUrl)+'" loading="lazy" alt="'+esc(label)+'"></button>':'<div class="empty" style="box-shadow:none;border:0;border-radius:0;padding:22px 8px">ลบรูปแล้ว</div>';
