@@ -3498,11 +3498,13 @@
   }
 
   async function measureBackendStorageStats() {
+    const session = getRawSession();
+    if (!session) throw new Error('ไม่พบ session');
     const res = await fetch(RESIDENT_AUTH_URL, {
       method: 'POST',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'adminStorageStats', ...getAdminAuth() })
+      body: JSON.stringify({ action: 'adminStorageStats', ...session })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.ok) throw new Error(data.error || 'โหลดไม่สำเร็จ');
