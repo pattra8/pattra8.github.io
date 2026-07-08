@@ -27,12 +27,28 @@
   .wrap { width:100%; max-width:560px; margin:0 auto; padding:0 14px; }
 
   .site-header {
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    display:flex; align-items:center; justify-content:flex-start; gap:12px;
     background:var(--bg); border-bottom:1px solid var(--border);
     padding:14px 0; margin-bottom:16px;
   }
   .home-link { color:var(--accent-text); text-decoration:none; font-size:14px; font-weight:600; }
-  .brand { font-size:13px; color:var(--text-muted); letter-spacing:.03em; }
+  .resident-banner {
+    display:flex; align-items:center; gap:10px; background:var(--card);
+    border:1px solid var(--border); border-radius:14px; padding:12px 14px;
+    margin:0 0 14px; box-shadow:var(--shadow);
+  }
+  .resident-avatar {
+    width:38px; height:38px; border-radius:50%; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--accent); color:#fff; font-family:'IBM Plex Mono', monospace;
+    font-weight:700; font-size:15px;
+  }
+  .resident-meta { min-width:0; }
+  .resident-house { font-size:15px; font-weight:700; color:var(--text); line-height:1.2; }
+  .resident-name {
+    font-size:12.5px; color:var(--text-soft); line-height:1.35; margin-top:2px;
+    word-break:break-word;
+  }
 
   h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
   .sub { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
@@ -190,7 +206,14 @@
   <div class="wrap">
     <div class="site-header">
       <a href="/" class="home-link">← หน้าแรก</a>
-      <span class="brand">Pattra Villa 8</span>
+    </div>
+
+    <div class="resident-banner" id="residentBanner" style="display:none;">
+      <div class="resident-avatar" id="residentAvatar">38</div>
+      <div class="resident-meta">
+        <div class="resident-house" id="residentHouse">บ้าน 38/—</div>
+        <div class="resident-name" id="residentName">—</div>
+      </div>
     </div>
 
     <h1>🔎 ภาพรวม Visitor หมู่บ้าน</h1>
@@ -315,9 +338,30 @@
   var elLoginOverlay = document.getElementById('loginOverlay');
   var elApp = document.getElementById('app');
 
+  function residentDisplayName(s) {
+    return String((s && s.residentName) || '').trim() || 'เจ้าของบ้าน';
+  }
+
+  function renderResidentBanner() {
+    var s = getSession();
+    var banner = document.getElementById('residentBanner');
+    if (!s) {
+      banner.style.display = 'none';
+      return;
+    }
+    var houseNo = String(s.houseNo || '38/—');
+    var name = residentDisplayName(s);
+    var initial = (name.match(/[ก-๙A-Za-z0-9]/) || houseNo.match(/[0-9A-Za-z]/) || ['P'])[0];
+    document.getElementById('residentAvatar').textContent = String(initial).toUpperCase();
+    document.getElementById('residentHouse').textContent = 'บ้าน ' + houseNo;
+    document.getElementById('residentName').textContent = name;
+    banner.style.display = 'flex';
+  }
+
   function showLogin(msg) {
     elApp.style.display = 'none';
     elLoginOverlay.classList.add('open');
+    renderResidentBanner();
     var err = document.getElementById('loginErr');
     if (msg) { err.textContent = msg; err.classList.add('show'); }
     else { err.classList.remove('show'); }
@@ -325,6 +369,7 @@
   function showApp() {
     elLoginOverlay.classList.remove('open');
     elApp.style.display = 'block';
+    renderResidentBanner();
   }
 
   document.getElementById('loginBtn').addEventListener('click', doLogin);
