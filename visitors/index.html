@@ -343,7 +343,7 @@
         <div class="field"><label>Purpose category</label><div class="row"><select id="editPurposeCategory">
           <option value="contact">มาติดต่อ</option>
           <option value="guest">มาหาลูกบ้าน</option>
-          <option value="food_delivery">ส่งอาหาร</option>
+          <option value="food_delivery">ส่งอาหาร (Food Delivery)</option>
           <option value="delivery">ส่งพัสดุ/ขนส่ง</option>
           <option value="pickup">รับ-ส่ง (Grab/แท็กซี่)</option>
           <option value="contractor">ช่าง/ซ่อมบำรุง</option>
@@ -432,7 +432,7 @@
       if(s==='pending_text') return 'รอข้อมูลเพิ่มเติม';
       return 'รอข้อมูล';
     }
-    function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง (Grab/แท็กซี่)',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
+    function categoryLabel(s){return {food_delivery:'ส่งอาหาร (Food Delivery)',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง (Grab/แท็กซี่)',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'บัตรประชาชน / ใบขับขี่':k==='vehicle'?'รูปรถ':'รูปภาพ';}
     function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}
     function plateParts(v){
