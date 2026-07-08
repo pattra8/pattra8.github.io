@@ -3497,6 +3497,30 @@
     return { available: true, docCount: requests.length, fileCount };
   }
 
+  async function measureBackendStorageStats() {
+    const res = await fetch(RESIDENT_AUTH_URL, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'adminStorageStats', ...getAdminAuth() })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || 'โหลดไม่สำเร็จ');
+    const toRow = f => f ? {
+      available: true,
+      docCount: f.docCount || 0,
+      fileCount: f.fileCount || 0,
+      bytes: f.totalBytes || 0,
+      oldestAt: f.oldestAt || null,
+      newestAt: f.newestAt || null,
+    } : { available: false, reason: 'ไม่มีข้อมูล' };
+    return {
+      generatedAt: data.generatedAt || null,
+      lprLog: toRow(data.features?.lprLog),
+      visitorIntake: toRow(data.features?.visitorIntake),
+    };
+  }
+
   let storageResults = null;
 
   async function loadStorageUsage() {
@@ -3522,7 +3546,7 @@
       }, 'storage-usage-main');
       const mainDb = getFirestore(mainApp);
 
-      const [issues, privateIssues, announcements, expenses, pickup, insurance, blueprints] = await Promise.all([
+      const [issues, privateIssues, announcements, expenses, pickup, insurance, blueprints, backendStats] = await Promise.all([
         measureIssuesCollection(mainDb, 'issues', firestoreMod).catch(e => ({ error: e.message })),
         measureIssuesCollection(mainDb, 'private_issues', firestoreMod).catch(e => ({ error: e.message })),
         measureAnnouncements(mainDb, firestoreMod).catch(e => ({ error: e.message })),
@@ -3530,9 +3554,13 @@
         measurePickup().catch(e => ({ available: false, reason: e.message })),
         measureVault('insurance').catch(e => ({ available: false, reason: e.message })),
         measureVault('blueprints').catch(e => ({ available: false, reason: e.message })),
+        measureBackendStorageStats().catch(e => ({ lprLog: { available: false, reason: e.message }, visitorIntake: { available: false, reason: e.message } })),
       ]);
 
-      storageResults = { issues, privateIssues, announcements, expenses, pickup, insurance, blueprints };
+      storageResults = {
+        issues, privateIssues, announcements, expenses, pickup, insurance, blueprints,
+        lprLog: backendStats.lprLog, visitorIntake: backendStats.visitorIntake,
+      };
       renderStorageUsage(storageResults);
     } catch (err) {
       contentEl.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${escHtml(err.message)}</div>`;
@@ -3547,13 +3575,16 @@
     const riskEl = document.getElementById('storageRiskContent');
 
     const measuredBytes = (r.issues.bytes || 0) + (r.privateIssues.bytes || 0) +
-      (r.announcements.bytes || 0) + (r.expenses.bytes || 0);
+      (r.announcements.bytes || 0) + (r.expenses.bytes || 0) +
+      (r.lprLog.bytes || 0) + (r.visitorIntake.bytes || 0);
 
     statsEl.innerHTML = [
       ['รวมที่วัดขนาดได้', fmtBytes(measuredBytes)],
       ['แจ้งปัญหา (issues)', fmtBytes((r.issues.bytes || 0) + (r.privateIssues.bytes || 0))],
       ['ประกาศ', fmtBytes(r.announcements.bytes || 0)],
       ['ค่าใช้จ่าย', r.expenses.available ? fmtBytes(r.expenses.bytes || 0) : '—'],
+      ['LPR log', r.lprLog.available ? fmtBytes(r.lprLog.bytes || 0) : '—'],
+      ['Visitor intake', r.visitorIntake.available ? fmtBytes(r.visitorIntake.bytes || 0) : '—'],
     ].map(([label, num]) => `
       <div class="stat-card">
         <div class="stat-card-num" style="font-size:18px;">${num}</div>
@@ -3565,6 +3596,8 @@
       { label: '🔒 แจ้งปัญหา (ส่วนตัว)', data: r.privateIssues, sizeKnown: true },
       { label: '📢 ประกาศ', data: r.announcements, sizeKnown: true },
       { label: '💰 ค่าใช้จ่าย (โครงการแยก)', data: r.expenses, sizeKnown: true },
+      { label: '🚗 LPR log (รูปรถเข้า-ออก)', data: r.lprLog, sizeKnown: true },
+      { label: '🪪 Visitor intake (รูปบัตร/รูปรถ)', data: r.visitorIntake, sizeKnown: true },
       { label: '🗑 ทิ้งของใหญ่', data: r.pickup, sizeKnown: false },
       { label: '🛡 ประกันภัย', data: r.insurance, sizeKnown: false },
       { label: '📐 แบบแปลน', data: r.blueprints, sizeKnown: false },
@@ -3578,8 +3611,11 @@
         </tr>`;
       }
       const fileCount = data.mediaCount ?? data.fileCount ?? 0;
+      const dateRange = data.oldestAt && data.newestAt
+        ? `<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">${escHtml(fmtUsageDate(new Date(data.oldestAt).getTime()))} – ${escHtml(fmtUsageDate(new Date(data.newestAt).getTime()))}</div>`
+        : '';
       return `<tr>
-        <td>${label}</td>
+        <td>${label}${dateRange}</td>
         <td style="text-align:center;">${data.docCount ?? '—'}</td>
         <td style="text-align:center;">${fileCount}</td>
         <td style="text-align:right;">${sizeKnown ? fmtBytes(data.bytes || 0) : '<span style="color:var(--text-muted);">ไม่ทราบ (ดู Firebase Console)</span>'}</td>
