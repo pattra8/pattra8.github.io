@@ -477,7 +477,23 @@
       if(c==='other'||c==='unknown') return r.purposeText||categoryLabel(c);
       return categoryLabel(c);
     }
-    function warningsFor(r){return Array.isArray(r.warnings)?r.warnings.filter(Boolean):[];}
+    var QUIET_WARNING_CODES = {
+      text_spacing_normalized: true
+    };
+    var QUIET_WARNING_LABELS = {
+      'ข้อความพิมพ์ติดกัน ระบบช่วยแยกคำให้': true
+    };
+    function warningsFor(r){
+      var labels=Array.isArray(r.warnings)?r.warnings.filter(Boolean):[];
+      var codes=Array.isArray(r.warningCodes)?r.warningCodes.filter(Boolean):[];
+      if(!labels.length) return [];
+      return labels.filter(function(label, idx){
+        var code=codes[idx]||'';
+        if(code && QUIET_WARNING_CODES[code]) return false;
+        if(QUIET_WARNING_LABELS[label]) return false;
+        return true;
+      });
+    }
     function docRaw(o){return (o&&String(o.documentNumber||'').replace(/\D/g,''))||'';}
 
     async function call(body){
