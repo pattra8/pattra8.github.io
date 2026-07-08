@@ -1425,6 +1425,9 @@
     <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
       🧾 Activity Log
     </button>
+    <button class="tab-btn" id="tabUsage" onclick="switchTab('usage')">
+      📶 การใช้งานบ้าน
+    </button>
   </div>
 
   <!-- Tab: Residents -->
@@ -1724,6 +1727,35 @@
       </div>
       <div id="logContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
         <div style="padding:40px;text-align:center;color:var(--text-muted);">กดปุ่ม "🔄 โหลดใหม่" เพื่อโหลด log</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: House Usage -->
+  <div id="usageTab" style="display:none">
+    <div style="max-width:1100px;margin:28px auto;padding:0 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <h2 style="margin:0 0 4px;font-size:1.3rem;">📶 การใช้งานบ้าน</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:.88rem;">สรุปว่าบ้านไหนเข้าใช้งานระบบบ้าง — never / today / last seen / ความถี่ (ไม่ลงรายละเอียดราย transaction)</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="number" id="usageLimitInput" value="500" min="50" max="2000" style="width:80px;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.88rem;">
+          <button class="toolbar-btn" onclick="loadUsageLog()" id="usageRefreshBtn">🔄 โหลดใหม่</button>
+        </div>
+      </div>
+
+      <div id="usageStats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:18px;"></div>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <input type="text" id="usageSearchInput" placeholder="ค้นหาบ้านเลขที่ / ชื่อ..." oninput="renderUsageTable()"
+          style="flex:1;min-width:180px;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.88rem;">
+      </div>
+
+      <div id="usageNote" style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px;"></div>
+
+      <div id="usageContent" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="padding:40px;text-align:center;color:var(--text-muted);">กดปุ่ม "🔄 โหลดใหม่" เพื่อโหลดข้อมูล</div>
       </div>
     </div>
   </div>
@@ -2386,7 +2418,8 @@
     survey: 'admin.survey',
     announce: 'admin.announcements',
     pickup: 'admin.pickup',
-    log: 'admin.audit'
+    log: 'admin.audit',
+    usage: 'admin.audit'
   };
 
   const ADMIN_HASH_TABS = {
@@ -2404,7 +2437,8 @@
     pickup: 'pickup',
     access: 'access',
     log: 'log',
-    audit: 'log'
+    audit: 'log',
+    usage: 'usage'
   };
 
   function getRequestedAdminTab() {
@@ -2833,6 +2867,7 @@
     document.getElementById('announceTab').style.display   = tab === 'announce'  ? 'block' : 'none';
     document.getElementById('pickupTab').style.display     = tab === 'pickup'    ? 'block' : 'none';
     document.getElementById('accessTab').style.display     = tab === 'access'    ? 'block' : 'none';
+    document.getElementById('usageTab').style.display      = tab === 'usage'     ? 'block' : 'none';
     if (tab !== 'pickup') {
       pickupSelected.clear();
       const bb = document.getElementById('pickupBulkBar');
@@ -2846,11 +2881,13 @@
     document.getElementById('tabAnnounce').classList.toggle('active', tab === 'announce');
     document.getElementById('tabPickup').classList.toggle('active', tab === 'pickup');
     document.getElementById('tabAccess').classList.toggle('active', tab === 'access');
+    document.getElementById('tabUsage').classList.toggle('active', tab === 'usage');
     if (tab === 'access') loadAccessMatrix();
     if (tab === 'vote') loadAdminPolls();
     if (tab === 'log') loadActivityLog();
     if (tab === 'announce') initAnnounceTab();
     if (tab === 'pickup') loadPickupRequests();
+    if (tab === 'usage') loadUsageLog();
   }
 
   // ── Lifestyle Survey Stats ───────────────────────────────────────────────
@@ -3104,6 +3141,204 @@
           </tbody>
         </table>
         <div style="padding:10px 14px;color:var(--text-muted);font-size:.78rem;border-top:1px solid var(--border);">${logs.length} รายการ</div>
+      </div>`;
+  }
+
+  // ── House Usage (last seen / frequency) ─────────────────────────────────
+  let usageRows = [];
+  let usageFilter = 'all';
+
+  async function loadUsageLog() {
+    const contentEl = document.getElementById('usageContent');
+    const noteEl = document.getElementById('usageNote');
+    const btn = document.getElementById('usageRefreshBtn');
+    const limit = parseInt(document.getElementById('usageLimitInput').value) || 500;
+    contentEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">⏳ กำลังโหลด...</div>';
+    btn.disabled = true;
+    try {
+      // House list — reuse already-loaded residents if available, else fetch fresh.
+      let residents = allData;
+      if (!residents || !residents.length) {
+        const rRes = await fetch(RESIDENT_AUTH_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'adminResidents', ...getAdminAuth() })
+        });
+        const rJson = await rRes.json().catch(() => ({}));
+        residents = rJson.ok && Array.isArray(rJson.residents) ? rJson.residents : [];
+      }
+
+      const logRes = await fetch(RESIDENT_AUTH_URL, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'adminAuditLogs', ...getAdminAuth(), limit })
+      });
+      const logJson = await logRes.json();
+      if (!logJson.ok) throw new Error(logJson.error || 'load failed');
+      const logs = (logJson.logs || []).filter(l => l.action === 'pin_verify' && l.success !== false);
+
+      usageRows = buildUsageRows(residents, logs);
+
+      const oldestTs = logs.length ? Math.min(...logs.map(l => tsToMs(l.ts))) : null;
+      noteEl.textContent = logs.length
+        ? `อ้างอิงจาก log การ verify PIN ล่าสุด ${logs.length} รายการ (ย้อนหลังถึง ${fmtUsageDate(oldestTs)}) — หากบ้านไม่มีการใช้งานเก่ากว่านี้ อาจไม่ถูกนับ`
+        : 'ไม่พบ log การ verify PIN ในช่วงที่ดึงข้อมูล';
+
+      renderUsageStats(usageRows);
+      renderUsageTable();
+    } catch (err) {
+      contentEl.innerHTML = `<div style="padding:40px;text-align:center;color:#ef4444;">โหลดไม่สำเร็จ: ${escHtml(err.message)}</div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function tsToMs(ts) {
+    if (!ts) return null;
+    return ts._seconds ? ts._seconds * 1000 : new Date(ts).getTime();
+  }
+
+  function fmtUsageDate(ms) {
+    if (!ms) return '—';
+    return new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric', month: 'short', year: 'numeric',
+      timeZone: 'Asia/Bangkok'
+    }).format(new Date(ms));
+  }
+
+  function fmtUsageDateTime(ms) {
+    if (!ms) return '—';
+    return new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+      timeZone: 'Asia/Bangkok'
+    }).format(new Date(ms));
+  }
+
+  function buildUsageRows(residents, logs) {
+    const now = Date.now();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayMs = startOfToday.getTime();
+
+    const byHouse = new Map();
+    logs.forEach(l => {
+      const houseNo = l.houseNo;
+      if (!houseNo) return;
+      const ms = tsToMs(l.ts);
+      if (!ms) return;
+      let entry = byHouse.get(houseNo);
+      if (!entry) {
+        entry = { count: 0, lastSeen: null, firstSeen: null };
+        byHouse.set(houseNo, entry);
+      }
+      entry.count += 1;
+      if (!entry.lastSeen || ms > entry.lastSeen) entry.lastSeen = ms;
+      if (!entry.firstSeen || ms < entry.firstSeen) entry.firstSeen = ms;
+    });
+
+    const houseNos = new Set(residents.map(r => r.house_no).filter(Boolean));
+    byHouse.forEach((_, houseNo) => houseNos.add(houseNo));
+    const nameByHouse = new Map(residents.map(r => [r.house_no, r.name || '']));
+
+    return [...houseNos].sort().map(houseNo => {
+      const entry = byHouse.get(houseNo);
+      if (!entry) {
+        return {
+          houseNo, name: nameByHouse.get(houseNo) || '',
+          lastSeen: null, count: 0, daysSince: null, status: 'never', freqPerWeek: 0
+        };
+      }
+      const daysSince = Math.floor((now - entry.lastSeen) / 86400000);
+      const spanDays = Math.max((entry.lastSeen - entry.firstSeen) / 86400000, 1);
+      const freqPerWeek = Math.round((entry.count / spanDays) * 7 * 10) / 10;
+      let status;
+      if (entry.lastSeen >= todayMs) status = 'today';
+      else if (daysSince <= 7) status = 'week';
+      else if (daysSince <= 30) status = 'month';
+      else status = 'inactive';
+      return { houseNo, name: nameByHouse.get(houseNo) || '', lastSeen: entry.lastSeen, count: entry.count, daysSince, status, freqPerWeek };
+    });
+  }
+
+  const USAGE_STATUS_LABEL = {
+    never: ['⚪ ไม่เคยใช้', '#6b7280', '#f3f4f6'],
+    today: ['🟢 ใช้วันนี้', '#166534', '#dcfce7'],
+    week: ['🔵 ใช้ใน 7 วัน', '#1e40af', '#dbeafe'],
+    month: ['🟠 ใช้ใน 30 วัน', '#a16207', '#fef3c7'],
+    inactive: ['🔴 เงียบ >30 วัน', '#991b1b', '#fee2e2'],
+  };
+
+  function renderUsageStats(rows) {
+    const counts = { all: rows.length, never: 0, today: 0, week: 0, month: 0, inactive: 0 };
+    rows.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    const cards = [
+      ['all', 'ทั้งหมด', counts.all],
+      ['today', '🟢 วันนี้', counts.today],
+      ['week', '🔵 ใน 7 วัน', counts.week],
+      ['month', '🟠 ใน 30 วัน', counts.month],
+      ['inactive', '🔴 เงียบ >30 วัน', counts.inactive],
+      ['never', '⚪ ไม่เคยใช้', counts.never],
+    ];
+    document.getElementById('usageStats').innerHTML = cards.map(([filter, label, num]) => `
+      <div class="stat-card is-filter ${usageFilter === filter ? 'is-active' : ''}" onclick="setUsageFilter('${filter}')">
+        <div class="stat-card-num">${num}</div>
+        <div class="stat-card-label">${label}</div>
+      </div>`).join('');
+  }
+
+  function setUsageFilter(filter) {
+    usageFilter = filter;
+    renderUsageStats(usageRows);
+    renderUsageTable();
+  }
+
+  function renderUsageTable() {
+    const el = document.getElementById('usageContent');
+    const q = (document.getElementById('usageSearchInput').value || '').trim().toLowerCase();
+    let rows = usageFilter === 'all' ? usageRows : usageRows.filter(r => r.status === usageFilter);
+    if (q) {
+      rows = rows.filter(r => r.houseNo.toLowerCase().includes(q) || (r.name || '').toLowerCase().includes(q));
+    }
+    // Most recently active first; houses that never logged in sink to the bottom.
+    rows = [...rows].sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+
+    if (!rows.length) {
+      el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">ไม่พบข้อมูล</div>';
+      return;
+    }
+
+    const trs = rows.map(r => {
+      const [label, color, bg] = USAGE_STATUS_LABEL[r.status];
+      return `<tr>
+        <td><strong>${escHtml(r.houseNo)}</strong></td>
+        <td style="font-size:.85rem;color:var(--text-soft)">${escHtml(r.name || '—')}</td>
+        <td><span style="font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px;color:${color};background:${bg};white-space:nowrap;">${label}</span></td>
+        <td style="font-size:.82rem;white-space:nowrap;">${fmtUsageDateTime(r.lastSeen)}</td>
+        <td style="font-size:.82rem;color:var(--text-muted);">${r.daysSince === null ? '—' : `${r.daysSince} วันก่อน`}</td>
+        <td style="font-size:.82rem;text-align:center;">${r.count || 0}</td>
+        <td style="font-size:.82rem;text-align:center;">${r.count ? r.freqPerWeek : '—'}</td>
+      </tr>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+          <thead>
+            <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">บ้าน</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">ชื่อ</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">สถานะ</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">Last seen</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">ผ่านมาแล้ว</th>
+              <th style="padding:10px 14px;text-align:center;font-weight:600;">จำนวนครั้ง</th>
+              <th style="padding:10px 14px;text-align:center;font-weight:600;">ความถี่/สัปดาห์</th>
+            </tr>
+          </thead>
+          <tbody>${trs}</tbody>
+        </table>
+        <div style="padding:10px 14px;color:var(--text-muted);font-size:.78rem;border-top:1px solid var(--border);">${rows.length} บ้าน</div>
       </div>`;
   }
 
