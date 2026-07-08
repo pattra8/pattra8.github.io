@@ -426,7 +426,12 @@
     function fmtTime(ts){try{var ms=ts&&ts._seconds?ts._seconds*1000:(ts&&ts.seconds?ts.seconds*1000:0); if(!ms) return '--:--'; return new Date(ms).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Bangkok'});}catch(e){return '--:--';}}
     function fmtDate(v){try{var parts=String(v||'').split('-'); if(parts.length!==3) return ''; var d=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2])); return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}catch(e){return v||'';}}
     function syncDaycap(){elDaycap.textContent=fmtDate(elDate.value);}
-    function statusLabel(s){return s==='complete'?'ครบถ้วน':'รอข้อมูล';}
+    function statusLabel(s){
+      if(s==='complete') return 'ครบถ้วน';
+      if(s==='pending_image') return 'ขาดรูปบัตร / รูปรถ';
+      if(s==='pending_text') return 'รอข้อมูลเพิ่มเติม';
+      return 'รอข้อมูล';
+    }
     function categoryLabel(s){return {food_delivery:'ส่งอาหาร',delivery:'ส่งพัสดุ/ขนส่ง',pickup:'รับ-ส่ง (Grab/แท็กซี่)',contractor:'ช่าง/ซ่อมบำรุง',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document'?'บัตรประชาชน / ใบขับขี่':k==='vehicle'?'รูปรถ':'รูปภาพ';}
     function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}

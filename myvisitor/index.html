@@ -80,6 +80,34 @@
   }
   .search-box input::placeholder { color:var(--text-muted); font-weight:400; }
 
+  .filters-panel {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:12px; margin-bottom:14px;
+  }
+  .filters-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end;
+  }
+  .filter-field label, .custom-date label {
+    display:block; font-size:11.5px; font-weight:700; color:var(--text-muted);
+    margin-bottom:6px; letter-spacing:.02em;
+  }
+  .filter-field select, .custom-date input[type=date] {
+    width:100%; border:1px solid var(--border); border-radius:10px; background:var(--bg-soft);
+    color:var(--text); font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
+    font-size:14px; padding:10px 11px; outline:none;
+  }
+  .custom-date-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;
+  }
+  .filter-meta {
+    margin-top:10px; font-size:12px; color:var(--text-soft); line-height:1.45;
+  }
+  .filter-warning {
+    margin-top:8px; display:none; font-size:12px; color:var(--warn);
+    background:var(--warn-bg); border-radius:10px; padding:8px 10px;
+  }
+  .filter-warning.show { display:block; }
+
   .date-heading {
     font-size:12.5px; font-weight:700; color:var(--text-muted);
     letter-spacing:.03em; margin:18px 2px 8px;
@@ -189,6 +217,40 @@
       <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, ทะเบียนรถ หรือประเภท...">
     </div>
 
+    <div class="filters-panel">
+      <div class="filters-row">
+        <div class="filter-field">
+          <label for="dateRangeSelect">ช่วงเวลา</label>
+          <select id="dateRangeSelect">
+            <option value="30d">ย้อนหลัง 30 วัน</option>
+            <option value="365d">ย้อนหลัง 1 ปี</option>
+            <option value="all">ทั้งหมดที่โหลดมา</option>
+            <option value="custom">กำหนดเอง</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="statusFilter">สถานะ</label>
+          <select id="statusFilter">
+            <option value="all">ทุกสถานะ</option>
+            <option value="complete">ครบถ้วน</option>
+            <option value="pending">ต้องติดตาม</option>
+          </select>
+        </div>
+      </div>
+      <div class="custom-date-grid" id="customDateRange" style="display:none;">
+        <div class="custom-date">
+          <label for="dateFrom">ตั้งแต่วันที่</label>
+          <input type="date" id="dateFrom">
+        </div>
+        <div class="custom-date">
+          <label for="dateTo">ถึงวันที่</label>
+          <input type="date" id="dateTo">
+        </div>
+      </div>
+      <div class="filter-meta" id="filterMeta"></div>
+      <div class="filter-warning" id="filterWarning"></div>
+    </div>
+
     <div id="listRoot"></div>
     <div class="empty-state" id="emptyState" style="display:none;">ยังไม่มีประวัติผู้มาติดต่อบ้านนี้</div>
     <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
@@ -243,6 +305,12 @@
     });
   }
   function categoryInfo(s) { return CATEGORY[s] || CATEGORY.unknown; }
+  function statusLabel(s) {
+    if (s === 'complete') return 'ครบถ้วน';
+    if (s === 'pending_image') return 'ขาดรูปบัตร / รูปรถ';
+    if (s === 'pending_text') return 'รอข้อมูลเพิ่มเติม';
+    return 'กำลังประมวลผล';
+  }
   function purposeDisplay(r) {
     var c = String(r.purposeCategory || 'unknown');
     if (c === 'other' || c === 'unknown') return r.purposeText || categoryInfo(c).label;
@@ -341,6 +409,8 @@
   var elLoginOverlay = document.getElementById('loginOverlay');
   var elApp = document.getElementById('app');
   var allRecords = [];
+  var hasMoreRecords = false;
+  var loadedLimit = 150;
 
   function showLogin(msg) {
     elApp.style.display = 'none';
@@ -390,6 +460,13 @@
   }
 
   document.getElementById('searchInput').addEventListener('input', renderList);
+  document.getElementById('dateRangeSelect').addEventListener('change', function() {
+    document.getElementById('customDateRange').style.display = this.value === 'custom' ? 'grid' : 'none';
+    renderList();
+  });
+  document.getElementById('statusFilter').addEventListener('change', renderList);
+  document.getElementById('dateFrom').addEventListener('change', renderList);
+  document.getElementById('dateTo').addEventListener('change', renderList);
 
   function toggleCard(id) {
     var el = document.querySelector('[data-card="' + id + '"]');
@@ -440,7 +517,7 @@
         '<div class="card-main">' +
           '<div class="card-top">' +
             '<span class="card-time mono">' + esc(fmtTime(r.createdAt)) + '</span>' +
-            '<span class="badge ' + (isComplete ? 'complete' : 'pending') + '"><span class="dot"></span>' + (isComplete ? 'ครบถ้วน' : 'กำลังประมวลผล') + '</span>' +
+            '<span class="badge ' + (isComplete ? 'complete' : 'pending') + '"><span class="dot"></span>' + esc(statusLabel(r.status)) + '</span>' +
           '</div>' +
           '<div class="card-cat">' + esc(cat.label) + '</div>' +
           '<div class="card-purpose">' + esc(purposeDisplay(r)) + '</div>' +
@@ -460,9 +537,65 @@
     '</div>';
   }
 
+  function dayKeyFromMs(ms) {
+    if (!ms) return '';
+    try {
+      return new Date(ms).toLocaleDateString('en-CA', {timeZone:'Asia/Bangkok'});
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function parseDateInput(value, endOfDay) {
+    if (!value) return null;
+    var timePart = endOfDay ? 'T23:59:59.999+07:00' : 'T00:00:00.000+07:00';
+    var ms = Date.parse(value + timePart);
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  function getDateRangeBounds() {
+    var mode = document.getElementById('dateRangeSelect').value;
+    var now = Date.now();
+    if (mode === '30d') return {fromMs: now - (30 * 24 * 60 * 60 * 1000), toMs: null};
+    if (mode === '365d') return {fromMs: now - (365 * 24 * 60 * 60 * 1000), toMs: null};
+    if (mode === 'custom') {
+      return {
+        fromMs: parseDateInput(document.getElementById('dateFrom').value, false),
+        toMs: parseDateInput(document.getElementById('dateTo').value, true)
+      };
+    }
+    return {fromMs: null, toMs: null};
+  }
+
+  function updateFilterMeta(totalCount, filteredCount) {
+    var parts = ['แสดง ' + filteredCount + ' จาก ' + totalCount + ' รายการ'];
+    if (hasMoreRecords) {
+      parts.push('ตอนนี้โหลดเฉพาะล่าสุด ' + loadedLimit + ' รายการ');
+    }
+    document.getElementById('filterMeta').textContent = parts.join(' • ');
+  }
+
+  function setFilterWarning(message) {
+    var el = document.getElementById('filterWarning');
+    if (!message) {
+      el.textContent = '';
+      el.classList.remove('show');
+      return;
+    }
+    el.textContent = message;
+    el.classList.add('show');
+  }
+
   function renderList() {
     var q = document.getElementById('searchInput').value.trim().toLowerCase();
+    var statusFilter = document.getElementById('statusFilter').value;
+    var range = getDateRangeBounds();
     var filtered = allRecords.filter(function(r) {
+      var ms = tsToMs(r.createdAt);
+      if (range.fromMs != null && (!ms || ms < range.fromMs)) return false;
+      if (range.toMs != null && (!ms || ms > range.toMs)) return false;
+      if (statusFilter === 'complete' && r.status !== 'complete') return false;
+      if (statusFilter === 'pending' && r.status === 'complete') return false;
       if (!q) return true;
       var o = r.ocr || {}, vc = r.vehicleCapture || {};
       var hay = [personName(o), vc.plateText, r.purposeText, categoryInfo(r.purposeCategory).label]
@@ -471,12 +604,24 @@
     });
     var root = document.getElementById('listRoot');
     var empty = document.getElementById('emptyState');
+    updateFilterMeta(allRecords.length, filtered.length);
+    if (document.getElementById('dateRangeSelect').value === 'custom' &&
+        range.fromMs != null && range.toMs != null && range.fromMs > range.toMs) {
+      setFilterWarning('ช่วงวันที่ไม่ถูกต้อง: วันที่เริ่มต้นมากกว่าวันที่สิ้นสุด');
+      root.innerHTML = '';
+      empty.style.display = 'block';
+      empty.textContent = 'ยังไม่สามารถแสดงผลได้ กรุณาตรวจสอบช่วงวันที่';
+      return;
+    }
+    setFilterWarning(hasMoreRecords ? 'หากต้องการดูเก่าย้อนมากกว่าในหน้านี้ ตอนนี้ระบบยังโหลดเฉพาะรายการล่าสุดเท่านั้น' : '');
     if (!filtered.length) {
       root.innerHTML = '';
       empty.style.display = 'block';
+      empty.textContent = 'ไม่พบรายการตามเงื่อนไขที่เลือก';
       return;
     }
     empty.style.display = 'none';
+    empty.textContent = 'ยังไม่มีประวัติผู้มาติดต่อบ้านนี้';
     var html = '';
     var lastHeading = null;
     filtered.forEach(function(r) {
@@ -524,6 +669,7 @@
       }
       showApp();
       allRecords = r.data.records || [];
+      hasMoreRecords = !!r.data.hasMore;
       renderList();
     }).catch(function() {
       document.getElementById('loadingState').style.display = 'none';
