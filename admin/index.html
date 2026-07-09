@@ -1344,7 +1344,7 @@
       .dashboard > header > div:last-child { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
       .admin-quick-links { width: 100%; }
       .admin-link-btn { flex: 1 1 auto; }
-      .tabs { padding: 14px 16px 0; overflow-x: auto; }
+      .tabs { padding: 14px 16px 0; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
       .toolbar { padding: 14px 16px; }
       .table-wrap { margin: 0 16px 16px; }
       .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
@@ -3159,7 +3159,7 @@
 
     el.innerHTML = `
       <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+        <table style="min-width:100%;border-collapse:collapse;font-size:.85rem;">
           <thead>
             <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
               <th style="padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap">เวลา</th>
@@ -3359,7 +3359,7 @@
 
     el.innerHTML = `
       <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+        <table style="min-width:100%;border-collapse:collapse;font-size:.85rem;">
           <thead>
             <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
               <th style="padding:10px 14px;text-align:left;font-weight:600;">บ้าน</th>
@@ -3626,7 +3626,7 @@
 
     contentEl.innerHTML = `
       <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+        <table style="min-width:100%;border-collapse:collapse;font-size:.85rem;">
           <thead>
             <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
               <th style="padding:10px 14px;text-align:left;font-weight:600;">หมวด</th>
