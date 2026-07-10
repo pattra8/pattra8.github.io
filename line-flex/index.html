@@ -87,6 +87,7 @@
       font-size:12px;font-weight:600;color:var(--text);
     }
     .badge strong{color:var(--accent-2)}
+    .badge-subtle{color:var(--muted);font-weight:500}
     .panel{
       background:rgba(255,255,255,.85);
       border:1px solid rgba(230,220,199,.9);
@@ -125,6 +126,16 @@
     }
     .route-title{font-size:16px;font-weight:700;margin:0 0 4px}
     .route-desc{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+    .route-pair{
+      margin-top:8px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .route-pair .badge{
+      padding:6px 10px;
+      font-size:11px;
+    }
     .route-select{
       width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 12px;
       font:inherit;font-size:14px;background:#fff;color:var(--text);outline:none;
@@ -179,12 +190,12 @@
       <h2>เลือก sandbox หรือ prd สำหรับทุก LINE flex flow</h2>
       <p>
         หน้านี้มีไว้สำหรับประธานเท่านั้น เพื่อกำหนดว่าแต่ละ flex จะถูกส่งไป
-        <strong>Pattra Watch</strong> (sandbox) หรือ <strong>Security Pattra 8</strong> (prd)
-        แบบแยกกันรายงาน.
+        environment ที่ถูกต้องของแต่ละ flow โดย
+        <strong>sandbox</strong> และ <strong>prd</strong> สามารถอ้างอิงคนละกลุ่มกันได้ตามชนิดรายงาน.
       </p>
       <div class="badges">
-        <span class="badge">Sandbox: <strong id="sandboxName">Pattra Watch</strong></span>
-        <span class="badge">PRD: <strong id="prdName">Security Pattra 8</strong></span>
+        <span class="badge">Sandbox default: <strong>Pattra Watch</strong></span>
+        <span class="badge">PRD mapping: <strong>route-specific</strong> <span class="badge-subtle">เช่น Security หรือ Pattra Villa 8</span></span>
       </div>
     </section>
 
@@ -192,7 +203,7 @@
       <div class="section-head">
         <div>
           <h3>Target map</h3>
-          <p>ค่าต่อไปนี้มาจาก config กลาง ใช้ได้กับทุก flow ใน Pattra Bot</p>
+          <p>ปลายทางที่ระบบรู้จักทั้งหมด และแต่ละ flow จะอ้างอิงคู่ sandbox/prd ของตัวเอง</p>
         </div>
         <div class="badge" id="updatedBadge">Loading…</div>
       </div>
@@ -218,8 +229,8 @@
       </div>
 
       <div class="footer-note">
-        คำแนะนำ: Daily/Night และ Guard ทั้งสองกะอ้างอิง target เลือกจากหน้านี้โดยตรง,
-        ส่วน Pattra Report ที่เพิ่งย้ายจะไม่กลับไป Security ถ้าเลือก sandbox ไว้.
+        คำแนะนำ: Daily/Night, Guard ทั้งสองกะ และ Pattra Report ใช้ prd = Security Pattra 8
+        ส่วน Pattra Pay ใช้ prd = Pattra Villa 8 โดยแยกจาก flow อื่น.
       </div>
     </section>
   </div>
@@ -239,10 +250,19 @@
 
     const DEFAULT_TARGETS = {
       sandbox: { key: 'sandbox', label: 'Pattra Watch', targetId: 'Cc8b4fea6ca64611a006388a9c46d8bbe' },
-      prd: { key: 'prd', label: 'Security Pattra 8', targetId: 'Cece0bf710254a9d48d5b738c4f2afdd7' },
+      securityPrd: { key: 'security_prd', label: 'Security Pattra 8', targetId: 'Cece0bf710254a9d48d5b738c4f2afdd7' },
+      pattraVillaPrd: { key: 'pattra_villa_prd', label: 'Pattra Villa 8', targetId: 'C7e85f0564a1563a1aa681cd970c04a9d' },
+    };
+    const DEFAULT_ROUTE_TARGETS = {
+      daily: { sandbox: DEFAULT_TARGETS.sandbox, prd: DEFAULT_TARGETS.securityPrd },
+      night: { sandbox: DEFAULT_TARGETS.sandbox, prd: DEFAULT_TARGETS.securityPrd },
+      guardDay: { sandbox: DEFAULT_TARGETS.sandbox, prd: DEFAULT_TARGETS.securityPrd },
+      guardNight: { sandbox: DEFAULT_TARGETS.sandbox, prd: DEFAULT_TARGETS.securityPrd },
+      pattraPay: { sandbox: DEFAULT_TARGETS.sandbox, prd: DEFAULT_TARGETS.pattraVillaPrd },
+      pattraReport: { sandbox: DEFAULT_TARGETS.sandbox, prd: DEFAULT_TARGETS.securityPrd },
     };
 
-    const state = { houseNo: '', pin: '', config: null, targets: DEFAULT_TARGETS };
+    const state = { houseNo: '', pin: '', config: null, targets: DEFAULT_TARGETS, routeTargets: DEFAULT_ROUTE_TARGETS };
 
     function esc(s) {
       return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -286,11 +306,11 @@
     }
     function renderTargets(targets) {
       const grid = document.getElementById('targetsGrid');
-      grid.innerHTML = ['sandbox','prd'].map(key => {
+      grid.innerHTML = Object.keys(targets).map(key => {
         const target = targets[key] || DEFAULT_TARGETS[key];
         return `
           <article class="target-card">
-            <div class="label">${key === 'sandbox' ? 'Sandbox' : 'Production'}<span>${esc(target.key)}</span></div>
+            <div class="label">${esc(target.label)}<span>${esc(target.key)}</span></div>
             <div class="name">${esc(target.label)}</div>
             <div class="id">${esc(maskId(target.targetId))}</div>
           </article>`;
@@ -300,17 +320,22 @@
       const routes = (config && config.routes) || {
         daily: 'prd', night: 'prd', guardDay: 'prd', guardNight: 'prd', pattraPay: 'sandbox', pattraReport: 'sandbox'
       };
+      const routeTargets = (config && config.routeTargets) || state.routeTargets || DEFAULT_ROUTE_TARGETS;
       const grid = document.getElementById('routesGrid');
       grid.innerHTML = ROUTE_META.map(route => `
         <div class="route-row">
           <div>
             <div class="route-title">${esc(route.label)}</div>
             <p class="route-desc">${esc(route.desc)}</p>
+            <div class="route-pair">
+              <span class="badge">sandbox → <strong>${esc(((routeTargets[route.key] || {}).sandbox || {}).label || DEFAULT_TARGETS.sandbox.label)}</strong></span>
+              <span class="badge">prd → <strong>${esc(((routeTargets[route.key] || {}).prd || {}).label || DEFAULT_TARGETS.securityPrd.label)}</strong></span>
+            </div>
           </div>
           <div>
             <select class="route-select" data-route-key="${esc(route.key)}">
-              <option value="sandbox" ${routes[route.key] === 'sandbox' ? 'selected' : ''}>Pattra Watch (sandbox)</option>
-              <option value="prd" ${routes[route.key] === 'prd' ? 'selected' : ''}>Security Pattra 8 (prd)</option>
+              <option value="sandbox" ${routes[route.key] === 'sandbox' ? 'selected' : ''}>${esc((((routeTargets[route.key] || {}).sandbox) || DEFAULT_TARGETS.sandbox).label)} (sandbox)</option>
+              <option value="prd" ${routes[route.key] === 'prd' ? 'selected' : ''}>${esc((((routeTargets[route.key] || {}).prd) || DEFAULT_TARGETS.securityPrd).label)} (prd)</option>
             </select>
           </div>
         </div>
@@ -336,6 +361,7 @@
       if (!response.ok || !data.ok) throw new Error(data.error || 'โหลด config ไม่สำเร็จ');
       state.config = data.config || null;
       state.targets = data.targets || DEFAULT_TARGETS;
+      state.routeTargets = data.routeTargets || (state.config && state.config.routeTargets) || DEFAULT_ROUTE_TARGETS;
       renderTargets(state.targets);
       renderRoutes(state.config);
       updateUpdatedBadge(state.config || {});
@@ -359,6 +385,7 @@
       if (!response.ok || !data.ok) throw new Error(data.error || 'บันทึกไม่สำเร็จ');
       state.config = data.config || null;
       state.targets = data.targets || DEFAULT_TARGETS;
+      state.routeTargets = data.routeTargets || (state.config && state.config.routeTargets) || DEFAULT_ROUTE_TARGETS;
       renderTargets(state.targets);
       renderRoutes(state.config);
       updateUpdatedBadge(state.config || {});
