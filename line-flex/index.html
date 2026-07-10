@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LINE Flex Routing · Pattra Villa 8</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#f9f3e9;
+      --bg2:#f2ead9;
+      --card:#fffdf9;
+      --line:#e6dcc7;
+      --text:#2a2218;
+      --muted:#7b6a54;
+      --accent:#c47a2c;
+      --accent-2:#8b5520;
+      --shadow:0 1px 2px rgba(60,40,20,.04), 0 10px 32px rgba(60,40,20,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;width:100%;min-height:100%}
+    body{
+      font-family:'IBM Plex Sans Thai',-apple-system,BlinkMacSystemFont,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(196,122,44,.08), transparent 30%),
+        radial-gradient(circle at top right, rgba(139,85,32,.08), transparent 24%),
+        linear-gradient(180deg, var(--bg), #f7f0e4 70%, #f3ecdd);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    a{color:inherit}
+    .wrap{max-width:1120px;margin:0 auto;padding:24px 18px 60px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:18px;flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;text-decoration:none;
+    }
+    .monogram{
+      width:42px;height:42px;border:1px solid var(--accent);border-radius:12px;
+      display:grid;place-items:center;font-family:'Cormorant Garamond',serif;
+      color:var(--accent);font-size:20px;font-weight:600;background:rgba(255,255,255,.55);
+    }
+    .brand-copy h1{
+      margin:0;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;
+      letter-spacing:.01em;line-height:1.05;
+    }
+    .brand-copy p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--line);background:rgba(255,255,255,.82);color:var(--text);
+      border-radius:999px;padding:10px 14px;font:inherit;font-size:13px;font-weight:600;
+      cursor:pointer;text-decoration:none;transition:all .15s ease;
+      box-shadow:0 1px 1px rgba(0,0,0,.02);
+    }
+    .btn:hover{border-color:var(--accent);color:var(--accent-2);transform:translateY(-1px)}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2);color:#fff}
+    .hero{
+      background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.62));
+      border:1px solid rgba(230,220,199,.8);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:22px 22px 18px;
+      margin-bottom:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::after{
+      content:"";position:absolute;inset:-40px -80px auto auto;width:220px;height:220px;
+      background:radial-gradient(circle, rgba(196,122,44,.14), transparent 65%);pointer-events:none;
+    }
+    .hero-kicker{
+      display:inline-flex;align-items:center;gap:8px;
+      color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.18em;
+      text-transform:uppercase;margin-bottom:10px;
+    }
+    .hero h2{margin:0;font-size:clamp(28px,4vw,42px);line-height:1.05}
+    .hero p{margin:10px 0 0;color:var(--muted);max-width:760px;line-height:1.7}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);
+      font-size:12px;font-weight:600;color:var(--text);
+    }
+    .badge strong{color:var(--accent-2)}
+    .panel{
+      background:rgba(255,255,255,.85);
+      border:1px solid rgba(230,220,199,.9);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .section-head{
+      display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+      flex-wrap:wrap;margin-bottom:14px;
+    }
+    .section-head h3{margin:0;font-size:20px}
+    .section-head p{margin:0;color:var(--muted);font-size:13px}
+    .targets{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px;
+    }
+    .target-card{
+      background:linear-gradient(180deg,#fff, #fbf6ed);
+      border:1px solid var(--line);border-radius:18px;padding:14px 14px 12px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .target-card .label{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--accent-2);
+    }
+    .target-card .name{font-size:17px;font-weight:700}
+    .target-card .id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
+    .routes{
+      display:grid;gap:12px;
+    }
+    .route-row{
+      background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;
+      display:grid;grid-template-columns:minmax(220px,1.1fr) minmax(180px,.75fr);
+      gap:14px;align-items:center;
+    }
+    .route-title{font-size:16px;font-weight:700;margin:0 0 4px}
+    .route-desc{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+    .route-select{
+      width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 12px;
+      font:inherit;font-size:14px;background:#fff;color:var(--text);outline:none;
+    }
+    .route-select:focus{border-color:var(--accent)}
+    .actions{
+      display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;
+      margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+    }
+    .status{
+      color:var(--muted);font-size:13px;line-height:1.6;min-height:22px
+    }
+    .status.ok{color:#2d6a3f}
+    .status.err{color:#9e3f24}
+    .footer-note{
+      margin-top:16px;color:var(--muted);font-size:12px;line-height:1.6
+    }
+    .loading{
+      display:grid;place-items:center;min-height:40vh;color:var(--muted);
+      font-size:14px;
+    }
+    @media (max-width: 820px){
+      .targets,.route-row{grid-template-columns:1fr}
+    }
+    @media (max-width: 640px){
+      .wrap{padding:18px 14px 48px}
+      .panel,.hero{border-radius:20px}
+      .brand-copy h1{font-size:24px}
+      .hero h2{font-size:30px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/admin/">
+        <div class="monogram">PV</div>
+        <div class="brand-copy">
+          <h1>LINE Flex Routing</h1>
+          <p>Pattra Villa 8 · President only</p>
+        </div>
+      </a>
+      <div class="top-actions">
+        <a class="btn" href="/">Home</a>
+        <a class="btn" href="/admin/">Admin</a>
+        <button class="btn primary" id="saveBtn" type="button">Save routing</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-kicker">Routing control</div>
+      <h2>เลือก sandbox หรือ prd สำหรับทุก LINE flex flow</h2>
+      <p>
+        หน้านี้มีไว้สำหรับประธานเท่านั้น เพื่อกำหนดว่าแต่ละ flex จะถูกส่งไป
+        <strong>Pattra Watch</strong> (sandbox) หรือ <strong>Security Pattra 8</strong> (prd)
+        แบบแยกกันรายงาน.
+      </p>
+      <div class="badges">
+        <span class="badge">Sandbox: <strong id="sandboxName">Pattra Watch</strong></span>
+        <span class="badge">PRD: <strong id="prdName">Security Pattra 8</strong></span>
+      </div>
+    </section>
+
+    <section class="panel" id="contentPanel">
+      <div class="section-head">
+        <div>
+          <h3>Target map</h3>
+          <p>ค่าต่อไปนี้มาจาก config กลาง ใช้ได้กับทุก flow ใน Pattra Bot</p>
+        </div>
+        <div class="badge" id="updatedBadge">Loading…</div>
+      </div>
+
+      <div class="targets" id="targetsGrid"></div>
+
+      <div class="section-head" style="margin-top:4px">
+        <div>
+          <h3>Flow routing</h3>
+          <p>เปลี่ยน dropdown แล้วกด Save เพื่อให้มีผลกับการส่งครั้งถัดไป</p>
+        </div>
+      </div>
+      <div class="routes" id="routesGrid">
+        <div class="loading">กำลังโหลด config…</div>
+      </div>
+
+      <div class="actions">
+        <div class="status" id="statusText">พร้อมใช้งาน</div>
+        <div class="top-actions">
+          <button class="btn" id="resetBtn" type="button">Reset defaults</button>
+          <button class="btn primary" id="saveBtn2" type="button">Save routing</button>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        คำแนะนำ: Daily/Night และ Guard ทั้งสองกะอ้างอิง target เลือกจากหน้านี้โดยตรง,
+        ส่วน Pattra Report ที่เพิ่งย้ายจะไม่กลับไป Security ถ้าเลือก sandbox ไว้.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const RESIDENT_SESSION_KEY = 'pattra_resident_session_v1';
+    const ADMIN_ACCESS_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix';
+    const LINE_ROUTING_URL = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lineFlexRoutingAdmin';
+    const ROUTE_META = [
+      { key: 'daily', label: 'daily watch', desc: 'รายงานสรุปประจำวัน / daily traffic summary' },
+      { key: 'night', label: 'night watch', desc: 'รายงานกลางคืน / overnight security summary' },
+      { key: 'guardDay', label: 'ตรวจงาน รปภ. กลางวัน', desc: 'guard audit shift กลางวัน' },
+      { key: 'guardNight', label: 'ตรวจงาน รปภ. กลางคืน', desc: 'guard audit shift กลางคืน' },
+      { key: 'pattraPay', label: 'pattra pay', desc: 'flex ของ Pattra Pay / payment heatmap' },
+      { key: 'pattraReport', label: 'pattra report', desc: 'new issue จาก /report/ ส่งเข้า sandbox หรือ prd' },
+    ];
+
+    const DEFAULT_TARGETS = {
+      sandbox: { key: 'sandbox', label: 'Pattra Watch', targetId: 'Cc8b4fea6ca64611a006388a9c46d8bbe' },
+      prd: { key: 'prd', label: 'Security Pattra 8', targetId: 'Cece0bf710254a9d48d5b738c4f2afdd7' },
+    };
+
+    const state = { houseNo: '', pin: '', config: null, targets: DEFAULT_TARGETS };
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+    function maskId(id) {
+      const text = String(id || '');
+      if (!text) return '—';
+      if (text.length <= 12) return text;
+      return text.slice(0, 5) + '…' + text.slice(-5);
+    }
+    function getSession() {
+      try {
+        const raw = localStorage.getItem(RESIDENT_SESSION_KEY);
+        const session = JSON.parse(raw || 'null');
+        if (!session || !session.houseNo || !session.pin || Number(session.expiresAt) <= Date.now()) return null;
+        return session;
+      } catch (_) {
+        return null;
+      }
+    }
+    async function resolveAdminAccess(session) {
+      const response = await fetch(ADMIN_ACCESS_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({action:'resolve', houseNo: session.houseNo, pin: session.pin}),
+      });
+      const data = await response.json().catch(() => ({}));
+      return response.ok && data.ok ? data.access : null;
+    }
+    function setStatus(text, kind) {
+      const el = document.getElementById('statusText');
+      el.textContent = text;
+      el.className = 'status' + (kind ? ' ' + kind : '');
+    }
+    function getCurrentRoutes() {
+      const routes = {};
+      document.querySelectorAll('[data-route-key]').forEach(sel => {
+        routes[sel.dataset.routeKey] = sel.value;
+      });
+      return routes;
+    }
+    function renderTargets(targets) {
+      const grid = document.getElementById('targetsGrid');
+      grid.innerHTML = ['sandbox','prd'].map(key => {
+        const target = targets[key] || DEFAULT_TARGETS[key];
+        return `
+          <article class="target-card">
+            <div class="label">${key === 'sandbox' ? 'Sandbox' : 'Production'}<span>${esc(target.key)}</span></div>
+            <div class="name">${esc(target.label)}</div>
+            <div class="id">${esc(maskId(target.targetId))}</div>
+          </article>`;
+      }).join('');
+    }
+    function renderRoutes(config) {
+      const routes = (config && config.routes) || {
+        daily: 'prd', night: 'prd', guardDay: 'prd', guardNight: 'prd', pattraPay: 'sandbox', pattraReport: 'sandbox'
+      };
+      const grid = document.getElementById('routesGrid');
+      grid.innerHTML = ROUTE_META.map(route => `
+        <div class="route-row">
+          <div>
+            <div class="route-title">${esc(route.label)}</div>
+            <p class="route-desc">${esc(route.desc)}</p>
+          </div>
+          <div>
+            <select class="route-select" data-route-key="${esc(route.key)}">
+              <option value="sandbox" ${routes[route.key] === 'sandbox' ? 'selected' : ''}>Pattra Watch (sandbox)</option>
+              <option value="prd" ${routes[route.key] === 'prd' ? 'selected' : ''}>Security Pattra 8 (prd)</option>
+            </select>
+          </div>
+        </div>
+      `).join('');
+    }
+    function updateUpdatedBadge(config) {
+      const badge = document.getElementById('updatedBadge');
+      if (!config) {
+        badge.textContent = 'No config';
+        return;
+      }
+      const by = config.updatedBy ? ` · by ${config.updatedBy}` : '';
+      badge.textContent = config.updatedAt ? `Updated${by}` : 'Using defaults';
+    }
+    async function loadConfig() {
+      const session = state.session;
+      const response = await fetch(LINE_ROUTING_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'get', houseNo: session.houseNo, pin: session.pin}),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'โหลด config ไม่สำเร็จ');
+      state.config = data.config || null;
+      state.targets = data.targets || DEFAULT_TARGETS;
+      renderTargets(state.targets);
+      renderRoutes(state.config);
+      updateUpdatedBadge(state.config || {});
+      setStatus('โหลด config สำเร็จ', 'ok');
+    }
+    async function saveConfig({reset = false} = {}) {
+      const session = state.session;
+      const body = {
+        action: reset ? 'reset' : 'save',
+        houseNo: session.houseNo,
+        pin: session.pin,
+        routes: reset ? undefined : getCurrentRoutes(),
+      };
+      setStatus('กำลังบันทึก…');
+      const response = await fetch(LINE_ROUTING_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || 'บันทึกไม่สำเร็จ');
+      state.config = data.config || null;
+      state.targets = data.targets || DEFAULT_TARGETS;
+      renderTargets(state.targets);
+      renderRoutes(state.config);
+      updateUpdatedBadge(state.config || {});
+      setStatus(reset ? 'รีเซ็ตเป็นค่าเริ่มต้นแล้ว' : 'บันทึกเรียบร้อยแล้ว', 'ok');
+    }
+    (async function init() {
+      try {
+        const session = getSession();
+        if (!session) {
+          location.href = '/';
+          return;
+        }
+        state.session = session;
+        const access = await resolveAdminAccess(session);
+        if (!access || !access.active || !access.permissions || !access.permissions['admin.portal']) {
+          location.href = '/';
+          return;
+        }
+        document.getElementById('saveBtn').addEventListener('click', () => saveConfig().catch(err => setStatus(err.message, 'err')));
+        document.getElementById('saveBtn2').addEventListener('click', () => saveConfig().catch(err => setStatus(err.message, 'err')));
+        document.getElementById('resetBtn').addEventListener('click', async () => {
+          if (!confirm('รีเซ็ต routing ทั้งหมดกลับเป็นค่า default ใช่ไหม?')) return;
+          try { await saveConfig({reset: true}); } catch (err) { setStatus(err.message, 'err'); }
+        });
+        await loadConfig();
+      } catch (err) {
+        setStatus(err.message || 'เกิดข้อผิดพลาด', 'err');
+      }
+    })();
+  </script>
+</body>
+</html>
