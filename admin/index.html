@@ -716,14 +716,12 @@
     #adminTable .c-zone   { width: 1%; white-space: nowrap; }
     #adminTable .c-quota  { width: 1%; white-space: nowrap; text-align: center; }
     #adminTable .c-upd    { width: 1%; white-space: nowrap; color: #a2937c; font-size: 0.72rem; }
-    #adminTable .c-resident { min-width: 210px; }
-    #adminTable .c-vehicles { min-width: 200px; }
+    #adminTable .c-resident { min-width: 160px; }
+    #adminTable .c-cars     { min-width: 140px; }
+    #adminTable .c-motos    { min-width: 130px; }
 
     /* resident cell: name with contact (email / phone) as a muted subline */
     .r-name { font-weight: 600; color: var(--text); line-height: 1.3; }
-    .r-sub  { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-top: 2px; }
-    .r-sub span { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
-    .r-sub .ic { opacity: 0.6; font-size: 10px; }
 
     /* zone / plot merged into one badge */
     .zone-badge { display: inline-flex; align-items: center; gap: 5px; }
@@ -1458,8 +1456,9 @@
           <th class="c-resident">ผู้พักอาศัย</th>
           <th class="c-deed">โฉนด</th>
           <th class="c-zone">โซน / แปลง</th>
-          <th class="c-vehicles">ยานพาหนะ</th>
-          <th class="c-quota">โควตา</th>
+          <th class="c-cars">🚗 รถยนต์</th>
+          <th class="c-motos">🏍 มอเตอร์ไซค์</th>
+          <th class="c-quota">โควต้ารถยนต์</th>
           <th class="c-upd">อัปเดต</th>
         </tr>
       </thead>
@@ -4377,7 +4376,7 @@
       } catch(e) {
         if (!cached) {
           document.getElementById('adminBody').innerHTML =
-            `<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+            `<tr><td colspan="10" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
           setToolbarNote('โหลดไม่สำเร็จ', 'error');
         } else {
           setToolbarNote(`⚠️ แสดงข้อมูล cache · อัปเดตล่าสุดไม่สำเร็จ`, 'error');
@@ -4395,13 +4394,8 @@
     document.getElementById('adminBody').innerHTML = data.map((r, i) => {
       const cars  = normalizePlateArray(r.cars);
       const motos = normalizePlateArray(r.motorcycles);
-      const chips = [
-        ...cars.map(p => `<span class="chip car">${escHtml(p)}</span>`),
-        ...motos.map(p => `<span class="chip moto">${escHtml(p)}</span>`),
-      ].join('');
-      const sub = [];
-      if (r.email) sub.push(`<span><span class="ic">✉</span>${escHtml(r.email)}</span>`);
-      if (r.phone) sub.push(`<span><span class="ic">✆</span>${escHtml(formatPhone(r.phone))}</span>`);
+      const carChips  = cars.length  ? `<div class="veh">${cars.map(p => `<span class="chip car">${escHtml(p)}</span>`).join('')}</div>`   : '<span class="no-val">—</span>';
+      const motoChips = motos.length ? `<div class="veh">${motos.map(p => `<span class="chip moto">${escHtml(p)}</span>`).join('')}</div>` : '<span class="no-val">—</span>';
       const zone = r.zone
         ? `<span class="zone-badge"><b>${escHtml(r.zone)}</b>${r.plot ? `<span class="dot"></span><span class="plot">${escHtml(r.plot)}</span>` : ''}</span>`
         : (r.plot ? `<span class="zone-badge"><span class="plot">${escHtml(r.plot)}</span></span>` : '<span class="no-val">—</span>');
@@ -4411,11 +4405,11 @@
         <td class="c-house">${showVal(r.house_no)}</td>
         <td class="c-resident">
           <div class="r-name" title="${escHtml(r.name || '')}">${showVal(shortenCompanyName(r.name))}</div>
-          ${sub.length ? `<div class="r-sub">${sub.join('')}</div>` : ''}
         </td>
         <td class="c-deed">${showVal(r.deed_no)}</td>
         <td class="c-zone">${zone}</td>
-        <td class="c-vehicles">${chips ? `<div class="veh">${chips}</div>` : '<span class="no-val">—</span>'}</td>
+        <td class="c-cars">${carChips}</td>
+        <td class="c-motos">${motoChips}</td>
         <td class="c-quota"><span class="quota-badge">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</span></td>
         <td class="c-upd">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
       </tr>`;
