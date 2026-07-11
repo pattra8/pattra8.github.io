@@ -30,7 +30,7 @@
       padding:0 0 60px;
     }
     a{color:inherit;text-decoration:none}
-    .shell{max-width:900px;margin:0 auto;padding:0 16px}
+    .shell{max-width:1160px;margin:0 auto;padding:0 16px}
 
     /* ── Canonical Pattra Villa 8 header ── */
     .site-header{
@@ -55,18 +55,18 @@
     .btn.ghost{background:transparent;box-shadow:none}
     .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-    .page-head{margin:22px 0 4px}
+    .page-head{margin:16px 0 4px}
     .page-head h2{margin:0;font-size:20px;font-weight:700;color:var(--text);text-wrap:balance}
     .page-head p{margin:6px 0 0;color:var(--text-muted);font-size:13px;line-height:1.6;max-width:640px}
 
-    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0}
+    .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0}
     .stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
     .stat-box .label{margin:0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);font-weight:700}
     .stat-box .value{margin:4px 0 0;font-size:24px;font-weight:700;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
     .stat-box .sub{margin:4px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5}
 
     /* ── Target Directory (collapsible) ── */
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-top:14px}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-top:10px}
     .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
     .panel-head h3{margin:0;font-size:15px;font-weight:700;color:var(--text)}
     .panel-head p{margin:4px 0 0;color:var(--text-muted);font-size:12.5px;line-height:1.55}
@@ -93,7 +93,7 @@
     .catalog-item p{margin:0;color:var(--text-muted);font-size:11px;font-family:'IBM Plex Mono',ui-monospace,monospace}
 
     /* ── Flow groups ── */
-    .flow-section{margin-top:22px}
+    .flow-section{margin-top:16px}
     .cat-head{
       display:flex;align-items:center;gap:10px;margin:0 0 10px;
       padding:9px 12px;border-radius:12px;
@@ -107,7 +107,7 @@
     .cat-title{font-size:13.5px;font-weight:800;color:var(--cat-color,var(--text));letter-spacing:.02em;text-transform:uppercase}
     .cat-sub{margin-top:1px;font-size:11px;color:var(--text-soft)}
 
-    .flow-grid{display:flex;flex-direction:column;gap:10px}
+    .flow-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-items:start}
     .flow-card{
       border:1px solid var(--border);border-left:3px solid var(--cat-color,var(--accent));
       border-radius:12px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;
@@ -196,6 +196,9 @@
     }
     .toast.show{transform:translateX(-50%) translateY(0)}
 
+    @media (max-width: 780px){
+      .flow-grid{grid-template-columns:1fr}
+    }
     @media (max-width: 560px){
       .stats-row{grid-template-columns:1fr 1fr}
       .send-row,.choice-row,.segmented{grid-template-columns:1fr}
