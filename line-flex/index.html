@@ -15,9 +15,6 @@
       --accent-text:#9a5c1f; --accent-deep:#855015;
       --ok:#3f6431; --ok-bg:#e8efd9; --warn:#855015; --warn-bg:#f7e6cd;
       --err:#86341e; --err-bg:#f7dfd5;
-      --cat-traffic:#9a5c1f; --cat-traffic-bg:#f7e6cd;
-      --cat-guard:#3f5a44; --cat-guard-bg:#e3ead9;
-      --cat-money:#9c4a34; --cat-money-bg:#f3ded4;
       --radius:16px; --shadow:0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
     }
     *{box-sizing:border-box}
@@ -97,19 +94,19 @@
     .cat-head{
       display:flex;align-items:center;gap:10px;margin:0 0 10px;
       padding:9px 12px;border-radius:12px;
-      background:var(--cat-bg,var(--bg-soft));
-      border:1px solid var(--cat-color,var(--border));
+      background:var(--bg-soft);
+      border:1px solid var(--border);
     }
     .cat-icon{
       width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
-      font-size:13px;flex-shrink:0;background:var(--card);
+      font-size:13px;flex-shrink:0;background:var(--card);border:1px solid var(--border-soft);
     }
-    .cat-title{font-size:13.5px;font-weight:800;color:var(--cat-color,var(--text));letter-spacing:.02em;text-transform:uppercase}
-    .cat-sub{margin-top:1px;font-size:11px;color:var(--text-soft)}
+    .cat-title{font-size:13px;font-weight:800;color:var(--text-soft);letter-spacing:.06em;text-transform:uppercase}
+    .cat-sub{margin-top:1px;font-size:11px;color:var(--text-muted)}
 
     .flow-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-items:start}
     .flow-card{
-      border:1px solid var(--border);border-left:3px solid var(--cat-color,var(--accent));
+      border:1px solid var(--border);
       border-radius:12px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;
     }
     .flow-top{
@@ -283,9 +280,9 @@
     const LINE_ROUTING_URL = "https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lineFlexRoutingAdmin";
 
     const CATEGORY_META = [
-      { key: "traffic", title: "Traffic Reports", subtitle: "สรุปการเข้า-ออกประจำวันและกลางคืน", icon: "🚗", colorVar: "--cat-traffic", bgVar: "--cat-traffic-bg" },
-      { key: "guard", title: "Guard Audit", subtitle: "ตรวจงาน รปภ. กะกลางวัน/กลางคืน", icon: "🛡️", colorVar: "--cat-guard", bgVar: "--cat-guard-bg" },
-      { key: "money", title: "Payments & Reports", subtitle: "Pattra Pay และแจ้งปัญหาจากหน้า Report", icon: "💳", colorVar: "--cat-money", bgVar: "--cat-money-bg" },
+      { key: "traffic", title: "Traffic Reports", subtitle: "สรุปการเข้า-ออกประจำวันและกลางคืน", icon: "🚗" },
+      { key: "guard", title: "Guard Audit", subtitle: "ตรวจงาน รปภ. กะกลางวัน/กลางคืน", icon: "🛡️" },
+      { key: "money", title: "Payments & Reports", subtitle: "Pattra Pay และแจ้งปัญหาจากหน้า Report", icon: "💳" },
     ];
 
     const FLOW_META = [
@@ -451,7 +448,7 @@
           const productionLabel = getTargetLabel(current.productionTargetId);
           const activeLabel = mode === "sandbox" ? sandboxLabel : productionLabel;
           return `
-            <article class="flow-card" style="--cat-color:var(${cat.colorVar})" data-flow-card="${esc(flow.key)}">
+            <article class="flow-card" data-flow-card="${esc(flow.key)}">
               <div class="flow-top">
                 <div>
                   <h4 class="flow-title">${esc(flow.title)}</h4>
@@ -520,8 +517,8 @@
         }).join("");
         return `
           <section class="flow-section">
-            <div class="cat-head" style="--cat-color:var(${cat.colorVar});--cat-bg:var(${cat.bgVar})">
-              <span class="cat-icon" style="color:var(${cat.colorVar})">${cat.icon}</span>
+            <div class="cat-head">
+              <span class="cat-icon">${cat.icon}</span>
               <div>
                 <div class="cat-title">${esc(cat.title)}</div>
                 <div class="cat-sub">${esc(cat.subtitle)}</div>
