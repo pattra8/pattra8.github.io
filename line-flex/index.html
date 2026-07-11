@@ -238,12 +238,12 @@
     const ADMIN_ACCESS_URL = "https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix";
     const LINE_ROUTING_URL = "https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/lineFlexRoutingAdmin";
     const FLOW_META = [
-      { key: "daily", title: "daily watch", subtitle: "รายงานสรุปประจำวัน / daily traffic summary", testLabel: "ทดสอบ daily เข้า sandbox" },
-      { key: "night", title: "night watch", subtitle: "รายงานกลางคืน / overnight security summary", testLabel: "ทดสอบ night เข้า sandbox" },
-      { key: "guardDay", title: "ตรวจงาน รปภ. กลางวัน", subtitle: "guard audit shift กลางวัน", testLabel: "ทดสอบกะกลางวันเข้า sandbox" },
-      { key: "guardNight", title: "ตรวจงาน รปภ. กลางคืน", subtitle: "guard audit shift กลางคืน", testLabel: "ทดสอบกะกลางคืนเข้า sandbox" },
-      { key: "pattraPay", title: "pattra pay", subtitle: "flex ของ Pattra Pay / payment heatmap", testLabel: "ทดสอบ Pattra Pay เข้า sandbox" },
-      { key: "pattraReport", title: "pattra report", subtitle: "new issue จาก /report/ ส่งเข้า sandbox หรือ production", testLabel: "ส่งตัวอย่าง pattra report เข้า sandbox" },
+      { key: "daily", title: "daily watch", subtitle: "รายงานสรุปประจำวัน / daily traffic summary", sandboxLabel: "ทดสอบ daily เข้า sand box 1 ครั้ง", productionLabel: "ยิง daily เข้า PRD จริง 1 ครั้ง" },
+      { key: "night", title: "night watch", subtitle: "รายงานกลางคืน / overnight security summary", sandboxLabel: "ทดสอบ night เข้า sand box 1 ครั้ง", productionLabel: "ยิง night เข้า PRD จริง 1 ครั้ง" },
+      { key: "guardDay", title: "ตรวจงาน รปภ. กลางวัน", subtitle: "guard audit shift กลางวัน", sandboxLabel: "ทดสอบกะกลางวันเข้า sand box 1 ครั้ง", productionLabel: "ยิงกะกลางวันเข้า PRD จริง 1 ครั้ง" },
+      { key: "guardNight", title: "ตรวจงาน รปภ. กลางคืน", subtitle: "guard audit shift กลางคืน", sandboxLabel: "ทดสอบกะกลางคืนเข้า sand box 1 ครั้ง", productionLabel: "ยิงกะกลางคืนเข้า PRD จริง 1 ครั้ง" },
+      { key: "pattraPay", title: "pattra pay", subtitle: "flex ของ Pattra Pay / payment heatmap", sandboxLabel: "ทดสอบ Pattra Pay เข้า sand box 1 ครั้ง", productionLabel: "ยิง Pattra Pay เข้า PRD จริง 1 ครั้ง" },
+      { key: "pattraReport", title: "pattra report", subtitle: "new issue จาก /report/ ส่งเข้า sandbox หรือ production", sandboxLabel: "ส่งตัวอย่าง pattra report เข้า sand box 1 ครั้ง", productionLabel: "ส่งตัวอย่าง pattra report เข้า PRD จริง 1 ครั้ง" },
     ];
     const DEFAULT_FLOWS = {
       daily: {
@@ -431,7 +431,8 @@
                   </button>
                 </div>
                 <div class="choice-actions">
-                  <button type="button" class="btn ghost" data-test-flow-key="${esc(flow.key)}">${esc(flow.testLabel)}</button>
+                  <button type="button" class="btn ghost" data-test-flow-key="${esc(flow.key)}" data-test-mode="sandbox">${esc(flow.sandboxLabel)}</button>
+                  <button type="button" class="btn ghost" data-test-flow-key="${esc(flow.key)}" data-test-mode="prd">${esc(flow.productionLabel)}</button>
                 </div>
               </section>
             </div>
@@ -461,8 +462,10 @@
 
       grid.querySelectorAll("button[data-test-flow-key]").forEach((button) => {
         button.addEventListener("click", () => {
-          sendSandboxTest(button.dataset.testFlowKey)
-            .catch((err) => setStatus(err.message || "ส่ง sandbox test ไม่สำเร็จ", "err"));
+          const flowKey = button.dataset.testFlowKey;
+          const mode = button.dataset.testMode === "prd" ? "prd" : "sandbox";
+          sendFlowTest(flowKey, mode)
+            .catch((err) => setStatus(err.message || "ส่ง test ไม่สำเร็จ", "err"));
         });
       });
     }
@@ -532,25 +535,41 @@
       setStatus(reset ? "รีเซ็ตเป็นค่าเริ่มต้นแล้ว" : "บันทึกเรียบร้อยแล้ว", "ok");
     }
 
-    async function sendSandboxTest(flowKey) {
+    async function sendFlowTest(flowKey, mode) {
       const flow = FLOW_META.find((item) => item.key === flowKey);
-      setStatus(`กำลังส่ง ${flow ? flow.title : flowKey} เข้า sandbox…`);
+      const targetId = mode === "sandbox" ?
+        state.config.flows[flowKey].sandboxTargetId :
+        state.config.flows[flowKey].productionTargetId;
+      const targetLabel = getTargetLabel(targetId);
+      if (mode === "prd") {
+        const confirmed = confirm(
+            `ยืนยันส่ง ${flow ? flow.title : flowKey} เข้า PRD 1 ครั้ง ไปที่ ${targetLabel} ?`,
+        );
+        if (!confirmed) return;
+      }
+      setStatus(
+          `กำลังส่ง ${flow ? flow.title : flowKey} เข้า ${mode === "sandbox" ? "sand box" : "PRD"}…`,
+      );
       const response = await fetch(LINE_ROUTING_URL, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          action: "sendSandboxTest",
+          action: "sendFlowTest",
           flowKey,
+          mode,
           houseNo: state.session.houseNo,
           pin: state.session.pin,
         }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) {
-        throw new Error(data.error || "ส่ง sandbox test ไม่สำเร็จ");
+        throw new Error(data.error || "ส่ง test ไม่สำเร็จ");
       }
       const flowLabel = flow ? flow.title : flowKey;
-      setStatus(`ส่ง ${flowLabel} เข้า ${data.targetLabel || "sandbox"} แล้ว`, "ok");
+      setStatus(
+          `ส่ง ${flowLabel} เข้า ${data.targetLabel || (mode === "sandbox" ? "sand box" : "PRD")} แล้ว`,
+          "ok",
+      );
     }
 
     (async function init() {
