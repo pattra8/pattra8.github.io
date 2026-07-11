@@ -705,32 +705,42 @@
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: var(--bg-soft); }
 
-    #adminTable th:nth-child(1), #adminTable td:nth-child(1) { width: 36px; }
-    #adminTable th:nth-child(2), #adminTable td:nth-child(2) { width: 64px; }
-    #adminTable th:nth-child(3), #adminTable td:nth-child(3) { width: 84px; }
-    #adminTable th:nth-child(4), #adminTable td:nth-child(4) { width: 176px; }
-    #adminTable th:nth-child(5), #adminTable td:nth-child(5) { width: 170px; }
-    #adminTable th:nth-child(6), #adminTable td:nth-child(6) { width: 124px; }
-    #adminTable th:nth-child(7), #adminTable td:nth-child(7) { width: 78px; }
-    #adminTable th:nth-child(8), #adminTable td:nth-child(8) { width: 56px; }
-    #adminTable th:nth-child(9), #adminTable td:nth-child(9) { width: 56px; }
-    #adminTable th:nth-child(10), #adminTable td:nth-child(10) { width: 126px; }
-    #adminTable th:nth-child(11), #adminTable td:nth-child(11) { width: 126px; }
-    #adminTable th:nth-child(12), #adminTable td:nth-child(12) { width: 70px; }
-    #adminTable th:nth-child(13), #adminTable td:nth-child(13) { width: 92px; }
+    /* residents table: fluid auto layout — fills the width, no fixed-sum overflow.
+       Small columns hug their content (width:1%); the two flexible columns
+       (resident, vehicles) absorb the remaining space. */
+    #adminTable { table-layout: auto; min-width: 920px; }
+    #adminTable .c-idx    { width: 1%; white-space: nowrap; text-align: right; color: #b3a58a; font-size: 0.75rem; }
+    #adminTable .c-act    { width: 1%; white-space: nowrap; }
+    #adminTable .c-house  { width: 1%; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+    #adminTable .c-deed   { width: 1%; white-space: nowrap; color: var(--text-soft); font-variant-numeric: tabular-nums; }
+    #adminTable .c-zone   { width: 1%; white-space: nowrap; }
+    #adminTable .c-quota  { width: 1%; white-space: nowrap; text-align: center; }
+    #adminTable .c-upd    { width: 1%; white-space: nowrap; color: #a2937c; font-size: 0.72rem; }
+    #adminTable .c-resident { min-width: 210px; }
+    #adminTable .c-vehicles { min-width: 200px; }
 
-    .col-actions { width: 64px; }
-    .col-house   { width: 86px; }
-    .col-name    {
-      width: 176px;
-      min-width: 0;
-      max-width: none;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .col-phone   { width: 124px; white-space: nowrap; }
-    .col-email   { width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* resident cell: name with contact (email / phone) as a muted subline */
+    .r-name { font-weight: 600; color: var(--text); line-height: 1.3; }
+    .r-sub  { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-top: 2px; }
+    .r-sub span { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+    .r-sub .ic { opacity: 0.6; font-size: 10px; }
+
+    /* zone / plot merged into one badge */
+    .zone-badge { display: inline-flex; align-items: center; gap: 5px; }
+    .zone-badge b { font-weight: 600; }
+    .zone-badge .dot { width: 3px; height: 3px; border-radius: 50%; background: #cdbfa4; }
+    .zone-badge .plot { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+    /* vehicle plates as wrapping chips (car = amber, motorcycle = slate) */
+    .veh { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 7px; white-space: nowrap; line-height: 1.5; }
+    .chip.car  { background: #f6ead6; color: #7c4f16; border: 1px solid #ecdcbf; }
+    .chip.moto { background: #eef1f5; color: #42546b; border: 1px solid #dfe5ec; }
+    .chip .k { font-size: 9px; opacity: 0.65; font-family: 'IBM Plex Sans Thai', sans-serif; }
+
+    /* car quota badge */
+    .quota-badge { display: inline-flex; min-width: 24px; justify-content: center; font-weight: 700; font-size: 12px; color: var(--accent-deep); background: var(--accent-pale); border-radius: 7px; padding: 2px 8px; }
+
     .arrow-col   { color: var(--text-muted); font-size: 11px; }
 
     .edit-btn {
@@ -1349,14 +1359,10 @@
       .table-wrap { margin: 0 16px 16px; }
       .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
 
-      /* table: hide non-essential columns */
-      #adminTable th:nth-child(1), #adminTable td:nth-child(1),
-      #adminTable th:nth-child(5), #adminTable td:nth-child(5),
-      #adminTable th:nth-child(7), #adminTable td:nth-child(7),
-      #adminTable th:nth-child(8), #adminTable td:nth-child(8),
-      #adminTable th:nth-child(9), #adminTable td:nth-child(9),
-      #adminTable th:nth-child(11), #adminTable td:nth-child(11),
-      #adminTable th:nth-child(12), #adminTable td:nth-child(12) { display: none; }
+      /* table: hide non-essential columns (index, deed, updated) */
+      #adminTable .c-idx,
+      #adminTable .c-deed,
+      #adminTable .c-upd { display: none; }
 
       /* compact table on mobile */
       .table-wrap { margin: 0 12px 16px; border-radius: 10px; }
@@ -1447,19 +1453,15 @@
     <table id="adminTable">
       <thead>
         <tr>
-          <th>#</th>
-          <th>จัดการ</th>
-          <th>บ้านเลขที่</th>
-          <th>ชื่อ-นามสกุล</th>
-          <th>อีเมล</th>
-          <th>โทรศัพท์</th>
-          <th>โฉนด</th>
-          <th>โซน</th>
-          <th>แปลง</th>
-          <th>🚗 รถยนต์</th>
-          <th>🏍 มอเตอร์ไซค์</th>
-          <th>🚗 โควต้า</th>
-          <th style="color:#94a3b8;font-weight:500;font-size:0.72rem;">Updated</th>
+          <th class="c-idx">#</th>
+          <th class="c-act">จัดการ</th>
+          <th class="c-house">บ้านเลขที่</th>
+          <th class="c-resident">ผู้พักอาศัย</th>
+          <th class="c-deed">โฉนด</th>
+          <th class="c-zone">โซน / แปลง</th>
+          <th class="c-vehicles">ยานพาหนะ</th>
+          <th class="c-quota">โควตา</th>
+          <th class="c-upd">อัปเดต</th>
         </tr>
       </thead>
       <tbody id="adminBody"></tbody>
@@ -4376,7 +4378,7 @@
       } catch(e) {
         if (!cached) {
           document.getElementById('adminBody').innerHTML =
-            `<tr><td colspan="13" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+            `<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
           setToolbarNote('โหลดไม่สำเร็จ', 'error');
         } else {
           setToolbarNote(`⚠️ แสดงข้อมูล cache · อัปเดตล่าสุดไม่สำเร็จ`, 'error');
@@ -4394,20 +4396,29 @@
     document.getElementById('adminBody').innerHTML = data.map((r, i) => {
       const cars  = normalizePlateArray(r.cars);
       const motos = normalizePlateArray(r.motorcycles);
+      const chips = [
+        ...cars.map(p => `<span class="chip car"><span class="k">รถ</span>${escHtml(p)}</span>`),
+        ...motos.map(p => `<span class="chip moto"><span class="k">มค</span>${escHtml(p)}</span>`),
+      ].join('');
+      const sub = [];
+      if (r.email) sub.push(`<span><span class="ic">✉</span>${escHtml(r.email)}</span>`);
+      if (r.phone) sub.push(`<span><span class="ic">✆</span>${escHtml(formatPhone(r.phone))}</span>`);
+      const zone = r.zone
+        ? `<span class="zone-badge"><b>${escHtml(r.zone)}</b>${r.plot ? `<span class="dot"></span><span class="plot">${escHtml(r.plot)}</span>` : ''}</span>`
+        : (r.plot ? `<span class="zone-badge"><span class="plot">${escHtml(r.plot)}</span></span>` : '<span class="no-val">—</span>');
       return `<tr>
-        <td style="color:#aaa;font-size:0.75rem;">${i + 1}</td>
-        <td class="col-actions"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
-        <td class="col-house"><strong>${showVal(r.house_no)}</strong></td>
-        <td class="col-name" title="${escHtml(r.name || '')}">${showVal(shortenCompanyName(r.name))}</td>
-        <td class="col-email">${showVal(r.email)}</td>
-        <td class="col-phone">${showVal(formatPhone(r.phone))}</td>
-        <td class="col-deed">${showVal(r.deed_no)}</td>
-        <td class="col-zone">${showVal(r.zone)}</td>
-        <td class="col-plot">${showVal(r.plot)}</td>
-        <td style="font-size:0.77rem;color:#78350f;">${cars.length ? cars.join(', ') : '<span class="no-val">—</span>'}</td>
-        <td style="font-size:0.77rem;color:#475569;">${motos.length ? motos.join(', ') : '<span class="no-val">—</span>'}</td>
-        <td style="font-size:0.77rem;color:#7c5a2e;font-weight:700;">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</td>
-        <td style="color:#94a3b8;font-size:0.72rem;white-space:nowrap;">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
+        <td class="c-idx">${i + 1}</td>
+        <td class="c-act"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
+        <td class="c-house">${showVal(r.house_no)}</td>
+        <td class="c-resident">
+          <div class="r-name" title="${escHtml(r.name || '')}">${showVal(shortenCompanyName(r.name))}</div>
+          ${sub.length ? `<div class="r-sub">${sub.join('')}</div>` : ''}
+        </td>
+        <td class="c-deed">${showVal(r.deed_no)}</td>
+        <td class="c-zone">${zone}</td>
+        <td class="c-vehicles">${chips ? `<div class="veh">${chips}</div>` : '<span class="no-val">—</span>'}</td>
+        <td class="c-quota"><span class="quota-badge">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</span></td>
+        <td class="c-upd">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
       </tr>`;
     }).join('');
   }
