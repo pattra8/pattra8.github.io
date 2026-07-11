@@ -712,24 +712,17 @@
     #adminTable .c-idx    { width: 1%; white-space: nowrap; text-align: right; color: #b3a58a; font-size: 0.75rem; }
     #adminTable .c-act    { width: 1%; white-space: nowrap; }
     #adminTable .c-house  { width: 1%; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
-    #adminTable .c-deed   { width: 1%; white-space: nowrap; color: var(--text-soft); font-variant-numeric: tabular-nums; }
-    #adminTable .c-zone   { width: 1%; white-space: nowrap; }
+    #adminTable .c-phone  { width: 1%; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; color: var(--text-body); font-variant-numeric: tabular-nums; }
     #adminTable .c-quota  { width: 1%; white-space: nowrap; text-align: center; }
     #adminTable .c-upd    { width: 1%; white-space: nowrap; color: #a2937c; font-size: 0.72rem; }
-    #adminTable .c-resident { min-width: 160px; }
+    #adminTable .c-resident { min-width: 170px; }
     #adminTable .c-cars     { min-width: 140px; }
     #adminTable .c-motos    { min-width: 130px; }
 
-    /* resident cell: name with contact (email / phone) as a muted subline */
+    /* resident cell: name */
     .r-name { font-weight: 600; color: var(--text); line-height: 1.3; }
 
-    /* zone / plot merged into one badge */
-    .zone-badge { display: inline-flex; align-items: center; gap: 5px; }
-    .zone-badge b { font-weight: 600; }
-    .zone-badge .dot { width: 3px; height: 3px; border-radius: 50%; background: #cdbfa4; }
-    .zone-badge .plot { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-
-    /* vehicle plates as wrapping chips (car = amber, motorcycle = slate) */
+    /* vehicle plates as wrapping chips (car = amber, motorcycle = sage) */
     .veh { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
     .chip { display: inline-flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 7px; white-space: nowrap; line-height: 1.5; }
     .chip.car  { background: #f6ead6; color: #7c4f16; border: 1px solid #ecdcbf; }
@@ -1356,9 +1349,8 @@
       .table-wrap { margin: 0 16px 16px; }
       .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
 
-      /* table: hide non-essential columns (index, deed, updated) */
+      /* table: hide non-essential columns (index, updated) */
       #adminTable .c-idx,
-      #adminTable .c-deed,
       #adminTable .c-upd { display: none; }
 
       /* compact table on mobile */
@@ -1454,8 +1446,7 @@
           <th class="c-act">จัดการ</th>
           <th class="c-house">บ้านเลขที่</th>
           <th class="c-resident">ผู้พักอาศัย</th>
-          <th class="c-deed">โฉนด</th>
-          <th class="c-zone">โซน / แปลง</th>
+          <th class="c-phone">เบอร์โทรศัพท์</th>
           <th class="c-cars">🚗 รถยนต์</th>
           <th class="c-motos">🏍 มอเตอร์ไซค์</th>
           <th class="c-quota">โควต้ารถยนต์</th>
@@ -4376,7 +4367,7 @@
       } catch(e) {
         if (!cached) {
           document.getElementById('adminBody').innerHTML =
-            `<tr><td colspan="10" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+            `<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
           setToolbarNote('โหลดไม่สำเร็จ', 'error');
         } else {
           setToolbarNote(`⚠️ แสดงข้อมูล cache · อัปเดตล่าสุดไม่สำเร็จ`, 'error');
@@ -4396,9 +4387,6 @@
       const motos = normalizePlateArray(r.motorcycles);
       const carChips  = cars.length  ? `<div class="veh">${cars.map(p => `<span class="chip car">${escHtml(p)}</span>`).join('')}</div>`   : '<span class="no-val">—</span>';
       const motoChips = motos.length ? `<div class="veh">${motos.map(p => `<span class="chip moto">${escHtml(p)}</span>`).join('')}</div>` : '<span class="no-val">—</span>';
-      const zone = r.zone
-        ? `<span class="zone-badge"><b>${escHtml(r.zone)}</b>${r.plot ? `<span class="dot"></span><span class="plot">${escHtml(r.plot)}</span>` : ''}</span>`
-        : (r.plot ? `<span class="zone-badge"><span class="plot">${escHtml(r.plot)}</span></span>` : '<span class="no-val">—</span>');
       return `<tr>
         <td class="c-idx">${i + 1}</td>
         <td class="c-act"><button class="edit-btn" onclick="openEditModal(${allData.indexOf(r)})">Edit</button></td>
@@ -4406,8 +4394,7 @@
         <td class="c-resident">
           <div class="r-name" title="${escHtml(r.name || '')}">${showVal(shortenCompanyName(r.name))}</div>
         </td>
-        <td class="c-deed">${showVal(r.deed_no)}</td>
-        <td class="c-zone">${zone}</td>
+        <td class="c-phone">${r.phone ? escHtml(formatPhone(r.phone)) : '<span class="no-val">—</span>'}</td>
         <td class="c-cars">${carChips}</td>
         <td class="c-motos">${motoChips}</td>
         <td class="c-quota"><span class="quota-badge">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</span></td>
