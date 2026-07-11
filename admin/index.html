@@ -3275,6 +3275,33 @@
       if (!entry.firstSeen || ms < entry.firstSeen) entry.firstSeen = ms;
     });
 
+    // The resident PIN record is the authoritative Last Seen source. Unlike
+    // the audit list, it is not truncated when other system events are busy.
+    residents.forEach(r => {
+      const houseNo = r.house_no;
+      const ms = tsToMs(r.lastActivity || r.lastLogin);
+      if (!houseNo || !ms) return;
+      let entry = byHouse.get(houseNo);
+      const activityCount = Number(r.activityCount || 0);
+      const firstActivity = tsToMs(r.firstActivity);
+      if (activityCount > 0) {
+        entry = {
+          count: activityCount,
+          lastSeen: ms,
+          firstSeen: firstActivity || ms
+        };
+        byHouse.set(houseNo, entry);
+        return;
+      }
+      if (!entry) {
+        entry = { count: 1, lastSeen: ms, firstSeen: ms };
+        byHouse.set(houseNo, entry);
+        return;
+      }
+      if (!entry.lastSeen || ms > entry.lastSeen) entry.lastSeen = ms;
+      if (!entry.firstSeen || ms < entry.firstSeen) entry.firstSeen = ms;
+    });
+
     const houseNos = new Set(residents.map(r => r.house_no).filter(Boolean));
     byHouse.forEach((_, houseNo) => houseNos.add(houseNo));
     const nameByHouse = new Map(residents.map(r => [r.house_no, r.name || '']));
