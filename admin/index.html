@@ -731,6 +731,16 @@
     /* car quota badge */
     .quota-badge { display: inline-flex; min-width: 24px; justify-content: center; font-weight: 700; font-size: 12px; color: var(--accent-deep); background: var(--accent-pale); border-radius: 7px; padding: 2px 8px; }
 
+    /* LPR camera sync status (aggregate per house, from lprSyncPending/lprLastSync) */
+    .cars-cell { display: flex; align-items: center; gap: 7px; }
+    .lpr-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; cursor: help; }
+    .lpr-dot.ok    { background: #3f6431; }
+    .lpr-dot.fail  { background: #c0392b; box-shadow: 0 0 0 3px rgba(192,57,43,0.16); }
+    .lpr-dot.never { background: transparent; border: 1.5px solid #cdbfa4; }
+    .lpr-status { margin-top: 7px; font-size: 12px; color: var(--text-muted); }
+    .lpr-status.ok   { color: #3f6431; }
+    .lpr-status.fail { color: #a33d30; font-weight: 600; }
+
     .arrow-col   { color: var(--text-muted); font-size: 11px; }
 
     .edit-btn {
@@ -1968,6 +1978,7 @@
       <div class="form-group full">
         <label for="edit_cars">ทะเบียนรถยนต์ (คั่นด้วยลูกน้ำ)</label>
         <input id="edit_cars" type="text" placeholder="เช่น 5ขฌ9398, 3กศ535" />
+        <div id="edit_cars_lpr" class="lpr-status" style="display:none"></div>
       </div>
       <div class="form-group full">
         <label for="edit_motorcycles">ทะเบียนมอเตอร์ไซค์ (คั่นด้วยลูกน้ำ)</label>
@@ -4379,13 +4390,46 @@
     return adminDataRequest;
   }
 
+  // LPR camera sync status for a resident's car list. Aggregate per house
+  // (backend stores one flag for the whole list, not per plate), from the
+  // lprSyncPending / lprLastSync fields already returned by adminResidents.
+  // Returns null when the house has no cars (LPR is car-only).
+  function lprStatus(r) {
+    if (!r || !normalizePlateArray(r.cars).length) return null;
+    const pending = (r.lprSyncPending ?? r.lpr_sync_pending) ? true : false;
+    const last = r.lprLastSync || r.lpr_last_sync || '';
+    if (pending) return { state: 'fail', label: 'sync ไม่สำเร็จ', last,
+      title: `LPR: sync ไม่สำเร็จ${last ? ' · ลองล่าสุด ' + fmtDate(last) : ''}` };
+    if (!last) return { state: 'never', label: 'ยังไม่เคย sync', last,
+      title: 'LPR: ยังไม่เคย sync (จะ sync เมื่อบันทึกทะเบียนรถ)' };
+    return { state: 'ok', label: 'sync แล้ว', last,
+      title: `LPR: sync แล้ว · ${fmtDate(last)}` };
+  }
+
+  // Fills the LPR status line under the car field in the edit modal.
+  function setLprStatusLine(r) {
+    const el = document.getElementById('edit_cars_lpr');
+    if (!el) return;
+    const s = lprStatus(r);
+    if (!s) { el.style.display = 'none'; el.textContent = ''; return; }
+    el.style.display = '';
+    el.className = 'lpr-status ' + s.state;
+    const icon = s.state === 'ok' ? '🟢' : s.state === 'fail' ? '🔴' : '⚪️';
+    const when = s.last ? ` · ล่าสุด ${fmtDate(s.last)}` : '';
+    const hint = s.state === 'fail' ? ' — แก้ทะเบียนแล้วกดบันทึกเพื่อ sync ซ้ำ'
+      : s.state === 'never' ? ' — จะ sync อัตโนมัติเมื่อกดบันทึก' : '';
+    el.textContent = `${icon} LPR: ${s.label}${when}${hint}`;
+  }
+
   // ── Render residents table ────────────────────────────────────────────────
   function renderAdmin(data) {
     document.getElementById('recordCount').textContent = `${data.length} รายการ`;
     document.getElementById('adminBody').innerHTML = data.map((r, i) => {
       const cars  = normalizePlateArray(r.cars);
       const motos = normalizePlateArray(r.motorcycles);
-      const carChips  = cars.length  ? `<div class="veh">${cars.map(p => `<span class="chip car">${escHtml(p)}</span>`).join('')}</div>`   : '<span class="no-val">—</span>';
+      const lpr = lprStatus(r);
+      const lprDot = lpr ? `<span class="lpr-dot ${lpr.state}" title="${escHtml(lpr.title)}"></span>` : '';
+      const carChips  = cars.length  ? `<div class="cars-cell">${lprDot}<div class="veh">${cars.map(p => `<span class="chip car">${escHtml(p)}</span>`).join('')}</div></div>`   : '<span class="no-val">—</span>';
       const motoChips = motos.length ? `<div class="veh">${motos.map(p => `<span class="chip moto">${escHtml(p)}</span>`).join('')}</div>` : '<span class="no-val">—</span>';
       return `<tr>
         <td class="c-idx">${i + 1}</td>
@@ -4537,6 +4581,7 @@
     document.getElementById('edit_cars').value        = plateDisplayValue(r.cars);
     document.getElementById('edit_motorcycles').value = plateDisplayValue(r.motorcycles);
     document.getElementById('edit_car_quota').value   = effectiveQuota || '';
+    setLprStatusLine(r);
     originalSnap = getFormValues();
     document.getElementById('editModal').classList.add('active');
   }
