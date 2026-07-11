@@ -93,11 +93,17 @@
     .catalog-item p{margin:0;color:var(--text-muted);font-size:11px;font-family:'IBM Plex Mono',ui-monospace,monospace}
 
     /* ── Flow groups ── */
-    .flow-section{margin-top:20px}
-    .cat-head{display:flex;align-items:center;gap:10px;margin:0 0 10px 2px}
-    .cat-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
-    .cat-title{font-size:13.5px;font-weight:700;color:var(--text);letter-spacing:.01em}
-    .cat-sub{font-size:11.5px;color:var(--text-muted)}
+    .flow-section{margin-top:30px}
+    .cat-head{
+      display:flex;align-items:center;gap:12px;margin:0 0 14px;
+      padding:2px 2px 12px;border-bottom:2px solid var(--cat-color,var(--border));
+    }
+    .cat-icon{
+      width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
+      font-size:17px;flex-shrink:0;box-shadow:0 2px 6px rgba(60,40,20,.12);
+    }
+    .cat-title{font-size:16px;font-weight:700;color:var(--cat-color,var(--text));letter-spacing:.01em}
+    .cat-sub{margin-top:1px;font-size:12px;color:var(--text-muted)}
 
     .flow-grid{display:flex;flex-direction:column;gap:14px}
     .flow-card{
@@ -509,7 +515,7 @@
         }).join("");
         return `
           <section class="flow-section">
-            <div class="cat-head">
+            <div class="cat-head" style="--cat-color:var(${cat.colorVar})">
               <span class="cat-icon" style="background:var(${cat.bgVar});color:var(${cat.colorVar})">${cat.icon}</span>
               <div>
                 <div class="cat-title">${esc(cat.title)}</div>
