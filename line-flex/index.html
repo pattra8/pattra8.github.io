@@ -152,6 +152,7 @@
       background:var(--bg-soft);border:1px dashed var(--border);border-radius:12px;
       padding:12px 14px;color:var(--text-muted);font-size:12px;line-height:1.6;margin-top:14px;
     }
+    .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .loading{min-height:80px;display:grid;place-items:center;color:var(--text-muted);font-size:13px}
 
     @media (max-width: 560px){
@@ -220,6 +221,9 @@
         <strong>Sandbox</strong> = กลุ่มสำหรับลอง/ทดสอบ ·
         <strong>Production</strong> = กลุ่มใช้งานจริง ·
         <strong>Active mode</strong> = ฝั่งที่ระบบจะใช้ตอน push ครั้งถัดไป
+      </div>
+      <div class="quick-actions">
+        <button class="btn ghost" id="sendPattraPaySandboxBtn" type="button">ยิง Pattra Pay เข้า sandbox 1 ครั้ง</button>
       </div>
       <div class="bottom-bar">
         <div class="status" id="statusText">พร้อมใช้งาน</div>
@@ -520,6 +524,24 @@
       setStatus(reset ? "รีเซ็ตเป็นค่าเริ่มต้นแล้ว" : "บันทึกเรียบร้อยแล้ว", "ok");
     }
 
+    async function sendPattraPaySandbox() {
+      setStatus("กำลังส่ง Pattra Pay เข้า sandbox…");
+      const response = await fetch(LINE_ROUTING_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          action: "sendPattraPaySandbox",
+          houseNo: state.session.houseNo,
+          pin: state.session.pin,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "ส่ง Pattra Pay sandbox ไม่สำเร็จ");
+      }
+      setStatus(`ส่ง Pattra Pay เข้า ${data.targetLabel || "sandbox"} แล้ว`, "ok");
+    }
+
     (async function init() {
       try {
         const session = getSession();
@@ -539,6 +561,9 @@
         });
         document.getElementById("saveBtn2").addEventListener("click", () => {
           saveConfig(false).catch((err) => setStatus(err.message || "บันทึกไม่สำเร็จ", "err"));
+        });
+        document.getElementById("sendPattraPaySandboxBtn").addEventListener("click", () => {
+          sendPattraPaySandbox().catch((err) => setStatus(err.message || "ส่ง Pattra Pay sandbox ไม่สำเร็จ", "err"));
         });
         document.getElementById("resetBtn").addEventListener("click", () => {
           if (!confirm("รีเซ็ตค่าของทุก flow กลับเป็นค่าเริ่มต้นใช่ไหม?")) return;
