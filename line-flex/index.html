@@ -178,7 +178,7 @@
 
     <div class="page-head">
       <h2>ตั้งค่าปลายทางของแต่ละ flow</h2>
-      <p>แต่ละ flow มี 3 ค่า: กลุ่มสำหรับทดสอบ (Sandbox), กลุ่มใช้งานจริง (Production) และโหมดที่กำลังใช้งานอยู่ (Active mode) — สลับได้โดยไม่ต้องแก้โค้ด</p>
+      <p>แต่ละ flow มี 3 ค่า: กลุ่มสำหรับทดสอบ (Sandbox), กลุ่มใช้งานจริง (Production) และค่าถาวรที่ระบบจะใช้เวลา push อัตโนมัติ (Default send mode)</p>
     </div>
 
     <div class="stats-row">
@@ -211,7 +211,7 @@
       <div class="panel-head">
         <div>
           <h3>Flow Configuration</h3>
-          <p>ตั้ง Sandbox / Production ของแต่ละ flow แล้วเลือก Active mode ว่าจะ push ไปฝั่งไหน</p>
+          <p>ตั้ง Sandbox / Production ของแต่ละ flow แล้วกำหนดว่าปกติระบบจะส่งอัตโนมัติไปฝั่งไหน</p>
         </div>
       </div>
       <div class="flow-grid" id="flowGrid">
@@ -220,8 +220,8 @@
       <div class="helper">
         <strong>Sandbox</strong> = กลุ่มสำหรับลอง/ทดสอบ ·
         <strong>Production</strong> = กลุ่มใช้งานจริง ·
-        <strong>Active mode</strong> = ฝั่งที่ระบบจะใช้ตอน push ครั้งถัดไป ·
-        ปุ่ม <strong>ทดสอบส่งเข้า sandbox</strong> จะยิงเฉพาะ flow ของ card นั้น
+        <strong>Default send mode</strong> = ค่าถาวรที่ระบบจะใช้ตอนส่งอัตโนมัติ ·
+        ปุ่มทดสอบ = ยิงเฉพาะครั้งเดียว และ <strong>ไม่เปลี่ยน</strong> Default send mode
       </div>
       <div class="bottom-bar">
         <div class="status" id="statusText">พร้อมใช้งาน</div>
@@ -395,9 +395,9 @@
                 <p class="flow-desc">${esc(flow.subtitle)}</p>
               </div>
               <div class="active-pill">
-                <span class="eyeline">Active destination</span>
+                <span class="eyeline">Current default destination</span>
                 <strong>${esc(activeLabel)}</strong>
-                <small>${mode === "sandbox" ? "Currently using sandbox target" : "Currently using production target"} · ${esc(activeMeta)}</small>
+                <small>${mode === "sandbox" ? "Automatic sends currently default to sandbox" : "Automatic sends currently default to production"} · ${esc(activeMeta)}</small>
               </div>
             </div>
             <div class="flow-body">
@@ -418,16 +418,16 @@
                 <div class="target-meta">${esc(getTargetMeta(current.productionTargetId))}</div>
               </section>
               <section class="choice mode">
-                <h4>Active mode</h4>
-                <p>เลือกว่าการ push ครั้งถัดไปจะใช้ฝั่ง sandbox หรือ production</p>
+                <h4>Default send mode</h4>
+                <p>ใช้กำหนดการส่งอัตโนมัติของระบบ ไม่ได้บังคับปุ่มทดสอบครั้งเดียวด้านล่าง</p>
                 <div class="segmented" data-segmented="${esc(flow.key)}">
                   <button type="button" data-mode="sandbox" data-flow-key="${esc(flow.key)}" class="${mode === "sandbox" ? "active" : ""}">
-                    <span class="label">Use sandbox</span>
-                    <span class="sub">${esc(getTargetLabel(current.sandboxTargetId))}</span>
+                    <span class="label">Default = sandbox</span>
+                    <span class="sub">ส่งอัตโนมัติไป ${esc(getTargetLabel(current.sandboxTargetId))}</span>
                   </button>
                   <button type="button" data-mode="prd" data-flow-key="${esc(flow.key)}" class="${mode === "prd" ? "active" : ""}">
-                    <span class="label">Use production</span>
-                    <span class="sub">${esc(getTargetLabel(current.productionTargetId))}</span>
+                    <span class="label">Default = production</span>
+                    <span class="sub">ส่งอัตโนมัติไป ${esc(getTargetLabel(current.productionTargetId))}</span>
                   </button>
                 </div>
                 <div class="choice-actions">
