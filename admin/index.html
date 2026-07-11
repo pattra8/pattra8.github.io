@@ -733,10 +733,9 @@
 
     /* vehicle plates as wrapping chips (car = amber, motorcycle = slate) */
     .veh { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-    .chip { display: inline-flex; align-items: center; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 7px; white-space: nowrap; line-height: 1.5; }
+    .chip { display: inline-flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 7px; white-space: nowrap; line-height: 1.5; }
     .chip.car  { background: #f6ead6; color: #7c4f16; border: 1px solid #ecdcbf; }
-    .chip.moto { background: #eef1f5; color: #42546b; border: 1px solid #dfe5ec; }
-    .chip .k { font-size: 9px; opacity: 0.65; font-family: 'IBM Plex Sans Thai', sans-serif; }
+    .chip.moto { background: #e6ede9; color: #4a6b5d; border: 1px solid #d5e2db; }
 
     /* car quota badge */
     .quota-badge { display: inline-flex; min-width: 24px; justify-content: center; font-weight: 700; font-size: 12px; color: var(--accent-deep); background: var(--accent-pale); border-radius: 7px; padding: 2px 8px; }
@@ -4397,8 +4396,8 @@
       const cars  = normalizePlateArray(r.cars);
       const motos = normalizePlateArray(r.motorcycles);
       const chips = [
-        ...cars.map(p => `<span class="chip car"><span class="k">รถ</span>${escHtml(p)}</span>`),
-        ...motos.map(p => `<span class="chip moto"><span class="k">มค</span>${escHtml(p)}</span>`),
+        ...cars.map(p => `<span class="chip car">${escHtml(p)}</span>`),
+        ...motos.map(p => `<span class="chip moto">${escHtml(p)}</span>`),
       ].join('');
       const sub = [];
       if (r.email) sub.push(`<span><span class="ic">✉</span>${escHtml(r.email)}</span>`);
