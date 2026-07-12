@@ -713,6 +713,7 @@
     #adminTable .c-act    { width: 1%; white-space: nowrap; }
     #adminTable .c-house  { width: 1%; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
     #adminTable .c-phone  { width: 1%; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; color: var(--text-body); font-variant-numeric: tabular-nums; }
+    #adminTable .c-mail   { width: 1%; white-space: nowrap; text-align: center; }
     #adminTable .c-quota  { width: 1%; white-space: nowrap; text-align: center; }
     #adminTable .c-upd    { width: 1%; white-space: nowrap; color: #a2937c; font-size: 0.72rem; }
     #adminTable .c-resident { min-width: 170px; }
@@ -740,6 +741,11 @@
     .lpr-status { margin-top: 7px; font-size: 12px; color: var(--text-muted); }
     .lpr-status.ok   { color: #3f6431; }
     .lpr-status.fail { color: #a33d30; font-weight: 600; }
+
+    /* email-on-file indicator (symbol only, never the address) */
+    .mail-ic { font-size: 15px; line-height: 1; cursor: default; }
+    .mail-ic.has { color: var(--accent-deep); }
+    .mail-ic.no  { color: #d8ccb4; }
 
     .arrow-col   { color: var(--text-muted); font-size: 11px; }
 
@@ -1457,6 +1463,7 @@
           <th class="c-house">บ้านเลขที่</th>
           <th class="c-resident">ผู้พักอาศัย</th>
           <th class="c-phone">เบอร์โทรศัพท์</th>
+          <th class="c-mail">อีเมล</th>
           <th class="c-cars">🚗 รถยนต์</th>
           <th class="c-motos">🏍 มอเตอร์ไซค์</th>
           <th class="c-quota">โควต้ารถยนต์</th>
@@ -3213,7 +3220,9 @@
       });
       const logJson = await logRes.json();
       if (!logJson.ok) throw new Error(logJson.error || 'load failed');
-      const logs = (logJson.logs || []).filter(l => l.action === 'pin_verify' && l.success !== false);
+      const logs = (logJson.logs || []).filter(l =>
+        l.action === 'pin_verify' && l.success !== false
+      );
 
       usageRows = buildUsageRows(residents, logs);
 
@@ -4405,7 +4414,7 @@
       } catch(e) {
         if (!cached) {
           document.getElementById('adminBody').innerHTML =
-            `<tr><td colspan="9" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
+            `<tr><td colspan="10" style="text-align:center;color:#c00;padding:20px;">โหลดข้อมูลไม่สำเร็จ: ${e.message}</td></tr>`;
           setToolbarNote('โหลดไม่สำเร็จ', 'error');
         } else {
           setToolbarNote(`⚠️ แสดงข้อมูล cache · อัปเดตล่าสุดไม่สำเร็จ`, 'error');
@@ -4466,6 +4475,9 @@
           <div class="r-name" title="${escHtml(r.name || '')}">${showVal(shortenCompanyName(r.name))}</div>
         </td>
         <td class="c-phone">${r.phone ? escHtml(formatPhone(r.phone)) : '<span class="no-val">—</span>'}</td>
+        <td class="c-mail">${r.email
+          ? '<span class="mail-ic has" title="มีอีเมลในระบบ">✉</span>'
+          : '<span class="mail-ic no" title="ไม่มีอีเมล">✉</span>'}</td>
         <td class="c-cars">${carChips}</td>
         <td class="c-motos">${motoChips}</td>
         <td class="c-quota"><span class="quota-badge">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</span></td>
