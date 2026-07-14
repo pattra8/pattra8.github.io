@@ -32,6 +32,8 @@
     --rose-bg:   #F3E0DB;
     --violet:    #C47A2C;
     --violet-bg: #F7E6CD;
+    --refund:     #167A75;
+    --refund-bg:  #DDF2EF;
 
     --shadow-sm: 0 1px 3px rgba(80,60,30,0.07);
     --shadow-md: 0 4px 16px rgba(80,60,30,0.10), 0 1px 4px rgba(80,60,30,0.06);
@@ -342,6 +344,7 @@
   .badge-investment  { background:var(--amber-bg);  color:var(--amber); }
   .badge-maintenance { background:var(--rose-bg);   color:var(--rose);  }
   .badge-general     { background:var(--violet-bg); color:var(--violet); }
+  .badge-refund      { background:var(--refund-bg); color:var(--refund); }
   .expense-info   { flex:1; min-width:0; }
   .expense-title-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:3px; }
   .expense-title  { font-size:15.5px; font-weight:700; color:var(--text-hi); line-height:1.3; }
@@ -353,6 +356,7 @@
     border:1px solid rgba(79,110,247,0.18); flex-shrink:0;
   }
   .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; }
+  .expense-amount.refund { color:var(--refund); }
   .expense-slips  { display:flex; gap:5px; margin-top:9px; flex-wrap:wrap; align-items:flex-start; }
   .slip-thumb     { width:48px; height:48px; border-radius:7px; object-fit:cover; border:1.5px solid var(--border); cursor:pointer; }
   .slip-count     { width:48px; height:48px; border-radius:7px; background:var(--surface2); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--text-lo); font-weight:600; cursor:pointer; }
@@ -432,7 +436,7 @@
   .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:22px; padding-top:16px; border-top:1px solid var(--border); }
 
   /* ── TYPE TOGGLE ── */
-  .type-toggle { display:flex; gap:6px; }
+  .type-toggle { display:grid; grid-template-columns:repeat(auto-fit,minmax(88px,1fr)); gap:6px; }
   .type-btn {
     flex:1; padding:9px; border-radius:var(--r-sm);
     border:1.5px solid var(--border); background:var(--surface);
@@ -443,6 +447,7 @@
   .type-btn.active-investment  { background:var(--amber-bg); border-color:var(--amber); color:var(--amber); font-weight:600; }
   .type-btn.active-maintenance { background:var(--rose-bg);  border-color:var(--rose);  color:var(--rose);  font-weight:600; }
   .type-btn.active-general     { background:var(--violet-bg); border-color:var(--violet); color:var(--violet); font-weight:600; }
+  .type-btn.active-refund      { background:var(--refund-bg); border-color:var(--refund); color:var(--refund); font-weight:600; }
 
   /* ── CATEGORY PICKER ── */
   .category-select { position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
@@ -731,12 +736,13 @@
       <button class="modal-close" type="button" onclick="closeModal('expenseModal')" aria-label="ปิด">×</button>
     </div>
     <div class="form-group">
-      <label class="form-label">ประเภทรายจ่าย</label>
+      <label class="form-label">ประเภทรายการ</label>
       <div class="type-toggle">
         <button class="type-btn" onclick="setType('recurring')"   id="typeBtnRecurring">🔄 ประจำ</button>
         <button class="type-btn" onclick="setType('investment')"  id="typeBtnInvestment">📈 ลงทุน</button>
         <button class="type-btn" onclick="setType('maintenance')" id="typeBtnMaintenance">🔧 ซ่อมบำรุง</button>
         <button class="type-btn" onclick="setType('general')"     id="typeBtnGeneral">🟤 ทั่วไป</button>
+        <button class="type-btn" onclick="setType('refund')"      id="typeBtnRefund">↩️ คืนเงิน</button>
       </div>
     </div>
     <div class="form-group">
@@ -771,7 +777,7 @@
       </div>
     </div>
     <div class="form-group title-hero">
-      <label class="form-label">ชื่อรายจ่าย *</label>
+      <label class="form-label" id="fTitleLabel">ชื่อรายการ *</label>
       <input class="form-input" id="fTitle" placeholder="">
     </div>
     <div class="form-row">
@@ -781,7 +787,7 @@
         <div class="ocr-hint" id="ocrHint" style="display:none"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">วันที่จ่าย *</label>
+        <label class="form-label" id="fDateLabel">วันที่จ่าย *</label>
         <input class="form-input" type="date" id="fDate">
       </div>
     </div>
@@ -801,7 +807,7 @@
       <input class="form-input" id="fNote" placeholder="หมายเหตุ...">
     </div>
     <div class="form-group">
-      <label class="form-label">แนบสลิป / รูปภาพ</label>
+      <label class="form-label" id="fAttachmentLabel">แนบสลิป / รูปภาพ</label>
       <div class="upload-zone" id="uploadZone"
            onclick="document.getElementById('fileInput').click()"
            ondragover="handleDragOver(event)" ondrop="handleDrop(event)"
@@ -1153,6 +1159,26 @@ function showPage(p) {
 }
 
 function fmt(n) { return '฿'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function isRefundExpense(expense) { return expense?.type === 'refund'; }
+function expenseNetAmount(expense) {
+  const amount = Math.abs(Number(expense?.amount || 0));
+  return isRefundExpense(expense) ? -amount : amount;
+}
+function sumNetExpenses(items) {
+  return items.reduce((sum, expense) => sum + expenseNetAmount(expense), 0);
+}
+function fmtNet(n) {
+  const value = Number(n || 0);
+  return `${value < 0 ? '-' : ''}฿${Math.abs(value).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}`;
+}
+function fmtExpenseAmount(expense) {
+  const value = Math.abs(Number(expense?.amount || 0));
+  return `${isRefundExpense(expense) ? '+' : ''}${fmt(value)}`;
+}
+function heroAmountHtml(value) {
+  const amount = Number(value || 0);
+  return `${amount < 0 ? '-' : ''}<span>฿</span>${Math.abs(amount).toLocaleString('en-US')}`;
+}
 function fmtDate(d) {
   if (!d) return '—';
   const dt = new Date(d);
@@ -1162,12 +1188,14 @@ function typeLabel(t) {
   return t==='recurring' ? '🔄 ประจำ'
     : t==='investment' ? '📈 ลงทุน'
     : t==='maintenance' ? '🔧 ซ่อมบำรุง'
+    : t==='refund' ? '↩️ คืนเงิน'
     : '🟤 ทั่วไป';
 }
 function typeBadgeClass(t) {
   return t==='recurring' ? 'badge-recurring'
     : t==='investment' ? 'badge-investment'
     : t==='maintenance' ? 'badge-maintenance'
+    : t==='refund' ? 'badge-refund'
     : 'badge-general';
 }
 const COST_CATEGORY_EMOJI = {
@@ -1234,6 +1262,7 @@ function renderDashboard() {
   const inv = monthly.filter(e=>e.type==='investment').reduce((s,e)=>s+Number(e.amount||0),0);
   const mnt = monthly.filter(e=>e.type==='maintenance').reduce((s,e)=>s+Number(e.amount||0),0);
   const gen = monthly.filter(e=>e.type==='general').reduce((s,e)=>s+Number(e.amount||0),0);
+  const refund = monthly.filter(e=>e.type==='refund').reduce((s,e)=>s+Math.abs(Number(e.amount||0)),0);
   document.getElementById('statCards').innerHTML = `
     <div class="stat-card${activeDashboardType === 'recurring' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('recurring')">
       <div class="stat-icon" style="background:var(--ok-bg)">🔄</div>
@@ -1258,6 +1287,12 @@ function renderDashboard() {
       <div class="stat-label">ค่าซ่อมบำรุง</div>
       <div class="stat-value" style="color:var(--rose)">${fmt(mnt)}</div>
       <div class="stat-sub">${monthly.filter(e=>e.type==='maintenance').length} รายการ</div>
+    </div>
+    <div class="stat-card${activeDashboardType === 'refund' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('refund')">
+      <div class="stat-icon" style="background:var(--refund-bg)">↩️</div>
+      <div class="stat-label">คืนเงิน</div>
+      <div class="stat-value" style="color:var(--refund)">+${fmt(refund)}</div>
+      <div class="stat-sub">${monthly.filter(e=>e.type==='refund').length} รายการ</div>
     </div>`;
 
   renderDashboardFacilities();
@@ -1270,37 +1305,40 @@ function renderAnnualBreakdown() {
     general: '#8b5cf6',
     investment: '#f59e0b',
     maintenance: '#fb7185',
+    refund: '#14b8a6',
   };
   const items = [
     { key: 'recurring', label: 'ประจำ' },
     { key: 'general', label: 'ทั่วไป' },
     { key: 'investment', label: 'ลงทุน' },
     { key: 'maintenance', label: 'ซ่อมบำรุง' },
+    { key: 'refund', label: 'คืนเงิน' },
   ].map(item => {
     const amount = expenses
       .filter(expense => new Date(expense.date).getFullYear() === year && expense.type === item.key)
       .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
     return { ...item, amount, color: colors[item.key] };
   });
-  const total = items.reduce((sum, item) => sum + item.amount, 0);
+  const movementTotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const netTotal = items.reduce((sum, item) => sum + (item.key === 'refund' ? -item.amount : item.amount), 0);
   let cursor = 0;
   const segments = items
     .filter(item => item.amount > 0)
     .map(item => {
-      const pct = total > 0 ? (item.amount / total) * 100 : 0;
+      const pct = movementTotal > 0 ? (item.amount / movementTotal) * 100 : 0;
       const start = cursor;
       const end = cursor + (pct * 3.6);
       cursor = end;
       return `${item.color} ${start}deg ${end}deg`;
     });
   const legend = items.map(item => {
-    const pct = total > 0 ? Math.round((item.amount / total) * 100) : 0;
+    const pct = movementTotal > 0 ? Math.round((item.amount / movementTotal) * 100) : 0;
     const isActive = activeAnnualType === item.key;
     return `<div class="annual-legend-item${isActive ? ' active' : ''}" onclick="toggleAnnualTypeFilter('${item.key}')" role="button" aria-pressed="${isActive ? 'true' : 'false'}">
       <div class="annual-legend-dot" style="background:${item.color}"></div>
       <div class="annual-legend-name">${item.label}</div>
       <div class="annual-legend-pct">${pct}%</div>
-      <div class="annual-legend-amt">${fmt(item.amount)}</div>
+      <div class="annual-legend-amt"${item.key === 'refund' ? ' style="color:var(--refund)"' : ''}>${item.key === 'refund' ? '+' : ''}${fmt(item.amount)}</div>
     </div>`;
   }).join('');
   const background = segments.length ? `conic-gradient(${segments.join(', ')})` : 'conic-gradient(var(--surface2) 0deg 360deg)';
@@ -1308,17 +1346,17 @@ function renderAnnualBreakdown() {
     <div class="annual-chart-card">
       <div class="annual-chart-head">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-            <div class="annual-chart-title">สัดส่วนค่าใช้จ่ายรายปี</div>
+            <div class="annual-chart-title">สรุปการเงินรายปี</div>
             ${activeAnnualType ? `<button onclick="clearAnnualTypeFilter()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;">✕ ล้าง filter</button>` : ''}
           </div>
-        <div class="annual-chart-sub">แยกตามประเภทของปี ${year}</div>
+        <div class="annual-chart-sub">สัดส่วนรายการแยกตามประเภทของปี ${year}</div>
       </div>
       <div class="annual-chart-layout">
         <div class="annual-donut-wrap">
           <div class="annual-donut" style="background:${background}">
             <div class="annual-donut-center">
-              <div class="annual-donut-label">รวมทั้งหมด</div>
-              <div class="annual-donut-value">${fmt(total)}</div>
+              <div class="annual-donut-label">รายจ่ายสุทธิ</div>
+              <div class="annual-donut-value">${fmtNet(netTotal)}</div>
               <div class="annual-donut-meta">${items.filter(item => item.amount > 0).length || 0} หมวดที่ใช้งาน</div>
             </div>
           </div>
@@ -1330,23 +1368,25 @@ function renderAnnualBreakdown() {
 function renderExpensesHero(list) {
   const year = new Date().getFullYear();
   const yearly = expenses.filter(expense => new Date(expense.date).getFullYear() === year);
-  const total = yearly.reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+  const total = sumNetExpenses(yearly);
   const recurring = yearly.filter(expense => expense.type === 'recurring').reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
   const investment = yearly.filter(expense => expense.type === 'investment').reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
   const maintenance = yearly.filter(expense => expense.type === 'maintenance').reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
   const general = yearly.filter(expense => expense.type === 'general').reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+  const refund = yearly.filter(expense => expense.type === 'refund').reduce((sum, expense) => sum + Math.abs(Number(expense.amount || 0)), 0);
   document.getElementById('expensesHeroCard').innerHTML = `
     <div class="month-hero">
       <div>
-        <div class="hero-label">รายจ่ายทั้งหมด</div>
+        <div class="hero-label">รายจ่ายสุทธิ</div>
         <div class="hero-month">สรุปค่าใช้จ่ายรายปี ${year}</div>
-        <div class="hero-amount"><span>฿</span>${Number(total).toLocaleString('en-US')}</div>
+        <div class="hero-amount">${heroAmountHtml(total)}</div>
         <div class="hero-chips">
           ${recurring>0?`<div class="hero-chip"><div class="hero-chip-dot" style="background:#6ee7b7"></div>ประจำ ${fmt(recurring)}</div>`:''}
           ${investment>0?`<div class="hero-chip"><div class="hero-chip-dot" style="background:#fcd34d"></div>ลงทุน ${fmt(investment)}</div>`:''}
           ${maintenance>0?`<div class="hero-chip"><div class="hero-chip-dot" style="background:#fca5a5"></div>ซ่อมฯ ${fmt(maintenance)}</div>`:''}
           ${general>0?`<div class="hero-chip"><div class="hero-chip-dot" style="background:#a78bfa"></div>ทั่วไป ${fmt(general)}</div>`:''}
-          ${total===0?`<div class="hero-chip">ยังไม่มีรายการ</div>`:''}
+          ${refund>0?`<div class="hero-chip" style="color:var(--refund);background:var(--refund-bg)"><div class="hero-chip-dot" style="background:var(--refund)"></div>คืนเงิน +${fmt(refund)}</div>`:''}
+          ${yearly.length===0?`<div class="hero-chip">ยังไม่มีรายการ</div>`:''}
         </div>
       </div>
       <div class="hero-right">
@@ -1365,13 +1405,13 @@ function getMonthFilter() {
 function renderMonthHero() {
   const {yr,mi} = getMonthFilter();
   const me  = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
-  const tot = me.reduce((s,e)=>s+Number(e.amount||0),0);
+  const tot = sumNetExpenses(me);
   document.getElementById('monthHeroCard').innerHTML = `
     <div class="month-hero">
       <div>
-        <div class="hero-label">รายจ่ายประจำเดือน</div>
+        <div class="hero-label">รายจ่ายสุทธิประจำเดือน</div>
         <div class="hero-month">${MONTH_TH[mi]} ${yr}</div>
-        <div class="hero-amount"><span>฿</span>${Number(tot).toLocaleString('en-US')}</div>
+        <div class="hero-amount">${heroAmountHtml(tot)}</div>
       </div>
       <div class="hero-right">
         <div class="hero-count">${me.length}</div>
@@ -1428,22 +1468,22 @@ let activeSearchSuggestion = { all: -1, month: -1 };
 function facilityRows(sourceItems, activeKey, clickFnName) {
   const data = FACILITIES.map(f => {
     const items = sourceItems.filter(e => (e.costCategory || 'อื่น ๆ') === f.key);
-    const total = items.reduce((s, e) => s + Number(e.amount || 0), 0);
+    const total = sumNetExpenses(items);
     return { ...f, total, count: items.length };
   });
-  const maxAmt = Math.max(...data.map(d => d.total), 1);
+  const maxAmt = Math.max(...data.map(d => Math.abs(d.total)), 1);
   if (data.every(d => d.total === 0)) {
     return '<div class="facilities-empty">ยังไม่มีข้อมูลค่าใช้จ่ายพื้นที่ส่วนกลางในช่วงนี้</div>';
   }
   return `<div class="facilities-list">${data.map(d => {
-    const pct = maxAmt > 0 ? (d.total / maxAmt) * 100 : 0;
+    const pct = maxAmt > 0 ? (Math.abs(d.total) / maxAmt) * 100 : 0;
     const isActive = activeKey === d.key;
     return `<div class="facility-row${isActive ? ' active' : ''}" onclick="${clickFnName}('${d.key}')">
       <div class="facility-emoji">${d.emoji}</div>
       <div class="facility-info">
         <div class="facility-name">
           <span>${d.label}</span>
-          <span class="facility-amt">${d.total > 0 ? '฿' + d.total.toLocaleString('th-TH') : '—'}</span>
+          <span class="facility-amt">${d.total !== 0 ? fmtNet(d.total) : '—'}</span>
         </div>
         <div class="facility-bar-track">
           <div class="facility-bar-fill" style="width:${pct}%;background:${d.color}"></div>
@@ -1455,9 +1495,7 @@ function facilityRows(sourceItems, activeKey, clickFnName) {
 }
 
 function facilitiesTotal(sourceItems) {
-  return sourceItems
-    .filter(e => FACILITIES.some(f => f.key === (e.costCategory || 'อื่น ๆ')))
-    .reduce((s, e) => s + Number(e.amount || 0), 0);
+  return sumNetExpenses(sourceItems.filter(e => FACILITIES.some(f => f.key === (e.costCategory || 'อื่น ๆ'))));
 }
 
 function renderDashboardFacilities() {
@@ -1472,7 +1510,7 @@ function renderDashboardFacilities() {
       <div class="facilities-head">
         <div>
           <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
-          <div class="facilities-sub">${monthLabel}${grandTotal > 0 ? ' · ฿' + grandTotal.toLocaleString('th-TH') : ''}</div>
+          <div class="facilities-sub">${monthLabel}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}</div>
         </div>
         ${activeDashboardFacility ? `<button onclick="clearDashboardFacilityFilter()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;">✕ ล้าง filter</button>` : ''}
       </div>
@@ -1491,7 +1529,7 @@ function renderExpensesFacilities() {
       <div class="facilities-head">
         <div>
           <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
-          <div class="facilities-sub">ปี ${year}${grandTotal > 0 ? ' · ฿' + grandTotal.toLocaleString('th-TH') : ''}</div>
+          <div class="facilities-sub">ปี ${year}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}</div>
         </div>
         ${activeExpensesFacility ? `<button onclick="clearExpensesFacilityFilter()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;">✕ ล้าง filter</button>` : ''}
       </div>
@@ -1903,9 +1941,10 @@ function exportCsvCell(value) {
   return text;
 }
 function expenseTypeText(type) {
-  return type === 'recurring' ? 'ประจำ' : type === 'investment' ? 'ลงทุน' : type === 'maintenance' ? 'ซ่อมบำรุง' : 'ทั่วไป';
+  return type === 'recurring' ? 'ประจำ' : type === 'investment' ? 'ลงทุน' : type === 'maintenance' ? 'ซ่อมบำรุง' : type === 'refund' ? 'คืนเงิน' : 'ทั่วไป';
 }
-function expenseStatusText(status) {
+function expenseStatusText(status, type) {
+  if (type === 'refund') return status === 'paid' ? 'ได้รับเงินแล้ว' : 'รอรับเงิน';
   return status === 'paid' ? 'จ่ายแล้ว' : 'รอดำเนินการ';
 }
 function exportYearTransactions() {
@@ -1923,7 +1962,7 @@ function exportYearTransactions() {
 
   const headers = [
     'วันที่',
-    'ชื่อรายจ่าย',
+    'ชื่อรายการ',
     'ประเภท',
     'หมวดค่าใช้จ่าย',
     'สถานะ',
@@ -1939,7 +1978,7 @@ function exportYearTransactions() {
     e.title || '',
     expenseTypeText(e.type),
     costCategoryLabel(e),
-    expenseStatusText(e.status),
+    expenseStatusText(e.status, e.type),
     Number(e.amount || 0).toFixed(2),
     e.detail || '',
     e.note || '',
@@ -2066,7 +2105,7 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
   const slipsHtml = attachmentsHtml(e.slips,false);
   const adminHtml = isAdmin
     ?`<div class="expense-actions" onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="openEditModal('${e.id}')">✏️ แก้ไข</button><button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">ลบ</button></div>`:'';
-  const sd = e.status==='paid'?'<span class="status-dot dot-paid"></span>จ่ายแล้ว':'<span class="status-dot dot-pending"></span>รอดำเนินการ';
+  const sd = `<span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
   return `<div class="expense-card" data-id="${e.id}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
     ${handleHtml}<span class="expense-type-badge ${typeBadgeClass(e.type)}">${typeLabel(e.type)}</span>
@@ -2077,8 +2116,15 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
       <div class="expense-meta"><span class="expense-category-badge">${costCategoryLabel(e)}</span><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}</div>
       ${slipsHtml}${adminHtml}
     </div>
-    <div class="expense-amount">${fmt(e.amount)}</div>
+    <div class="expense-amount${isRefundExpense(e) ? ' refund' : ''}">${fmtExpenseAmount(e)}</div>
   </div>`;
+}
+
+function showExpenseModal() {
+  const overlay = document.getElementById('expenseModal');
+  const modal = overlay.querySelector('.modal');
+  if (modal) modal.scrollTop = 0;
+  overlay.classList.add('open');
 }
 
 function openAddModal() {
@@ -2093,7 +2139,7 @@ function openAddModal() {
   setOcrHint('');
   setExpenseSaveState(false);
   document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
-  setType('recurring'); document.getElementById('expenseModal').classList.add('open');
+  setType('recurring'); showExpenseModal();
   rememberExpenseFormSnapshot();
 }
 function openEditModal(id) {
@@ -2108,7 +2154,7 @@ function openEditModal(id) {
   setCostCategory(costCategoryValue(e));
   setOcrHint('');
   setExpenseSaveState(false);
-  setType(e.type||'recurring'); renderPreview(); document.getElementById('expenseModal').classList.add('open');
+  setType(e.type||'recurring'); renderPreview(); showExpenseModal();
   rememberExpenseFormSnapshot();
 }
 function getExpenseFormState() {
@@ -2142,9 +2188,24 @@ function confirmDiscardExpenseForm() {
 }
 function setType(t) {
   currentType=t;
-  ['recurring','investment','maintenance','general'].forEach(tp=>{
+  ['recurring','investment','maintenance','general','refund'].forEach(tp=>{
     document.getElementById('typeBtn'+tp.charAt(0).toUpperCase()+tp.slice(1)).className='type-btn'+(tp===t?' active-'+tp:'');
   });
+  syncExpenseTypeFormCopy();
+}
+function syncExpenseTypeFormCopy() {
+  const isRefund = currentType === 'refund';
+  const selectedStatus = document.getElementById('fStatus').value || 'paid';
+  document.getElementById('modalTitle').textContent = editingId
+    ? (isRefund ? 'แก้ไขรายการคืนเงิน' : 'แก้ไขรายจ่าย')
+    : (isRefund ? 'เพิ่มรายการคืนเงิน' : 'เพิ่มรายจ่ายใหม่');
+  document.getElementById('fTitleLabel').textContent = isRefund ? 'ชื่อรายการคืนเงิน *' : 'ชื่อรายการ *';
+  document.getElementById('fDateLabel').textContent = isRefund ? 'วันที่รับคืน *' : 'วันที่จ่าย *';
+  document.getElementById('fAttachmentLabel').textContent = isRefund ? 'แนบสลิปรับเงินคืน / รูปภาพ' : 'แนบสลิป / รูปภาพ';
+  document.getElementById('fStatus').innerHTML = isRefund
+    ? '<option value="paid">ได้รับเงินแล้ว ✅</option><option value="pending">รอรับเงิน ⏳</option>'
+    : '<option value="paid">จ่ายแล้ว ✅</option><option value="pending">รอดำเนินการ ⏳</option>';
+  document.getElementById('fStatus').value = selectedStatus;
 }
 function setCostCategory(category) {
   const select = document.getElementById('fCostCategory');
@@ -2326,14 +2387,15 @@ async function saveExpense() {
   if (!isAdmin) return;
   if (isSavingExpense) return;
   const title=document.getElementById('fTitle').value.trim(), amount=document.getElementById('fAmount').value, date=document.getElementById('fDate').value;
-  if(!title||!amount||!date){alert('กรุณากรอก: ชื่อรายจ่าย, จำนวนเงิน, วันที่');return;}
+  if(!title||!amount||!date){alert('กรุณากรอก: ชื่อรายการ, จำนวนเงิน, วันที่');return;}
+  if(Number(amount) <= 0){alert('จำนวนเงินต้องมากกว่า 0 บาท');return;}
   const expenseId = editingId || makeExpenseId();
   setExpenseSaveState(true);
   setExpenseSaveProgress(5, editingId ? 'กำลังอัปเดตรายจ่าย...' : 'กำลังบันทึกรายจ่าย...', 'กำลังตรวจสอบข้อมูล...');
   try {
     const slips = usingFirestore ? await persistSlipAssets(expenseId, currentSlips) : [...currentSlips];
     setExpenseSaveProgress(92, editingId ? 'กำลังอัปเดตรายจ่าย...' : 'กำลังบันทึกรายจ่าย...', 'กำลังบันทึกข้อมูลรายการ...');
-    const entry={title,type:currentType,amount:parseFloat(amount),date,
+    const entry={title,type:currentType,amount:Math.abs(parseFloat(amount)),date,
       costCategory:document.getElementById('fCostCategory').value,
       detail:document.getElementById('fDetail').value.trim(),note:document.getElementById('fNote').value.trim(),
       status:document.getElementById('fStatus').value,
@@ -2449,9 +2511,9 @@ async function tryAutofillFromSlip(file){
       amountEl.value = data.amount; filled.push('ยอดเงิน');
     }
     const titleEl = document.getElementById('fTitle');
-    if (data.memo && !titleEl.value.trim()){ titleEl.value = data.memo; filled.push('ชื่อรายจ่าย'); }
+    if (data.memo && !titleEl.value.trim()){ titleEl.value = data.memo; filled.push(currentType === 'refund' ? 'ชื่อรายการคืนเงิน' : 'ชื่อรายจ่าย'); }
     const detailEl = document.getElementById('fDetail');
-    if (data.payee && !detailEl.value.trim()){ detailEl.value = 'จ่ายให้: ' + data.payee; filled.push('รายละเอียด'); }
+    if (data.payee && !detailEl.value.trim()){ detailEl.value = (currentType === 'refund' ? 'รับเงินคืนจาก: ' : 'จ่ายให้: ') + data.payee; filled.push('รายละเอียด'); }
     // วันที่: ใช้ตามสลิป แต่เฉพาะเมื่อ "สมเหตุสมผล" (กัน OCR อ่านปีผิดแล้วทับวันที่)
     if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date) && isPlausibleSlipDate(data.date)){
       const dateEl = document.getElementById('fDate');
@@ -2504,11 +2566,11 @@ function openDetail(id) {
     </div>
     <div style="background:var(--bg);border-radius:var(--r-md);padding:14px 16px;margin-bottom:16px">
       <div style="font-size:11px;font-weight:600;color:var(--text-lo);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">จำนวนเงิน</div>
-      <div style="font-size:30px;font-weight:800;color:var(--text-hi);letter-spacing:-0.5px">${fmt(e.amount)}</div>
+      <div style="font-size:30px;font-weight:800;color:${isRefundExpense(e) ? 'var(--refund)' : 'var(--text-hi)'};letter-spacing:-0.5px">${fmtExpenseAmount(e)}</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
       <div class="detail-section"><div class="detail-label">วันที่</div><div class="detail-value">${fmtDate(e.date)}</div></div>
-      <div class="detail-section"><div class="detail-label">สถานะ</div><div class="detail-value">${e.status==='paid'?'✅ จ่ายแล้ว':'⏳ รอดำเนินการ'}</div></div>
+      <div class="detail-section"><div class="detail-label">สถานะ</div><div class="detail-value">${e.status === 'paid' ? '✅ ' : '⏳ '}${expenseStatusText(e.status, e.type)}</div></div>
     </div>
     ${detailHtml?`<div class="detail-section"><div class="detail-label">รายละเอียด</div><div class="detail-value detail-value-multiline">${detailHtml}</div></div>`:''}
     ${noteHtml?`<div class="detail-section"><div class="detail-label">หมายเหตุ</div><div class="detail-value detail-value-multiline">${noteHtml}</div></div>`:''}
