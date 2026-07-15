@@ -2130,7 +2130,7 @@ function showExpenseModal() {
 function openAddModal() {
   if (!isAdmin) return;
   if (isSavingExpense) return;
-  editingId=null; currentSlips=[];
+  editingId=null; currentSlips=[]; resetOcrSession();
   document.getElementById('modalTitle').textContent='เพิ่มรายจ่ายใหม่';
   ['fTitle','fDetail','fNote'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
@@ -2146,7 +2146,7 @@ function openEditModal(id) {
   if (!isAdmin) return;
   if (isSavingExpense) return;
   const e=expenses.find(x=>x.id===id); if(!e)return;
-  editingId=id; currentSlips=[...(e.slips||[])];
+  editingId=id; currentSlips=[...(e.slips||[])]; resetOcrSession();
   document.getElementById('modalTitle').textContent='แก้ไขรายจ่าย';
   document.getElementById('fTitle').value=e.title||''; document.getElementById('fAmount').value=e.amount||'';
   document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=e.detail||'';
@@ -2457,12 +2457,21 @@ function processFiles(files){
     }));
   });
   renderPreview();
-  // อ่านยอดจากสลิปรูปแรกที่เพิ่งแนบ แล้วเติมช่องให้อัตโนมัติ
-  const firstImage = files.find(f => (f.type || '').startsWith('image/'));
-  if (firstImage) tryAutofillFromSlip(firstImage);
+  const images = files.filter(file => (file.type || '').startsWith('image/'));
+  if (images.length) {
+    queuedOcrImages.push(...images);
+    tryAutofillFromQueuedSlips();
+  }
 }
 
 let ocrInFlight = false;
+let queuedOcrImages = [];
+let ocrSessionId = 0;
+function resetOcrSession(){
+  ocrSessionId += 1;
+  queuedOcrImages = [];
+  setOcrHint('');
+}
 // วันที่จากสลิปต้องไม่อยู่อนาคต และไม่เก่ากว่า ~1 ปี ไม่งั้นถือว่า OCR อ่านปีเพี้ยน ไม่เอามาทับ
 function isPlausibleSlipDate(d){
   const t = new Date(d + 'T00:00:00').getTime();
@@ -2485,27 +2494,45 @@ function setOcrHint(msg, state){
   el.innerHTML = msg ? (state === 'loading' ? '<span class="ocr-spin"></span>' : '') + escapeHtml(msg) : '';
   el.style.display = msg ? 'flex' : 'none';
 }
-async function tryAutofillFromSlip(file){
+async function requestSlipOcr(file, idToken){
+  const imageBase64 = await fileToBase64(file);
+  const res = await fetch(EXPENSE_OCR_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+    body: JSON.stringify({ imageBase64, mimeType: file.type }),
+  });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok || !data.ok) throw new Error(data.error || 'ocr_failed');
+  return data;
+}
+async function tryAutofillFromQueuedSlips(){
   if (!usingFirestore || !auth || !auth.currentUser) return;
-  if (!file || !(file.type || '').startsWith('image/')) return;
   if (ocrInFlight) return;
-  const amountEl = document.getElementById('fAmount');
-  // ไม่ทับยอดที่ผู้ใช้กรอกไว้แล้ว
-  if (amountEl.value && Number(amountEl.value) > 0) return;
+  if (!queuedOcrImages.length) return;
+  const sessionId = ocrSessionId;
   ocrInFlight = true;
-  setOcrHint('กำลังอ่านยอดจากสลิป…', 'loading');
   try {
-    const [imageBase64, idToken] = await Promise.all([
-      fileToBase64(file),
-      auth.currentUser.getIdToken(),
-    ]);
-    const res = await fetch(EXPENSE_OCR_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
-      body: JSON.stringify({ imageBase64, mimeType: file.type }),
-    });
-    const data = await res.json().catch(()=>({}));
-    if (!res.ok || !data.ok) throw new Error(data.error || 'ocr_failed');
+    const idToken = await auth.currentUser.getIdToken();
+    let data = null;
+    let checked = 0;
+    while (queuedOcrImages.length && sessionId === ocrSessionId) {
+      const file = queuedOcrImages.shift();
+      checked += 1;
+      setOcrHint(`กำลังค้นหาสลิปธนาคารในรูปที่ ${checked}…`, 'loading');
+      const result = await requestSlipOcr(file, idToken);
+      if (sessionId !== ocrSessionId) return;
+      if (result.documentType === 'bank_slip') {
+        data = result;
+        queuedOcrImages = [];
+        break;
+      }
+    }
+    if (sessionId !== ocrSessionId) return;
+    if (!data) {
+      setOcrHint('ไม่พบสลิปธนาคาร — วันที่และยอดยังคงเดิม', 'warn');
+      return;
+    }
+    const amountEl = document.getElementById('fAmount');
     const filled = [];
     if (data.amount > 0 && !(amountEl.value && Number(amountEl.value) > 0)){
       amountEl.value = data.amount; filled.push('ยอดเงิน');
@@ -2525,13 +2552,14 @@ async function tryAutofillFromSlip(file){
         setCostCategory(data.category); filled.push('หมวด');
       }
     }
-    if (filled.length) setOcrHint('เติมให้แล้ว: ' + filled.join(', ') + ' — ตรวจสอบอีกครั้งได้', 'ok');
-    else setOcrHint('อ่านสลิปไม่พบยอด กรอกเองได้เลย', 'warn');
+    if (filled.length) setOcrHint('พบสลิปธนาคาร · เติมให้แล้ว: ' + filled.join(', ') + ' — ตรวจสอบอีกครั้งได้', 'ok');
+    else setOcrHint('พบสลิปธนาคารแล้ว — ข้อมูลในฟอร์มตรงกัน', 'ok');
   } catch (err){
     console.warn('OCR autofill failed', err);
     setOcrHint('อ่านสลิปอัตโนมัติไม่สำเร็จ — กรอกยอดเอง', 'warn');
   } finally {
     ocrInFlight = false;
+    if (queuedOcrImages.length) tryAutofillFromQueuedSlips();
     setTimeout(()=>{
       const el = document.getElementById('ocrHint');
       if (el && el.classList.contains('ok')) setOcrHint('');
@@ -2609,7 +2637,10 @@ function closeModal(id, force = false){
   if (!force && id === 'expenseModal' && isSavingExpense) return;
   if (!force && id === 'expenseModal' && isExpenseFormDirty() && !confirmDiscardExpenseForm()) return;
   document.getElementById(id).classList.remove('open');
-  if (id === 'expenseModal') expenseFormSnapshot = null;
+  if (id === 'expenseModal') {
+    expenseFormSnapshot = null;
+    resetOcrSession();
+  }
 }
 // Lock background page scroll while any modal/lightbox is open (and avoid the layout jump).
 function syncModalScrollLock() {
