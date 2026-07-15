@@ -3118,19 +3118,65 @@
       }).format(d);
     };
 
+    const normalizeAuditPlate = value => String(value || '')
+      .normalize('NFKC')
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/[\s-]/g, '')
+      .trim()
+      .toUpperCase();
+
+    const auditPlateMap = value => {
+      const result = new Map();
+      const values = Array.isArray(value) ? value : String(value || '').split(',');
+      values
+        .flatMap(item => String(item || '').split(/[,;\n\r]+/))
+        .map(item => item.trim())
+        .filter(Boolean)
+        .forEach(item => {
+          const key = normalizeAuditPlate(item);
+          if (key && !result.has(key)) result.set(key, item);
+        });
+      return result;
+    };
+
+    const fmtPlateDiff = (field, oldValue, newValue) => {
+      const oldPlates = auditPlateMap(oldValue);
+      const newPlates = auditPlateMap(newValue);
+      const removed = [...oldPlates].filter(([key]) => !newPlates.has(key));
+      const added = [...newPlates].filter(([key]) => !oldPlates.has(key));
+      if (!removed.length && !added.length) return '';
+
+      const removedHtml = removed.map(([, plate]) =>
+        `<span style="color:#ef4444;text-decoration:line-through;white-space:nowrap">− ${escHtml(plate)}</span>`
+      ).join(' ');
+      const addedHtml = added.map(([, plate]) =>
+        `<span style="color:#22c55e;white-space:nowrap">+ ${escHtml(plate)}</span>`
+      ).join(' ');
+      return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(field)}:</span> ${removedHtml}${removedHtml && addedHtml ? ' ' : ''}${addedHtml}</div>`;
+    };
+
     const fmtDiff = (log) => {
       if (!log.old || !log.new) return '';
-      const fields = log.changedFields || [];
+      const fields = [...new Set(log.changedFields || [])];
       if (!fields.length) return '';
       return fields.map(f => {
         const ov = log.old[f], nv = log.new[f];
+        if (f === 'cars' || f === 'motorcycles') {
+          return fmtPlateDiff(f, ov, nv);
+        }
         if (Array.isArray(ov) || Array.isArray(nv)) {
-          const o = [].concat(ov || []).join(', ') || '—';
-          const n = [].concat(nv || []).join(', ') || '—';
+          const oldItems = [].concat(ov || []);
+          const newItems = [].concat(nv || []);
+          if (JSON.stringify(oldItems) === JSON.stringify(newItems)) return '';
+          const o = oldItems.join(', ') || '—';
+          const n = newItems.join(', ') || '—';
           return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(o)}</span> → <span style="color:#22c55e">${escHtml(n)}</span></div>`;
         }
-        return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(String(ov||'—'))}</span> → <span style="color:#22c55e">${escHtml(String(nv||'—'))}</span></div>`;
-      }).join('');
+        const oldText = String(ov ?? '');
+        const newText = String(nv ?? '');
+        if (oldText === newText) return '';
+        return `<div style="margin-bottom:3px;"><span style="font-size:.75rem;color:var(--text-muted)">${escHtml(f)}:</span> <span style="color:#ef4444;text-decoration:line-through">${escHtml(oldText || '—')}</span> → <span style="color:#22c55e">${escHtml(newText || '—')}</span></div>`;
+      }).filter(Boolean).join('');
     };
 
     const rows = logs.map(log => {
