@@ -326,6 +326,31 @@
   .search-suggestion mark {
     background:#fef3c7; color:var(--text-hi); border-radius:4px; padding:0 2px;
   }
+  .transaction-toolbar {
+    display:grid; grid-template-columns:minmax(0,1fr) 200px;
+    grid-template-areas:"search month";
+    gap:10px; align-items:center; margin-bottom:16px;
+  }
+  .transaction-toolbar .search-wrap { grid-area:search; min-width:0; }
+  .transaction-toolbar .month-filter-select { grid-area:month; }
+  .transaction-toolbar .filter-search,
+  .transaction-toolbar .month-filter-select { height:44px; }
+  .month-filter-select {
+    width:100%; padding:8px 36px 8px 12px;
+    border:1.5px solid var(--border); border-radius:var(--r-sm);
+    font-family:inherit; font-size:13px; font-weight:600; color:var(--text-hi);
+    background:var(--surface); outline:none; cursor:pointer;
+    transition:border-color .18s, box-shadow .18s;
+  }
+  .month-filter-select:focus {
+    border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,.10);
+  }
+  @media(max-width:580px) {
+    .transaction-toolbar {
+      grid-template-columns:1fr; grid-template-areas:"month" "search"; gap:8px;
+    }
+    .transaction-toolbar .month-filter-select { width:100%; }
+  }
 
   /* ── EXPENSE CARDS ── */
   .expense-list { display:flex; flex-direction:column; gap:8px; }
@@ -684,7 +709,6 @@
         <div class="section-title">สรุปรายเดือน</div>
         <div class="section-sub" id="yearSubLabel"></div>
       </div>
-      <select class="filter-select" id="dashMonthFilter" onchange="renderDashboard()"></select>
     </div>
     <div class="stats-grid" id="statCards"></div>
     <div id="dashboardFacilitiesCard"></div>
@@ -693,13 +717,14 @@
       <div class="section-title" id="txnSectionTitle">รายจ่ายเดือน —</div>
       <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
     </div>
-    <div class="filters">
+    <div class="transaction-toolbar">
       <div class="search-wrap" id="monthSearchWrap">
         <span class="search-icon">⌕</span>
-        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่ายเดือนนี้..." autocomplete="off">
+        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่ายทุกเดือน..." autocomplete="off">
         <button type="button" class="search-clear" id="monthSearchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="monthSearchSuggestions"></div>
       </div>
+      <select class="month-filter-select" id="dashMonthFilter" aria-label="เลือกเดือนที่แสดง" onchange="renderDashboard()"></select>
     </div>
     <div class="expense-list" id="recentList"></div>
   </div>
@@ -1420,13 +1445,21 @@ function renderMonthHero() {
     </div>`;
 }
 
+function dashboardExpenseMatchesActiveFilters(expense) {
+  return (!activeDashboardType || expense.type===activeDashboardType)
+    && (!activeDashboardFacility || costCategoryValue(expense)===activeDashboardFacility);
+}
+
+function getDashboardSearchItems() {
+  return expenses.filter(dashboardExpenseMatchesActiveFilters);
+}
+
 function getMonthExpenseItems() {
   const {yr,mi} = getMonthFilter();
   return expenses.filter(e=>{
     const d=new Date(e.date);
     return d.getFullYear()===yr&&d.getMonth()===mi
-      && (!activeDashboardType || e.type===activeDashboardType)
-      && (!activeDashboardFacility || costCategoryValue(e)===activeDashboardFacility);
+      && dashboardExpenseMatchesActiveFilters(e);
   });
 }
 
@@ -1434,22 +1467,24 @@ function renderMonthTxn() {
   renderMonthHero();
   const {yr,mi} = getMonthFilter();
   const q = getExpenseSearchQuery('month');
-  const me = getMonthExpenseItems()
+  const sourceItems = q ? getDashboardSearchItems() : getMonthExpenseItems();
+  const me = sourceItems
     .filter(e => expenseMatchesSearch(e, q))
     .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
   const filterLabels = [
     activeDashboardType ? expenseTypeText(activeDashboardType) : '',
     activeDashboardFacility || '',
-    q ? `ค้นหา: ${q}` : '',
   ].filter(Boolean);
   syncSearchUi('month');
   const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
-  document.getElementById('txnSectionTitle').innerHTML = `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
+  document.getElementById('txnSectionTitle').innerHTML = q
+    ? `ผลการค้นหา <span class="title-month">ทุกเดือน · ${me.length} รายการ</span>${escapeHtml(extra)}`
+    : `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
   // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
   const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility;
   document.getElementById('recentList').innerHTML = me.length
     ? me.map(e=>expenseCardHtml(e,false,reorderable)).join('')
-    : '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">ไม่มีรายการในเดือนนี้</div></div>';
+    : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? 'ไม่พบรายการจากทุกเดือน' : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
 const FACILITIES = [
@@ -1629,7 +1664,7 @@ function searchEls(scope = 'all') {
 }
 
 function searchSourceItems(scope = 'all') {
-  return searchScope(scope) === 'month' ? getMonthExpenseItems() : expenses;
+  return searchScope(scope) === 'month' ? getDashboardSearchItems() : expenses;
 }
 
 function bindSearchControls() {
