@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f0e3">
+  <title>LINE Broadcast · Pattra Villa 8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #f7f0e3;
+      --paper: #fffdf8;
+      --paper-2: #f0e7d7;
+      --ink: #282118;
+      --muted: #786a57;
+      --line: #dfd1ba;
+      --line-green: #2f7650;
+      --line-green-deep: #205d3c;
+      --line-green-soft: #e1eee4;
+      --production: #ba5c27;
+      --production-deep: #91421c;
+      --production-soft: #f7e4d5;
+      --danger: #9a3e2c;
+      --shadow: 0 22px 60px rgba(67, 49, 27, .12);
+      --radius-lg: 26px;
+      --radius-md: 17px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--canvas); }
+    body {
+      min-height: 100dvh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 3%, rgba(226, 164, 89, .16), transparent 26rem),
+        radial-gradient(circle at 90% 20%, rgba(47, 118, 80, .11), transparent 30rem),
+        var(--canvas);
+      font-family: "IBM Plex Sans Thai", sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    button, select { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .52; }
+    a { color: inherit; text-decoration: none; }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      opacity: .23;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
+    }
+
+    .shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding-bottom: 56px; }
+    .site-header {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(126, 99, 62, .18);
+    }
+    .brand { display: flex; flex-direction: column; line-height: 1; }
+    .brand strong {
+      font: 700 21px/1 "Cormorant Garamond", serif;
+      letter-spacing: .15em;
+    }
+    .brand span { margin-top: 5px; color: var(--muted); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+    .header-actions { display: flex; gap: 8px; }
+    .nav-link {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 13px;
+      background: rgba(255, 253, 248, .64);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .nav-link:hover { border-color: var(--line-green); color: var(--line-green-deep); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 24px;
+      padding: 42px 4px 28px;
+    }
+    .eyebrow { color: var(--line-green-deep); font-size: 11px; font-weight: 700; letter-spacing: .17em; text-transform: uppercase; }
+    .hero h1 {
+      max-width: 760px;
+      margin: 7px 0 7px;
+      font: 700 clamp(35px, 5vw, 64px)/.98 "Cormorant Garamond", "IBM Plex Sans Thai", serif;
+      letter-spacing: -.025em;
+    }
+    .hero p { max-width: 680px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .access-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #bbd2bf;
+      border-radius: 999px;
+      padding: 9px 13px;
+      background: var(--line-green-soft);
+      color: var(--line-green-deep);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .access-chip::before { width: 7px; height: 7px; border-radius: 50%; background: currentColor; content: ""; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr);
+      gap: 18px;
+      align-items: start;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .workspace.ready { opacity: 1; transform: none; }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248, .92);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 24px 17px;
+      border-bottom: 1px solid var(--line);
+    }
+    .step { color: var(--production); font: 500 11px/1 "IBM Plex Mono", monospace; letter-spacing: .11em; }
+    .card-head h2 { margin: 4px 0 0; font-size: 20px; line-height: 1.25; }
+    .draft-state { color: var(--muted); font-size: 11px; }
+    .composer-body { padding: 22px 24px 24px; }
+    .field-grid { display: grid; grid-template-columns: 1fr 190px; gap: 14px; }
+    .field { display: block; margin-bottom: 16px; }
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .field-label span { color: var(--muted); font-weight: 500; }
+    .control {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: 13px;
+      outline: 0;
+      background: #fff;
+      color: var(--ink);
+      padding: 12px 13px;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+    .control:focus { border-color: var(--line-green); box-shadow: 0 0 0 4px rgba(47, 118, 80, .1); }
+    textarea.control { min-height: 180px; resize: vertical; line-height: 1.65; }
+
+    .dropzone {
+      position: relative;
+      min-height: 122px;
+      display: grid;
+      place-items: center;
+      border: 1.5px dashed #bca98b;
+      border-radius: var(--radius-md);
+      background: var(--paper-2);
+      text-align: center;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+    .dropzone.dragging { border-color: var(--line-green); background: var(--line-green-soft); transform: scale(.995); }
+    .dropzone input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .dropzone-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 7px;
+      border-radius: 12px;
+      background: var(--paper);
+      color: var(--line-green-deep);
+      box-shadow: 0 5px 16px rgba(65, 48, 24, .08);
+    }
+    .dropzone strong { display: block; font-size: 13px; }
+    .dropzone small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .media-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; margin-top: 11px; }
+    .media-item { position: relative; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: var(--paper-2); }
+    .media-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .media-item button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 25px;
+      height: 25px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(36, 28, 19, .82);
+      color: #fff;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .media-order { position: absolute; left: 6px; bottom: 6px; border-radius: 999px; padding: 2px 7px; background: rgba(255, 253, 248, .9); font: 500 10px/1.5 "IBM Plex Mono", monospace; }
+    .media-note { margin: 9px 1px 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+
+    .side-stack { position: sticky; top: 14px; display: grid; gap: 14px; }
+    .preview-card { padding: 18px; }
+    .preview-label { margin-bottom: 10px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .phone-preview {
+      min-height: 185px;
+      border-radius: 20px;
+      padding: 15px;
+      background: #89aade;
+      box-shadow: inset 0 0 0 1px rgba(32, 54, 81, .1);
+    }
+    .line-bubble { max-width: 94%; border-radius: 4px 16px 16px 16px; padding: 13px 14px; background: #fff; box-shadow: 0 4px 14px rgba(45, 64, 88, .13); }
+    .line-bubble strong { display: block; margin-bottom: 5px; font-size: 13px; white-space: pre-wrap; }
+    .line-bubble p { margin: 0; color: #544b41; font-size: 11.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .preview-images { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 7px; }
+    .preview-images img { width: 100%; aspect-ratio: 1; border-radius: 7px; object-fit: cover; }
+
+    .send-card { padding: 20px; }
+    .send-card h2 { margin: 0; font-size: 18px; }
+    .send-card > p { margin: 4px 0 17px; color: var(--muted); font-size: 11.5px; line-height: 1.55; }
+    .destination {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: #fff;
+    }
+    .destination + .destination { margin-top: 10px; }
+    .destination.sandbox { border-color: #b9d2bd; background: var(--line-green-soft); }
+    .destination.production { border-color: #e8c3aa; background: var(--production-soft); }
+    .destination-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .destination h3 { margin: 0; font-size: 13px; }
+    .mode-badge { border-radius: 999px; padding: 3px 7px; background: rgba(255, 255, 255, .72); color: var(--muted); font: 500 9px/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
+    .target-name { margin: 5px 0 10px; color: var(--muted); font-size: 12px; }
+    .target-select { margin: 9px 0 11px; background: rgba(255, 255, 255, .9); font-size: 12px; }
+    .send-button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 13px;
+      color: #fff;
+      font-weight: 700;
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .send-button:hover:not(:disabled) { filter: brightness(.94); transform: translateY(-1px); }
+    .send-button.sandbox { background: var(--line-green); }
+    .send-button.production { background: var(--production); }
+    .safety-note { display: flex; gap: 8px; margin: 13px 2px 0; color: var(--muted); font-size: 10.5px; line-height: 1.55; }
+    .safety-note svg { flex: 0 0 auto; margin-top: 1px; }
+    .status {
+      min-height: 42px;
+      display: none;
+      align-items: center;
+      gap: 9px;
+      margin-top: 12px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--paper-2);
+      color: var(--muted);
+      font-size: 11.5px;
+    }
+    .status.show { display: flex; }
+    .status.ok { background: var(--line-green-soft); color: var(--line-green-deep); }
+    .status.error { background: #f8dfd8; color: var(--danger); }
+    .status.loading::before { width: 13px; height: 13px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; content: ""; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .auth-screen { min-height: 52vh; display: grid; place-items: center; text-align: center; color: var(--muted); }
+    .auth-screen strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: 15px; }
+    .auth-screen.hidden { display: none; }
+    .clear-button { border: 0; background: transparent; color: var(--muted); font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+      .side-stack { position: static; grid-template-columns: .8fr 1.2fr; }
+    }
+    @media (max-width: 650px) {
+      .shell { width: min(100% - 22px, 1240px); padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
+      .site-header { height: 60px; }
+      .nav-link.admin { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 13px; padding: 28px 2px 20px; }
+      .hero h1 { font-size: 39px; }
+      .access-chip { justify-self: start; }
+      .card { border-radius: 20px; }
+      .card-head, .composer-body { padding-left: 16px; padding-right: 16px; }
+      .field-grid, .side-stack { grid-template-columns: 1fr; }
+      .media-grid { grid-template-columns: repeat(3, 1fr); }
+      textarea.control { min-height: 150px; }
+      .side-stack { gap: 11px; }
+      .send-card { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <strong>PATTRA VILLA 8</strong>
+        <span>LINE Broadcast Desk</span>
+      </a>
+      <nav class="header-actions" aria-label="เมนูหลัก">
+        <a class="nav-link" href="/">หน้าแรก</a>
+        <a class="nav-link admin" href="/admin/">Admin</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Official communication</div>
+        <h1>ส่งข้อความจาก Pattra Villa 8</h1>
+        <p>เขียนข้อความ แนบรูปได้สูงสุด 5 รูป แล้วเลือกส่งทดสอบหรือส่งเข้ากลุ่มใช้งานจริงอย่างชัดเจน</p>
+      </div>
+      <div class="access-chip">เฉพาะประธานกรรมการ</div>
+    </section>
+
+    <div class="auth-screen" id="authScreen">
+      <div><strong>กำลังตรวจสอบสิทธิ์</strong>กรุณารอสักครู่…</div>
+    </div>
+
+    <main class="workspace" id="workspace" aria-hidden="true">
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <div class="step">01 / COMPOSE</div>
+            <h2>เตรียมข้อความ</h2>
+          </div>
+          <button class="clear-button" id="clearBtn" type="button">ล้างข้อความ</button>
+        </div>
+        <div class="composer-body">
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">หัวข้อ <span id="titleCount">0 / 120</span></span>
+              <input class="control" id="titleInput" maxlength="120" placeholder="เช่น แจ้งกำหนดการประชุมประจำเดือน">
+            </label>
+            <label class="field">
+              <span class="field-label">หมวดหมู่</span>
+              <select class="control" id="categoryInput">
+                <option value="ทั่วไป">ทั่วไป</option>
+                <option value="ประกาศสำคัญ">ประกาศสำคัญ</option>
+                <option value="ส่วนกลาง">ส่วนกลาง</option>
+                <option value="การเงิน">การเงิน</option>
+                <option value="ซ่อมบำรุง">ซ่อมบำรุง</option>
+                <option value="ความปลอดภัย">ความปลอดภัย</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="field-label">ข้อความ <span id="messageCount">0 / 4,000</span></span>
+            <textarea class="control" id="messageInput" maxlength="4000" placeholder="พิมพ์รายละเอียดที่ต้องการแจ้ง…"></textarea>
+          </label>
+
+          <div class="field-label">รูปภาพ <span id="mediaCount">0 / 5</span></div>
+          <div class="dropzone" id="dropzone">
+            <input id="mediaInput" type="file" accept="image/jpeg,image/png" multiple aria-label="เลือกรูปภาพ">
+            <div>
+              <div class="dropzone-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
+              </div>
+              <strong>กดเลือก หรือลากรูปมาวาง</strong>
+              <small>JPG / PNG · สูงสุด 5 รูป</small>
+            </div>
+          </div>
+          <div class="media-grid" id="mediaGrid"></div>
+          <p class="media-note">ระบบจะปรับขนาดรูปใหญ่ให้อัตโนมัติเพื่อส่งผ่าน LINE ได้เสถียรขึ้น · ยังไม่รองรับวิดีโอในหน้านี้</p>
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="card preview-card">
+          <div class="preview-label">Message preview</div>
+          <div class="phone-preview">
+            <div class="line-bubble">
+              <strong id="previewTitle">หัวข้อประกาศ</strong>
+              <p id="previewMessage">ข้อความที่พิมพ์จะแสดงตัวอย่างตรงนี้</p>
+              <div class="preview-images" id="previewImages"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card send-card">
+          <div class="step">02 / SEND</div>
+          <h2>เลือกปลายทาง</h2>
+          <p>การส่งครั้งเดียวไม่เปลี่ยนค่า scheduler หรือ default routing</p>
+
+          <div class="destination sandbox">
+            <div class="destination-top">
+              <h3>ทดสอบเข้า Sandbox</h3>
+              <span class="mode-badge">safe test</span>
+            </div>
+            <div class="target-name" id="sandboxName">Pattra Watch</div>
+            <button class="send-button sandbox" id="sandboxBtn" type="button">ส่งทดสอบ 1 ครั้ง</button>
+          </div>
+
+          <div class="destination production">
+            <div class="destination-top">
+              <h3>ส่งเข้า Production จริง</h3>
+              <span class="mode-badge">live</span>
+            </div>
+            <select class="control target-select" id="productionTarget" aria-label="เลือกกลุ่ม Production">
+              <option value="">กำลังโหลดรายชื่อกลุ่ม…</option>
+            </select>
+            <button class="send-button production" id="productionBtn" type="button" disabled>ส่งเข้ากลุ่มจริง 1 ครั้ง</button>
+          </div>
+
+          <div class="safety-note">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 3.8 7v5c0 5.1 3.5 8 8.2 9 4.7-1 8.2-3.9 8.2-9V7L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>ปุ่ม Production จะแสดงชื่อกลุ่มให้ยืนยันอีกครั้งก่อนส่งจริง</span>
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const RESIDENT_SESSION_KEY = "pattra_resident_session_v1";
+    const ADMIN_ACCESS_URL = "https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix";
+    const BROADCAST_URL = "https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/broadcastLineAnnouncement";
+    const MAX_IMAGES = 5;
+    const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
+    const TARGET_IMAGE_BYTES = 2.2 * 1024 * 1024;
+
+    const state = {session: null, media: [], productionTargets: [], sending: false};
+    const el = (id) => document.getElementById(id);
+
+    function getSession() {
+      try {
+        const session = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || "null");
+        if (!session || !session.houseNo || !session.pin || Number(session.expiresAt) <= Date.now()) return null;
+        return session;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function post(body) {
+      const response = await fetch(BROADCAST_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({...body, houseNo: state.session.houseNo, pin: state.session.pin}),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || "ไม่สามารถดำเนินการได้");
+      return data;
+    }
+
+    function setStatus(message, kind = "") {
+      const status = el("status");
+      status.className = `status show ${kind}`.trim();
+      status.textContent = message;
+    }
+
+    function updatePreview() {
+      const title = el("titleInput").value.trim();
+      const message = el("messageInput").value.trim();
+      el("titleCount").textContent = `${el("titleInput").value.length} / 120`;
+      el("messageCount").textContent = `${el("messageInput").value.length.toLocaleString("th-TH")} / 4,000`;
+      el("previewTitle").textContent = title || "หัวข้อประกาศ";
+      el("previewMessage").textContent = message || "ข้อความที่พิมพ์จะแสดงตัวอย่างตรงนี้";
+      el("previewImages").innerHTML = state.media.map((item) =>
+        `<img src="${item.dataUrl}" alt="${escapeHtml(item.name)}">`,
+      ).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>\"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;",
+      })[character]);
+    }
+
+    function renderMedia() {
+      el("mediaCount").textContent = `${state.media.length} / ${MAX_IMAGES}`;
+      el("mediaGrid").innerHTML = state.media.map((item, index) => `
+        <div class="media-item">
+          <img src="${item.dataUrl}" alt="${escapeHtml(item.name)}">
+          <button type="button" data-remove-media="${item.id}" aria-label="ลบรูป ${index + 1}">×</button>
+          <span class="media-order">${index + 1}</span>
+        </div>
+      `).join("");
+      el("dropzone").style.display = state.media.length >= MAX_IMAGES ? "none" : "grid";
+      updatePreview();
+    }
+
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error(`อ่านไฟล์ ${file.name} ไม่สำเร็จ`));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("เปิดรูปภาพไม่สำเร็จ"));
+        image.src = dataUrl;
+      });
+    }
+
+    async function prepareImage(file) {
+      if (!/^image\/(jpeg|png)$/.test(file.type)) throw new Error(`${file.name}: รองรับเฉพาะ JPG และ PNG`);
+      if (file.size > MAX_SOURCE_BYTES) throw new Error(`${file.name}: ไฟล์ใหญ่เกิน 8 MB`);
+      const original = await readFile(file);
+      if (file.size <= TARGET_IMAGE_BYTES) return original;
+
+      const image = await loadImage(original);
+      const scale = Math.min(1, 1800 / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      canvas.getContext("2d", {alpha: false}).drawImage(image, 0, 0, canvas.width, canvas.height);
+      let quality = .86;
+      let compressed = canvas.toDataURL("image/jpeg", quality);
+      while (compressed.length * .75 > TARGET_IMAGE_BYTES && quality > .58) {
+        quality -= .07;
+        compressed = canvas.toDataURL("image/jpeg", quality);
+      }
+      return compressed;
+    }
+
+    async function addFiles(fileList) {
+      const files = Array.from(fileList || []);
+      const available = MAX_IMAGES - state.media.length;
+      if (!available) return;
+      if (files.length > available) setStatus(`เลือกได้อีก ${available} รูป ระบบจะใช้ตามลำดับแรก`, "error");
+      const selected = files.slice(0, available);
+      try {
+        for (const file of selected) {
+          const dataUrl = await prepareImage(file);
+          state.media.push({id: crypto.randomUUID(), name: file.name, dataUrl});
+          renderMedia();
+        }
+        setStatus(`เพิ่มรูปแล้ว ${selected.length} รูป`, "ok");
+      } catch (error) {
+        setStatus(error.message, "error");
+      } finally {
+        el("mediaInput").value = "";
+      }
+    }
+
+    function validateDraft() {
+      const title = el("titleInput").value.trim();
+      const message = el("messageInput").value.trim();
+      if (!title) throw new Error("กรุณากรอกหัวข้อ");
+      if (!message && !state.media.length) throw new Error("กรุณากรอกข้อความหรือแนบรูปอย่างน้อย 1 รูป");
+      return {title, message, category: el("categoryInput").value, media: state.media.map(({dataUrl}) => ({dataUrl}))};
+    }
+
+    function setSending(sending) {
+      state.sending = sending;
+      el("sandboxBtn").disabled = sending;
+      el("productionBtn").disabled = sending || !el("productionTarget").value;
+    }
+
+    async function sendBroadcast(mode) {
+      if (state.sending) return;
+      try {
+        const draft = validateDraft();
+        const targetId = mode === "prd" ? el("productionTarget").value : "";
+        const selected = state.productionTargets.find((target) => target.targetId === targetId);
+        const targetName = mode === "sandbox" ? el("sandboxName").textContent : selected && selected.label;
+        if (mode === "prd" && !selected) throw new Error("กรุณาเลือกกลุ่ม Production");
+        const question = mode === "sandbox" ?
+          `ยืนยันส่งทดสอบเข้า ${targetName} 1 ครั้ง?` :
+          `ยืนยันส่งเข้า Production จริง\n\nกลุ่ม: ${targetName}\n\nข้อความนี้จะถูกส่งทันที`;
+        if (!confirm(question)) return;
+
+        setSending(true);
+        setStatus(`กำลังอัปโหลดและส่งเข้า ${targetName}…`, "loading");
+        const result = await post({action: "sendBroadcast", mode, targetId, ...draft});
+        setStatus(`ส่งสำเร็จแล้ว · ${result.targetLabel || targetName}`, "ok");
+      } catch (error) {
+        setStatus(error.message || "ส่งไม่สำเร็จ", "error");
+      } finally {
+        setSending(false);
+      }
+    }
+
+    function clearDraft() {
+      if ((el("titleInput").value || el("messageInput").value || state.media.length) && !confirm("ล้างข้อความและรูปทั้งหมด?")) return;
+      el("titleInput").value = "";
+      el("messageInput").value = "";
+      el("categoryInput").value = "ทั่วไป";
+      state.media = [];
+      renderMedia();
+      el("status").className = "status";
+    }
+
+    async function init() {
+      const session = getSession();
+      if (!session) {
+        location.replace("/");
+        return;
+      }
+      state.session = session;
+      try {
+        const accessResponse = await fetch(ADMIN_ACCESS_URL, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({action: "resolve", houseNo: session.houseNo, pin: session.pin}),
+        });
+        const accessData = await accessResponse.json().catch(() => ({}));
+        const access = accessData.access;
+        if (!accessResponse.ok || !accessData.ok || session.houseNo !== "38/8" || !access || !access.active || !access.permissions || !access.permissions["admin.portal"]) {
+          location.replace("/");
+          return;
+        }
+
+        const data = await post({action: "listBroadcastTargets"});
+        state.productionTargets = (data.productionTargets || []).sort((a, b) =>
+          String(a.label || "").localeCompare(String(b.label || ""), "th"),
+        );
+        el("sandboxName").textContent = data.sandboxTarget && data.sandboxTarget.label || "Pattra Watch";
+        el("productionTarget").innerHTML = [
+          '<option value="">เลือกกลุ่ม Production…</option>',
+          ...state.productionTargets.map((target) =>
+            `<option value="${escapeHtml(target.targetId)}">${escapeHtml(target.label || "LINE group")}</option>`,
+          ),
+        ].join("");
+        el("authScreen").classList.add("hidden");
+        el("workspace").classList.add("ready");
+        el("workspace").setAttribute("aria-hidden", "false");
+      } catch (error) {
+        el("authScreen").innerHTML = `<div><strong>ไม่สามารถเปิดหน้า Broadcast ได้</strong>${escapeHtml(error.message || "กรุณาลองใหม่")}</div>`;
+      }
+    }
+
+    el("titleInput").addEventListener("input", updatePreview);
+    el("messageInput").addEventListener("input", updatePreview);
+    el("categoryInput").addEventListener("change", updatePreview);
+    el("mediaInput").addEventListener("change", (event) => addFiles(event.target.files));
+    el("mediaGrid").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-remove-media]");
+      if (!button) return;
+      state.media = state.media.filter((item) => item.id !== button.dataset.removeMedia);
+      renderMedia();
+    });
+    ["dragenter", "dragover"].forEach((name) => el("dropzone").addEventListener(name, (event) => {
+      event.preventDefault();
+      el("dropzone").classList.add("dragging");
+    }));
+    ["dragleave", "drop"].forEach((name) => el("dropzone").addEventListener(name, (event) => {
+      event.preventDefault();
+      el("dropzone").classList.remove("dragging");
+    }));
+    el("dropzone").addEventListener("drop", (event) => addFiles(event.dataTransfer.files));
+    el("productionTarget").addEventListener("change", () => {
+      el("productionBtn").disabled = state.sending || !el("productionTarget").value;
+    });
+    el("sandboxBtn").addEventListener("click", () => sendBroadcast("sandbox"));
+    el("productionBtn").addEventListener("click", () => sendBroadcast("prd"));
+    el("clearBtn").addEventListener("click", clearDraft);
+
+    updatePreview();
+    init();
+  </script>
+</body>
+</html>
