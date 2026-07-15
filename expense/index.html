@@ -361,10 +361,17 @@
     cursor:pointer; transition:box-shadow .18s, transform .18s, border-color .18s;
   }
   .expense-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); border-color:var(--border2); }
+  .expense-badge-stack {
+    width:112px; flex:0 0 112px;
+    display:flex; flex-direction:column; align-items:stretch; gap:6px;
+  }
   .expense-type-badge {
     padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600;
     white-space:nowrap; flex-shrink:0; align-self:flex-start; margin-top:1px;
     display:inline-flex; align-items:center; justify-content:center; min-width:96px;
+  }
+  .expense-badge-stack .expense-type-badge {
+    width:100%; min-width:0; margin-top:0; align-self:stretch;
   }
   .badge-recurring   { background:var(--ok-bg);    color:var(--ok);    }
   .badge-investment  { background:var(--amber-bg);  color:var(--amber); }
@@ -380,6 +387,11 @@
     background:var(--accent-bg); color:var(--accent-dk);
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
     border:1px solid rgba(79,110,247,0.18); flex-shrink:0;
+  }
+  .expense-badge-stack .expense-category-badge {
+    max-width:100%; align-self:center; justify-content:center;
+    padding:2px 7px; font-size:10.5px; line-height:1.25;
+    text-align:center; white-space:normal;
   }
   .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
   .expense-amount.refund { color:var(--refund); }
@@ -424,14 +436,18 @@
   @media(max-width:580px) {
     .expense-card {
       display:grid;
-      grid-template-columns:auto 1fr auto auto;
+      grid-template-columns:minmax(0,1fr) auto auto;
       grid-template-areas:
-        "badge . amount menu"
-        "info info info info";
+        "badge amount menu"
+        "info info info";
       row-gap:6px; column-gap:8px; align-items:center;
     }
     .expense-card > .drag-handle { display:none; }
-    .expense-card > .expense-type-badge { grid-area:badge; margin-top:0; min-width:0; }
+    .expense-card > .expense-badge-stack {
+      grid-area:badge; width:auto; max-width:136px; min-width:0; flex-basis:auto;
+    }
+    .expense-badge-stack .expense-type-badge { width:max-content; max-width:100%; padding-inline:9px; }
+    .expense-badge-stack .expense-category-badge { align-self:flex-start; }
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-amount { grid-area:amount; }
     .expense-card > .card-menu-wrap { grid-area:menu; }
@@ -2182,12 +2198,15 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
   const sd = `<span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
   return `<div class="expense-card" data-id="${e.id}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
-    ${handleHtml}<span class="expense-type-badge ${typeBadgeClass(e.type)}">${typeLabel(e.type)}</span>
+    ${handleHtml}<div class="expense-badge-stack">
+      <span class="expense-type-badge ${typeBadgeClass(e.type)}">${typeLabel(e.type)}</span>
+      <span class="expense-category-badge">${costCategoryLabel(e)}</span>
+    </div>
     <div class="expense-info">
       <div class="expense-title-row">
         <span class="expense-title">${escapeHtml(e.title)}</span>
       </div>
-      <div class="expense-meta"><span class="expense-category-badge">${costCategoryLabel(e)}</span><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}</div>
+      <div class="expense-meta"><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}</div>
       ${slipsHtml}
     </div>
     <div class="expense-amount${isRefundExpense(e) ? ' refund' : ''}">${fmtExpenseAmount(e)}</div>
