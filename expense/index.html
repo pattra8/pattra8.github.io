@@ -362,8 +362,8 @@
   }
   .expense-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); border-color:var(--border2); }
   .expense-badge-stack {
-    width:112px; flex:0 0 112px;
-    display:flex; flex-direction:column; align-items:stretch; gap:6px;
+    width:116px; flex:0 0 116px;
+    display:flex; flex-direction:column; align-items:center; gap:7px;
   }
   .expense-type-badge {
     padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600;
@@ -371,7 +371,9 @@
     display:inline-flex; align-items:center; justify-content:center; min-width:96px;
   }
   .expense-badge-stack .expense-type-badge {
-    width:100%; min-width:0; margin-top:0; align-self:stretch;
+    width:max-content; min-width:92px; max-width:116px;
+    margin-top:0; align-self:center; padding:5px 12px;
+    font-size:13px; font-weight:700; line-height:1.3;
   }
   .badge-recurring   { background:var(--ok-bg);    color:var(--ok);    }
   .badge-investment  { background:var(--amber-bg);  color:var(--amber); }
@@ -389,8 +391,8 @@
     border:1px solid rgba(79,110,247,0.18); flex-shrink:0;
   }
   .expense-badge-stack .expense-category-badge {
-    max-width:100%; align-self:center; justify-content:center;
-    padding:2px 7px; font-size:10.5px; line-height:1.25;
+    min-width:88px; max-width:116px; align-self:center; justify-content:center;
+    padding:4px 10px; font-size:12px; line-height:1.3;
     text-align:center; white-space:normal;
   }
   .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
@@ -444,10 +446,10 @@
     }
     .expense-card > .drag-handle { display:none; }
     .expense-card > .expense-badge-stack {
-      grid-area:badge; width:auto; max-width:136px; min-width:0; flex-basis:auto;
+      grid-area:badge; width:116px; max-width:116px; min-width:0; flex-basis:auto;
     }
-    .expense-badge-stack .expense-type-badge { width:max-content; max-width:100%; padding-inline:9px; }
-    .expense-badge-stack .expense-category-badge { align-self:flex-start; }
+    .expense-badge-stack .expense-type-badge,
+    .expense-badge-stack .expense-category-badge { max-width:116px; }
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-amount { grid-area:amount; }
     .expense-card > .card-menu-wrap { grid-area:menu; }
