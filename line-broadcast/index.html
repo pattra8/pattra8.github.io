@@ -140,7 +140,6 @@
     .card-head h2 { margin: 4px 0 0; font-size: 20px; line-height: 1.25; }
     .draft-state { color: var(--muted); font-size: 11px; }
     .composer-body { padding: 22px 24px 24px; }
-    .field-grid { display: grid; grid-template-columns: 1fr 190px; gap: 14px; }
     .field { display: block; margin-bottom: 16px; }
     .field-label {
       display: flex;
@@ -221,9 +220,9 @@
       box-shadow: inset 0 0 0 1px rgba(32, 54, 81, .1);
     }
     .line-bubble { max-width: 94%; border-radius: 4px 16px 16px 16px; padding: 13px 14px; background: #fff; box-shadow: 0 4px 14px rgba(45, 64, 88, .13); }
-    .line-bubble strong { display: block; margin-bottom: 5px; font-size: 13px; white-space: pre-wrap; }
     .line-bubble p { margin: 0; color: #544b41; font-size: 11.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .preview-images { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 7px; }
+    .preview-images { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0 0 7px; }
+    .preview-images:empty { display: none; }
     .preview-images img { width: 100%; aspect-ratio: 1; border-radius: 7px; object-fit: cover; }
 
     .send-card { padding: 20px; }
@@ -293,7 +292,7 @@
       .access-chip { justify-self: start; }
       .card { border-radius: 20px; }
       .card-head, .composer-body { padding-left: 16px; padding-right: 16px; }
-      .field-grid, .side-stack { grid-template-columns: 1fr; }
+      .side-stack { grid-template-columns: 1fr; }
       .media-grid { grid-template-columns: repeat(3, 1fr); }
       textarea.control { min-height: 150px; }
       .side-stack { gap: 11px; }
@@ -322,7 +321,7 @@
       <div>
         <div class="eyebrow">Official communication</div>
         <h1>ส่งข้อความจาก Pattra Villa 8</h1>
-        <p>เขียนข้อความ แนบรูปได้สูงสุด 5 รูป แล้วเลือกส่งทดสอบหรือส่งเข้ากลุ่มใช้งานจริงอย่างชัดเจน</p>
+        <p>พิมพ์ข้อความตามที่ต้องการส่ง แนบรูปได้สูงสุด 5 รูป แล้วเลือก Sandbox หรือกลุ่มใช้งานจริง</p>
       </div>
       <div class="access-chip">เฉพาะประธานกรรมการ</div>
     </section>
@@ -341,29 +340,6 @@
           <button class="clear-button" id="clearBtn" type="button">ล้างข้อความ</button>
         </div>
         <div class="composer-body">
-          <div class="field-grid">
-            <label class="field">
-              <span class="field-label">หัวข้อ <span id="titleCount">0 / 120</span></span>
-              <input class="control" id="titleInput" maxlength="120" placeholder="เช่น แจ้งกำหนดการประชุมประจำเดือน">
-            </label>
-            <label class="field">
-              <span class="field-label">หมวดหมู่</span>
-              <select class="control" id="categoryInput">
-                <option value="ทั่วไป">ทั่วไป</option>
-                <option value="ประกาศสำคัญ">ประกาศสำคัญ</option>
-                <option value="ส่วนกลาง">ส่วนกลาง</option>
-                <option value="การเงิน">การเงิน</option>
-                <option value="ซ่อมบำรุง">ซ่อมบำรุง</option>
-                <option value="ความปลอดภัย">ความปลอดภัย</option>
-              </select>
-            </label>
-          </div>
-
-          <label class="field">
-            <span class="field-label">ข้อความ <span id="messageCount">0 / 4,000</span></span>
-            <textarea class="control" id="messageInput" maxlength="4000" placeholder="พิมพ์รายละเอียดที่ต้องการแจ้ง…"></textarea>
-          </label>
-
           <div class="field-label">รูปภาพ <span id="mediaCount">0 / 5</span></div>
           <div class="dropzone" id="dropzone">
             <input id="mediaInput" type="file" accept="image/jpeg,image/png" multiple aria-label="เลือกรูปภาพ">
@@ -377,6 +353,11 @@
           </div>
           <div class="media-grid" id="mediaGrid"></div>
           <p class="media-note">ระบบจะปรับขนาดรูปใหญ่ให้อัตโนมัติเพื่อส่งผ่าน LINE ได้เสถียรขึ้น · ยังไม่รองรับวิดีโอในหน้านี้</p>
+
+          <label class="field">
+            <span class="field-label">ข้อความที่จะส่งหลังรูปภาพ <span id="messageCount">0 / 4,000</span></span>
+            <textarea class="control" id="messageInput" maxlength="4000" placeholder="พิมพ์ข้อความที่นี่ ระบบจะส่งตรง ๆ หลังรูปภาพ โดยไม่เติมหัวข้อหรือรูปแบบอื่น…"></textarea>
+          </label>
         </div>
       </section>
 
@@ -385,9 +366,8 @@
           <div class="preview-label">Message preview</div>
           <div class="phone-preview">
             <div class="line-bubble">
-              <strong id="previewTitle">หัวข้อประกาศ</strong>
-              <p id="previewMessage">ข้อความที่พิมพ์จะแสดงตัวอย่างตรงนี้</p>
               <div class="preview-images" id="previewImages"></div>
+              <p id="previewMessage">ข้อความที่พิมพ์จะแสดงตรงนี้แบบเดียวกับที่ส่งเข้า LINE</p>
             </div>
           </div>
         </section>
@@ -466,12 +446,9 @@
     }
 
     function updatePreview() {
-      const title = el("titleInput").value.trim();
-      const message = el("messageInput").value.trim();
-      el("titleCount").textContent = `${el("titleInput").value.length} / 120`;
+      const message = el("messageInput").value;
       el("messageCount").textContent = `${el("messageInput").value.length.toLocaleString("th-TH")} / 4,000`;
-      el("previewTitle").textContent = title || "หัวข้อประกาศ";
-      el("previewMessage").textContent = message || "ข้อความที่พิมพ์จะแสดงตัวอย่างตรงนี้";
+      el("previewMessage").textContent = message || "ข้อความที่พิมพ์จะแสดงตรงนี้แบบเดียวกับที่ส่งเข้า LINE";
       el("previewImages").innerHTML = state.media.map((item) =>
         `<img src="${item.dataUrl}" alt="${escapeHtml(item.name)}">`,
       ).join("");
@@ -556,11 +533,9 @@
     }
 
     function validateDraft() {
-      const title = el("titleInput").value.trim();
-      const message = el("messageInput").value.trim();
-      if (!title) throw new Error("กรุณากรอกหัวข้อ");
-      if (!message && !state.media.length) throw new Error("กรุณากรอกข้อความหรือแนบรูปอย่างน้อย 1 รูป");
-      return {title, message, category: el("categoryInput").value, media: state.media.map(({dataUrl}) => ({dataUrl}))};
+      const message = el("messageInput").value;
+      if (!message.trim() && !state.media.length) throw new Error("กรุณากรอกข้อความหรือแนบรูปอย่างน้อย 1 รูป");
+      return {message, media: state.media.map(({dataUrl}) => ({dataUrl}))};
     }
 
     function setSending(sending) {
@@ -594,10 +569,8 @@
     }
 
     function clearDraft() {
-      if ((el("titleInput").value || el("messageInput").value || state.media.length) && !confirm("ล้างข้อความและรูปทั้งหมด?")) return;
-      el("titleInput").value = "";
+      if ((el("messageInput").value || state.media.length) && !confirm("ล้างข้อความและรูปทั้งหมด?")) return;
       el("messageInput").value = "";
-      el("categoryInput").value = "ทั่วไป";
       state.media = [];
       renderMedia();
       el("status").className = "status";
@@ -642,9 +615,7 @@
       }
     }
 
-    el("titleInput").addEventListener("input", updatePreview);
     el("messageInput").addEventListener("input", updatePreview);
-    el("categoryInput").addEventListener("change", updatePreview);
     el("mediaInput").addEventListener("change", (event) => addFiles(event.target.files));
     el("mediaGrid").addEventListener("click", (event) => {
       const button = event.target.closest("[data-remove-media]");
