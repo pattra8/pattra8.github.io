@@ -356,8 +356,8 @@
   .expense-list { display:flex; flex-direction:column; gap:8px; }
   .expense-card {
     background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--r-md); padding:15px 18px;
-    display:flex; align-items:flex-start; gap:14px;
+    border-radius:var(--r-md); padding:11px 16px;
+    display:flex; align-items:center; gap:12px;
     cursor:pointer; transition:box-shadow .18s, transform .18s, border-color .18s;
   }
   .expense-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); border-color:var(--border2); }
@@ -371,16 +371,20 @@
   .badge-general     { background:var(--violet-bg); color:var(--violet); }
   .badge-refund      { background:var(--refund-bg); color:var(--refund); }
   .expense-info   { flex:1; min-width:0; }
-  .expense-title-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:3px; }
-  .expense-title  { font-size:15.5px; font-weight:700; color:var(--text-hi); line-height:1.3; }
-  .expense-meta   { font-size:12px; color:var(--text-lo); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .expense-title-row { display:flex; align-items:center; gap:6px; margin-bottom:2px; min-width:0; }
+  .expense-title  {
+    font-size:14.5px; font-weight:700; color:var(--text-hi); line-height:1.35;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .expense-meta   { font-size:11.5px; color:var(--text-lo); display:flex; gap:9px; align-items:center; white-space:nowrap; overflow:hidden; margin-top:2px; }
   .expense-category-badge {
     display:inline-flex; align-items:center; gap:3px;
     background:var(--accent-bg); color:var(--accent-dk);
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
     border:1px solid rgba(79,110,247,0.18); flex-shrink:0;
   }
-  .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; }
+  .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
+  .expense-card .expense-amount { min-width:88px; }
   .expense-amount.refund { color:var(--refund); }
   .expense-slips  { display:flex; gap:5px; margin-top:9px; flex-wrap:wrap; align-items:flex-start; }
   .slip-thumb     { width:48px; height:48px; border-radius:7px; object-fit:cover; border:1.5px solid var(--border); cursor:pointer; }
@@ -398,6 +402,74 @@
     margin-top:2px;
   }
   .expense-actions { display:flex; gap:5px; margin-top:8px; }
+
+  /* compact card: slip stack + kebab menu */
+  .slip-stack { display:flex; align-items:center; flex-shrink:0; cursor:pointer; }
+  .stack-thumb {
+    width:30px; height:30px; border-radius:8px; object-fit:cover;
+    border:2px solid var(--surface); box-shadow:0 0 0 1px var(--border);
+  }
+  .stack-file {
+    width:30px; height:30px; border-radius:8px; border:2px solid var(--surface);
+    box-shadow:0 0 0 1px var(--border); background:var(--surface2);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-num); font-size:8px; font-weight:700; color:var(--text-mid);
+  }
+  .slip-stack .stack-thumb + .stack-thumb,
+  .slip-stack .stack-thumb + .stack-file,
+  .slip-stack .stack-file + .stack-thumb,
+  .slip-stack .stack-file + .stack-file,
+  .slip-stack .stack-more { margin-left:-11px; }
+  .stack-more {
+    width:30px; height:30px; border-radius:8px; border:2px solid var(--surface);
+    box-shadow:0 0 0 1px var(--border); background:var(--surface2);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-num); font-size:10px; font-weight:700; color:var(--text-mid);
+  }
+  .card-menu-wrap { position:relative; flex-shrink:0; }
+  .card-kebab {
+    width:30px; height:30px; border-radius:8px; border:none; background:transparent;
+    color:var(--text-lo); font-size:16px; font-weight:700; cursor:pointer; line-height:1;
+    display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .card-kebab:hover { background:var(--surface2); color:var(--text-hi); }
+  .card-menu {
+    display:none; position:absolute; right:0; top:34px; z-index:30;
+    background:var(--surface); border:1px solid var(--border2); border-radius:var(--r-sm);
+    box-shadow:var(--shadow-md); min-width:130px; overflow:hidden; padding:4px;
+  }
+  .card-menu-wrap.open .card-menu { display:block; }
+  .card-menu button {
+    display:flex; align-items:center; gap:7px; width:100%; padding:8px 12px;
+    border:none; background:transparent; border-radius:6px; font-family:inherit;
+    font-size:12.5px; font-weight:600; color:var(--text-mid); cursor:pointer; text-align:left;
+  }
+  .card-menu button:hover { background:var(--surface2); color:var(--text-hi); }
+  .card-menu button.menu-danger { color:var(--rose); }
+  .card-menu button.menu-danger:hover { background:var(--rose-bg); }
+
+  @media(max-width:580px) {
+    .expense-card {
+      display:grid;
+      grid-template-columns:auto 1fr auto auto;
+      grid-template-areas:
+        "badge badge amount menu"
+        "info  info  info   info"
+        "stack stack stack  stack";
+      row-gap:5px; column-gap:8px; align-items:center;
+    }
+    .expense-card > .drag-handle { display:none; }
+    .expense-card > .expense-type-badge { grid-area:badge; justify-self:start; margin-top:0; }
+    .expense-card > .expense-info { grid-area:info; }
+    .expense-card .expense-amount { grid-area:amount; min-width:0; }
+    .expense-card > .card-menu-wrap { grid-area:menu; }
+    .expense-card > .slip-stack { grid-area:stack; justify-self:end; }
+    .expense-title {
+      white-space:normal; display:-webkit-box; -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+    }
+    .expense-meta { flex-wrap:wrap; white-space:normal; }
+  }
 
   /* ── STATUS DOT ── */
   .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; vertical-align:middle; }
@@ -2123,8 +2195,19 @@ function escapeHtml(value) {
 function attachmentsHtml(items, detail = false) {
   const attachments = (items || []).map(normalizeAttachment).filter(Boolean);
   if (!attachments.length) return '';
-  const visible = detail ? attachments : attachments.slice(0, 3);
   const encodedAll = JSON.stringify(attachments).replace(/"/g,'&quot;');
+  if (!detail) {
+    const tiles = attachments.slice(0, 3).map((att, index) => {
+      const source = attachmentSource(att);
+      if (att.kind === 'image' && source) {
+        return `<img class="stack-thumb" src="${source}" loading="lazy" decoding="async" fetchpriority="low" onclick="event.stopPropagation();openAttachment(${encodedAll},${index})">`;
+      }
+      return `<span class="stack-file" onclick="event.stopPropagation();openAttachment(${encodedAll},${index})">${attachmentBadge(att.kind)}</span>`;
+    }).join('');
+    const overflow = attachments.length > 3 ? `<span class="stack-more">+${attachments.length-3}</span>` : '';
+    return `<div class="slip-stack" title="ไฟล์แนบ ${attachments.length} รายการ" onclick="event.stopPropagation();openAttachment(${encodedAll},0)">${tiles}${overflow}</div>`;
+  }
+  const visible = attachments;
   const tiles = visible.map((att, index) => {
     const source = attachmentSource(att);
     if (att.kind === 'image' && source) {
@@ -2139,7 +2222,7 @@ function attachmentsHtml(items, detail = false) {
 function expenseCardHtml(e,showAdmin,reorderable=false) {
   const slipsHtml = attachmentsHtml(e.slips,false);
   const adminHtml = isAdmin
-    ?`<div class="expense-actions" onclick="event.stopPropagation()"><button class="btn btn-ghost btn-sm" onclick="openEditModal('${e.id}')">✏️ แก้ไข</button><button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">ลบ</button></div>`:'';
+    ?`<div class="card-menu-wrap" onclick="event.stopPropagation()"><button class="card-kebab" title="แก้ไข / ลบ" onclick="toggleCardMenu(this)">⋯</button><div class="card-menu"><button onclick="closeCardMenus();openEditModal('${e.id}')">✏️ แก้ไข</button><button class="menu-danger" onclick="closeCardMenus();deleteExpense('${e.id}')">🗑 ลบ</button></div></div>`:'';
   const sd = `<span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
   return `<div class="expense-card" data-id="${e.id}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
@@ -2149,11 +2232,22 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
         <span class="expense-title">${escapeHtml(e.title)}</span>
       </div>
       <div class="expense-meta"><span class="expense-category-badge">${costCategoryLabel(e)}</span><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}</div>
-      ${slipsHtml}${adminHtml}
     </div>
+    ${slipsHtml}
     <div class="expense-amount${isRefundExpense(e) ? ' refund' : ''}">${fmtExpenseAmount(e)}</div>
+    ${adminHtml}
   </div>`;
 }
+function closeCardMenus() {
+  document.querySelectorAll('.card-menu-wrap.open').forEach((w) => w.classList.remove('open'));
+}
+function toggleCardMenu(btn) {
+  const wrap = btn.closest('.card-menu-wrap');
+  const wasOpen = wrap.classList.contains('open');
+  closeCardMenus();
+  if (!wasOpen) wrap.classList.add('open');
+}
+document.addEventListener('click', closeCardMenus);
 
 function showExpenseModal() {
   const overlay = document.getElementById('expenseModal');
@@ -2777,6 +2871,8 @@ Object.assign(window, {
   openDetail,
   openEditModal,
   openLightbox,
+  toggleCardMenu,
+  closeCardMenus,
   removeSlip,
   renderDashboard,
   renderDashboardFacilities,
