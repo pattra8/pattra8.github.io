@@ -1120,7 +1120,9 @@
 
     const announceQuery = query(colRef, orderBy('createdAt', 'desc'));
     onSnapshot(announceQuery, snapshot => {
-      cachedItems = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+      cachedItems = snapshot.docs
+        .map(item => ({ id: item.id, ...item.data() }))
+        .filter(item => item.source !== 'line_broadcast');
       renderList(cachedItems);
     }, error => {
       console.error(error);

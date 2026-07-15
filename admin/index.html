@@ -5308,11 +5308,14 @@
       const q = query(_annColRef, orderBy('createdAt', 'desc'));
       if (_annUnsubscribe) _annUnsubscribe();
       _annUnsubscribe = onSnapshot(q, snap => {
-        if (snap.empty) {
+        const announcementDocs = snap.docs.filter(d =>
+          d.data().source !== 'line_broadcast'
+        );
+        if (!announcementDocs.length) {
           listEl.innerHTML = '<div style="color:var(--text-muted);padding:24px;text-align:center;">ยังไม่มีประกาศ</div>';
           return;
         }
-        listEl.innerHTML = snap.docs.map(d => {
+        listEl.innerHTML = announcementDocs.map(d => {
           const a = d.data();
           const typeLabel = ANN_TYPE_LABELS[a.type] || a.type || '📣';
           const dateStr = a.effectiveDate ? `<span style="font-size:12px;color:var(--text-muted);">📅 ${escHtml(a.effectiveDate)}</span>` : '';

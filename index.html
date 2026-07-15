@@ -2223,7 +2223,9 @@ pager.addEventListener('click', event => {
 
 const announceQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
 onSnapshot(announceQuery, snapshot => {
-  announcements = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  announcements = snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(item => item.source !== 'line_broadcast');
   renderAnnouncements();
 }, error => {
   console.error(error);
