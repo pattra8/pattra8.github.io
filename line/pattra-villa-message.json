@@ -1,0 +1,60 @@
+{
+  "_comment": "ข้อความในนาม bot Pattra Villa — แทน IMAGE_URL_1 / IMAGE_URL_2 ด้วย URL รูปแบบ HTTPS ก่อนส่ง",
+  "messages": [
+    {
+      "type": "flex",
+      "altText": "Pattra Villa · รบกวนขยับรถด้วยครับ (ญษ6218 · บ้าน 38/34)",
+      "contents": {
+        "type": "bubble",
+        "size": "mega",
+        "hero": {
+          "type": "image",
+          "url": "IMAGE_URL_1",
+          "size": "full",
+          "aspectRatio": "20:13",
+          "aspectMode": "cover"
+        },
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "spacing": "md",
+          "contents": [
+            {
+              "type": "image",
+              "url": "IMAGE_URL_2",
+              "size": "full",
+              "aspectRatio": "20:26",
+              "aspectMode": "cover",
+              "margin": "none"
+            },
+            {
+              "type": "box",
+              "layout": "baseline",
+              "contents": [
+                { "type": "text", "text": "✅ ญษ6218", "weight": "bold", "size": "md", "color": "#2E7D32", "flex": 0 },
+                { "type": "text", "text": "บ้าน 38/34", "size": "sm", "color": "#888888", "align": "end" }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "รบกวนขยับรถด้วยครับ",
+              "weight": "bold",
+              "size": "lg",
+              "color": "#B26A1F",
+              "wrap": true,
+              "align": "center",
+              "margin": "md"
+            }
+          ]
+        },
+        "footer": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            { "type": "text", "text": "Pattra Villa · ระบบแจ้งเตือน", "size": "xs", "color": "#AAAAAA", "align": "center" }
+          ]
+        }
+      }
+    }
+  ]
+}
