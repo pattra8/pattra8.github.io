@@ -355,26 +355,25 @@
   /* ── EXPENSE CARDS ── */
   .expense-list { display:flex; flex-direction:column; gap:8px; }
   .expense-card {
+    position:relative;
     background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--r-md); padding:15px 18px;
+    border-radius:var(--r-md); padding:15px 18px 15px 21px;
     display:flex; align-items:flex-start; gap:14px;
     cursor:pointer; transition:box-shadow .18s, transform .18s, border-color .18s;
   }
+  /* Type rail — inset so it never fights the card's rounded corners. */
+  .expense-card::before {
+    content:''; position:absolute; left:0; top:12px; bottom:12px; width:3px;
+    border-radius:0 3px 3px 0; background:var(--rail,var(--text-lo));
+  }
   .expense-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); border-color:var(--border2); }
-  .expense-badge-stack {
-    width:116px; flex:0 0 116px;
-    display:flex; flex-direction:column; align-items:flex-start; gap:7px;
+  .expense-type-inline {
+    font-size:12px; font-weight:700; color:var(--rail,var(--text-mid)); white-space:nowrap;
   }
   .expense-type-badge {
     padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600;
     white-space:nowrap; flex-shrink:0; align-self:flex-start; margin-top:1px;
     display:inline-flex; align-items:center; justify-content:center; min-width:96px;
-  }
-  .expense-badge-stack .expense-type-badge {
-    width:max-content; min-width:92px; max-width:116px;
-    margin-top:0; align-self:flex-start; justify-content:flex-start;
-    padding:5px 12px; text-align:left;
-    font-size:13px; font-weight:700; line-height:1.3;
   }
   .badge-recurring   { background:var(--ok-bg);    color:var(--ok);    }
   .badge-investment  { background:var(--amber-bg);  color:var(--amber); }
@@ -387,14 +386,9 @@
   .expense-meta   { font-size:12px; color:var(--text-lo); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   .expense-category-badge {
     display:inline-flex; align-items:center; gap:3px;
-    background:var(--accent-bg); color:var(--accent-dk);
+    background:var(--cat-bg,var(--accent-bg)); color:var(--cat-ink,var(--accent-dk));
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
-    border:1px solid rgba(79,110,247,0.18); flex-shrink:0;
-  }
-  .expense-badge-stack .expense-category-badge {
-    min-width:92px; max-width:116px; align-self:flex-start; justify-content:flex-start;
-    padding:5px 12px; font-size:13px; line-height:1.3;
-    text-align:left; white-space:normal;
+    border:1px solid transparent; flex-shrink:0; white-space:nowrap;
   }
   .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
   .expense-amount.refund { color:var(--refund); }
@@ -440,17 +434,10 @@
     .expense-card {
       display:grid;
       grid-template-columns:minmax(0,1fr) auto auto;
-      grid-template-areas:
-        "badge amount menu"
-        "info info info";
-      row-gap:6px; column-gap:8px; align-items:center;
+      grid-template-areas:"info amount menu";
+      column-gap:8px; align-items:start;
     }
     .expense-card > .drag-handle { display:none; }
-    .expense-card > .expense-badge-stack {
-      grid-area:badge; width:116px; max-width:116px; min-width:0; flex-basis:auto;
-    }
-    .expense-badge-stack .expense-type-badge,
-    .expense-badge-stack .expense-category-badge { max-width:116px; }
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-amount { grid-area:amount; }
     .expense-card > .card-menu-wrap { grid-area:menu; }
@@ -643,9 +630,20 @@
     border-radius: var(--r-xl); padding: 14px 18px; margin-bottom: 20px;
   }
   .facilities-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 10px; cursor: pointer; user-select: none;
   }
+  .facilities-card.collapsed .facilities-head { margin-bottom: 0; }
+  .facilities-card.collapsed .facilities-list,
+  .facilities-card.collapsed .facilities-empty { display: none; }
+  .facilities-head-main { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .facilities-caret {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-lo); font-size: 11px; transition: transform .2s, color .15s;
+  }
+  .facilities-head:hover .facilities-caret { color: var(--accent); background: var(--accent-bg); }
+  .facilities-card.collapsed .facilities-caret { transform: rotate(-90deg); }
   .facilities-title { font-size: 18px; font-weight: 700; color: var(--text-hi); }
   .facilities-sub   { font-size: 13px; color: var(--text-lo); margin-top: 4px; }
   .facilities-list  { display: flex; flex-direction: column; gap: 6px; }
@@ -1281,6 +1279,21 @@ function typeBadgeClass(t) {
     : t==='refund' ? 'badge-refund'
     : 'badge-general';
 }
+// Type has no emoji on the card — the colour rail already carries it.
+function typeLabelPlain(t) {
+  return t==='recurring' ? 'ประจำ'
+    : t==='investment' ? 'ลงทุน'
+    : t==='maintenance' ? 'ซ่อมบำรุง'
+    : t==='refund' ? 'คืนเงิน'
+    : 'ทั่วไป';
+}
+function typeRailColor(t) {
+  return t==='recurring' ? 'var(--ok)'
+    : t==='investment' ? 'var(--amber)'
+    : t==='maintenance' ? 'var(--rose)'
+    : t==='refund' ? 'var(--refund)'
+    : 'var(--text-lo)';
+}
 const COST_CATEGORY_EMOJI = {
   'ส่วนกลาง': '🏘️',
   'สโมสร': '🏛️',
@@ -1302,6 +1315,11 @@ function costCategoryLabel(e) {
   const cat = costCategoryValue(e);
   const emoji = COST_CATEGORY_EMOJI[cat] || '✨';
   return `${emoji} ${cat}`;
+}
+// Tracked facilities keep their dashboard colour; everything else falls back to the accent tint.
+function costCategoryStyle(e) {
+  const f = FACILITIES.find(x => x.key === costCategoryValue(e));
+  return f ? `--cat-bg:${f.tint};--cat-ink:${f.ink}` : '';
 }
 function getExpenseDateMs(expense) {
   const value = expense?.date ? new Date(expense.date).getTime() : 0;
@@ -1545,12 +1563,52 @@ function renderMonthTxn() {
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? 'ไม่พบรายการจากทุกเดือน' : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
+// `tint`/`ink` give the card pills the same colour identity as the dashboard bars.
 const FACILITIES = [
-  { key: 'สระว่ายน้ำ',        label: 'สระว่ายน้ำ',        emoji: '🏊', color: '#0EA5E9' },
-  { key: 'ฟิตเนส',            label: 'ฟิตเนส',            emoji: '🏋️', color: '#7C3AED' },
-  { key: 'สโมสร',             label: 'สโมสร',             emoji: '🏛️', color: '#4F6EF7' },
-  { key: 'สวน / ภูมิทัศน์',   label: 'สวน & ภูมิทัศน์',  emoji: '🌳', color: '#16A34A' },
+  { key: 'สระว่ายน้ำ',        label: 'สระว่ายน้ำ',        emoji: '🏊', color: '#0EA5E9', tint: '#E0F2FE', ink: '#0369A1' },
+  { key: 'ฟิตเนส',            label: 'ฟิตเนส',            emoji: '🏋️', color: '#7C3AED', tint: '#EDE9FE', ink: '#5B21B6' },
+  { key: 'สโมสร',             label: 'สโมสร',             emoji: '🏛️', color: '#4F6EF7', tint: '#E5E9FE', ink: '#3B4FC4' },
+  { key: 'สวน / ภูมิทัศน์',   label: 'สวน & ภูมิทัศน์',  emoji: '🌳', color: '#16A34A', tint: '#DCFCE7', ink: '#15803D' },
 ];
+
+const FACILITIES_COLLAPSE_KEY = 'pattra_expense_facilities_collapsed_v1';
+let facilitiesCollapsed = { dashboard: false, expenses: false };
+try {
+  Object.assign(facilitiesCollapsed, JSON.parse(localStorage.getItem(FACILITIES_COLLAPSE_KEY) || '{}'));
+} catch (err) { /* corrupt value — keep the expanded default */ }
+
+function facilitiesHeadHtml(scope, subText, clearFnName) {
+  const clearBtn = clearFnName
+    ? `<button onclick="event.stopPropagation();${clearFnName}()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;flex-shrink:0;">✕ ล้าง filter</button>`
+    : '';
+  return `<div class="facilities-head" role="button" tabindex="0"
+      aria-expanded="${!facilitiesCollapsed[scope]}"
+      onclick="toggleFacilitiesCollapse('${scope}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFacilitiesCollapse('${scope}');}">
+      <div class="facilities-head-main">
+        <span class="facilities-caret" aria-hidden="true">▼</span>
+        <div>
+          <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
+          <div class="facilities-sub">${subText}</div>
+        </div>
+      </div>
+      ${clearBtn}
+    </div>`;
+}
+
+function toggleFacilitiesCollapse(scope) {
+  facilitiesCollapsed[scope] = !facilitiesCollapsed[scope];
+  try {
+    localStorage.setItem(FACILITIES_COLLAPSE_KEY, JSON.stringify(facilitiesCollapsed));
+  } catch (err) { /* private mode — collapse still works for this session */ }
+  const root = document.getElementById(
+    scope === 'dashboard' ? 'dashboardFacilitiesCard' : 'expensesFacilitiesCard');
+  if (!root) return;
+  const card = root.querySelector('.facilities-card');
+  if (card) card.classList.toggle('collapsed', facilitiesCollapsed[scope]);
+  const head = root.querySelector('.facilities-head');
+  if (head) head.setAttribute('aria-expanded', String(!facilitiesCollapsed[scope]));
+}
 
 let activeDashboardFacility = null;
 let activeDashboardType = null;
@@ -1599,14 +1657,9 @@ function renderDashboardFacilities() {
   const grandTotal = facilitiesTotal(filtered);
   const monthLabel = month ? `${MONTH_TH[parseInt(month.slice(5,7))-1]} ${month.slice(0,4)}` : 'ทั้งหมด';
   el.innerHTML = `
-    <div class="facilities-card">
-      <div class="facilities-head">
-        <div>
-          <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
-          <div class="facilities-sub">${monthLabel}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}</div>
-        </div>
-        ${activeDashboardFacility ? `<button onclick="clearDashboardFacilityFilter()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;">✕ ล้าง filter</button>` : ''}
-      </div>
+    <div class="facilities-card${facilitiesCollapsed.dashboard ? ' collapsed' : ''}">
+      ${facilitiesHeadHtml('dashboard', `${monthLabel}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}`,
+        activeDashboardFacility ? 'clearDashboardFacilityFilter' : '')}
       ${facilityRows(filtered, activeDashboardFacility, 'toggleDashboardFacilityFilter')}
     </div>`;
 }
@@ -1618,14 +1671,9 @@ function renderExpensesFacilities() {
   const yearly = expenses.filter(e => e?.date && new Date(e.date).getFullYear() === year);
   const grandTotal = facilitiesTotal(yearly);
   el.innerHTML = `
-    <div class="facilities-card">
-      <div class="facilities-head">
-        <div>
-          <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
-          <div class="facilities-sub">ปี ${year}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}</div>
-        </div>
-        ${activeExpensesFacility ? `<button onclick="clearExpensesFacilityFilter()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;">✕ ล้าง filter</button>` : ''}
-      </div>
+    <div class="facilities-card${facilitiesCollapsed.expenses ? ' collapsed' : ''}">
+      ${facilitiesHeadHtml('expenses', `ปี ${year}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}`,
+        activeExpensesFacility ? 'clearExpensesFacilityFilter' : '')}
       ${facilityRows(yearly, activeExpensesFacility, 'toggleExpensesFacilityFilter')}
     </div>`;
 }
@@ -2200,16 +2248,16 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
     ?`<div class="card-menu-wrap" onclick="event.stopPropagation()"><button class="card-kebab" title="แก้ไข / ลบ" onclick="toggleCardMenu(this)">⋯</button><div class="card-menu"><button onclick="closeCardMenus();openEditModal('${e.id}')">✏️ แก้ไข</button><button class="menu-danger" onclick="closeCardMenus();deleteExpense('${e.id}')">🗑 ลบ</button></div></div>`:'';
   const sd = `<span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
-  return `<div class="expense-card" data-id="${e.id}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
-    ${handleHtml}<div class="expense-badge-stack">
-      <span class="expense-type-badge ${typeBadgeClass(e.type)}">${typeLabel(e.type)}</span>
-      <span class="expense-category-badge">${costCategoryLabel(e)}</span>
-    </div>
-    <div class="expense-info">
+  return `<div class="expense-card" data-id="${e.id}" style="--rail:${typeRailColor(e.type)}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
+    ${handleHtml}<div class="expense-info">
       <div class="expense-title-row">
         <span class="expense-title">${escapeHtml(e.title)}</span>
       </div>
-      <div class="expense-meta"><span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}</div>
+      <div class="expense-meta">
+        <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
+        <span class="expense-category-badge" style="${costCategoryStyle(e)}">${costCategoryLabel(e)}</span>
+        <span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
+      </div>
       ${slipsHtml}
     </div>
     <div class="expense-amount${isRefundExpense(e) ? ' refund' : ''}">${fmtExpenseAmount(e)}</div>
@@ -2696,7 +2744,7 @@ function openDetail(id) {
       <span class="expense-type-badge ${typeBadgeClass(e.type)}" style="flex-shrink:0;margin-top:3px">${typeLabel(e.type)}</span>
       <div>
         <div style="font-size:19px;font-weight:700;color:var(--text-hi);line-height:1.3;margin-bottom:6px">${escapeHtml(e.title)}</div>
-        <span class="expense-category-badge">${costCategoryLabel(e)}</span>
+        <span class="expense-category-badge" style="${costCategoryStyle(e)}">${costCategoryLabel(e)}</span>
       </div>
     </div>
     <div style="background:var(--bg);border-radius:var(--r-md);padding:14px 16px;margin-bottom:16px">
@@ -2869,6 +2917,7 @@ Object.assign(window, {
   toggleDashboardFacilityFilter,
   toggleDashboardTypeFilter,
   toggleExpensesFacilityFilter,
+  toggleFacilitiesCollapse,
   clearAnnualTypeFilter,
   clearDashboardFacilityFilter,
   clearExpensesFacilityFilter,
