@@ -107,6 +107,9 @@
   .section-title  { font-family:var(--font-display); font-size:21px; font-weight:600; color:var(--text-hi); letter-spacing:.01em; }
   .section-title .title-month { font-family:var(--font-num); font-weight:600; font-size:0.92em; }
   .section-sub    { font-size:12px; color:var(--text-lo); margin-top:2px; }
+  .summary-head   { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+  .summary-section.collapsed .stats-grid    { display:none; }
+  .summary-section.collapsed .section-header { margin-bottom:0; }
 
   /* ── BUTTONS ── */
   .btn {
@@ -636,13 +639,16 @@
   .facilities-card.collapsed .facilities-list,
   .facilities-card.collapsed .facilities-empty { display: none; }
   .facilities-head-main { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .facilities-caret {
+  /* Shared by every collapsible section (facilities card, monthly summary). */
+  .collapse-caret {
     flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     color: var(--text-lo); font-size: 11px; transition: transform .2s, color .15s;
   }
-  .facilities-head:hover .facilities-caret { color: var(--accent); background: var(--accent-bg); }
-  .facilities-card.collapsed .facilities-caret { transform: rotate(-90deg); }
+  .facilities-head:hover .collapse-caret,
+  .summary-head:hover .collapse-caret { color: var(--accent); background: var(--accent-bg); }
+  .facilities-card.collapsed .collapse-caret,
+  .summary-section.collapsed .collapse-caret { transform: rotate(-90deg); }
   .facilities-title { font-size: 18px; font-weight: 700; color: var(--text-hi); }
   .facilities-sub   { font-size: 13px; color: var(--text-lo); margin-top: 4px; }
   .facilities-list  { display: flex; flex-direction: column; gap: 6px; }
@@ -759,13 +765,17 @@
   <div id="pageDashboard">
     <div id="monthHeroCard"></div>
 
-    <div class="section-header" style="margin-top:8px">
-      <div>
-        <div class="section-title">สรุปรายเดือน</div>
-        <div class="section-sub" id="yearSubLabel"></div>
+    <div id="monthSummarySection" class="summary-section">
+      <div class="section-header" style="margin-top:8px">
+        <div class="summary-head" role="button" tabindex="0" aria-expanded="true"
+             aria-controls="statCards" onclick="toggleSummaryCollapse()"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSummaryCollapse();}">
+          <span class="collapse-caret" aria-hidden="true">▼</span>
+          <div class="section-title">สรุปรายเดือน</div>
+        </div>
       </div>
+      <div class="stats-grid" id="statCards"></div>
     </div>
-    <div class="stats-grid" id="statCards"></div>
     <div id="dashboardFacilitiesCard"></div>
 
     <div class="section-header">
@@ -1335,9 +1345,28 @@ function compareExpensesManual(a, b) {
   return compareExpensesDesc(a, b);
 }
 
+const SUMMARY_COLLAPSE_KEY = 'pattra_expense_summary_collapsed_v1';
+let summaryCollapsed = localStorage.getItem(SUMMARY_COLLAPSE_KEY) === '1';
+
+function applySummaryCollapse() {
+  const section = document.getElementById('monthSummarySection');
+  if (!section) return;
+  section.classList.toggle('collapsed', summaryCollapsed);
+  const head = section.querySelector('.summary-head');
+  if (head) head.setAttribute('aria-expanded', String(!summaryCollapsed));
+}
+
+function toggleSummaryCollapse() {
+  summaryCollapsed = !summaryCollapsed;
+  try {
+    localStorage.setItem(SUMMARY_COLLAPSE_KEY, summaryCollapsed ? '1' : '0');
+  } catch (err) { /* private mode — collapse still works for this session */ }
+  applySummaryCollapse();
+}
+
 function renderDashboard() {
   const {yr,mi} = getMonthFilter();
-  document.getElementById('yearSubLabel').textContent = '';
+  applySummaryCollapse();
   const monthly = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
   const rec = monthly.filter(e=>e.type==='recurring').reduce((s,e)=>s+Number(e.amount||0),0);
   const inv = monthly.filter(e=>e.type==='investment').reduce((s,e)=>s+Number(e.amount||0),0);
@@ -1566,7 +1595,7 @@ function facilitiesHeadHtml(scope, subText, clearFnName) {
       onclick="toggleFacilitiesCollapse('${scope}')"
       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFacilitiesCollapse('${scope}');}">
       <div class="facilities-head-main">
-        <span class="facilities-caret" aria-hidden="true">▼</span>
+        <span class="collapse-caret" aria-hidden="true">▼</span>
         <div>
           <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
           <div class="facilities-sub">${subText}</div>
@@ -2898,6 +2927,7 @@ Object.assign(window, {
   toggleDashboardTypeFilter,
   toggleExpensesFacilityFilter,
   toggleFacilitiesCollapse,
+  toggleSummaryCollapse,
   clearAnnualTypeFilter,
   clearDashboardFacilityFilter,
   clearExpensesFacilityFilter,
