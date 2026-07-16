@@ -128,8 +128,8 @@
   /* ── HERO CARD ── */
   .month-hero {
     background:var(--surface2); border:1px solid var(--border); border-radius:var(--r-xl);
-    padding:28px 32px; display:flex; align-items:center;
-    justify-content:space-between; gap:24px; margin-bottom:20px;
+    padding:16px 20px; display:flex; align-items:center;
+    justify-content:space-between; gap:18px; margin-bottom:14px;
     position:relative; overflow:hidden;
   }
   .month-hero::before {
@@ -142,11 +142,11 @@
     width:140px; height:140px; border-radius:50%;
     background:rgba(196,122,44,0.04); pointer-events:none;
   }
-  .hero-label  { font-size:11px; font-weight:600; color:var(--accent); letter-spacing:.18em; text-transform:uppercase; margin-bottom:4px; }
-  .hero-month  { font-size:16px; font-weight:500; color:var(--text-mid); margin-bottom:10px; }
-  .hero-amount { font-family:var(--font-num); font-size:38px; font-weight:700; color:var(--text-hi); line-height:1; letter-spacing:-1px; }
-  .hero-amount span { font-size:20px; font-weight:500; margin-right:3px; color:var(--accent); }
-  .hero-chips  { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .hero-label  { font-size:10px; font-weight:600; color:var(--accent); letter-spacing:.14em; text-transform:uppercase; margin-bottom:1px; }
+  .hero-month  { font-size:13px; font-weight:500; color:var(--text-mid); margin-bottom:5px; }
+  .hero-amount { font-family:var(--font-num); font-size:30px; font-weight:700; color:var(--text-hi); line-height:1; letter-spacing:-.7px; }
+  .hero-amount span { font-size:17px; font-weight:500; margin-right:2px; color:var(--accent); }
+  .hero-chips  { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
   .hero-chip {
     background:var(--accent-bg); border:1px solid var(--border); border-radius:99px;
     padding:4px 12px; font-size:12px; font-weight:500; color:var(--accent-dk);
@@ -154,8 +154,8 @@
   }
   .hero-chip-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
   .hero-right    { text-align:right; flex-shrink:0; }
-  .hero-count    { font-family:var(--font-num); font-size:40px; font-weight:700; color:var(--accent); line-height:1; }
-  .hero-count-lbl { font-size:12px; color:var(--text-mid); margin-top:3px; }
+  .hero-count    { font-family:var(--font-num); font-size:28px; font-weight:700; color:var(--accent); line-height:1; }
+  .hero-count-lbl { font-size:11px; color:var(--text-mid); margin-top:2px; }
   .annual-chart-card {
     background:var(--surface); border:1px solid var(--border);
     border-radius:var(--r-xl); padding:24px; margin-bottom:20px;
@@ -200,18 +200,17 @@
   .annual-legend-pct { font-size:13px; font-weight:600; color:var(--text-mid); }
   .annual-legend-amt { font-size:13px; font-weight:700; color:var(--text-hi); }
   @media(max-width:520px) {
-    .month-hero { align-items:flex-start; gap:14px; padding:24px 26px; }
+    .month-hero { align-items:center; gap:12px; padding:14px 16px; border-radius:var(--r-lg); }
     .hero-right {
-      align-self:flex-start; text-align:left;
-      display:inline-flex; align-items:baseline; gap:5px;
-      background:var(--accent-bg); border:1px solid var(--border); border-radius:99px;
-      padding:6px 12px;
+      align-self:center; text-align:right;
+      display:block; background:transparent; border:0; padding:0;
     }
-    .hero-month { font-size:18px; font-weight:600; margin-bottom:8px; }
-    .hero-amount { font-size:30px; }
-    .hero-amount span { font-size:18px; }
-    .hero-count { font-size:24px; font-weight:600; }
-    .hero-count-lbl { font-size:11px; margin-top:0; color:var(--text-mid); }
+    .hero-label { font-size:9px; letter-spacing:.1em; }
+    .hero-month { font-size:12px; font-weight:500; margin-bottom:4px; }
+    .hero-amount { font-size:25px; }
+    .hero-amount span { font-size:15px; }
+    .hero-count { font-size:22px; font-weight:700; }
+    .hero-count-lbl { font-size:10px; margin-top:1px; color:var(--text-mid); }
   }
   @media(max-width:900px) {
     .annual-chart-layout { grid-template-columns:1fr; }
@@ -629,11 +628,11 @@
   /* ── FACILITIES DASHBOARD ── */
   .facilities-card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r-xl); padding: 14px 18px; margin-bottom: 20px;
+    border-radius: var(--r-xl); padding: 10px 12px; margin-bottom: 14px;
   }
   .facilities-head {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    margin-bottom: 10px; cursor: pointer; user-select: none;
+    margin-bottom: 8px; cursor: pointer; user-select: none;
   }
   .facilities-card.collapsed .facilities-head { margin-bottom: 0; }
   .facilities-card.collapsed .facilities-list,
@@ -649,12 +648,13 @@
   .summary-head:hover .collapse-caret { color: var(--accent); background: var(--accent-bg); }
   .facilities-card.collapsed .collapse-caret,
   .summary-section.collapsed .collapse-caret { transform: rotate(-90deg); }
-  .facilities-title { font-size: 18px; font-weight: 700; color: var(--text-hi); }
-  .facilities-sub   { font-size: 13px; color: var(--text-lo); margin-top: 4px; }
-  .facilities-list  { display: flex; flex-direction: column; gap: 6px; }
+  .facilities-head-text { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
+  .facilities-title { font-size: 16px; font-weight: 700; color: var(--text-hi); }
+  .facilities-sub   { font-size: 13px; color: var(--text-lo); }
+  .facilities-list  { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
   .facility-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 7px 10px; border-radius: var(--r-sm);
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 9px; border-radius: var(--r-sm);
     border: 1.5px solid transparent; cursor: pointer;
     transition: background .15s, border-color .15s;
     background: var(--bg);
@@ -663,20 +663,31 @@
   .facility-row.active { background: var(--accent-bg); border-color: var(--accent); }
   .facility-emoji { font-size: 16px; flex-shrink: 0; width: 24px; height: 24px; display:flex; align-items:center; justify-content:center; }
   .facility-info  { flex: 1; min-width: 0; }
-  .facility-name  { font-size: 14px; font-weight: 700; color: var(--text-hi); margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
-  .facility-amt   { font-size: 14px; font-weight: 700; color: var(--text-hi); white-space: nowrap; }
+  .facility-name  { font-size: 13px; font-weight: 700; color: var(--text-hi); margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .facility-amt   { font-size: 13px; font-weight: 700; color: var(--text-hi); white-space: nowrap; }
   .facility-bar-track {
-    height: 5px; background: var(--border); border-radius: 99px; overflow: hidden;
+    height: 4px; background: var(--border); border-radius: 99px; overflow: hidden;
   }
   .facility-bar-fill {
     height: 100%; border-radius: 99px;
     transition: width .4s cubic-bezier(.4,0,.2,1);
   }
-  .facility-count { font-size: 10.5px; color: var(--text-lo); margin-top: 2px; }
+  .facility-count { font-size: 11px; font-weight: 500; color: var(--text-lo); margin-left: 6px; white-space: nowrap; }
   .facility-row.active .facility-name { color: var(--accent-dk); }
   .facility-row.active .facility-amt  { color: var(--accent-dk); }
   .facility-row.active .facility-bar-track { background: rgba(79,110,247,0.15); }
   .facilities-empty { font-size: 13px; color: var(--text-lo); text-align: center; padding: 12px 0; }
+  @media(max-width:520px) {
+    .facilities-card { padding:9px; border-radius:var(--r-lg); }
+    .facilities-head-text { gap:5px; }
+    .facilities-title { font-size:14px; }
+    .facilities-sub { font-size:11px; }
+    .facility-row { gap:5px; padding:7px 6px; }
+    .facility-emoji { width:20px; height:22px; font-size:14px; }
+    .facility-name { display:block; font-size:11.5px; margin-bottom:4px; }
+    .facility-count { display:block; margin-left:0; font-size:9.5px; }
+    .facility-amt { display:block; margin-top:2px; font-size:12px; }
+  }
 
   /* ── FAB ── */
   .fab {
@@ -1596,7 +1607,7 @@ function facilitiesHeadHtml(scope, subText, clearFnName) {
       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFacilitiesCollapse('${scope}');}">
       <div class="facilities-head-main">
         <span class="collapse-caret" aria-hidden="true">▼</span>
-        <div>
+        <div class="facilities-head-text">
           <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
           <div class="facilities-sub">${subText}</div>
         </div>
@@ -1642,13 +1653,12 @@ function facilityRows(sourceItems, activeKey, clickFnName) {
       <div class="facility-emoji">${d.emoji}</div>
       <div class="facility-info">
         <div class="facility-name">
-          <span>${d.label}</span>
+          <span>${d.label}<span class="facility-count">· ${d.count > 0 ? d.count + ' รายการ' : 'ยังไม่มีรายการ'}</span></span>
           <span class="facility-amt">${d.total !== 0 ? fmtNet(d.total) : '—'}</span>
         </div>
         <div class="facility-bar-track">
           <div class="facility-bar-fill" style="width:${pct}%;background:${d.color}"></div>
         </div>
-        <div class="facility-count">${d.count > 0 ? d.count + ' รายการ' : 'ยังไม่มีรายการ'}</div>
       </div>
     </div>`;
   }).join('')}</div>`;
