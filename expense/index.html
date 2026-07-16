@@ -370,25 +370,24 @@
   .expense-type-inline {
     font-size:12px; font-weight:700; color:var(--rail,var(--text-mid)); white-space:nowrap;
   }
-  .expense-type-badge {
-    padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600;
-    white-space:nowrap; flex-shrink:0; align-self:flex-start; margin-top:1px;
-    display:inline-flex; align-items:center; justify-content:center; min-width:96px;
+  /* Detail modal header — same rail language as the cards. */
+  .detail-head { position:relative; padding-left:14px; margin-bottom:18px; }
+  .detail-head::before {
+    content:''; position:absolute; left:0; top:2px; bottom:2px; width:3px;
+    border-radius:0 3px 3px 0; background:var(--rail,var(--text-lo));
   }
-  .badge-recurring   { background:var(--ok-bg);    color:var(--ok);    }
-  .badge-investment  { background:var(--amber-bg);  color:var(--amber); }
-  .badge-maintenance { background:var(--rose-bg);   color:var(--rose);  }
-  .badge-general     { background:var(--violet-bg); color:var(--violet); }
-  .badge-refund      { background:var(--refund-bg); color:var(--refund); }
+  .detail-head-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+  .detail-head-title { font-size:19px; font-weight:700; color:var(--text-hi); line-height:1.3; }
   .expense-info   { flex:1; min-width:0; }
   .expense-title-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:3px; }
   .expense-title  { font-size:15.5px; font-weight:700; color:var(--text-hi); line-height:1.3; }
   .expense-meta   { font-size:12px; color:var(--text-lo); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  /* Neutral on purpose — colour on a card means expense type, nothing else. */
   .expense-category-badge {
     display:inline-flex; align-items:center; gap:3px;
-    background:var(--cat-bg,var(--accent-bg)); color:var(--cat-ink,var(--accent-dk));
+    background:var(--surface2); color:var(--text-mid);
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
-    border:1px solid transparent; flex-shrink:0; white-space:nowrap;
+    flex-shrink:0; white-space:nowrap;
   }
   .expense-amount { font-family:var(--font-num); font-size:16px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
   .expense-amount.refund { color:var(--refund); }
@@ -1265,21 +1264,7 @@ function fmtDate(d) {
   const dt = new Date(d);
   return `${dt.getDate()} ${MONTH_SH[dt.getMonth()]} ${dt.getFullYear()}`;
 }
-function typeLabel(t) {
-  return t==='recurring' ? '🔄 ประจำ'
-    : t==='investment' ? '📈 ลงทุน'
-    : t==='maintenance' ? '🔧 ซ่อมบำรุง'
-    : t==='refund' ? '↩️ คืนเงิน'
-    : '🟤 ทั่วไป';
-}
-function typeBadgeClass(t) {
-  return t==='recurring' ? 'badge-recurring'
-    : t==='investment' ? 'badge-investment'
-    : t==='maintenance' ? 'badge-maintenance'
-    : t==='refund' ? 'badge-refund'
-    : 'badge-general';
-}
-// Type has no emoji on the card — the colour rail already carries it.
+// Type carries no emoji — the colour rail already identifies it.
 function typeLabelPlain(t) {
   return t==='recurring' ? 'ประจำ'
     : t==='investment' ? 'ลงทุน'
@@ -1315,11 +1300,6 @@ function costCategoryLabel(e) {
   const cat = costCategoryValue(e);
   const emoji = COST_CATEGORY_EMOJI[cat] || '✨';
   return `${emoji} ${cat}`;
-}
-// Tracked facilities keep their dashboard colour; everything else falls back to the accent tint.
-function costCategoryStyle(e) {
-  const f = FACILITIES.find(x => x.key === costCategoryValue(e));
-  return f ? `--cat-bg:${f.tint};--cat-ink:${f.ink}` : '';
 }
 function getExpenseDateMs(expense) {
   const value = expense?.date ? new Date(expense.date).getTime() : 0;
@@ -1563,12 +1543,12 @@ function renderMonthTxn() {
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? 'ไม่พบรายการจากทุกเดือน' : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
-// `tint`/`ink` give the card pills the same colour identity as the dashboard bars.
+// `color` is the dashboard bar only — cards deliberately don't tint by facility.
 const FACILITIES = [
-  { key: 'สระว่ายน้ำ',        label: 'สระว่ายน้ำ',        emoji: '🏊', color: '#0EA5E9', tint: '#E0F2FE', ink: '#0369A1' },
-  { key: 'ฟิตเนส',            label: 'ฟิตเนส',            emoji: '🏋️', color: '#7C3AED', tint: '#EDE9FE', ink: '#5B21B6' },
-  { key: 'สโมสร',             label: 'สโมสร',             emoji: '🏛️', color: '#4F6EF7', tint: '#E5E9FE', ink: '#3B4FC4' },
-  { key: 'สวน / ภูมิทัศน์',   label: 'สวน & ภูมิทัศน์',  emoji: '🌳', color: '#16A34A', tint: '#DCFCE7', ink: '#15803D' },
+  { key: 'สระว่ายน้ำ',        label: 'สระว่ายน้ำ',        emoji: '🏊', color: '#0EA5E9' },
+  { key: 'ฟิตเนส',            label: 'ฟิตเนส',            emoji: '🏋️', color: '#7C3AED' },
+  { key: 'สโมสร',             label: 'สโมสร',             emoji: '🏛️', color: '#4F6EF7' },
+  { key: 'สวน / ภูมิทัศน์',   label: 'สวน & ภูมิทัศน์',  emoji: '🌳', color: '#16A34A' },
 ];
 
 const FACILITIES_COLLAPSE_KEY = 'pattra_expense_facilities_collapsed_v1';
@@ -2255,7 +2235,7 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
       </div>
       <div class="expense-meta">
         <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
-        <span class="expense-category-badge" style="${costCategoryStyle(e)}">${costCategoryLabel(e)}</span>
+        <span class="expense-category-badge">${costCategoryLabel(e)}</span>
         <span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
       </div>
       ${slipsHtml}
@@ -2740,12 +2720,12 @@ function openDetail(id) {
   const detailHtml = e.detail ? escapeHtml(e.detail) : '';
   const noteHtml = e.note ? escapeHtml(e.note) : '';
   document.getElementById('detailContent').innerHTML=`
-    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px">
-      <span class="expense-type-badge ${typeBadgeClass(e.type)}" style="flex-shrink:0;margin-top:3px">${typeLabel(e.type)}</span>
-      <div>
-        <div style="font-size:19px;font-weight:700;color:var(--text-hi);line-height:1.3;margin-bottom:6px">${escapeHtml(e.title)}</div>
-        <span class="expense-category-badge" style="${costCategoryStyle(e)}">${costCategoryLabel(e)}</span>
+    <div class="detail-head" style="--rail:${typeRailColor(e.type)}">
+      <div class="detail-head-meta">
+        <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
+        <span class="expense-category-badge">${costCategoryLabel(e)}</span>
       </div>
+      <div class="detail-head-title">${escapeHtml(e.title)}</div>
     </div>
     <div style="background:var(--bg);border-radius:var(--r-md);padding:14px 16px;margin-bottom:16px">
       <div style="font-size:11px;font-weight:600;color:var(--text-lo);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">จำนวนเงิน</div>
