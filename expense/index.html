@@ -142,8 +142,9 @@
     width:140px; height:140px; border-radius:50%;
     background:rgba(196,122,44,0.04); pointer-events:none;
   }
-  .hero-label  { font-size:12px; font-weight:600; color:var(--accent-dk); letter-spacing:0; line-height:1.35; margin-bottom:2px; }
-  .hero-month  { font-size:14px; font-weight:500; color:var(--text-mid); line-height:1.35; margin-bottom:6px; }
+  .hero-heading-line { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
+  .hero-label  { font-size:12px; font-weight:600; color:var(--accent-dk); letter-spacing:0; line-height:1.35; }
+  .hero-month  { font-size:12px; font-weight:500; color:var(--text-lo); line-height:1.35; }
   .hero-amount { font-family:var(--font-num); font-size:32px; font-weight:700; color:var(--text-hi); line-height:1.02; letter-spacing:-.01em; }
   .hero-amount span { font-size:15px; font-weight:600; margin-right:4px; color:var(--accent-dk); vertical-align:10%; }
   .hero-chips  { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
@@ -198,8 +199,9 @@
   .annual-legend-amt { font-size:13px; font-weight:700; color:var(--text-hi); }
   @media(max-width:520px) {
     .month-hero { align-items:center; gap:12px; padding:14px 16px; border-radius:var(--r-lg); }
+    .hero-heading-line { gap:6px; margin-bottom:6px; }
     .hero-label { font-size:11px; letter-spacing:0; }
-    .hero-month { font-size:13px; font-weight:500; margin-bottom:5px; }
+    .hero-month { font-size:11px; font-weight:500; }
     .hero-amount { font-size:28px; line-height:1.04; }
     .hero-amount span { font-size:14px; }
   }
@@ -1490,8 +1492,10 @@ function renderExpensesHero(list) {
   document.getElementById('expensesHeroCard').innerHTML = `
     <div class="month-hero">
       <div>
-        <div class="hero-label">รายจ่ายสุทธิ</div>
-        <div class="hero-month">สรุปค่าใช้จ่ายรายปี ${year}</div>
+        <div class="hero-heading-line">
+          <div class="hero-label">รายจ่ายสุทธิ</div>
+          <div class="hero-month">สรุปค่าใช้จ่ายรายปี ${year}</div>
+        </div>
         <div class="hero-amount">${heroAmountHtml(total)}</div>
         <div class="hero-chips">
           ${recurring>0?`<div class="hero-chip"><div class="hero-chip-dot" style="background:#6ee7b7"></div>ประจำ ${fmt(recurring)}</div>`:''}
@@ -1518,8 +1522,10 @@ function renderMonthHero() {
   document.getElementById('monthHeroCard').innerHTML = `
     <div class="month-hero">
       <div>
-        <div class="hero-label">รายจ่ายสุทธิประจำเดือน</div>
-        <div class="hero-month">${MONTH_TH[mi]} ${yr}</div>
+        <div class="hero-heading-line">
+          <div class="hero-label">รายจ่ายสุทธิประจำเดือน</div>
+          <div class="hero-month">${MONTH_TH[mi]} ${yr}</div>
+        </div>
         <div class="hero-amount">${heroAmountHtml(tot)}</div>
       </div>
     </div>`;
