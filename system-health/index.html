@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#17211d">
+  <meta name="theme-color" content="#f4efe5">
   <title>System Health · Pattra Villa 8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,6 +82,9 @@
       min-width: 220px; border: 1px solid var(--line); background: var(--card);
       border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow);
     }
+    .overall.online { background: #e1f4e8; border-color: #78bd91; }
+    .overall.warning, .overall.rebooting { background: #fff2d5; border-color: #dfad55; }
+    .overall.offline { background: #fde5e1; border-color: #d7847b; }
     .overall-line { display: flex; align-items: center; gap: 11px; }
     .signal {
       width: 12px; height: 12px; border-radius: 50%; background: var(--unknown);
@@ -98,38 +101,46 @@
     .section-head span { color: var(--muted); font-size: 12px; }
     .camera-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
     .camera-card {
-      position: relative; overflow: hidden; background: var(--ink); color: #f8f2e7;
-      border-radius: 22px; padding: 24px; min-height: 330px; box-shadow: 0 24px 65px rgba(20,31,26,.18);
+      position: relative; overflow: hidden; background: #fffdf8; color: var(--ink);
+      border: 1px solid var(--line); border-top: 7px solid var(--unknown);
+      border-radius: 22px; padding: 21px 24px 24px; min-height: 330px; box-shadow: var(--shadow);
       animation: rise .5s ease both;
     }
+    .camera-card.online { background: #effaf2; border-color: #92cda7; border-top-color: var(--online); }
+    .camera-card.warning, .camera-card.rebooting { background: #fff8e8; border-color: #e6c174; border-top-color: var(--warning); }
+    .camera-card.offline { background: #fff1ef; border-color: #e3aaa4; border-top-color: var(--offline); }
     .camera-card:nth-child(2) { animation-delay: .08s; }
     @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
     .camera-card::after {
       content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%;
-      right: -120px; top: -130px; background: radial-gradient(circle, rgba(186,123,53,.25), transparent 68%);
+      right: -120px; top: -130px; background: radial-gradient(circle, rgba(186,123,53,.14), transparent 68%);
     }
     .cam-top { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-    .cam-port { color: #d7a363; font: 500 12px "IBM Plex Mono", monospace; letter-spacing: .14em; }
+    .cam-port { color: #9d6425; font: 500 12px "IBM Plex Mono", monospace; letter-spacing: .14em; }
     .cam-name { margin-top: 6px; font-size: 20px; font-weight: 600; }
     .status-pill {
-      display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.07); padding: 7px 11px; border-radius: 999px;
-      font: 500 11px "IBM Plex Mono", monospace; text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line);
+      background: white; padding: 8px 13px; border-radius: 999px;
+      font: 700 12px "IBM Plex Mono", monospace; text-transform: uppercase;
     }
+    .status-pill.online { color: white; background: #218a52; border-color: #218a52; box-shadow: 0 7px 18px rgba(33,138,82,.25); }
+    .status-pill.warning, .status-pill.rebooting { color: #3f2a08; background: #f0b84f; border-color: #f0b84f; }
+    .status-pill.offline { color: white; background: #c84f43; border-color: #c84f43; }
+    .status-pill .signal { width: 9px; height: 9px; background: currentColor; box-shadow: 0 0 0 4px rgba(255,255,255,.18); animation: none; }
     .cam-metrics { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 30px 0 24px; }
-    .metric { border-top: 1px solid rgba(255,255,255,.16); padding-top: 12px; min-width: 0; }
-    .metric span { display: block; color: #aeb8b2; font-size: 11px; margin-bottom: 5px; }
+    .metric { border-top: 1px solid var(--line); padding-top: 12px; min-width: 0; }
+    .metric span { display: block; color: var(--muted); font-size: 11px; margin-bottom: 5px; }
     .metric b { display: block; font: 500 12px/1.45 "IBM Plex Mono", monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cam-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 23px; }
-    .check-chip { border-radius: 7px; padding: 6px 9px; font-size: 11px; background: rgba(255,255,255,.07); color: #aeb8b2; }
-    .check-chip.ok { color: #92d3ad; background: rgba(60,140,97,.16); }
+    .check-chip { border-radius: 7px; padding: 6px 9px; font-size: 11px; background: #ebe7de; color: #675f54; }
+    .check-chip.ok { color: #176d40; background: #d7efdf; font-weight: 600; }
     .reboot-btn {
-      position: relative; z-index: 1; width: 100%; border: 1px solid rgba(215,163,99,.45);
-      color: #f4c58f; background: rgba(186,123,53,.1); border-radius: 11px; padding: 12px 15px;
+      position: relative; z-index: 1; width: 100%; border: 1px solid #c79456;
+      color: #86551e; background: #fff8eb; border-radius: 11px; padding: 12px 15px;
       cursor: pointer; font-weight: 600; transition: .2s ease;
     }
     .reboot-btn:hover { background: #ba7b35; color: white; border-color: #ba7b35; }
-    .reboot-btn:disabled { color: #8f9792; border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.04); cursor: not-allowed; }
+    .reboot-btn:disabled { color: #99948b; border-color: #d8d3ca; background: #eeeae3; cursor: not-allowed; }
     .component-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
     .component-card {
       background: var(--card); border: 1px solid var(--line); border-radius: 15px;
@@ -299,14 +310,15 @@
     function render() {
       if (!summary) return;
       const overall = summary.overallStatus || "unknown";
+      document.querySelector(".overall").className = `overall ${overall}`;
       document.getElementById("overallSignal").className = `signal ${overall}`;
       document.getElementById("overallLabel").textContent = OVERALL_TEXT[overall] || OVERALL_TEXT.unknown;
       document.getElementById("overallTime").textContent = `LAST CHECK ${formatTime(summary.lastProbeEpoch, "—")}`;
       document.getElementById("cameraGrid").innerHTML = (summary.cameras || []).map(camera => {
         const status = camera.status || "unknown";
         const disable = status === "rebooting" || (camera.reboot?.requestedEpoch && Date.now() - camera.reboot.requestedEpoch < 5 * 60 * 1000);
-        return `<article class="camera-card">
-          <div class="cam-top"><div><div class="cam-port">PORT ${escapeHtml(camera.cameraId)}</div><div class="cam-name">${escapeHtml(camera.label)} · ANPR</div></div><div class="status-pill"><span class="signal ${status}"></span>${STATUS_TEXT[status] || "Unknown"}</div></div>
+        return `<article class="camera-card ${status}">
+          <div class="cam-top"><div><div class="cam-port">PORT ${escapeHtml(camera.cameraId)}</div><div class="cam-name">${escapeHtml(camera.label)} · ANPR</div></div><div class="status-pill ${status}"><span class="signal ${status}"></span>${STATUS_TEXT[status] || "Unknown"}</div></div>
           <div class="cam-metrics">
             <div class="metric"><span>ANPR event ล่าสุด</span><b title="${escapeHtml(formatTime(camera.lastAnprEventEpoch))}">${escapeHtml(relativeTime(camera.lastAnprEventEpoch))}</b></div>
             <div class="metric"><span>ตรวจระบบล่าสุด</span><b>${escapeHtml(relativeTime(camera.checkedEpoch))}</b></div>
