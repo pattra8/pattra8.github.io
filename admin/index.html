@@ -2884,6 +2884,7 @@
       return;
     }
     localStorage.removeItem(RESIDENT_SESSION_KEY);
+    localStorage.removeItem('pattra_admin_access_v1');
     clearAdminResidentCache();
     location.href = '/';
   }
@@ -5589,26 +5590,61 @@
   // ─────────────────────────────────────────────────────────────────────────
 
   // Session guard — verify current permissions with the central access matrix.
-  (async function() {
+  // The dashboard paints from the last known answer first (the matrix call
+  // costs ~2s on a cold function) and the live check runs behind it, kicking
+  // the page back to / if access was revoked. Every panel re-authorises
+  // server-side on its own calls, so this only moves the paint earlier.
+  const ADMIN_ACCESS_CACHE_KEY = 'pattra_admin_access_v1';
+  const ADMIN_ACCESS_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+
+  function readCachedAdminAccess(houseNo) {
     try {
-      const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
-      if (!s || Number(s.expiresAt) <= Date.now() || !s.houseNo || !s.pin) {
-        location.href = '/'; return;
-      }
+      const c = JSON.parse(localStorage.getItem(ADMIN_ACCESS_CACHE_KEY) || 'null');
+      if (!c || c.houseNo !== houseNo) return null;
+      if (Date.now() - Number(c.cachedAt || 0) > ADMIN_ACCESS_CACHE_TTL) return null;
+      return c.access;
+    } catch { return null; }
+  }
+  function writeCachedAdminAccess(houseNo, access) {
+    try {
+      if (!access) { localStorage.removeItem(ADMIN_ACCESS_CACHE_KEY); return; }
+      localStorage.setItem(ADMIN_ACCESS_CACHE_KEY,
+          JSON.stringify({houseNo, access, cachedAt: Date.now()}));
+    } catch { /* quota / private mode — cache is optional */ }
+  }
+  const hasPortal = (a) => Boolean(a?.active && a?.permissions?.['admin.portal']);
+
+  (async function() {
+    const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
+    if (!s || Number(s.expiresAt) <= Date.now() || !s.houseNo || !s.pin) {
+      location.href = '/'; return;
+    }
+    const live = (async () => {
       const response = await fetch(ADMIN_ACCESS_URL, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'resolve', houseNo: s.houseNo, pin: s.pin})
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok ||
-          !data.access?.active ||
-          !data.access?.permissions?.['admin.portal']) {
-        location.href = '/'; return;
-      }
-      showDashboard(data.access);
+      const access = response.ok && data.ok ? data.access : null;
+      writeCachedAdminAccess(s.houseNo, access);
+      return access;
+    })();
+
+    const cached = readCachedAdminAccess(s.houseNo);
+    if (hasPortal(cached)) {
+      showDashboard(cached);
+      // Revoked while we were painting? Bounce. Network errors leave the
+      // dashboard up — the server rejects anything it shouldn't serve.
+      live.then((access) => { if (!hasPortal(access)) location.href = '/'; })
+          .catch(() => {});
       return;
-    } catch { location.href = '/'; return; }
+    }
+    try {
+      const access = await live;
+      if (!hasPortal(access)) { location.href = '/'; return; }
+      showDashboard(access);
+    } catch { location.href = '/'; }
   })();
 </script>
 
