@@ -1713,6 +1713,34 @@ function storeResidentSession(houseNo, pin, residentName) {
 }
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
 
+// ── Admin access cache ──
+// The matrix call costs ~2s on a cold function, so the cards used to pop in
+// late. Cache the last resolved access and paint from it immediately, then
+// revalidate in the background. Purely cosmetic — every admin page re-sends
+// {houseNo, pin} and the backend enforces the real permission check.
+const ADMIN_ACCESS_CACHE_KEY = 'pattra_admin_access_v1';
+const ADMIN_ACCESS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function getCachedAdminAccess(houseNo) {
+  try {
+    const c = JSON.parse(localStorage.getItem(ADMIN_ACCESS_CACHE_KEY) || 'null');
+    if (!c || c.houseNo !== houseNo) return null;
+    if (Date.now() - Number(c.cachedAt || 0) > ADMIN_ACCESS_TTL_MS) return null;
+    return c.access;
+  } catch { return null; }
+}
+function storeCachedAdminAccess(houseNo, access) {
+  try {
+    if (!access) { localStorage.removeItem(ADMIN_ACCESS_CACHE_KEY); return; }
+    localStorage.setItem(ADMIN_ACCESS_CACHE_KEY, JSON.stringify({
+      houseNo, access, cachedAt: Date.now()
+    }));
+  } catch { /* quota / private mode — cache is optional */ }
+}
+function clearCachedAdminAccess() {
+  localStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
+}
+
 let currentAdminAccess = null;
 async function resolveAdminAccess() {
   const resident = getResidentSession();
@@ -1730,27 +1758,47 @@ async function resolveAdminAccess() {
     const data = await response.json().catch(() => ({}));
     return response.ok && data.ok ? data.access : null;
   } catch {
-    return null;
+    // Network failure — signal "unknown" so the cached paint survives offline.
+    return undefined;
   }
 }
 
-async function renderAdminCards() {
-  currentAdminAccess = await resolveAdminAccess();
+function applyAdminAccess(access) {
+  currentAdminAccess = access;
   document.querySelectorAll('[data-admin-card]').forEach(card => {
     const permission = card.dataset.accessPermission;
     const canAccess = Boolean(
-      currentAdminAccess?.active &&
-      currentAdminAccess.permissions?.[permission]
+      access?.active && access.permissions?.[permission]
     );
     card.classList.toggle('show', canAccess);
   });
   const btn = document.getElementById('adminHomeBtn');
   if (btn) {
     btn.textContent = 'Admin';
-    btn.style.display = currentAdminAccess?.active &&
-      currentAdminAccess.permissions?.['admin.portal'] ? '' : 'none';
+    btn.style.display = access?.active &&
+      access.permissions?.['admin.portal'] ? '' : 'none';
   }
 }
+
+// Paint straight from cache — no network, no await. Runs while the page is
+// still parsing, so the admin cards are visible on first paint.
+function paintCachedAdminAccess() {
+  const session = getResidentSession();
+  if (!session?.houseNo) { clearCachedAdminAccess(); return; }
+  const cached = getCachedAdminAccess(session.houseNo);
+  if (cached) applyAdminAccess(cached);
+}
+
+async function renderAdminCards() {
+  const session = getResidentSession();
+  const access = await resolveAdminAccess();
+  if (access === undefined) return; // offline — keep whatever cache painted
+  applyAdminAccess(access);
+  if (session?.houseNo && access) storeCachedAdminAccess(session.houseNo, access);
+  else clearCachedAdminAccess();
+}
+
+paintCachedAdminAccess();
 
 function escH(s) {
   return String(s || '').replace(/[&<>"']/g, c =>
@@ -1780,8 +1828,9 @@ function renderHeaderIdentity(session) {
 function logoutResident() {
   if (!confirm('ออกจากระบบ?')) return;
   clearResidentSession();
+  clearCachedAdminAccess();
   renderHeaderIdentity(null);
-  renderAdminCards();
+  applyAdminAccess(null);
   document.querySelectorAll('a[href^="/data/"],a[href^="/vehicle/"]').forEach(a => {
     a.href = a.getAttribute('href').split('?')[0];
   });
