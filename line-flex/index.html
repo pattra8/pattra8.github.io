@@ -375,6 +375,41 @@
       return response.ok && data.ok ? data.access : null;
     }
 
+    // Shared with Pattra Center. The gate below used to block the whole page
+    // on this call (~2s cold), serialising it ahead of loadConfig(). With a
+    // cached answer the config load starts immediately and the real check
+    // runs alongside it — the server still authorises every save.
+    const ADMIN_ACCESS_CACHE_KEY = "pattra_admin_access_v1";
+    const ADMIN_ACCESS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+    function getCachedAdminAccess(houseNo) {
+      try {
+        const cached = JSON.parse(localStorage.getItem(ADMIN_ACCESS_CACHE_KEY) || "null");
+        if (!cached || cached.houseNo !== houseNo) return null;
+        if (Date.now() - Number(cached.cachedAt || 0) > ADMIN_ACCESS_TTL_MS) return null;
+        return cached.access;
+      } catch (_) {
+        return null;
+      }
+    }
+    function storeCachedAdminAccess(houseNo, access) {
+      try {
+        if (!access) {
+          localStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
+          return;
+        }
+        localStorage.setItem(ADMIN_ACCESS_CACHE_KEY, JSON.stringify({
+          houseNo, access, cachedAt: Date.now(),
+        }));
+      } catch (_) {
+        // quota / private mode — the cache is optional
+      }
+    }
+    function hasPortalAccess(access) {
+      return Boolean(access && access.active &&
+        access.permissions && access.permissions["admin.portal"]);
+    }
+
     function setStatus(text, kind) {
       const el = document.getElementById("statusText");
       el.textContent = text;
@@ -689,11 +724,20 @@
         }
         state.session = session;
         document.getElementById("flowCount").textContent = String(FLOW_META.length);
-        const access = await resolveAdminAccess(session);
-        if (!access || !access.active || !access.permissions || !access.permissions["admin.portal"]) {
-          location.href = "/";
-          return;
+
+        // Revalidate in the background; bail out the moment it says no.
+        const accessPromise = resolveAdminAccess(session).then((access) => {
+          storeCachedAdminAccess(session.houseNo, access);
+          if (!hasPortalAccess(access)) location.href = "/";
+          return access;
+        });
+        if (!hasPortalAccess(getCachedAdminAccess(session.houseNo))) {
+          const access = await accessPromise;
+          if (!hasPortalAccess(access)) return;
+        } else {
+          accessPromise.catch(() => {});
         }
+
         document.getElementById("saveBtn").addEventListener("click", () => {
           saveConfig(false).catch((err) => setStatus(err.message || "บันทึกไม่สำเร็จ", "err"));
         });
