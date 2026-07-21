@@ -583,6 +583,48 @@
       }
     }
 
+    async function resolveAdminAccess(session) {
+      const response = await fetch(ADMIN_ACCESS_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({action: "resolve", houseNo: session.houseNo, pin: session.pin}),
+      });
+      const data = await response.json().catch(() => ({}));
+      return response.ok && data.ok ? data.access : null;
+    }
+
+    // Shared with Pattra Center — see the cache note there.
+    const ADMIN_ACCESS_CACHE_KEY = "pattra_admin_access_v1";
+    const ADMIN_ACCESS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+    function getCachedAdminAccess(houseNo) {
+      try {
+        const cached = JSON.parse(localStorage.getItem(ADMIN_ACCESS_CACHE_KEY) || "null");
+        if (!cached || cached.houseNo !== houseNo) return null;
+        if (Date.now() - Number(cached.cachedAt || 0) > ADMIN_ACCESS_TTL_MS) return null;
+        return cached.access;
+      } catch (_) {
+        return null;
+      }
+    }
+    function storeCachedAdminAccess(houseNo, access) {
+      try {
+        if (!access) {
+          localStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
+          return;
+        }
+        localStorage.setItem(ADMIN_ACCESS_CACHE_KEY, JSON.stringify({
+          houseNo, access, cachedAt: Date.now(),
+        }));
+      } catch (_) {
+        // quota / private mode — the cache is optional
+      }
+    }
+    function canBroadcast(session, access) {
+      return Boolean(session.houseNo === "38/8" && access && access.active &&
+        access.permissions && access.permissions["admin.portal"]);
+    }
+
     async function post(body) {
       const response = await fetch(BROADCAST_URL, {
         method: "POST",
@@ -755,16 +797,18 @@
       state.session = session;
       renderHeaderIdentity(session);
       try {
-        const accessResponse = await fetch(ADMIN_ACCESS_URL, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({action: "resolve", houseNo: session.houseNo, pin: session.pin}),
+        // Revalidate in the background; bail out the moment it says no. With a
+        // cached answer listBroadcastTargets no longer waits behind this call
+        // (~2s on a cold function) — the server authorises every broadcast.
+        const accessPromise = resolveAdminAccess(session).then((access) => {
+          storeCachedAdminAccess(session.houseNo, access);
+          if (!canBroadcast(session, access)) location.replace("/");
+          return access;
         });
-        const accessData = await accessResponse.json().catch(() => ({}));
-        const access = accessData.access;
-        if (!accessResponse.ok || !accessData.ok || session.houseNo !== "38/8" || !access || !access.active || !access.permissions || !access.permissions["admin.portal"]) {
-          location.replace("/");
-          return;
+        if (!canBroadcast(session, getCachedAdminAccess(session.houseNo))) {
+          if (!canBroadcast(session, await accessPromise)) return;
+        } else {
+          accessPromise.catch(() => {});
         }
 
         const data = await post({action: "listBroadcastTargets"});
