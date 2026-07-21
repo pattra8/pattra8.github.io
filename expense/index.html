@@ -501,10 +501,11 @@
   /* ── TYPE TOGGLE ── */
   .type-toggle { display:grid; grid-template-columns:repeat(auto-fit,minmax(88px,1fr)); gap:6px; }
   .type-btn {
-    flex:1; padding:9px; border-radius:var(--r-sm);
+    flex:1; padding:9px 6px; border-radius:var(--r-sm);
     border:1.5px solid var(--border); background:var(--surface);
     font-family:inherit; font-size:13px; font-weight:500;
     cursor:pointer; text-align:center; transition:all .18s; color:var(--text-mid);
+    white-space:nowrap; word-break:keep-all; line-break:strict;
   }
   .type-btn.active-recurring   { background:var(--ok-bg);    border-color:var(--ok);    color:var(--ok);    font-weight:600; }
   .type-btn.active-investment  { background:var(--amber-bg); border-color:var(--amber); color:var(--amber); font-weight:600; }
