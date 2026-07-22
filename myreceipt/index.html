@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใบเสร็จของฉัน · Pattra Villa 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f9f3e9; --bg-soft:#f3ecdd; --card:#ffffff; --border:#e6dcc7;
+    --border-soft:#efe8d6; --text:#2a2218; --text-body:#3a3024;
+    --text-soft:#6b5d4a; --text-muted:#8a7960; --accent:#c47a2c;
+    --accent-text:#9a5c1f; --accent-deep:#855015;
+    --ok:#3f6431; --ok-bg:#e8efd9; --warn:#855015; --warn-bg:#f7e6cd;
+    --err:#86341e; --err-bg:#f7dfd5; --neutral:#6b5d4a; --neutral-bg:#efe8d6;
+    --radius:16px; --shadow:0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
+    background:var(--bg); color:var(--text-body);
+    min-height:100dvh; padding:0 0 70px;
+  }
+  .mono { font-family:'IBM Plex Mono', monospace; }
+  .wrap { width:100%; max-width:620px; margin:0 auto; padding:0 14px; }
+
+  .site-header {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--bg); border-bottom:1px solid var(--border);
+    padding:14px 0; margin-bottom:16px;
+  }
+  .home-link { color:var(--accent-text); text-decoration:none; font-size:14px; font-weight:600; }
+  .resident-banner {
+    display:flex; align-items:center; gap:8px; background:transparent;
+    border:0; padding:0; margin:0; box-shadow:none; max-width:min(62vw,280px); cursor:pointer;
+  }
+  .resident-avatar {
+    width:28px; height:28px; border-radius:50%; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-soft); color:var(--accent-text); font-family:'IBM Plex Mono', monospace;
+    font-weight:700; font-size:12px; border:1px solid var(--border);
+  }
+  .resident-meta { min-width:0; }
+  .resident-house { font-size:12px; font-weight:700; color:var(--text-soft); line-height:1.15; }
+  .resident-name {
+    font-size:11px; color:var(--text-muted); line-height:1.2; margin-top:1px;
+    word-break:break-word; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  @media (max-width:560px) {
+    .resident-banner { max-width:56vw; }
+    .resident-avatar { width:26px; height:26px; font-size:11px; }
+    .resident-house { font-size:11.5px; }
+    .resident-name { font-size:10.5px; }
+  }
+
+  h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
+  .sub { font-size:13px; color:var(--text-soft); margin:0 0 18px; line-height:1.5; }
+
+  #loginOverlay {
+    position:fixed; inset:0; background:rgba(42,34,24,.45);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:50;
+  }
+  #loginOverlay.open { display:flex; }
+  .login-card {
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    width:100%; max-width:360px; padding:24px 22px;
+  }
+  .login-card h2 { font-size:17px; margin:0 0 4px; color:var(--text); }
+  .login-card p { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
+  .house-row { display:flex; align-items:center; gap:6px; margin-bottom:12px; }
+  .house-prefix {
+    font-family:'IBM Plex Mono'; font-weight:600; color:var(--text-muted);
+    background:var(--bg-soft); border:1px solid var(--border); border-radius:10px;
+    padding:11px 10px; font-size:15px;
+  }
+  input[type=text], input[type=password] {
+    font-family:'IBM Plex Mono'; font-size:15px; font-weight:600;
+    border:1px solid var(--border); border-radius:10px; padding:11px 12px;
+    background:var(--bg-soft); color:var(--text); width:100%; outline:none;
+  }
+  input:focus { border-color:var(--accent); }
+  .pin-row { margin-bottom:16px; }
+  .btn-primary {
+    width:100%; background:var(--accent); color:#fff; border:none; border-radius:12px;
+    padding:12px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .btn-primary:active { background:var(--accent-deep); }
+  .login-err { color:var(--err); font-size:12.5px; margin-top:10px; display:none; }
+  .login-err.show { display:block; }
+
+  .rc-section {
+    display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700;
+    color:var(--accent-deep); margin:22px 2px 11px;
+  }
+  .rc-section:first-child { margin-top:2px; }
+  .rc-section .count { font-weight:600; font-size:12px; color:var(--text-muted); }
+
+  .card {
+    background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:10px;
+  }
+  .card-body { padding:14px; }
+  .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .rc-eyebrow { font-size:11.5px; font-weight:700; letter-spacing:.06em; color:var(--accent-text); }
+  .rc-fee { font-size:15.5px; font-weight:600; color:var(--text); margin-top:6px; }
+  .rc-period { font-size:12.5px; color:var(--text-soft); margin-top:3px; line-height:1.4; }
+  .rc-ref { color:var(--text-muted); }
+
+  .badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:2px 9px; font-size:11px; font-weight:700; white-space:nowrap; flex:none; }
+  .badge .dot { width:6px; height:6px; border-radius:50%; }
+  .badge.complete { color:var(--ok); background:var(--ok-bg); }
+  .badge.complete .dot { background:var(--ok); }
+
+  .rc-amount-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:14px; padding-top:13px; border-top:1px solid var(--border-soft); }
+  .rc-amount-label { font-size:12px; color:var(--text-muted); }
+  .rc-amount { font-family:'IBM Plex Mono'; font-weight:700; font-size:22px; color:var(--accent-text); white-space:nowrap; }
+
+  .rc-meta { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:11px; font-size:12px; color:var(--text-soft); }
+  .rc-meta .em { display:inline-flex; align-items:center; gap:4px; color:var(--ok); }
+
+  .rc-actions { margin-top:14px; }
+  .btn-view {
+    width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--bg-soft); color:var(--accent-text); border:1px solid var(--border);
+    border-radius:12px; padding:11px 12px; font-size:14px; font-weight:600;
+    font-family:inherit; cursor:pointer;
+  }
+  .btn-view:active { background:var(--border-soft); }
+  .btn-view svg { flex:none; }
+  .btn-view[disabled] { opacity:.6; cursor:default; }
+
+  .empty-state, .loading-state {
+    text-align:center; padding:44px 20px; color:var(--text-muted); font-size:13.5px; line-height:1.6;
+  }
+  .empty-state .big { font-size:34px; display:block; margin-bottom:10px; }
+  .spinner {
+    display:inline-block; width:14px; height:14px; margin-right:6px;
+    border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%;
+    animation:spin .7s linear infinite; vertical-align:-2px;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Receipt viewer overlay */
+  #docOverlay {
+    position:fixed; inset:0; background:rgba(21,18,15,.78); display:none;
+    flex-direction:column; z-index:80;
+  }
+  #docOverlay.open { display:flex; }
+  .doc-head {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 14px; background:#231d17; color:#fff; flex:none;
+  }
+  .doc-title { font-size:13px; font-weight:600; color:#f5ead9; font-family:'IBM Plex Mono', monospace; }
+  .doc-head-actions { display:flex; align-items:center; gap:8px; }
+  .doc-btn {
+    border:0; border-radius:9px; padding:8px 13px; font-size:13px; font-weight:600;
+    font-family:inherit; cursor:pointer; background:var(--accent); color:#fff;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .doc-btn:active { background:var(--accent-deep); }
+  .doc-close { background:transparent; color:#fff; font-size:22px; line-height:1; padding:2px 8px; }
+  #docFrame { flex:1; width:100%; border:0; background:#efe7d8; }
+
+  .footer-note {
+    text-align:center; font-size:11.5px; color:var(--text-muted); line-height:1.6; margin-top:24px;
+  }
+
+  #app { display:none; }
+</style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-card">
+    <h2>เข้าสู่ระบบลูกบ้าน</h2>
+    <p>กรอกบ้านเลขที่และ PIN 6 หลัก เพื่อดูและดาวน์โหลดใบเสร็จของบ้านคุณ</p>
+    <div class="house-row">
+      <span class="house-prefix mono">38/</span>
+      <input type="text" id="houseSuffix" inputmode="numeric" placeholder="เลขที่บ้าน เช่น 12">
+    </div>
+    <div class="pin-row">
+      <input type="password" id="pin" inputmode="numeric" maxlength="6" placeholder="PIN 6 หลัก">
+    </div>
+    <button class="btn-primary" id="loginBtn">เข้าสู่ระบบ</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="wrap">
+    <div class="site-header">
+      <a href="/" class="home-link">← หน้าแรก</a>
+      <div class="resident-banner" id="residentBanner" style="display:none;" title="กดเพื่อออกจากระบบ">
+        <div class="resident-avatar" id="residentAvatar">38</div>
+        <div class="resident-meta">
+          <div class="resident-house" id="residentHouse">บ้าน 38/—</div>
+          <div class="resident-name" id="residentName">—</div>
+        </div>
+      </div>
+    </div>
+
+    <h1>🧾 ใบเสร็จของฉัน</h1>
+    <p class="sub">ใบเสร็จรับเงินค่าส่วนกลางและค่าจอดรถของบ้านคุณ กดดูหรือบันทึกเป็น PDF ได้ทุกใบ แม้ไม่ได้รับอีเมลหรือไม่มีอีเมล</p>
+
+    <div id="listRoot"></div>
+    <div class="empty-state" id="emptyState" style="display:none;"></div>
+    <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
+
+    <div class="footer-note">
+      แสดงเฉพาะใบเสร็จของ "บ้านคุณ" เท่านั้น<br>
+      ใบเสร็จจะปรากฏที่นี่หลังกรรมการตรวจสลิปและออกใบเสร็จเรียบร้อยแล้ว
+    </div>
+  </div>
+</div>
+
+<div id="docOverlay">
+  <div class="doc-head">
+    <span class="doc-title" id="docTitle">ใบเสร็จรับเงิน</span>
+    <div class="doc-head-actions">
+      <button class="doc-btn" id="docPrint">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        บันทึก PDF / พิมพ์
+      </button>
+      <button class="doc-close" id="docClose" aria-label="ปิด">&times;</button>
+    </div>
+  </div>
+  <iframe id="docFrame" title="ใบเสร็จรับเงิน"></iframe>
+</div>
+
+<script>
+  var SESSION_KEY = 'pattra_resident_session_v1';
+  var TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  var PAY_API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/pattraPay';
+  var AUTH_API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/getResidentData';
+  var MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+    'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
+    });
+  }
+  function feeLabel(t) { return t === 'parking' ? 'ค่าจอดรถ' : 'ค่าส่วนกลาง'; }
+  function feeIcon(t) { return t === 'parking' ? '🅿️' : '🏠'; }
+  function periodLabel(r) {
+    if (r.feeType === 'common') {
+      return r.period === 'H1' ? 'ครึ่งปีแรก (ม.ค.–มิ.ย.)' : 'ครึ่งปีหลัง (ก.ค.–ธ.ค.)';
+    }
+    var parts = String(r.period || '').split('-');
+    var m = parseInt(parts[1], 10);
+    return (MONTHS_TH[m - 1] || r.period) + ' ' + (parts[0] || '');
+  }
+  function money(n) {
+    return Number(n || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+  function thaiDate(ms) {
+    if (!ms) return '';
+    try {
+      return new Date(ms).toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+    } catch (e) { return ''; }
+  }
+
+  function getSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (!s || Number(s.expiresAt) <= Date.now()) { localStorage.removeItem(SESSION_KEY); return null; }
+      return s;
+    } catch (e) { return null; }
+  }
+  function storeSession(houseNo, pin, residentName) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      houseNo: houseNo, pin: pin, residentName: residentName || '',
+      expiresAt: Date.now() + TTL_MS
+    }));
+  }
+
+  var elLoginOverlay = document.getElementById('loginOverlay');
+  var elApp = document.getElementById('app');
+
+  function residentDisplayName(s) {
+    return String((s && s.residentName) || '').trim() || 'เจ้าของบ้าน';
+  }
+  function renderResidentBanner() {
+    var s = getSession();
+    var banner = document.getElementById('residentBanner');
+    if (!s) { banner.style.display = 'none'; return; }
+    var houseNo = String(s.houseNo || '38/—');
+    var name = residentDisplayName(s);
+    var initial = (name.match(/[ก-๙A-Za-z0-9]/) || houseNo.match(/[0-9A-Za-z]/) || ['P'])[0];
+    document.getElementById('residentAvatar').textContent = String(initial).toUpperCase();
+    document.getElementById('residentHouse').textContent = 'บ้าน ' + houseNo;
+    document.getElementById('residentName').textContent = name;
+    banner.style.display = 'flex';
+  }
+
+  function showLogin(msg) {
+    elApp.style.display = 'none';
+    elLoginOverlay.classList.add('open');
+    renderResidentBanner();
+    var err = document.getElementById('loginErr');
+    if (msg) { err.textContent = msg; err.classList.add('show'); }
+    else { err.classList.remove('show'); }
+    setTimeout(function(){ document.getElementById('houseSuffix').focus(); }, 80);
+  }
+  function showApp() {
+    elLoginOverlay.classList.remove('open');
+    elApp.style.display = 'block';
+    renderResidentBanner();
+  }
+
+  document.getElementById('residentBanner').addEventListener('click', function() {
+    if (!confirm('ออกจากระบบ?')) return;
+    localStorage.removeItem(SESSION_KEY);
+    document.getElementById('listRoot').innerHTML = '';
+    showLogin();
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('pin').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('houseSuffix').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('pin').focus(); });
+
+  function doLogin() {
+    var suffix = document.getElementById('houseSuffix').value.trim();
+    var pin = document.getElementById('pin').value.trim();
+    var err = document.getElementById('loginErr');
+    if (!suffix || pin.length < 4) {
+      err.textContent = 'กรอกบ้านเลขที่และ PIN ให้ครบ';
+      err.classList.add('show');
+      return;
+    }
+    var houseNo = '38/' + suffix;
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ…';
+    fetch(AUTH_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({houseNo: houseNo, pin: pin})
+    }).then(function(res) { return res.json().then(function(data) { return {ok: res.ok, data: data}; }); })
+      .then(function(r) {
+        if (!r.ok || !r.data.ok) {
+          err.textContent = 'บ้านเลขที่หรือ PIN ไม่ถูกต้อง';
+          err.classList.add('show');
+          return;
+        }
+        var residentName = r.data.resident ? r.data.resident.name : '';
+        storeSession(houseNo, pin, residentName);
+        showApp();
+        loadReceipts();
+      })
+      .catch(function() {
+        err.textContent = 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่';
+        err.classList.add('show');
+      })
+      .finally(function() {
+        btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+      });
+  }
+
+  function receiptCard(r, grouped) {
+    var emailed = r.emailed
+      ? '<span class="em"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" style="display:none"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>ส่งอีเมลแล้ว</span>'
+      : '';
+    var dateStr = thaiDate(r.verifiedAt);
+    // When grouped under a fee-type header, lead with the period (fee type is
+    // already in the section header). Standalone cards keep the fee label.
+    var titleSub = grouped
+      ? '<div class="rc-fee">' + esc(periodLabel(r)) + '</div>' +
+        (r.year ? '<div class="rc-period">ปี ' + esc(r.year) + '</div>' : '')
+      : '<div class="rc-fee">' + feeIcon(r.feeType) + ' ' + esc(feeLabel(r.feeType)) + '</div>' +
+        '<div class="rc-period">' + esc(periodLabel(r)) + (r.year ? ' · ปี ' + esc(r.year) : '') + '</div>';
+    return '<div class="card">' +
+      '<div class="card-body">' +
+        '<div class="card-top">' +
+          '<div>' +
+            '<div class="rc-eyebrow">ใบเสร็จรับเงิน</div>' +
+            titleSub +
+          '</div>' +
+          '<span class="badge complete"><span class="dot"></span>ชำระแล้ว</span>' +
+        '</div>' +
+        '<div class="rc-amount-row">' +
+          '<span class="rc-amount-label">จำนวนเงิน</span>' +
+          '<span class="rc-amount mono">฿' + money(r.amount) + '</span>' +
+        '</div>' +
+        '<div class="rc-meta">' +
+          (dateStr ? '<span>ออกใบเสร็จ ' + esc(dateStr) + '</span>' : '') +
+          (r.receiptNo ? '<span class="rc-ref mono">เลขที่ ' + esc(r.receiptNo) + '</span>' : '') +
+          emailed +
+        '</div>' +
+        '<div class="rc-actions">' +
+          '<button class="btn-view" data-view="' + esc(r.id) + '">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+            'ดูใบเสร็จ / บันทึก PDF' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderReceipts(receipts) {
+    var root = document.getElementById('listRoot');
+    var empty = document.getElementById('emptyState');
+    if (!receipts.length) {
+      root.innerHTML = '';
+      empty.style.display = 'block';
+      empty.innerHTML = '<span class="big">🧾</span>ยังไม่มีใบเสร็จของบ้านคุณ<br>' +
+        '<small>เมื่อกรรมการตรวจสลิปและออกใบเสร็จแล้ว ใบเสร็จจะมาปรากฏที่นี่</small>';
+      return;
+    }
+    empty.style.display = 'none';
+    // Group by fee type so a house with both common + parking receipts reads
+    // cleanly. Section headers only appear when more than one type exists —
+    // common-fee-only houses (the majority) still see a plain list.
+    var groups = [
+      {type:'common',  label:'ค่าส่วนกลาง', icon:'🏠', items:[]},
+      {type:'parking', label:'ค่าจอดรถ',    icon:'🅿️', items:[]}
+    ];
+    receipts.forEach(function(r) {
+      (r.feeType === 'parking' ? groups[1] : groups[0]).items.push(r);
+    });
+    var used = groups.filter(function(g) { return g.items.length; });
+    var showHeaders = used.length > 1;
+    var html = '';
+    used.forEach(function(g) {
+      g.items.sort(function(a, b) { return (b.verifiedAt || 0) - (a.verifiedAt || 0); });
+      if (showHeaders) {
+        html += '<div class="rc-section">' + g.icon + ' ' + esc(g.label) +
+          ' <span class="count">' + g.items.length + ' ใบ</span></div>';
+      }
+      html += g.items.map(function(r) { return receiptCard(r, showHeaders); }).join('');
+    });
+    root.innerHTML = html;
+  }
+
+  function loadReceipts() {
+    var s = getSession();
+    if (!s) { showLogin(); return; }
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('listRoot').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'none';
+    fetch(PAY_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({action: 'myReceipts', houseNo: s.houseNo, pin: s.pin})
+    }).then(function(res) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      return res.json().then(function(data) { return {ok: res.ok, data: data}; });
+    }).then(function(r) {
+      document.getElementById('loadingState').style.display = 'none';
+      if (!r) return;
+      if (!r.ok || !r.data.ok) {
+        document.getElementById('listRoot').innerHTML =
+          '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ<br><small>' + esc(r.data.error || '') + '</small></div>';
+        return;
+      }
+      showApp();
+      renderReceipts(r.data.receipts || []);
+    }).catch(function() {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('listRoot').innerHTML = '<div class="empty-state">เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่</div>';
+    });
+  }
+
+  // ---- Receipt viewer ----
+  var elDocOverlay = document.getElementById('docOverlay');
+  var elDocFrame = document.getElementById('docFrame');
+
+  function openReceipt(id, cardBtn) {
+    var s = getSession();
+    if (!s) { showLogin(); return; }
+    var label = cardBtn ? cardBtn.innerHTML : '';
+    cardBtn.disabled = true;
+    cardBtn.innerHTML = '<span class="spinner"></span>กำลังเปิด…';
+    fetch(PAY_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({action: 'myReceiptDoc', houseNo: s.houseNo, pin: s.pin, id: id})
+    }).then(function(res) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      return res.json().then(function(data) { return {ok: res.ok, data: data}; });
+    }).then(function(r) {
+      cardBtn.disabled = false;
+      cardBtn.innerHTML = label;
+      if (!r) return;
+      if (!r.ok || !r.data.ok || !r.data.receiptHtml) {
+        alert('เปิดใบเสร็จไม่สำเร็จ' + (r.data && r.data.error ? '\n' + r.data.error : ''));
+        return;
+      }
+      document.getElementById('docTitle').textContent = 'ใบเสร็จรับเงิน';
+      elDocFrame.setAttribute('srcdoc', r.data.receiptHtml);
+      elDocOverlay.classList.add('open');
+    }).catch(function() {
+      cardBtn.disabled = false;
+      cardBtn.innerHTML = label;
+      alert('เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่');
+    });
+  }
+
+  function closeReceipt() {
+    elDocOverlay.classList.remove('open');
+    elDocFrame.removeAttribute('srcdoc');
+  }
+
+  document.getElementById('docClose').addEventListener('click', closeReceipt);
+  document.getElementById('docPrint').addEventListener('click', function() {
+    try {
+      elDocFrame.contentWindow.focus();
+      elDocFrame.contentWindow.print();
+    } catch (e) {
+      window.print();
+    }
+  });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeReceipt(); });
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-view]');
+    if (btn) openReceipt(btn.getAttribute('data-view'), btn);
+  });
+
+  // Boot: reuse pattra8.com session if present, else prompt login.
+  (function boot() {
+    if (getSession()) { showApp(); loadReceipts(); }
+    else { showLogin(); }
+  })();
+</script>
+
+</body>
+</html>
