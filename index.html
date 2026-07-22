@@ -386,6 +386,10 @@
       display: flex;
     }
 
+    /* Resident-only card: hidden until a resident session exists. */
+    .service-card.resident-only-card { display: none; }
+    .service-card.resident-only-card.show { display: flex; }
+
     .service-card.admin-only-card::before {
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
       opacity: 0.55;
@@ -1480,6 +1484,18 @@
       </span>
     </a>
 
+    <!-- 11. ใบเสร็จของฉัน: per-house receipts (shown when logged in) -->
+    <a href="/myreceipt/" class="service-card resident-only-card" data-resident-card>
+      <div class="tag">New</div>
+      <div class="service-icon">🧾</div>
+      <div class="service-title">ใบเสร็จของฉัน</div>
+      <p class="service-desc">ดูและดาวน์โหลดใบเสร็จรับเงินค่าส่วนกลาง/ค่าจอดรถของบ้านคุณ บันทึกเป็น PDF ได้ทุกใบ</p>
+      <span class="service-cta">
+        My Receipts
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
     <!-- Admin only: Asset Insurance -->
     <a href="/insurance/" class="service-card admin-only-card" data-admin-card
       data-access-permission="insurance.view">
@@ -1780,6 +1796,14 @@ function applyAdminAccess(access) {
   }
 }
 
+// Resident-only cards (e.g. My Receipts) appear once a resident is logged in.
+// No permission check — the destination page re-auths with {houseNo, pin}.
+function applyResidentCards(hasSession) {
+  document.querySelectorAll('[data-resident-card]').forEach(card => {
+    card.classList.toggle('show', Boolean(hasSession));
+  });
+}
+
 // Paint straight from cache — no network, no await. Runs while the page is
 // still parsing, so the admin cards are visible on first paint.
 function paintCachedAdminAccess() {
@@ -1799,6 +1823,7 @@ async function renderAdminCards() {
 }
 
 paintCachedAdminAccess();
+applyResidentCards(!!getResidentSession());
 
 function escH(s) {
   return String(s || '').replace(/[&<>"']/g, c =>
@@ -1831,6 +1856,7 @@ function logoutResident() {
   clearCachedAdminAccess();
   renderHeaderIdentity(null);
   applyAdminAccess(null);
+  applyResidentCards(false);
   document.querySelectorAll('a[href^="/data/"],a[href^="/vehicle/"]').forEach(a => {
     a.href = a.getAttribute('href').split('?')[0];
   });
@@ -1898,6 +1924,7 @@ async function handleLoginSubmit() {
     renderHeaderIdentity(getResidentSession());
     updateServiceLinks('38/' + suffix);
     renderAdminCards();
+    applyResidentCards(true);
     closeLoginModal();
   } catch (e) {
     errEl.textContent = 'เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ';
@@ -1911,6 +1938,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const session = getResidentSession();
   renderHeaderIdentity(session);
   renderAdminCards();
+  applyResidentCards(!!session);
   if (session) updateServiceLinks(session.houseNo);
 
   document.getElementById('loginOverlay').addEventListener('click', e => {
