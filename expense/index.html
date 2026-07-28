@@ -339,10 +339,6 @@
   .month-filter-select:focus {
     border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,.10);
   }
-  .month-filter-select.search-all {
-    color:var(--accent-dk); background:var(--accent-bg);
-    border-color:rgba(79,110,247,.22); cursor:default; opacity:1;
-  }
   @media(max-width:580px) {
     .transaction-toolbar {
       grid-template-columns:1fr; grid-template-areas:"month" "search"; gap:8px;
@@ -806,7 +802,7 @@
         <button type="button" class="search-clear" id="monthSearchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="monthSearchSuggestions"></div>
       </div>
-      <select class="month-filter-select" id="dashMonthFilter" aria-label="เลือกเดือนที่แสดง" onchange="renderDashboard()"></select>
+      <select class="month-filter-select" id="dashMonthFilter" aria-label="ขอบเขตการค้นหา" title="เลือกทุกเดือน หรือจำกัดการค้นหาเฉพาะเดือน" onchange="renderDashboard()"></select>
     </div>
     <div class="expense-list" id="recentList"></div>
   </div>
@@ -1117,20 +1113,14 @@ function populateMonthFilter() {
 function populateDashMonthFilter() {
   const sel = document.getElementById('dashMonthFilter');
   if (!sel) return;
-  const searchMonth = sel.dataset.monthBeforeSearch || '';
-  const prev = searchMonth || sel.value;
-  const cur = currentMonthValue();
+  const prev = sel.value;
   const values = availableMonthValues();
-  // Keep whatever month the user was viewing, even if it has no data yet.
+  // Keep a scoped month even if it has no data yet. Empty value means search all months.
   if (prev && !values.includes(prev)) { values.push(prev); values.sort().reverse(); }
-  const selected = prev || cur;
-  sel.innerHTML = values
+  const selected = prev && values.includes(prev) ? prev : '';
+  sel.innerHTML = ['<option value="">ทุกเดือน</option>', ...values
     .map(val => `<option value="${val}"${val===selected?' selected':''}>${monthOptionLabel(val)}</option>`)
-    .join('');
-  if (searchMonth) {
-    sel.dataset.monthBeforeSearch = selected;
-    syncDashboardSearchScope(true);
-  }
+  ].join('');
 }
 
 function getResidentSession() {
@@ -1523,43 +1513,12 @@ function renderExpensesHero(list) {
 
 function getMonthFilter() {
   const sel=document.getElementById('dashMonthFilter');
-  const val=sel ? (sel.dataset.monthBeforeSearch || sel.value) : null;
+  const val=sel ? sel.value : null;
   const now=new Date(); let yr=now.getFullYear(), mi=now.getMonth();
-  if (val) { const p=val.split('-'); yr=parseInt(p[0]); mi=parseInt(p[1])-1; }
-  return { yr, mi };
-}
-
-const DASH_SEARCH_ALL_VALUE = '__search_all__';
-
-function syncDashboardSearchScope(isSearching) {
-  const sel = document.getElementById('dashMonthFilter');
-  if (!sel) return;
-
-  if (isSearching) {
-    if (!sel.dataset.monthBeforeSearch)
-      sel.dataset.monthBeforeSearch = sel.value || currentMonthValue();
-    let allOption = sel.querySelector(`option[value="${DASH_SEARCH_ALL_VALUE}"]`);
-    if (!allOption) {
-      allOption = document.createElement('option');
-      allOption.value = DASH_SEARCH_ALL_VALUE;
-      allOption.textContent = 'ทุกเดือน';
-      sel.prepend(allOption);
-    }
-    sel.value = DASH_SEARCH_ALL_VALUE;
-    sel.disabled = true;
-    sel.classList.add('search-all');
-    sel.setAttribute('aria-label', 'กำลังค้นหารายจ่ายทุกเดือน');
-    return;
+  if (/^\d{4}-\d{2}$/.test(val || '')) {
+    const p=val.split('-'); yr=parseInt(p[0]); mi=parseInt(p[1])-1;
   }
-
-  const previousMonth = sel.dataset.monthBeforeSearch;
-  sel.querySelector(`option[value="${DASH_SEARCH_ALL_VALUE}"]`)?.remove();
-  sel.disabled = false;
-  sel.classList.remove('search-all');
-  sel.setAttribute('aria-label', 'เลือกเดือนที่แสดง');
-  if (previousMonth && [...sel.options].some(option => option.value === previousMonth))
-    sel.value = previousMonth;
-  delete sel.dataset.monthBeforeSearch;
+  return { yr, mi };
 }
 
 function renderMonthHero() {
@@ -1598,10 +1557,12 @@ function getMonthExpenseItems() {
 
 function renderMonthTxn() {
   const q = getExpenseSearchQuery('month');
-  syncDashboardSearchScope(Boolean(q));
   renderMonthHero();
   const {yr,mi} = getMonthFilter();
-  const sourceItems = q ? getDashboardSearchItems() : getMonthExpenseItems();
+  const searchAllMonths = !document.getElementById('dashMonthFilter')?.value;
+  const sourceItems = q
+    ? (searchAllMonths ? getDashboardSearchItems() : getMonthExpenseItems())
+    : getMonthExpenseItems();
   const me = sourceItems
     .filter(e => expenseMatchesSearch(e, q))
     .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
@@ -1612,13 +1573,13 @@ function renderMonthTxn() {
   syncSearchUi('month');
   const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
   document.getElementById('txnSectionTitle').innerHTML = q
-    ? `ผลการค้นหา <span class="title-month">ทุกเดือน</span>${escapeHtml(extra)}`
+    ? `ผลการค้นหา <span class="title-month">${escapeHtml(searchAllMonths ? 'ทุกเดือน' : MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`
     : `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
   // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
   const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility;
   document.getElementById('recentList').innerHTML = me.length
     ? me.map(e=>expenseCardHtml(e,false,reorderable)).join('')
-    : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? 'ไม่พบรายการจากทุกเดือน' : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
+    : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
 // `color` is the dashboard bar only — cards deliberately don't tint by facility.
@@ -1709,7 +1670,8 @@ function facilitiesTotal(sourceItems) {
 function renderDashboardFacilities() {
   const el = document.getElementById('dashboardFacilitiesCard');
   if (!el) return;
-  const month = document.getElementById('dashMonthFilter').value;
+  const {yr,mi} = getMonthFilter();
+  const month = `${yr}-${String(mi + 1).padStart(2, '0')}`;
   const filtered = expenses.filter(e => e?.date && new Date(e.date).toISOString().slice(0,7) === month);
   const grandTotal = facilitiesTotal(filtered);
   const monthLabel = month ? `${MONTH_TH[parseInt(month.slice(5,7))-1]} ${month.slice(0,4)}` : 'ทั้งหมด';
@@ -1827,7 +1789,10 @@ function searchEls(scope = 'all') {
 }
 
 function searchSourceItems(scope = 'all') {
-  return searchScope(scope) === 'month' ? getDashboardSearchItems() : expenses;
+  if (searchScope(scope) !== 'month') return expenses;
+  return document.getElementById('dashMonthFilter')?.value
+    ? getMonthExpenseItems()
+    : getDashboardSearchItems();
 }
 
 function bindSearchControls() {
