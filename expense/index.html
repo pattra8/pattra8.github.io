@@ -339,6 +339,10 @@
   .month-filter-select:focus {
     border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,110,247,.10);
   }
+  .month-filter-select.search-all {
+    color:var(--accent-dk); background:var(--accent-bg);
+    border-color:rgba(79,110,247,.22); cursor:default; opacity:1;
+  }
   @media(max-width:580px) {
     .transaction-toolbar {
       grid-template-columns:1fr; grid-template-areas:"month" "search"; gap:8px;
@@ -1113,7 +1117,8 @@ function populateMonthFilter() {
 function populateDashMonthFilter() {
   const sel = document.getElementById('dashMonthFilter');
   if (!sel) return;
-  const prev = sel.value;
+  const searchMonth = sel.dataset.monthBeforeSearch || '';
+  const prev = searchMonth || sel.value;
   const cur = currentMonthValue();
   const values = availableMonthValues();
   // Keep whatever month the user was viewing, even if it has no data yet.
@@ -1122,6 +1127,10 @@ function populateDashMonthFilter() {
   sel.innerHTML = values
     .map(val => `<option value="${val}"${val===selected?' selected':''}>${monthOptionLabel(val)}</option>`)
     .join('');
+  if (searchMonth) {
+    sel.dataset.monthBeforeSearch = selected;
+    syncDashboardSearchScope(true);
+  }
 }
 
 function getResidentSession() {
@@ -1513,11 +1522,46 @@ function renderExpensesHero(list) {
 }
 
 function getMonthFilter() {
-  const sel=document.getElementById('dashMonthFilter'), val=sel?sel.value:null;
+  const sel=document.getElementById('dashMonthFilter');
+  const val=sel ? (sel.dataset.monthBeforeSearch || sel.value) : null;
   const now=new Date(); let yr=now.getFullYear(), mi=now.getMonth();
   if (val) { const p=val.split('-'); yr=parseInt(p[0]); mi=parseInt(p[1])-1; }
   return { yr, mi };
 }
+
+const DASH_SEARCH_ALL_VALUE = '__search_all__';
+
+function syncDashboardSearchScope(isSearching) {
+  const sel = document.getElementById('dashMonthFilter');
+  if (!sel) return;
+
+  if (isSearching) {
+    if (!sel.dataset.monthBeforeSearch)
+      sel.dataset.monthBeforeSearch = sel.value || currentMonthValue();
+    let allOption = sel.querySelector(`option[value="${DASH_SEARCH_ALL_VALUE}"]`);
+    if (!allOption) {
+      allOption = document.createElement('option');
+      allOption.value = DASH_SEARCH_ALL_VALUE;
+      allOption.textContent = 'ทุกเดือน';
+      sel.prepend(allOption);
+    }
+    sel.value = DASH_SEARCH_ALL_VALUE;
+    sel.disabled = true;
+    sel.classList.add('search-all');
+    sel.setAttribute('aria-label', 'กำลังค้นหารายจ่ายทุกเดือน');
+    return;
+  }
+
+  const previousMonth = sel.dataset.monthBeforeSearch;
+  sel.querySelector(`option[value="${DASH_SEARCH_ALL_VALUE}"]`)?.remove();
+  sel.disabled = false;
+  sel.classList.remove('search-all');
+  sel.setAttribute('aria-label', 'เลือกเดือนที่แสดง');
+  if (previousMonth && [...sel.options].some(option => option.value === previousMonth))
+    sel.value = previousMonth;
+  delete sel.dataset.monthBeforeSearch;
+}
+
 function renderMonthHero() {
   const {yr,mi} = getMonthFilter();
   const me  = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
@@ -1553,9 +1597,10 @@ function getMonthExpenseItems() {
 }
 
 function renderMonthTxn() {
+  const q = getExpenseSearchQuery('month');
+  syncDashboardSearchScope(Boolean(q));
   renderMonthHero();
   const {yr,mi} = getMonthFilter();
-  const q = getExpenseSearchQuery('month');
   const sourceItems = q ? getDashboardSearchItems() : getMonthExpenseItems();
   const me = sourceItems
     .filter(e => expenseMatchesSearch(e, q))
