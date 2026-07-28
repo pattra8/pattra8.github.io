@@ -138,6 +138,8 @@
     .a-tile .th b { font-size:13.5px; color:var(--text); }
     .a-tile p { margin:8px 0 0; font-size:12px; color:var(--text-soft); line-height:1.5; }
     .a-tile time { display:block; font-family:var(--mono); font-size:10.5px; color:var(--text-muted); margin-top:6px; }
+    .status-link { display:inline-flex; align-items:center; gap:4px; margin-top:8px; color:var(--accent-text); font-size:11.5px; font-weight:600; text-decoration:none; }
+    .status-link:hover { color:var(--accent-deep); text-decoration:underline; }
 
     .empty-state { grid-column:1 / -1; padding:34px; text-align:center; border:1px dashed var(--border); border-radius:14px; color:var(--text-muted); }
     .error-bar { display:none; margin-top:14px; padding:12px 14px; color:var(--err); background:var(--err-bg); border:1px solid var(--err-bd); border-radius:11px; font-size:13px; }
@@ -324,7 +326,10 @@
           <button class="reboot" type="button" data-reboot="${escapeHtml(camera.cameraId)}" ${disable ? "disabled" : ""}>${status === "rebooting" ? "กำลัง Reboot…" : `Reboot ${escapeHtml(camera.cameraId)}`}</button>
         </article>`;
       }).join("");
-      document.getElementById("componentGrid").innerHTML = (summary.components || []).map(component => `<article class="a-tile"><div class="th"><b>${escapeHtml(component.label)}</b><span class="sig ${escapeHtml(component.status)}"></span></div><p>${escapeHtml(component.detail)}</p><time>${escapeHtml(relativeTime(component.checkedEpoch))}</time></article>`).join("");
+      document.getElementById("componentGrid").innerHTML = (summary.components || []).map(component => {
+        const statusLink = component.statusUrl ? `<a class="status-link" href="${escapeHtml(component.statusUrl)}" target="_blank" rel="noopener noreferrer">ดูสถานะ LINE ↗</a>` : "";
+        return `<article class="a-tile"><div class="th"><b>${escapeHtml(component.label)}</b><span class="sig ${escapeHtml(component.status)}"></span></div><p>${escapeHtml(component.detail)}</p><time>${escapeHtml(relativeTime(component.checkedEpoch))}</time>${statusLink}</article>`;
+      }).join("");
       document.querySelectorAll("[data-reboot]").forEach(button => button.addEventListener("click", () => openReboot(button.dataset.reboot)));
     }
     async function loadSummary(probe = false) {
