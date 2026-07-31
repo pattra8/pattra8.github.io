@@ -280,6 +280,19 @@
   var SESSION_KEY = 'pattra_resident_session_v1';
   var TTL_MS = 30 * 24 * 60 * 60 * 1000;
   var API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/dailyTrafficReport';
+  // Same cut as LPR_VISION_MIN_CONFIDENCE in the backend, so this board and the
+  // LINE daily/night cards hide a low-confidence guess in exactly the same
+  // cases. This hides nothing today — all 583 stored profiles score >= 0.80 —
+  // it is here so a future bad read never reaches the board as fact. The
+  // typeof check only matters if the API stops sending the field: the backend
+  // normalizer defaults a missing confidence to 0, so anything it does send is
+  // already a number.
+  var VISION_MIN_CONFIDENCE = 0.72;
+  function visionOf(row) {
+    var v = (row && row.vehicleVision) || {};
+    if (typeof v.confidence === 'number' && v.confidence < VISION_MIN_CONFIDENCE) return {};
+    return v;
+  }
 
   var COLOR_PHRASE = {'dark blue':'น้ำเงินเข้ม','light blue':'ฟ้า','dark gray':'เทาเข้ม',
     'dark grey':'เทาเข้ม','light gray':'เทาอ่อน','light grey':'เทาอ่อน','dark green':'เขียวเข้ม'};
@@ -449,7 +462,7 @@
       return currentTab === 'night' ? isNightRow(r) : !isNightRow(r);
     });
     var filtered = rows.filter(function(r) {
-      var v = r.vehicleVision || {};
+      var v = visionOf(r);
       var brand = [v.make, v.model].filter(Boolean).join(' ');
       return r.plate.toLowerCase().indexOf(q) !== -1 ||
         brand.toLowerCase().indexOf(q) !== -1 ||
@@ -465,7 +478,7 @@
     }
     empty.style.display = 'none';
     list.innerHTML = filtered.map(function(r) {
-      var v = r.vehicleVision || {};
+      var v = visionOf(r);
       var brand = [v.make, v.model].filter(Boolean).join(' ');
       var cth = colorTh(v.color);
       var carLine = (brand || cth) ?
