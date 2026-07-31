@@ -387,8 +387,15 @@
     var th = COLOR_PHRASE[s] || s.split(/\s+/).map(function(w){ return COLOR_TH[w] || w; }).join(' ');
     return 'สี' + th;
   }
+  // Matches LPR_VISION_MIN_CONFIDENCE in the backend and the same cut used by
+  // the LINE traffic cards and /visitorboard/ — brand/color here is a
+  // cross-reference from the gate camera, so a low-confidence guess would show
+  // the resident the wrong car. Hides nothing today (all stored profiles score
+  // >= 0.80); it is a floor for future reads, not a fix for existing data.
+  var VISION_MIN_CONFIDENCE = 0.72;
   function brandColorLine(vv) {
     if (!vv) return '';
+    if (typeof vv.confidence === 'number' && vv.confidence < VISION_MIN_CONFIDENCE) return '';
     var brand = [vv.make, vv.model].filter(Boolean).join(' ');
     var cth = colorTh(vv.color);
     return [brand, cth].filter(Boolean).join(' · ');
