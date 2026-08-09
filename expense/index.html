@@ -442,6 +442,12 @@
   .dot-paid    { background:var(--ok); }
   .dot-pending { background:var(--amber); }
 
+  /* ── STATUS BADGE ── */
+  .status-badge { display:inline-flex; align-items:center; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+  .status-badge .status-dot { margin-right:5px; }
+  .status-badge.paid    { background:var(--ok-bg);    color:var(--ok); }
+  .status-badge.pending { background:var(--amber-bg); color:var(--amber); }
+
   /* ── TAG CAP ── */
   .tag-cap { background:var(--amber-bg); color:var(--amber); font-size:11px; padding:2px 7px; border-radius:99px; font-weight:600; margin-left:5px; }
 
@@ -2268,7 +2274,7 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
   const slipsHtml = attachmentsHtml(e.slips,false);
   const adminHtml = isAdmin
     ?`<div class="card-menu-wrap" onclick="event.stopPropagation()"><button class="card-kebab" title="แก้ไข / ลบ" onclick="toggleCardMenu(this)">⋯</button><div class="card-menu"><button onclick="closeCardMenus();openEditModal('${e.id}')">✏️ แก้ไข</button><button class="menu-danger" onclick="closeCardMenus();deleteExpense('${e.id}')">🗑 ลบ</button></div></div>`:'';
-  const sd = `<span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}`;
+  const sd = `<span class="status-badge ${e.status === 'paid' ? 'paid' : 'pending'}"><span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}</span>`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
   return `<div class="expense-card" data-id="${e.id}" style="--rail:${typeRailColor(e.type)}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
     ${handleHtml}<div class="expense-info">
