@@ -321,12 +321,13 @@
     background:#fef3c7; color:var(--text-hi); border-radius:4px; padding:0 2px;
   }
   .transaction-toolbar {
-    display:grid; grid-template-columns:minmax(0,1fr) 200px;
-    grid-template-areas:"search month";
+    display:grid; grid-template-columns:minmax(0,1fr) 170px 170px;
+    grid-template-areas:"search month status";
     gap:10px; align-items:center; margin-bottom:16px;
   }
   .transaction-toolbar .search-wrap { grid-area:search; min-width:0; }
   .transaction-toolbar .month-filter-select { grid-area:month; }
+  .transaction-toolbar .status-filter-select { grid-area:status; }
   .transaction-toolbar .filter-search,
   .transaction-toolbar .month-filter-select { height:44px; }
   .month-filter-select {
@@ -341,10 +342,12 @@
   }
   @media(max-width:580px) {
     .transaction-toolbar {
-      grid-template-columns:1fr; grid-template-areas:"month" "search"; gap:8px;
+      grid-template-columns:1fr 1fr; grid-template-areas:"month status" "search search"; gap:8px;
     }
-    .transaction-toolbar .month-filter-select { width:100%; }
+    .transaction-toolbar .month-filter-select,
+    .transaction-toolbar .status-filter-select { width:100%; }
   }
+  .filters .status-filter-select { width:170px; height:44px; }
 
   /* ── EXPENSE CARDS ── */
   .expense-list { display:flex; flex-direction:column; gap:8px; }
@@ -440,13 +443,17 @@
   /* ── STATUS DOT ── */
   .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; vertical-align:middle; }
   .dot-paid    { background:var(--ok); }
-  .dot-pending { background:var(--amber); }
+  .dot-pending { background:var(--rose); }
 
   /* ── STATUS BADGE ── */
-  .status-badge { display:inline-flex; align-items:center; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; }
+  .status-badge { display:inline-flex; align-items:center; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; border:1px solid transparent; }
   .status-badge .status-dot { margin-right:5px; }
-  .status-badge.paid    { background:var(--ok-bg);    color:var(--ok); }
-  .status-badge.pending { background:var(--amber-bg); color:var(--amber); }
+  .status-badge.paid    { background:var(--ok-bg);   color:var(--ok); }
+  .status-badge.pending { background:var(--rose-bg); color:var(--rose); border-color:var(--rose); font-weight:800; animation:pending-pulse 1.8s ease-in-out infinite; }
+  @keyframes pending-pulse {
+    0%, 100% { box-shadow:0 0 0 0 rgba(154,51,34,.35); }
+    50%      { box-shadow:0 0 0 4px rgba(154,51,34,0); }
+  }
 
   /* ── TAG CAP ── */
   .tag-cap { background:var(--amber-bg); color:var(--amber); font-size:11px; padding:2px 7px; border-radius:99px; font-weight:600; margin-left:5px; }
@@ -809,6 +816,11 @@
         <div class="search-suggestions" id="monthSearchSuggestions"></div>
       </div>
       <select class="month-filter-select" id="dashMonthFilter" aria-label="ขอบเขตการค้นหา" title="เลือกทุกเดือน หรือจำกัดการค้นหาเฉพาะเดือน" onchange="renderDashboard()"></select>
+      <select class="month-filter-select status-filter-select" id="dashStatusFilter" aria-label="กรองตามสถานะ" title="กรองตามสถานะการจ่าย" onchange="setDashboardStatusFilter(this.value)">
+        <option value="">ทุกสถานะ</option>
+        <option value="paid">จ่ายแล้ว</option>
+        <option value="pending">รอดำเนินการ</option>
+      </select>
     </div>
     <div class="expense-list" id="recentList"></div>
   </div>
@@ -832,6 +844,11 @@
         <button type="button" class="search-clear" id="searchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="searchSuggestions"></div>
       </div>
+      <select class="month-filter-select status-filter-select" id="expStatusFilter" aria-label="กรองตามสถานะ" title="กรองตามสถานะการจ่าย" onchange="setExpensesStatusFilter(this.value)">
+        <option value="">ทุกสถานะ</option>
+        <option value="paid">จ่ายแล้ว</option>
+        <option value="pending">รอดำเนินการ</option>
+      </select>
     </div>
     <div class="expense-list" id="expenseList"></div>
   </div>
@@ -1545,7 +1562,8 @@ function renderMonthHero() {
 
 function dashboardExpenseMatchesActiveFilters(expense) {
   return (!activeDashboardType || expense.type===activeDashboardType)
-    && (!activeDashboardFacility || costCategoryValue(expense)===activeDashboardFacility);
+    && (!activeDashboardFacility || costCategoryValue(expense)===activeDashboardFacility)
+    && (!activeDashboardStatus || expense.status===activeDashboardStatus);
 }
 
 function getDashboardSearchItems() {
@@ -1575,6 +1593,7 @@ function renderMonthTxn() {
   const filterLabels = [
     activeDashboardType ? expenseTypeText(activeDashboardType) : '',
     activeDashboardFacility || '',
+    activeDashboardStatus ? expenseStatusText(activeDashboardStatus, 'general') : '',
   ].filter(Boolean);
   syncSearchUi('month');
   const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
@@ -1582,7 +1601,7 @@ function renderMonthTxn() {
     ? `ผลการค้นหา <span class="title-month">${escapeHtml(searchAllMonths ? 'ทุกเดือน' : MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`
     : `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
   // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
-  const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility;
+  const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
     ? me.map(e=>expenseCardHtml(e,false,reorderable)).join('')
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
@@ -1637,9 +1656,20 @@ function toggleFacilitiesCollapse(scope) {
 
 let activeDashboardFacility = null;
 let activeDashboardType = null;
+let activeDashboardStatus = null;
 let activeExpensesFacility = null;
 let activeAnnualType = null;
+let activeExpensesStatus = null;
 let activeSearchSuggestion = { all: -1, month: -1 };
+
+function setDashboardStatusFilter(value) {
+  activeDashboardStatus = value || null;
+  renderDashboard();
+}
+function setExpensesStatusFilter(value) {
+  activeExpensesStatus = value || null;
+  renderExpenses();
+}
 
 function facilityRows(sourceItems, activeKey, clickFnName) {
   const data = FACILITIES.map(f => {
@@ -2010,6 +2040,7 @@ function renderExpenses() {
     if(activeAnnualType&&new Date(e.date).getFullYear()!==new Date().getFullYear())return false;
     if(activeExpensesFacility&&costCategoryValue(e)!==activeExpensesFacility)return false;
     if(activeAnnualType&&e.type!==activeAnnualType)return false;
+    if(activeExpensesStatus&&e.status!==activeExpensesStatus)return false;
     if(!expenseMatchesSearch(e,q))return false;
     return true;
   }).sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
@@ -2018,7 +2049,7 @@ function renderExpenses() {
   renderExpensesFacilities();
   renderAnnualBreakdown();
   // Drag-reorder only makes sense on the full, unfiltered, unsearched admin list.
-  const reorderable = isAdmin && !q && !activeExpensesFacility && !activeAnnualType;
+  const reorderable = isAdmin && !q && !activeExpensesFacility && !activeAnnualType && !activeExpensesStatus;
   document.getElementById('expenseList').innerHTML=list.length
     ?list.map(e=>expenseCardHtml(e,true,reorderable)).join('')
     :'<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">ไม่พบรายการ</div></div>';
@@ -2945,6 +2976,8 @@ Object.assign(window, {
   toggleDashboardFacilityFilter,
   toggleDashboardTypeFilter,
   toggleExpensesFacilityFilter,
+  setDashboardStatusFilter,
+  setExpensesStatusFilter,
   toggleFacilitiesCollapse,
   toggleSummaryCollapse,
   clearAnnualTypeFilter,
