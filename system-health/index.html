@@ -313,6 +313,11 @@
         `<span class="chip-count off"><b>${tally("offline")}</b> Offline</span>`;
       document.getElementById("cameraGrid").innerHTML = (summary.cameras || []).map(camera => {
         const status = camera.status || "unknown";
+        const eventStatus = camera.eventStatus || "unknown";
+        const eventHealthy = eventStatus === "online";
+        const eventLabel = eventStatus === "warning" || eventStatus === "offline" ?
+          `ANPR stale · peer ${Number(camera.peerEventsSince || 0)}` :
+          eventStatus === "online" ? "ANPR Flow" : "ANPR Flow —";
         const disable = status === "rebooting" || (camera.reboot?.requestedEpoch && Date.now() - camera.reboot.requestedEpoch < 5 * 60 * 1000);
         return `<article class="a-cam ${status}">
           <div class="top"><div><div class="port">PORT ${escapeHtml(camera.cameraId)}</div><div class="cname">${escapeHtml(camera.label)} · ANPR</div></div><div class="pill ${status}"><span class="sig ${status}"></span>${STATUS_TEXT[status] || "Unknown"}</div></div>
@@ -322,7 +327,7 @@
             <div class="m"><span>Response</span><b>${camera.latencyMs ? `${Number(camera.latencyMs)} ms` : "—"}</b></div>
             <div class="m"><span>Snapshot</span><b>${camera.snapshotBytes ? `${Math.round(camera.snapshotBytes / 1024)} KB` : "—"}</b></div>
           </div>
-          <div class="chips"><span class="k ${camera.apiOk ? "ok" : "no"}">${camera.apiOk ? "✓" : "✕"} Device API</span><span class="k ${camera.snapshotOk ? "ok" : "no"}">${camera.snapshotOk ? "✓" : "✕"} Live Image</span><span class="k ${camera.lastEventReceivedEpoch ? "ok" : "no"}">${camera.lastEventReceivedEpoch ? "✓" : "✕"} Webhook</span></div>
+          <div class="chips"><span class="k ${camera.apiOk ? "ok" : "no"}">${camera.apiOk ? "✓" : "✕"} Device API</span><span class="k ${camera.snapshotOk ? "ok" : "no"}">${camera.snapshotOk ? "✓" : "✕"} Live Image</span><span class="k ${eventHealthy ? "ok" : "no"}">${eventHealthy ? "✓" : eventStatus === "unknown" ? "?" : "✕"} ${escapeHtml(eventLabel)}</span></div>
           <button class="reboot" type="button" data-reboot="${escapeHtml(camera.cameraId)}" ${disable ? "disabled" : ""}>${status === "rebooting" ? "กำลัง Reboot…" : `Reboot ${escapeHtml(camera.cameraId)}`}</button>
         </article>`;
       }).join("");
