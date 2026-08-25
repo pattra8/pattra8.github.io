@@ -1437,6 +1437,9 @@
     <button class="tab-btn" id="tabAccess" onclick="switchTab('access')" style="display:none">
       🛡 สิทธิ์ผู้ดูแล
     </button>
+    <button class="tab-btn" id="tabIssues" onclick="window.open('/report/', '_blank')">
+      📣 แจ้งปัญหา ↗
+    </button>
     <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
       🧾 Activity Log
     </button>
@@ -2443,6 +2446,7 @@
     ['admin.survey', 'ไลฟ์สไตล์'],
     ['admin.announcements', 'ประกาศ'],
     ['admin.pickup', 'ทิ้งของใหญ่'],
+    ['admin.issues', 'แจ้งปัญหา (/report)'],
     ['admin.audit', 'Activity log']
   ];
   const ACCESS_RESOURCES = [
@@ -2849,6 +2853,7 @@
       Survey: 'admin.survey',
       Announce: 'admin.announcements',
       Pickup: 'admin.pickup',
+      Issues: 'admin.issues',
       Log: 'admin.audit'
     };
     Object.entries(permissionByTab).forEach(([name, permission]) => {
@@ -3467,7 +3472,6 @@
   }
 
   // ── Storage Usage (rough estimate, client-side, no backend changes) ────────
-  const DOC_SOFT_LIMIT_BYTES = 1024 * 1024; // Firestore hard cap per document
   const EXPENSE_FIREBASE_CONFIG = {
     apiKey: 'AIzaSyAj8pSPvM22aA7ngOREZzECuvmgr3CM5OI',
     authDomain: 'pattra8-expense.firebaseapp.com',
@@ -3495,29 +3499,9 @@
     } catch { return null; }
   }
 
-  function estimateMediaBytes(mediaArr) {
-    return (mediaArr || []).reduce((sum, m) => sum + Math.floor((m?.dataUrl?.length || 0) * 0.75), 0);
-  }
-
-  async function measureIssuesCollection(db, collName, { collection, getDocs }) {
-    const snap = await getDocs(collection(db, collName));
-    let bytes = 0, mediaCount = 0;
-    const largeDocs = [];
-    snap.forEach(d => {
-      const data = d.data();
-      let docBytes = estimateMediaBytes(data.media);
-      mediaCount += (data.media || []).length;
-      (data.replies || []).forEach(r => {
-        docBytes += estimateMediaBytes(r.media);
-        mediaCount += (r.media || []).length;
-      });
-      bytes += docBytes;
-      if (docBytes > DOC_SOFT_LIMIT_BYTES * 0.7) {
-        largeDocs.push({ id: d.id, collection: collName, bytes: docBytes, title: data.title || data.detail || '(ไม่มีหัวข้อ)' });
-      }
-    });
-    return { docCount: snap.size, mediaCount, bytes, largeDocs };
-  }
+  const RETIRED_ISSUE_USAGE = Object.freeze({
+    docCount: 0, mediaCount: 0, bytes: 0, largeDocs: [], retired: true
+  });
 
   async function measureAnnouncements(db, { collection, getDocs }) {
     const snap = await getDocs(collection(db, 'announcements'));
@@ -3638,8 +3622,12 @@
       const mainDb = getFirestore(mainApp);
 
       const [issues, privateIssues, announcements, expenses, pickup, insurance, blueprints, backendStats] = await Promise.all([
-        measureIssuesCollection(mainDb, 'issues', firestoreMod).catch(e => ({ error: e.message })),
-        measureIssuesCollection(mainDb, 'private_issues', firestoreMod).catch(e => ({ error: e.message })),
+        // The old issue boards were retired: reporting moved to /report/ with a
+        // Cloud Function backend, the base64 media was moved into Storage, and
+        // firestore.rules now denies browser access to these two collections.
+        // Reading them here would only ever produce a permission error.
+        Promise.resolve(RETIRED_ISSUE_USAGE),
+        Promise.resolve(RETIRED_ISSUE_USAGE),
         measureAnnouncements(mainDb, firestoreMod).catch(e => ({ error: e.message })),
         measureExpenses().catch(e => ({ available: false, reason: e.message })),
         measurePickup().catch(e => ({ available: false, reason: e.message })),
@@ -3683,8 +3671,8 @@
       </div>`).join('');
 
     const rows = [
-      { label: '🧾 แจ้งปัญหา (สาธารณะ)', data: r.issues, sizeKnown: true },
-      { label: '🔒 แจ้งปัญหา (ส่วนตัว)', data: r.privateIssues, sizeKnown: true },
+      { label: '🧾 แจ้งปัญหา (บอร์ดเก่า · ย้ายเข้าคลังแล้ว)', data: r.issues, sizeKnown: true },
+      { label: '🔒 แจ้งปัญหาส่วนตัว (บอร์ดเก่า · ย้ายเข้าคลังแล้ว)', data: r.privateIssues, sizeKnown: true },
       { label: '📢 ประกาศ', data: r.announcements, sizeKnown: true },
       { label: '💰 ค่าใช้จ่าย (โครงการแยก)', data: r.expenses, sizeKnown: true },
       { label: '🚗 LPR log (รูปรถเข้า-ออก)', data: r.lprLog, sizeKnown: true },
