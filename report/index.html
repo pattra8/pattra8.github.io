@@ -60,32 +60,27 @@
     .pill-name { font-size:.72rem; color:var(--text-muted); line-height:1.2; }
 
     /* ── hero ── */
-    .hero { text-align:center; margin:22px 0 6px; }
-    .ornament { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; }
-    .o-line { width:56px; height:1px; background:linear-gradient(90deg,transparent,var(--accent)); }
-    .o-line.r { background:linear-gradient(90deg,var(--accent),transparent); }
-    .o-diamond { width:6px; height:6px; background:var(--accent); transform:rotate(45deg); opacity:.8; }
-    .title { font-size:26px; font-weight:700; color:var(--text); letter-spacing:.01em; }
-    .subtitle { font-size:13.5px; color:var(--text-muted); margin-top:6px; line-height:1.6; }
+    .hero { text-align:center; margin:14px 0 2px; }
+    .title { font-size:21px; font-weight:700; color:var(--text); letter-spacing:.01em; }
 
     /* ── cards & shared bits ── */
     .card {
       background:var(--card); border:1px solid var(--border-soft);
       border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:18px 16px; margin:14px 0;
+      padding:14px 15px; margin:11px 0;
     }
     .privacy-note {
-      display:flex; gap:12px; align-items:flex-start;
+      display:flex; gap:10px; align-items:center;
       background:var(--info-bg); border:1px solid #cfe0ea; color:#254a63;
-      border-radius:14px; padding:13px 15px; margin:16px 0 4px;
-      font-size:13px; line-height:1.65;
+      border-radius:12px; padding:10px 14px; margin:12px 0 4px;
+      font-size:13px; line-height:1.5;
     }
     .privacy-note b { color:#183c52; }
-    .privacy-icon { font-size:18px; line-height:1.3; }
+    .privacy-icon { font-size:16px; line-height:1.3; }
 
-    .tabs { display:flex; gap:8px; margin:18px 0 4px; }
+    .tabs { display:flex; gap:8px; margin:12px 0 4px; }
     .tab {
-      flex:1; text-align:center; padding:11px 8px; border-radius:12px; cursor:pointer;
+      flex:1; text-align:center; padding:10px 8px; border-radius:12px; cursor:pointer;
       font-size:14px; font-weight:600; border:1.5px solid var(--border);
       background:var(--card); color:var(--text-soft); position:relative;
       font-family:inherit;
@@ -102,37 +97,28 @@
       border-radius:50%; background:#c0392b;
     }
 
-    .field { margin-bottom:16px; }
+    .field { margin-bottom:11px; }
     .field label.lab {
       display:block; font-size:12.5px; font-weight:600;
-      color:var(--text-soft); margin-bottom:7px;
+      color:var(--text-soft); margin-bottom:6px;
     }
     .lab .opt { font-weight:400; color:var(--text-muted); }
     input[type=text], textarea, select {
       width:100%; font-family:inherit; font-size:15.5px; color:var(--text);
-      padding:12px; border:1.5px solid var(--border); border-radius:12px;
+      padding:11px 12px; border:1.5px solid var(--border); border-radius:12px;
       background:var(--card); outline:none; resize:vertical;
     }
     input[type=text]:focus, textarea:focus, select:focus { border-color:var(--accent); }
-    textarea { min-height:120px; line-height:1.65; }
+    textarea { min-height:88px; line-height:1.6; }
     .chips { display:flex; flex-wrap:wrap; gap:7px; }
     .chip {
-      padding:8px 13px; border-radius:99px; border:1.5px solid var(--border);
-      background:var(--card); color:var(--text-soft); font-size:13.5px;
+      padding:7px 12px; border-radius:99px; border:1.5px solid var(--border);
+      background:var(--card); color:var(--text-soft); font-size:13px;
       font-weight:600; cursor:pointer; font-family:inherit;
     }
     .chip.on { background:#f7e6cd; border-color:var(--accent); color:var(--accent-text); }
     .chip.pri-high.on { background:var(--warn-bg); border-color:#d08b3a; color:var(--warn); }
     .chip.pri-urgent.on { background:var(--err-bg); border-color:#c2795f; color:var(--err); }
-
-    .who { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
-    .who-opt {
-      border:1.5px solid var(--border); border-radius:13px; padding:12px 13px;
-      cursor:pointer; background:var(--card);
-    }
-    .who-opt.on { border-color:var(--accent); background:#fdf7ee; }
-    .who-title { font-size:14px; font-weight:700; color:var(--text); }
-    .who-sub { font-size:11.5px; color:var(--text-muted); margin-top:3px; line-height:1.5; }
 
     .dropzone {
       border:1.5px dashed var(--border); border-radius:13px; padding:18px 14px;
@@ -286,8 +272,7 @@
 
     @media (max-width:620px) {
       .site-header { padding:0 14px; }
-      .title { font-size:23px; }
-      .who { grid-template-columns:1fr; }
+      .title { font-size:19px; }
     }
     /* On a phone the wordmark, the backend button and the identity pill all
        want the same row; let the wordmark shrink instead of wrapping. */
@@ -318,9 +303,7 @@
 
   <div class="wrap">
     <section class="hero">
-      <div class="ornament"><span class="o-line"></span><span class="o-diamond"></span><span class="o-line r"></span></div>
-      <div class="title" id="heroTitle">แจ้งปัญหา · เสนอแนะ · ติชม</div>
-      <div class="subtitle" id="heroSub">ส่งเรื่องถึงนิติบุคคลโดยตรง พร้อมแนบรูปหรือวิดีโอ</div>
+      <div class="title" id="heroTitle">แจ้งเรื่องถึงกรรมการ</div>
     </section>
 
     <div id="bootState" class="loading"><span class="spinner"></span>กำลังโหลด…</div>
@@ -329,11 +312,7 @@
     <main id="residentView" hidden>
       <div class="privacy-note">
         <div class="privacy-icon">🔒</div>
-        <div>
-          เรื่องที่แจ้งจะส่ง<b>ถึงนิติบุคคลและกรรมการเท่านั้น</b>
-          ไม่แสดงต่อลูกบ้านท่านอื่น และไม่มีการโพสต์ขึ้นบอร์ดสาธารณะ
-          เมื่อนิติฯ ตอบกลับ คุณจะเห็นข้อความในหน้านี้
-        </div>
+        <div>เรื่องที่แจ้งจะส่งถึง<b>กรรมการเท่านั้น</b></div>
       </div>
 
       <div class="tabs">
@@ -358,25 +337,14 @@
 
           <div class="field">
             <label class="lab" for="fDetail">รายละเอียด</label>
-            <textarea id="fDetail" maxlength="4000" placeholder="เล่ารายละเอียด สถานที่ และช่วงเวลาที่เกิดเหตุ"></textarea>
-          </div>
-
-          <div class="field">
-            <label class="lab">ความเร่งด่วน</label>
-            <div class="chips" id="priChips"></div>
+            <textarea id="fDetail" maxlength="4000" placeholder="บอกรายละเอียด เช่น เกิดที่ไหน ตอนไหน หรืออยากให้ปรับปรุงอะไร"></textarea>
           </div>
 
           <div class="field">
             <label class="lab">แจ้งในนาม</label>
-            <div class="who">
-              <div class="who-opt on" id="whoNamed">
-                <div class="who-title" id="whoNamedTitle">ในนามบ้านของฉัน</div>
-                <div class="who-sub">นิติฯ ติดต่อกลับได้โดยตรง</div>
-              </div>
-              <div class="who-opt" id="whoAnon">
-                <div class="who-title">ไม่ประสงค์ออกนาม</div>
-                <div class="who-sub">ระบบจะไม่แสดงเลขบ้านให้กรรมการเห็น</div>
-              </div>
+            <div class="chips" id="whoChips">
+              <button type="button" class="chip on" id="whoNamed"><span id="whoNamedTitle">🏠 บ้านของฉัน</span></button>
+              <button type="button" class="chip" id="whoAnon">🙈 ไม่ประสงค์ออกนาม</button>
             </div>
           </div>
 
@@ -389,13 +357,13 @@
             <label class="lab">แนบรูปหรือวิดีโอ <span class="opt">(ถ้ามี)</span></label>
             <div class="dropzone" id="dropzone">
               📎 แตะเพื่อเลือกไฟล์
-              <div class="dz-sub">รูปได้สูงสุด 5 รูป · วิดีโอ 1 คลิป (ไม่เกิน 20MB)<br>รูปจะถูกย่อขนาดอัตโนมัติก่อนส่ง</div>
+              <div class="dz-sub">รูปได้สูงสุด 5 รูป · วิดีโอ 1 คลิป (ไม่เกิน 20MB)</div>
             </div>
             <input type="file" id="filePicker" accept="image/*,video/*" multiple hidden />
             <div class="previews" id="previews"></div>
           </div>
 
-          <button class="btn" id="submitBtn" type="button">ส่งเรื่องถึงนิติบุคคล</button>
+          <button class="btn" id="submitBtn" type="button">ส่งเรื่องให้กรรมการ</button>
         </div>
       </section>
 
@@ -469,13 +437,16 @@
   var SESSION_KEY = 'pattra_resident_session_v1';
   var TTL = 30 * 24 * 60 * 60 * 1000;
 
+  // Keys and order must match ISSUE_CATEGORIES in
+  // functions/domains/issues/contracts.js — the server is the source of
+  // truth for labels (they also drive the LINE notice and the archive view).
   var CATEGORIES = [
-    ['common_area', 'พื้นที่ส่วนกลาง'], ['security', 'ความปลอดภัย'],
-    ['cleanliness', 'ความสะอาด'], ['traffic', 'จราจร / ที่จอดรถ'],
-    ['utility', 'ไฟฟ้า / ประปา'], ['noise', 'เสียงรบกวน'],
-    ['suggestion', 'ข้อเสนอแนะ'], ['feedback', 'ติชม'], ['other', 'อื่น ๆ']
+    ['common_area', '🏡 พื้นที่ส่วนกลาง'], ['security', '🛡️ ความปลอดภัย'],
+    ['cleanliness', '🧹 ความสะอาด'], ['traffic', '🚗 จราจร / ที่จอดรถ'],
+    ['utility', '💡 ไฟฟ้า / ประปา'], ['noise', '🔊 เสียง / ความเป็นส่วนตัว'],
+    ['suggestion', '📝 ข้อเสนอแนะ'], ['feedback', '💬 ข้อกังวล'],
+    ['other', '💭 อื่น ๆ']
   ];
-  var PRIORITIES = [['normal', 'ปกติ'], ['high', 'เร่งด่วน'], ['urgent', 'ด่วนมาก']];
   var STATUSES = [['new', 'เรื่องใหม่'], ['in_progress', 'กำลังดำเนินการ'],
     ['resolved', 'ดำเนินการแล้ว'], ['closed', 'ปิดเรื่อง']];
   var MAX_IMAGES = 5, MAX_VIDEOS = 1;
@@ -608,7 +579,7 @@
   }
 
   /* ── form state ──────────────────────────────────────────────────── */
-  var draft = { category: 'common_area', priority: 'normal', anonymous: false };
+  var draft = { category: 'common_area', anonymous: false };
   var files = [];
 
   function renderChoiceChips() {
@@ -617,17 +588,12 @@
         (draft.category === c[0] ? ' on' : '') + '" data-cat="' + c[0] + '">' +
         esc(c[1]) + '</button>';
     }).join('');
-    $('priChips').innerHTML = PRIORITIES.map(function (p) {
-      return '<button type="button" class="chip pri-' + p[0] +
-        (draft.priority === p[0] ? ' on' : '') + '" data-pri="' + p[0] + '">' +
-        esc(p[1]) + '</button>';
-    }).join('');
   }
   function renderWho() {
     $('whoNamed').classList.toggle('on', !draft.anonymous);
     $('whoAnon').classList.toggle('on', draft.anonymous);
     $('contactField').hidden = draft.anonymous;
-    $('whoNamedTitle').textContent = session ? 'ในนามบ้าน ' + session.houseNo : 'ในนามบ้านของฉัน';
+    $('whoNamedTitle').textContent = session ? '🏠 บ้าน ' + session.houseNo : '🏠 บ้านของฉัน';
   }
 
   /* Shrinks a photo in the browser so a phone shot fits comfortably inside
@@ -715,7 +681,7 @@
 
     api('submit', {
       title: title, detail: detail,
-      category: draft.category, priority: draft.priority,
+      category: draft.category,
       anonymous: draft.anonymous,
       contact: draft.anonymous ? '' : String($('fContact').value || '').trim()
     }).then(function (data) {
@@ -731,8 +697,7 @@
     }).then(function (data) {
       files = []; renderPreviews();
       $('fTitle').value = ''; $('fDetail').value = ''; $('fContact').value = '';
-      draft.priority = 'normal'; renderChoiceChips();
-      formMessage('ok', 'ส่งเรื่องเรียบร้อยแล้ว เลขที่ ' + data.code +
+      formMessage('ok', 'ได้รับเรื่องแล้ว เลขที่ ' + data.code +
         ' — ติดตามคำตอบได้ที่แท็บ "เรื่องของฉัน"');
       loadMine();
     }).catch(function (e) {
@@ -945,10 +910,7 @@
     $('adminView').hidden = !admin;
     $('residentView').hidden = admin;
     $('adminToggle').textContent = admin ? 'มุมมองลูกบ้าน' : 'หลังบ้าน';
-    $('heroTitle').textContent = admin ? 'หลังบ้าน · เรื่องที่ลูกบ้านแจ้ง' : 'แจ้งปัญหา · เสนอแนะ · ติชม';
-    $('heroSub').textContent = admin ?
-      'เห็นเฉพาะกรรมการ · เรื่องที่แจ้งแบบไม่ประสงค์ออกนามจะไม่แสดงเลขบ้าน' :
-      'ส่งเรื่องถึงนิติบุคคลโดยตรง พร้อมแนบรูปหรือวิดีโอ';
+    $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' : 'แจ้งเรื่องถึงกรรมการ';
     if (admin) loadAdmin();
   }
 
@@ -973,11 +935,6 @@
       var chip = e.target.closest('[data-cat]');
       if (!chip) return;
       draft.category = chip.getAttribute('data-cat'); renderChoiceChips();
-    });
-    $('priChips').addEventListener('click', function (e) {
-      var chip = e.target.closest('[data-pri]');
-      if (!chip) return;
-      draft.priority = chip.getAttribute('data-pri'); renderChoiceChips();
     });
     $('whoNamed').addEventListener('click', function () { draft.anonymous = false; renderWho(); });
     $('whoAnon').addEventListener('click', function () { draft.anonymous = true; renderWho(); });
