@@ -1,1458 +1,1125 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pattra Report — ภัทราวิลล่า 8</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* Gambetta Bold — header wordmark (embedded) */
-@font-face{font-family:'Gambetta';font-style:normal;font-weight:700;src:url(data:font/otf;base64,T1RUTwAMAIAAAwBAQ0ZGIJxIaPYAAADUAAAEHUdERUYAFAAGAAAH2AAAABxHUE9TghCbtwAAB/QAAAEIR1NVQhZ9KIUAAAj8AAAAME9TLzJXt1YKAAAFeAAAAGBjbWFwAaECagAAB0QAAAB0aGVhZB9W6L8AAAT0AAAANmhoZWEKJQVdAAAFVAAAACRobXR4D/YA3wAABSwAAAAobWF4cAAKUAAAAADMAAAABm5hbWUbdzTLAAAF2AAAAWpwb3N0/58AMgAAB7gAAAAgAABQAAAKAAABAAQCAAEBAQ5HYW1iZXR0YS1Cb2xkAAEBASf4GwD4HAH4HQwA+B4C+B8D+BQEXvu1HAZd+jQF92gPoPqcEvd7EQAFAQEEN3SBiTEuMUdhbWJldHRhIGlzIGEgdHJhZGVtYXJrIG9mIHRoZSBJbmRpYW4gVHlwZSBGb3VuZHJ5LkNvcHlyaWdodCAyMDE3LTIwMjEgSW5kaWFuIFR5cGUgRm91bmRyeS4gQWxsIHJpZ2h0cyByZXNlcnZlZC5HYW1iZXR0YSBCb2xkR2FtYmV0dGEAAAAAMQA3AEIASgBNAFMAVQAZAAEACgIAAQAEAG4AygEzAZsB7gJaApQDBgMJ/K0O7/fnsRVikXyOgp0Ig5uLqcIa9wanB/dG9y/Q9yX3H/sJuvtLH/u1ZQazhZ2HlH0IlXuMb08a++8HT4pugnseg3x6iGWFCGUHjtuajLwbxJqKiNsfQvkOFbkG49BWKjtbPfsLfYCMjIAfDvcl99oWswb3cPiyrN2Rk8mVGbEHiWNsiWQbZG+NjWMfZQevhqqIbBp+hXaAcB77D/vN+wL3sAV8tIGnnhqqqI+ykR6xB4ljeYkgGzxijY1jH2UH0ICKhbj7BAgOTLj4CBWhbAWerLictRvNl2BbjR+BiQX7WV9jOUsaRL5qwcC1q7y3HooHUIq/dsQbqrCRmbAfrAdOe6LCjB+P90UF841Mzy0bOUFYXFof9wX7fRW5r7XUmh6J+xMFenp8f3QbdmyVth8O+3L3NPinFbmvr7m5Z69dXWdnXV2vZ7kf1vtVFbqLsJCtHnGYVHlRfkSEGWgHqIaaiJR/CJR+jHVgGvscB0+KboJ7HoN8eohvhQhqB47RkIzGG8aQiojRH6wHbJF8joKdCIObi6nCGg77evd3+OEVuouwkK0ecZhWeU9+RIQZaAeohpqIlH8IlH6MdWAa/BcHT4pugnseg3x6iG+FCGoHjtGQjMYbxpCKiNEfrAdskXyOgp0Ig5uLqcIaDvsF93/36BW4i6+PrB5tm1d5UX9GhBloB6iGmoiUfwiUfox1YBr7HgdPim6Cex6DfHqIb4UIageO0ZCMxhvGkIqI7x+sB06RfI6CnQiDm4upwhr3EQekrsWW0Rug9xoFjn1/jIQbUGFgNFkfDvtC92aBFbvEnKTBH32zBYV9eYd0G1FypuAf93X3J8gH+yeFBfcVZAdsPlFVSX8IYr/7pQc5vVXgHg7E+Ln3SBXoRL88sh7MrMW20RrdN8/7D/sP+wFH+wVHuk/TXx5EZz9SNho241X3H/cm9w3L9xIe+1P3YBU4sUa4yhq4srPP169ZSVd0Z2ZtHoiMiYyJjAj7Wft7Fb2lurqyHuVe7Gw5GktMa0g8WLvRHg777w6Blfk8ml6V+1yVBvt1lQf5ZRT4txUAAAAAAQAAAAEAQktGxcFfDzz1AAMD6AAAAADcOC7kAAAAAN3Wdjf/0/7fBl0DoAABAAYAAgAAAAAAAAAKAAAChwAmArQABQHkABQBRQAeAT0AFgGyAB4BdQAXAlwANwDIAAAAAQAAA6L+3gBQBsv/0/+pBl0AAQAAAAAAAAAAAAAAAAAAAAoABAIIArwABQAAAooCWAAAAEsCigJYAAABXgAyASwAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAASVRGTwCgACAAdAOi/t4AUAOiASIAAAABAAAAAAHMAcwAAAAgAAMAAAAHAFoAAwABBAkAAAB6AAAAAwABBAkAAQAQAHoAAwABBAkAAgAIAIoAAwABBAkAAwAwAJIAAwABBAkABAAaAMIAAwABBAkABQAaANwAAwABBAkABgAaAPYAQwBvAHAAeQByAGkAZwBoAHQAIAAyADAAMQA3AC0AMgAwADIAMQAgAEkAbgBkAGkAYQBuACAAVAB5AHAAZQAgAEYAbwB1AG4AZAByAHkALgAgAEEAbABsACAAcgBpAGcAaAB0AHMAIAByAGUAcwBlAHIAdgBlAGQALgBHAGEAbQBiAGUAdAB0AGEAQgBvAGwAZAAxAC4AMAAwADEAOwBJAFQARgBPADsARwBhAG0AYgBlAHQAdABhAC0AQgBvAGwAZABHAGEAbQBiAGUAdAB0AGEAIABCAG8AbABkAFYAZQByAHMAaQBvAG4AIAAxAC4AMAAwADEARwBhAG0AYgBlAHQAdABhAC0AQgBvAGwAZAAAAAAAAgAAAAMAAAAUAAMAAQAAABQABABgAAAAFAAQAAMABAAgADgAUABWAGEAaQBsAHIAdP//AAAAIAA4AFAAVgBhAGkAbAByAHT////p/9D/sf+s/6L/m/+Z/5T/kwABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAP+cADIAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAADAAAAAAAAAABAAMABQABAAAAAQABAAEAAQAAAAoAKgA4AANERkxUABRncmVrABRsYXRuABQABAAAAAD//wABAAAAAWtlcm4ACAAAAAEAAAABAAQAAgAIAAEACAACAJAABAAAAJoAsAAIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAD/7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+c/7AAAP+6/84AAAAAAAD/4gAAAAAAAAAA/+z/7AACAAEAAQAIAAAAAQABAAgABwAGAAAABAABAAMAAgAFAAEAAgAHAAcAAQAFAAMAAgAEAAYAAQAAAAoALAAuAANERkxUABRncmVrAB5sYXRuAB4ABAAAAAD//wAAAAAAAAAAAAA=) format('opentype');}
-:root{--bg:#f9f3e9;--surface:#ffffff;--border:#e6dcc7;--text:#2a2218;--muted:#6b5d4a;--accent:#c47a2c;--accent2:#d4913f;--todo-c:#3b82f6;--doing-c:#f59e0b;--done-c:#22c55e;--todo-bg:#eff6ff;--doing-bg:#fffbeb;--done-bg:#f0fdf4;--priv:#7c3aed;--priv-bg:#f5f3ff;--priv-border:#c4b5fd;--shadow:0 2px 12px rgba(28,26,23,.08);--shadow-lg:0 8px 32px rgba(28,26,23,.18);--r:14px;
-/* Priority colors */
---p-urgent:#dc2626;--p-urgent-bg:#fff1f2;--p-high:#ea580c;--p-high-bg:#fff7ed;--p-normal:#6b7280;--p-normal-bg:#f9fafb}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แจ้งปัญหา · Pattra Villa 8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#f9f3e9; --bg-soft:#f3ecdd; --card:#ffffff; --border:#e6dcc7;
+      --border-soft:#efe8d6; --text:#2a2218; --text-body:#3a3024;
+      --text-soft:#6b5d4a; --text-muted:#8a7960; --accent:#c47a2c;
+      --accent-text:#9a5c1f; --accent-deep:#855015;
+      --ok:#3f6431; --ok-bg:#e8efd9; --warn:#855015; --warn-bg:#f7e6cd;
+      --err:#86341e; --err-bg:#f7dfd5; --neutral:#6b5d4a; --neutral-bg:#efe8d6;
+      --info:#2f5d7c; --info-bg:#e2edf4;
+      --radius:16px;
+      --shadow:0 1px 2px rgba(60,40,20,0.04), 0 8px 24px rgba(60,40,20,0.07);
+    }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html, body { margin:0; padding:0; }
+    body {
+      font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
+      background:var(--bg); color:var(--text-body);
+      min-height:100dvh; padding:0 0 70px;
+    }
+    .wrap { width:100%; max-width:620px; margin:0 auto; padding:0 14px; }
+    .mono { font-family:'IBM Plex Mono', monospace; }
+    [hidden] { display:none !important; }
 
-/* ── HEADER ── */
-header{background:var(--bg);color:var(--text);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
-.hdr{padding:12px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.hbrand{display:flex;align-items:center;gap:13px}
-.hlogo{width:50px;height:50px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.25);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.htitle{font-family:'Gambetta','Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--text);letter-spacing:.2em}
-.hsub{font-family:'IBM Plex Sans Thai',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
-.hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.hbtn{padding:9px 15px;border-radius:9px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;transition:transform .15s,box-shadow .15s,background .15s;white-space:nowrap}
-.hbtn:hover{transform:translateY(-1px)}
-.btn-orange{background:var(--accent);color:white;box-shadow:0 3px 10px rgba(196,122,44,.35)}
-.btn-orange:hover{box-shadow:0 5px 16px rgba(196,122,44,.45)}
-.btn-purple{background:var(--priv-bg);color:var(--priv);border:1.5px solid var(--priv-border)!important}
-.btn-purple:hover{background:var(--priv);color:#fff!important}
-.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)!important}
-.btn-ghost:hover{background:var(--accent);color:#fff;border-color:var(--accent)!important}
-.admin-on{background:rgba(255,215,0,.25)!important;border-color:gold!important;color:gold!important}
+    /* ── header ── */
+    .site-header {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      background:var(--bg); border-bottom:1px solid var(--border);
+      padding:0 18px; height:68px; position:sticky; top:0; z-index:40;
+    }
+    .brand { display:flex; flex-direction:column; text-decoration:none; }
+    .brand-mark {
+      font-family:"Cormorant Garamond", serif; font-weight:700; font-size:21px;
+      color:var(--text); letter-spacing:.2em;
+    }
+    .brand-sub {
+      font-size:10px; color:var(--text-muted); letter-spacing:.18em;
+      text-transform:uppercase; margin-top:1px;
+    }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+    .identity-pill {
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+      background:#f7e6cd; border:1px solid #d4913f; border-radius:99px;
+      padding:4px 14px 4px 6px; white-space:nowrap;
+    }
+    .pill-avatar {
+      width:28px; height:28px; border-radius:50%; flex-shrink:0;
+      background:var(--accent); color:#fff; display:flex; align-items:center;
+      justify-content:center; font-size:.8rem; font-weight:800;
+    }
+    .pill-house { font-size:.8rem; font-weight:700; color:var(--text); line-height:1.2; }
+    .pill-name { font-size:.72rem; color:var(--text-muted); line-height:1.2; }
 
-/* ── STATS ── */
-.stats{display:flex;gap:9px;padding:13px 22px 0;overflow-x:auto}
-.schip{background:white;border-radius:30px;padding:6px 13px;font-size:.8rem;font-weight:600;white-space:nowrap;box-shadow:var(--shadow);display:flex;align-items:center;gap:5px;flex-shrink:0}
-.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    /* ── hero ── */
+    .hero { text-align:center; margin:22px 0 6px; }
+    .ornament { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; }
+    .o-line { width:56px; height:1px; background:linear-gradient(90deg,transparent,var(--accent)); }
+    .o-line.r { background:linear-gradient(90deg,var(--accent),transparent); }
+    .o-diamond { width:6px; height:6px; background:var(--accent); transform:rotate(45deg); opacity:.8; }
+    .title { font-size:26px; font-weight:700; color:var(--text); letter-spacing:.01em; }
+    .subtitle { font-size:13.5px; color:var(--text-muted); margin-top:6px; line-height:1.6; }
 
-/* ── PRIVATE BANNER ── */
-.priv-banner{display:none;align-items:center;gap:12px;margin:12px 22px 0;padding:12px 16px;background:var(--priv-bg);border:2px solid var(--priv-border);border-radius:12px;cursor:pointer;transition:box-shadow .15s}
-.priv-banner:hover{box-shadow:0 4px 16px rgba(124,58,237,.2)}
-.priv-banner.show{display:flex}
-.pb-icon{font-size:1.5rem}
-.pb-info{flex:1}
-.pb-title{font-family:'IBM Plex Sans Thai',sans-serif;font-size:.92rem;font-weight:700;color:var(--priv)}
-.pb-sub{font-size:.75rem;color:#6d28d9;margin-top:1px}
-.pb-badge{background:var(--priv);color:white;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:20px}
+    /* ── cards & shared bits ── */
+    .card {
+      background:var(--card); border:1px solid var(--border-soft);
+      border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:18px 16px; margin:14px 0;
+    }
+    .privacy-note {
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--info-bg); border:1px solid #cfe0ea; color:#254a63;
+      border-radius:14px; padding:13px 15px; margin:16px 0 4px;
+      font-size:13px; line-height:1.65;
+    }
+    .privacy-note b { color:#183c52; }
+    .privacy-icon { font-size:18px; line-height:1.3; }
 
-/* ── SEARCH & FILTER BAR ── */
-.filter-bar{display:flex;flex-wrap:wrap;gap:9px;padding:13px 22px 0;align-items:center}
-.search-wrap{flex:1;min-width:200px;position:relative}
-.search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--border);border-radius:30px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.88rem;background:white;outline:none;transition:border-color .15s,box-shadow .15s;color:var(--text)}
-.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(196,122,44,.12)}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.95rem;pointer-events:none;opacity:.5}
-.filter-selects{display:flex;gap:7px;flex-wrap:wrap}
-.fsel{padding:8px 12px;border:1.5px solid var(--border);border-radius:30px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.82rem;background:white;color:var(--text);cursor:pointer;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7570'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
-.fsel:focus{border-color:var(--accent)}
-.fsel.active{border-color:var(--accent);background-color:#f7e6cd;color:var(--accent);font-weight:700}
-.clear-filter-btn{padding:8px 14px;border:1.5px solid #fca5a5;border-radius:30px;background:#fff1f2;color:#dc2626;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;display:none;align-items:center;gap:5px;transition:background .15s}
-.clear-filter-btn.show{display:flex}
-.clear-filter-btn:hover{background:#fee2e2}
-.filter-result-info{padding:4px 22px 0;font-size:.78rem;color:var(--muted);display:none}
-.filter-result-info.show{display:block}
+    .tabs { display:flex; gap:8px; margin:18px 0 4px; }
+    .tab {
+      flex:1; text-align:center; padding:11px 8px; border-radius:12px; cursor:pointer;
+      font-size:14px; font-weight:600; border:1.5px solid var(--border);
+      background:var(--card); color:var(--text-soft); position:relative;
+      font-family:inherit;
+    }
+    .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .tab .count {
+      display:inline-block; min-width:20px; padding:0 5px; margin-left:5px;
+      border-radius:99px; background:var(--bg-soft); color:var(--text-soft);
+      font-size:11.5px; font-weight:700; line-height:18px;
+    }
+    .tab.active .count { background:rgba(255,255,255,.28); color:#fff; }
+    .tab .dot {
+      position:absolute; top:7px; right:9px; width:8px; height:8px;
+      border-radius:50%; background:#c0392b;
+    }
 
-/* ── BOARD ── */
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:13px 22px 32px}
-@media(max-width:800px){.board{grid-template-columns:1fr}}
-.col{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:0;overflow:visible;border:1.5px solid var(--border)}
-.col.collapsed{max-height:54px!important}
-.col.collapsed .col-body{display:none}
-.col-toggle{background:none;border:none;cursor:pointer;font-size:.85rem;color:var(--muted);padding:2px 4px;border-radius:6px;transition:transform .25s;line-height:1}
-.col.collapsed .col-toggle{transform:rotate(-90deg)}
-.col-stripe{height:5px;border-radius:var(--r) var(--r) 0 0}
-.cs-todo{background:var(--todo-c)}.cs-doing{background:var(--doing-c)}.cs-done{background:var(--done-c)}
-.col-hd{padding:13px 15px 11px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;border-radius:0}
-.col-hl{display:flex;align-items:center;gap:8px}
-.col-lbl{font-family:'IBM Plex Sans Thai',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-.01em}
-.cbadge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px}
-.cb-todo{background:var(--todo-bg);color:var(--todo-c)}.cb-doing{background:var(--doing-bg);color:#b45309}.cb-done{background:var(--done-bg);color:#15803d}
-.col-body{flex:1;overflow:visible;padding:11px 11px 24px;display:flex;flex-direction:column;gap:9px;min-height:200px}
-.col-body::-webkit-scrollbar{width:4px}
-.col-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    .field { margin-bottom:16px; }
+    .field label.lab {
+      display:block; font-size:12.5px; font-weight:600;
+      color:var(--text-soft); margin-bottom:7px;
+    }
+    .lab .opt { font-weight:400; color:var(--text-muted); }
+    input[type=text], textarea, select {
+      width:100%; font-family:inherit; font-size:15.5px; color:var(--text);
+      padding:12px; border:1.5px solid var(--border); border-radius:12px;
+      background:var(--card); outline:none; resize:vertical;
+    }
+    input[type=text]:focus, textarea:focus, select:focus { border-color:var(--accent); }
+    textarea { min-height:120px; line-height:1.65; }
+    .chips { display:flex; flex-wrap:wrap; gap:7px; }
+    .chip {
+      padding:8px 13px; border-radius:99px; border:1.5px solid var(--border);
+      background:var(--card); color:var(--text-soft); font-size:13.5px;
+      font-weight:600; cursor:pointer; font-family:inherit;
+    }
+    .chip.on { background:#f7e6cd; border-color:var(--accent); color:var(--accent-text); }
+    .chip.pri-high.on { background:var(--warn-bg); border-color:#d08b3a; color:var(--warn); }
+    .chip.pri-urgent.on { background:var(--err-bg); border-color:#c2795f; color:var(--err); }
 
-/* ── CARDS ── */
-.card{background:#fafaf8;border:1.5px solid var(--border);border-radius:10px;overflow:visible;animation:slideUp .25s ease;transition:box-shadow .15s,transform .15s;cursor:pointer}
-.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
-@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.card-body{padding:13px 14px}
-.card-top-row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
-.ctag{display:inline-block;font-size:.67rem;font-weight:700;padding:2px 9px;border-radius:20px;flex-shrink:0}
-.card-title{font-size:.92rem;font-weight:700;line-height:1.5;margin-bottom:6px;word-break:break-word;white-space:normal}
-.card-meta-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px}
-.card-actions{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap}
-.vbtn{display:flex;align-items:center;gap:4px;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);border-radius:20px;padding:4px 10px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;flex-shrink:0}
-.vbtn:hover{background:var(--border);color:var(--text)}
-.vbtn.voted{background:#f0fdf4;color:#15803d;border-color:#86efac}
-.mvbtns{display:flex;gap:5px;flex:1;flex-wrap:wrap}
-.mvb{flex:1;min-width:48px;padding:5px 3px;border:none;border-radius:6px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.68rem;font-weight:700;cursor:pointer;transition:opacity .15s}
-.mvb:hover{opacity:.75}
-.mvb-todo{background:var(--todo-bg);color:var(--todo-c)}.mvb-doing{background:var(--doing-bg);color:#b45309}.mvb-done{background:var(--done-bg);color:#15803d}.mvb-del{background:#fff1f2;color:#e11d48}
-.reply-strip{padding:8px 14px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:0 0 10px 10px;display:block}
-.rs-label{font-size:.69rem;font-weight:700;color:#15803d;margin-bottom:3px}
-.rs-text{font-size:.78rem;color:var(--text);line-height:1.5;word-break:break-word;white-space:normal;min-height:1.2em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.empty-col{text-align:center;padding:32px 14px;color:var(--muted);font-size:.83rem}
-.empty-col .ei{font-size:2rem;margin-bottom:7px}
+    .who { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .who-opt {
+      border:1.5px solid var(--border); border-radius:13px; padding:12px 13px;
+      cursor:pointer; background:var(--card);
+    }
+    .who-opt.on { border-color:var(--accent); background:#fdf7ee; }
+    .who-title { font-size:14px; font-weight:700; color:var(--text); }
+    .who-sub { font-size:11.5px; color:var(--text-muted); margin-top:3px; line-height:1.5; }
 
-/* ── PRIORITY BADGES ── */
-.pri-badge{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
-.pri-urgent{background:var(--p-urgent-bg);color:var(--p-urgent);border:1px solid #fca5a5}
-.pri-high{background:var(--p-high-bg);color:var(--p-high);border:1px solid #fdba74}
-.pri-normal{background:var(--p-normal-bg);color:var(--p-normal);border:1px solid #d1d5db}
-.card.urgent-card{border-left:3px solid var(--p-urgent)!important}
-.card.high-card{border-left:3px solid var(--p-high)!important}
+    .dropzone {
+      border:1.5px dashed var(--border); border-radius:13px; padding:18px 14px;
+      text-align:center; cursor:pointer; background:var(--bg-soft);
+      font-size:13.5px; color:var(--text-soft);
+    }
+    .dropzone:hover { border-color:var(--accent); }
+    .dz-sub { font-size:11.5px; color:var(--text-muted); margin-top:5px; line-height:1.55; }
+    .previews { display:flex; flex-wrap:wrap; gap:9px; margin-top:11px; }
+    .pv {
+      position:relative; width:82px; height:82px; border-radius:11px;
+      overflow:hidden; border:1px solid var(--border); background:#000;
+    }
+    .pv img, .pv video { width:100%; height:100%; object-fit:cover; display:block; }
+    .pv .rm {
+      position:absolute; top:3px; right:3px; width:22px; height:22px; border:none;
+      border-radius:50%; background:rgba(0,0,0,.62); color:#fff; font-size:13px;
+      cursor:pointer; line-height:22px; padding:0;
+    }
+    .pv .badge {
+      position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.55);
+      color:#fff; font-size:10px; text-align:center; padding:2px 0;
+    }
 
-/* ── OVERLAYS & MODALS ── */
-.overlay{position:fixed;inset:0;background:rgba(28,26,23,.55);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;animation:fadeIn .2s}
-.overlay.hidden{display:none}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{background:white;border-radius:20px;padding:26px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:popUp .25s ease}
-.modal::-webkit-scrollbar{width:5px}
-.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-@keyframes popUp{from{transform:scale(.95) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-.modal h2{font-family:'IBM Plex Sans Thai',sans-serif;font-size:1.12rem;margin-bottom:4px}
-.modal-sub{font-size:.81rem;color:var(--muted);margin-bottom:20px}
-.fg{margin-bottom:14px}
-.fg label{display:block;font-size:.82rem;font-weight:700;margin-bottom:5px}
-.fg input,.fg select,.fg textarea{width:100%;padding:10px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.88rem;color:var(--text);background:#fafaf8;outline:none;transition:border-color .15s}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);background:white}
-.fg textarea{resize:vertical;min-height:78px}
-.fg select:disabled,.fg input:disabled{opacity:.4;cursor:not-allowed}
-.field-note{font-size:.72rem;color:var(--muted);margin-top:4px;font-style:italic}
-.opt-lbl{font-weight:400;color:var(--muted);font-size:.78rem}
-.anon-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;cursor:pointer;user-select:none;margin-top:7px}
-.anon-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent2);flex-shrink:0}
-.anon-row span{font-size:.83rem;font-weight:700;color:#92400e}
-.anon-row small{font-size:.73rem;color:#b45309;margin-left:auto;opacity:.85}
+    .btn {
+      width:100%; font-family:inherit; font-size:16.5px; font-weight:600;
+      padding:15px; border:none; border-radius:12px; background:var(--accent);
+      color:#fff; cursor:pointer;
+    }
+    .btn:hover { background:var(--accent-deep); }
+    .btn:disabled { opacity:.55; cursor:default; }
+    .btn.ghost {
+      background:var(--card); color:var(--text-soft);
+      border:1.5px solid var(--border);
+    }
+    .btn.ghost:hover { background:var(--bg-soft); }
+    .btn.small { width:auto; font-size:13.5px; padding:9px 15px; border-radius:10px; }
 
-/* Priority selector in form */
-.pri-selector{display:flex;gap:7px;margin-top:4px;flex-wrap:wrap}
-.pri-opt{flex:1;min-width:80px;padding:8px 6px;border-radius:9px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid transparent;text-align:center;transition:all .15s}
-.pri-opt input[type=radio]{display:none}
-.pri-opt.sel-urgent{background:var(--p-urgent-bg);border-color:var(--p-urgent);color:var(--p-urgent)}
-.pri-opt.sel-high{background:var(--p-high-bg);border-color:var(--p-high);color:var(--p-high)}
-.pri-opt.sel-normal{background:var(--p-normal-bg);border-color:var(--p-normal);color:var(--p-normal)}
-.pri-opt.unsel{background:#f9fafb;border-color:var(--border);color:var(--muted)}
-.pri-opt.unsel:hover{border-color:#9ca3af}
+    .msg { border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.6; margin:12px 0; }
+    .msg.err { background:var(--err-bg); color:var(--err); }
+    .msg.ok { background:var(--ok-bg); color:var(--ok); }
+    .loading { text-align:center; padding:38px 0; color:var(--text-muted); font-size:14px; }
+    .spinner {
+      display:inline-block; width:18px; height:18px;
+      border:2.5px solid rgba(150,120,80,.3); border-top-color:var(--accent);
+      border-radius:50%; animation:spin .7s linear infinite;
+      vertical-align:-3px; margin-right:8px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .empty { text-align:center; padding:36px 14px; color:var(--text-muted); font-size:14px; line-height:1.7; }
+    .empty .big { font-size:34px; display:block; margin-bottom:10px; opacity:.65; }
 
-.priv-callout{background:var(--priv-bg);border:1.5px solid var(--priv-border);border-radius:11px;padding:13px 15px;margin-bottom:18px}
-.priv-callout-title{font-family:'IBM Plex Sans Thai',sans-serif;font-size:.92rem;font-weight:700;color:var(--priv);margin-bottom:5px;display:flex;align-items:center;gap:7px}
-.priv-callout p{font-size:.8rem;color:#5b21b6;line-height:1.6}
-.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:#fafaf8}
-.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:#f0fdf4}
-.upload-zone .uz-icon{font-size:1.8rem;margin-bottom:5px}
-.upload-zone p{font-size:.8rem;color:var(--muted)}
-.upload-zone strong{color:var(--accent)}
-.upload-zone input[type=file]{display:none}
-.prev-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
-.prev-item{position:relative}
-.prev-item img,.prev-item video{width:66px;height:66px;object-fit:cover;border-radius:7px;border:2px solid var(--border);display:block}
-.prev-rm{position:absolute;top:-5px;right:-5px;width:17px;height:17px;background:#e11d48;color:white;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-weight:700}
-.mbtns{display:flex;gap:9px;margin-top:20px}
-.btn-cancel{flex:1;padding:10px;border:1.5px solid var(--border);border-radius:8px;background:white;color:var(--muted);font-family:'IBM Plex Sans Thai',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer}
-.btn-cancel:hover{background:var(--bg)}
-.btn-submit{flex:2;padding:10px;border:none;border-radius:8px;background:var(--accent);color:white;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .15s,transform .15s;box-shadow:0 3px 10px rgba(196,122,44,.35)}
-.btn-submit:hover{opacity:.9;transform:translateY(-1px)}
-.btn-submit-priv{background:linear-gradient(135deg,#4c1d95,#7c3aed)!important;box-shadow:0 3px 10px rgba(124,58,237,.35)!important}
+    /* ── ticket cards ── */
+    .ticket {
+      background:var(--card); border:1px solid var(--border-soft);
+      border-left:4px solid var(--neutral); border-radius:14px;
+      box-shadow:var(--shadow); padding:14px 15px; margin-bottom:11px; cursor:pointer;
+    }
+    .ticket.st-new { border-left-color:#c0392b; }
+    .ticket.st-in_progress { border-left-color:var(--accent); }
+    .ticket.st-resolved { border-left-color:#4d7c3f; }
+    .ticket.st-closed { border-left-color:#9c8c76; }
+    .t-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
+    .t-code { font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; color:var(--accent-text); }
+    .pill {
+      font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;
+      background:var(--neutral-bg); color:var(--neutral); white-space:nowrap;
+    }
+    .pill.st-new { background:var(--err-bg); color:var(--err); }
+    .pill.st-in_progress { background:var(--warn-bg); color:var(--warn); }
+    .pill.st-resolved { background:var(--ok-bg); color:var(--ok); }
+    .pill.st-closed { background:var(--neutral-bg); color:var(--neutral); }
+    .pill.pri-high { background:var(--warn-bg); color:var(--warn); }
+    .pill.pri-urgent { background:var(--err-bg); color:var(--err); }
+    .pill.anon { background:#ece7f6; color:#5b4a8a; }
+    .pill.unread { background:#c0392b; color:#fff; }
+    .t-title { font-size:15.5px; font-weight:700; color:var(--text); line-height:1.5; }
+    .t-meta { font-size:11.5px; color:var(--text-muted); margin-top:6px; }
+    .t-preview {
+      font-size:13px; color:var(--text-soft); margin-top:7px; line-height:1.6;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
 
-/* ── DETAIL MODAL ── */
-.detail-modal{max-width:560px}
-.det-toprow{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px;gap:8px}
-.det-badges{display:flex;flex-direction:column;gap:5px}
-.det-sbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.78rem;font-weight:700}
-.dsb-todo{background:var(--todo-bg);color:var(--todo-c)}.dsb-doing{background:var(--doing-bg);color:#b45309}.dsb-done{background:var(--done-bg);color:#15803d}
-.dsb-priv{background:var(--priv-bg);color:var(--priv);border:1px solid var(--priv-border)}
-.det-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1;padding:0}
-.det-title{font-family:'IBM Plex Sans Thai',sans-serif;font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:9px}
-.det-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-.dchip{font-size:.77rem;border-radius:20px;padding:3px 10px;font-weight:600;border:1px solid var(--border);background:var(--bg);color:var(--muted)}
-.dchip.house{color:var(--accent);border-color:#86efac;background:#f0fdf4}
-.dchip.votes{color:#c2410c;border-color:#fed7aa;background:#fff7ed}
-.dchip.contact{color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff}
-.det-desc{font-size:.88rem;line-height:1.75;color:var(--text);margin-bottom:14px;white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:11px 13px}
-.det-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px}
-.det-media img,.det-media video{width:100%;height:160px;object-fit:cover;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:transform .15s,box-shadow .15s;display:block}
-.det-media img:hover,.det-media video:hover{transform:scale(1.02);box-shadow:var(--shadow-lg)}
-.det-media.single-media img,.det-media.single-media video{height:260px;border-radius:12px}
-.det-div{height:1px;background:var(--border);margin:16px 0}
-.det-sec{font-size:.82rem;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:5px}
-.det-replies{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
-.rep-bubble{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 12px}
-.rep-bubble p{font-size:.86rem;line-height:1.6;white-space:pre-wrap;word-wrap:break-word}
-.rep-meta{font-size:.7rem;color:var(--muted);margin-top:4px;display:flex;align-items:center;justify-content:space-between}
-.rep-del{background:none;border:none;color:#e11d48;cursor:pointer;font-size:.7rem;font-weight:700}
-.rep-input{display:flex;flex-direction:column;gap:7px;margin-top:4px}
-.rep-input-row{display:flex;flex-direction:column;gap:7px}
-.rep-input-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
-.rep-input input,.rep-input textarea{width:100%;padding:11px 13px;border:1.5px solid #86efac;border-radius:8px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.9rem;outline:none;background:white;box-sizing:border-box;color:var(--text)}
-.rep-input textarea{min-height:96px;max-height:300px;resize:vertical;line-height:1.6;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;display:block}
-.rep-input input:focus,.rep-input textarea:focus{border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.15)}
-.rep-send{background:var(--accent);color:white;border:none;padding:9px 18px;border-radius:8px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.02em}
-.rep-send:hover{background:#1b4d36}
-/* Admin reply file attach */
-.rep-attach-btn{background:#f0fdf4;border:1.5px solid #86efac;color:var(--accent);border-radius:8px;padding:8px 12px;font-size:.95rem;cursor:pointer;line-height:1;flex-shrink:0;transition:background .15s}
-.rep-attach-btn:hover{background:#dcfce7}
-.rep-file-input{display:none}
-.rep-attach-preview{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
-.rap-item{position:relative;display:flex;align-items:center;gap:5px}
-.rap-item img{width:52px;height:52px;object-fit:cover;border-radius:6px;border:2px solid #86efac}
-.rap-pdf{background:#fff1f2;border:2px solid #fca5a5;border-radius:6px;padding:5px 9px;font-size:.72rem;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rap-rm{position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:#e11d48;color:white;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-weight:700}
-/* Reply media display inside bubble */
-.rep-media{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-.rep-media img{width:80px;height:80px;object-fit:cover;border-radius:7px;border:2px solid #86efac;cursor:pointer;transition:transform .15s}
-.rep-media img:hover{transform:scale(1.05)}
-.rep-pdf-link{display:inline-flex;align-items:center;gap:5px;background:#fff1f2;border:1.5px solid #fca5a5;border-radius:7px;padding:5px 10px;font-size:.75rem;font-weight:700;color:#dc2626;cursor:pointer;text-decoration:none;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rep-pdf-link:hover{background:#fee2e2}
-.det-admin-btns{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
-.dab{flex:1;min-width:75px;padding:8px 5px;border:none;border-radius:7px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.79rem;font-weight:700;cursor:pointer;transition:opacity .15s}
-.dab:hover{opacity:.8}
-.dab-todo{background:var(--todo-bg);color:var(--todo-c)}.dab-doing{background:var(--doing-bg);color:#b45309}.dab-done{background:var(--done-bg);color:#15803d}.dab-del{background:#fff1f2;color:#e11d48}
+    /* ── thread ── */
+    .thread-detail { border-top:1px dashed var(--border); margin-top:13px; padding-top:13px; }
+    .detail-text { font-size:14px; line-height:1.75; color:var(--text-body); white-space:pre-wrap; }
+    .media-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
+    .media-row a { display:block; width:88px; height:88px; border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+    .media-row img, .media-row video { width:100%; height:100%; object-fit:cover; display:block; }
+    .replies { margin-top:14px; display:flex; flex-direction:column; gap:9px; }
+    .reply { border-radius:12px; padding:11px 13px; font-size:13.5px; line-height:1.7; }
+    .reply.admin { background:var(--warn-bg); }
+    .reply.resident { background:var(--bg-soft); }
+    .reply-head { font-size:11.5px; font-weight:700; color:var(--text-soft); margin-bottom:4px; display:flex; justify-content:space-between; gap:8px; }
+    .reply-body { white-space:pre-wrap; color:var(--text-body); }
+    .reply-box { display:flex; gap:8px; margin-top:12px; align-items:flex-start; }
+    .reply-box textarea { min-height:52px; font-size:14px; }
 
-/* edit issue btn */
-.edit-issue-btn{display:flex;align-items:center;gap:5px;background:#eff6ff;border:1.5px solid #bfdbfe;color:#1d4ed8;border-radius:20px;padding:5px 12px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .15s;margin-bottom:2px}
-.edit-issue-btn:hover{background:#dbeafe}
+    /* ── admin ── */
+    .stats { display:flex; gap:7px; overflow-x:auto; padding:2px 0 6px; }
+    .stat {
+      flex:0 0 auto; background:var(--card); border:1px solid var(--border-soft);
+      border-radius:12px; padding:9px 13px; min-width:78px; text-align:center;
+      cursor:pointer;
+    }
+    .stat.on { border-color:var(--accent); background:#fdf7ee; }
+    .stat .n { font-size:19px; font-weight:700; color:var(--text); }
+    .stat .l { font-size:11px; color:var(--text-muted); margin-top:1px; }
+    .admin-bar { display:flex; gap:8px; margin:10px 0 4px; }
+    .admin-bar input { flex:1; }
+    .note-item { background:#f4f0e6; border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.6; color:var(--text-soft); }
+    .admin-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 
-/* ── INBOX ── */
-.inbox-modal{max-width:580px}
-.inbox-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.inbox-notice{font-size:.79rem;color:#5b21b6;margin-bottom:18px;padding:8px 12px;background:var(--priv-bg);border-radius:8px;border:1px solid var(--priv-border);font-style:italic}
-.inbox-list{display:flex;flex-direction:column;gap:11px}
-.icard{background:var(--priv-bg);border:1.5px solid var(--priv-border);border-radius:12px;padding:14px 15px;cursor:pointer;transition:box-shadow .15s,transform .12s}
-.icard:hover{box-shadow:0 4px 16px rgba(124,58,237,.15);transform:translateY(-1px)}
-.icard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
-.icard-title{font-weight:700;font-size:.9rem;flex:1}
-.icard-date{font-size:.7rem;color:var(--muted);white-space:nowrap;margin-top:2px}
-.icard-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
-.ichip{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid}
-.ic-house{background:#f0fdf4;color:var(--accent);border-color:#86efac}
-.ic-contact{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
-.ic-cat{background:var(--priv-bg);color:var(--priv);border-color:var(--priv-border)}
-.ic-todo{background:var(--todo-bg);color:var(--todo-c);border-color:#93c5fd}
-.ic-doing{background:var(--doing-bg);color:#b45309;border-color:#fcd34d}
-.ic-done{background:var(--done-bg);color:#15803d;border-color:#86efac}
-.icard-desc{font-size:.78rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.icard-reply{font-size:.75rem;color:#15803d;background:#f0fdf4;border-radius:6px;padding:6px 9px;margin-top:7px;border-left:3px solid #22c55e;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45;word-break:break-word}
-.inbox-empty{text-align:center;padding:36px;color:var(--muted)}
-.inbox-empty .ei{font-size:2.5rem;margin-bottom:10px}
+    /* ── login ── */
+    .overlay {
+      position:fixed; inset:0; background:rgba(40,30,18,.45);
+      display:none; align-items:center; justify-content:center; padding:20px; z-index:60;
+    }
+    .overlay.open { display:flex; }
+    .modal {
+      background:var(--card); border-radius:20px; padding:26px 22px;
+      width:100%; max-width:360px; box-shadow:var(--shadow);
+    }
+    .modal h2 { margin:0 0 4px; font-size:20px; color:var(--text); }
+    .modal p { margin:0 0 18px; font-size:13px; color:var(--text-muted); line-height:1.6; }
+    .houserow { display:flex; align-items:stretch; border:1.5px solid var(--border); border-radius:12px; overflow:hidden; }
+    .houserow .prefix {
+      display:flex; align-items:center; padding:0 12px; background:var(--bg-soft);
+      font-weight:700; color:var(--text-soft); font-size:16px;
+    }
+    .houserow input, .pin-in {
+      width:100%; font-family:inherit; font-size:17px; font-weight:600;
+      padding:12px; border:none; outline:none; color:var(--text); background:transparent;
+    }
+    .pin-in {
+      border:1.5px solid var(--border); border-radius:12px;
+      letter-spacing:.3em; font-family:'IBM Plex Mono', monospace;
+    }
+    .houserow input::-webkit-outer-spin-button,
+    .houserow input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+    .houserow input[type=number] { -moz-appearance:textfield; }
+    .field:focus-within .houserow, .pin-in:focus { border-color:var(--accent); }
+    .modal-err {
+      font-size:13px; color:var(--err); background:var(--err-bg);
+      border-radius:10px; padding:10px 12px; margin-bottom:12px; display:none;
+    }
+    .modal-err.show { display:block; }
 
-/* ── ADMIN MODAL ── */
-.admin-modal{max-width:380px}
-.admin-modal h2{color:var(--accent)}
+    footer { text-align:center; margin-top:30px; font-size:12px; color:var(--text-muted); line-height:1.9; }
+    footer a { color:var(--accent-text); text-decoration:none; }
 
-/* ── EDIT CODE ── */
-.edit-code-box{background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:18px 20px;margin-top:18px;text-align:center}
-.edit-code-box .ecb-title{font-family:'IBM Plex Sans Thai',sans-serif;font-size:.95rem;font-weight:700;color:#15803d;margin-bottom:8px}
-.edit-code-box .ecb-sub{font-size:.78rem;color:#166534;margin-bottom:12px;line-height:1.5}
-.edit-code-display{display:flex;align-items:center;justify-content:center;gap:10px}
-.edit-code-num{font-family:monospace;font-size:2rem;font-weight:700;letter-spacing:.25em;color:#15803d;background:white;border:2px solid #86efac;border-radius:10px;padding:8px 18px}
-.copy-code-btn{background:var(--accent);color:white;border:none;padding:8px 14px;border-radius:8px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s}
-.copy-code-btn:hover{background:#1b4d36}
-.ecb-warn{font-size:.73rem;color:#b45309;margin-top:10px;background:#fffbeb;border-radius:6px;padding:5px 10px}
-.edit-verify-modal{max-width:420px}
-
-/* ── LIGHTBOX ── */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;display:flex;align-items:center;justify-content:center}
-.lightbox.hidden{display:none}
-.lightbox img,.lightbox video{max-width:92vw;max-height:88vh;border-radius:10px}
-.lb-close{position:absolute;top:18px;right:20px;color:white;font-size:2rem;cursor:pointer;background:none;border:none;line-height:1}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1c1a17;color:white;padding:10px 20px;border-radius:30px;font-size:.83rem;font-weight:600;z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1}
-
-/* ── DRAG & DROP ── */
-.card.dragging{opacity:.4;transform:scale(.98);cursor:grabbing}
-.col-body.drag-over{outline:2.5px dashed var(--accent);outline-offset:-4px;background-color:rgba(196,122,44,.08)}
-.col-body.drag-over-todo{outline-color:var(--todo-c);background-color:rgba(59,130,246,.06)}
-.col-body.drag-over-doing{outline-color:var(--doing-c);background-color:rgba(245,158,11,.06)}
-.col-body.drag-over-done{outline-color:var(--done-c);background-color:rgba(34,197,94,.06)}
-#col-todo{background:#f0f7ff}
-#col-doing{background:#fffbf0}
-#col-done{background:#f0fdf4}
-
-/* ── CATEGORY TAG COLORS ── */
-.tag-ไฟ{background:#fef3c7;color:#92400e}.tag-น้ำ{background:#dbeafe;color:#1e40af}.tag-ส่วนกลาง{background:#d1fae5;color:#065f46}.tag-ความปลอดภัย{background:#fee2e2;color:#991b1b}.tag-อื่นๆ{background:#f3f4f6;color:#374151}.tag-สัญญาณ{background:#fce7f3;color:#9d174d}.tag-ขยะ{background:#fef9c3;color:#713f12}.tag-จอดรถ{background:#e0f2fe;color:#0369a1}.tag-ถนน{background:#ede9fe;color:#5b21b6}.tag-ประตู{background:#ecfeff;color:#155e75}.tag-เพื่อนบ้าน{background:#fff1f2;color:#9f1239}
-
-/* ── MOBILE RESPONSIVE ── */
-@media(max-width:600px){
-  .hdr{padding:10px 14px}
-  .htitle{font-size:1rem}
-  .hsub{display:none}
-  .hbtn{padding:7px 11px;font-size:.78rem}
-  .filter-bar{padding:10px 14px 0;gap:7px}
-  .stats{padding:10px 14px 0}
-  .board{padding:10px 14px 24px;gap:10px}
-  .col{max-height:none}
-  .modal{padding:18px 16px}
-  .fsel{font-size:.78rem;padding:7px 28px 7px 10px}
-}
-</style>
+    @media (max-width:620px) {
+      .site-header { padding:0 14px; }
+      .title { font-size:23px; }
+      .who { grid-template-columns:1fr; }
+    }
+    /* On a phone the wordmark, the backend button and the identity pill all
+       want the same row; let the wordmark shrink instead of wrapping. */
+    @media (max-width:440px) {
+      .site-header { padding:0 11px; gap:8px; height:62px; }
+      .brand-mark { font-size:16px; letter-spacing:.12em; white-space:nowrap; }
+      .brand-sub { font-size:9px; letter-spacing:.12em; }
+      .btn.small { font-size:12.5px; padding:8px 11px; }
+      .identity-pill { padding:3px 11px 3px 4px; }
+      .pill-avatar { width:25px; height:25px; font-size:.72rem; }
+      .pill-house { font-size:.74rem; }
+      .pill-name { font-size:.66rem; }
+      .t-top { gap:6px; }
+    }
+  </style>
 </head>
 <body>
-
-<!-- Loading -->
-<div id="loadingOverlay" style="position:fixed;inset:0;background:rgba(245,243,239,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px">
-  <div style="width:44px;height:44px;border:4px solid #e8e4dd;border-top-color:#c47a2c;border-radius:50%;animation:spin .8s linear infinite"></div>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-  <div style="font-size:.9rem;color:#7a7570;font-weight:600">กำลังโหลดข้อมูล...</div>
-</div>
-
-<header>
-  <div class="hdr">
-    <div class="hbrand">
-      <div>
-        <div class="htitle">Pattra Villa 8</div>
-        <div class="hsub">Resident Reports</div>
-      </div>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <div class="brand-mark">Pattra Villa 8</div>
+      <div class="brand-sub">Resident Services</div>
+    </a>
+    <div class="header-actions">
+      <button id="adminToggle" class="btn ghost small" type="button" hidden>หลังบ้าน</button>
+      <div id="headerIdentity"></div>
     </div>
-    <div class="hbtns">
-      <button class="hbtn btn-ghost" id="adminToggle" onclick="openAdminLogin()">🔑 Admin</button>
-      <button class="hbtn btn-purple" onclick="openPrivateModal()">🔒 แจ้งแบบส่วนตัว</button>
-      <button class="hbtn btn-orange" onclick="openModal()">➕ รายงานปัญหา</button>
-    </div>
-  </div>
-</header>
+  </header>
 
-<!-- Stats -->
-<div class="stats" id="statsBar"></div>
+  <div class="wrap">
+    <section class="hero">
+      <div class="ornament"><span class="o-line"></span><span class="o-diamond"></span><span class="o-line r"></span></div>
+      <div class="title" id="heroTitle">แจ้งปัญหา · เสนอแนะ · ติชม</div>
+      <div class="subtitle" id="heroSub">ส่งเรื่องถึงนิติบุคคลโดยตรง พร้อมแนบรูปหรือวิดีโอ</div>
+    </section>
 
-<!-- Private banner (admin only) -->
-<div class="priv-banner" id="privBanner" onclick="openInbox()">
-  <div class="pb-icon">📬</div>
-  <div class="pb-info">
-    <div class="pb-title">กล่องรับปัญหาส่วนตัว (Admin Only)</div>
-    <div class="pb-sub">ลูกบ้านส่งปัญหามาแบบส่วนตัว — คลิกเพื่อดูและตอบกลับ</div>
-  </div>
-  <span class="pb-badge" id="privCount">0</span>
-</div>
+    <div id="bootState" class="loading"><span class="spinner"></span>กำลังโหลด…</div>
 
-<!-- ── SEARCH & FILTER BAR ── -->
-<div class="filter-bar" id="filterBar">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="ค้นหาปัญหา..." oninput="applyFilters()" autocomplete="off"/>
-  </div>
-  <div class="filter-selects">
-    <select class="fsel" id="filterCat" onchange="applyFilters()">
-      <option value="">หมวดหมู่ทั้งหมด</option>
-      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
-      <option value="น้ำ">💧 น้ำ / ท่อ</option>
-      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
-      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
-      <option value="ประตู">🚪 ประตู / รั้ว</option>
-      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
-      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
-      <option value="จอดรถ">🚗 ที่จอดรถ</option>
-      <option value="สัญญาณ">📡 สัญญาณ / อินเทอร์เน็ต</option>
-      <option value="เพื่อนบ้าน">🤝 เรื่องเพื่อนบ้าน</option>
-      <option value="อื่นๆ">📌 อื่นๆ</option>
-    </select>
-    <select class="fsel" id="filterStatus" onchange="applyFilters()">
-      <option value="">สถานะทั้งหมด</option>
-      <option value="todo">📋 รอดำเนินการ</option>
-      <option value="doing">🔧 กำลังดำเนินการ</option>
-      <option value="done">✅ เสร็จแล้ว</option>
-    </select>
-    <select class="fsel" id="filterPri" onchange="applyFilters()">
-      <option value="">ความเร่งด่วนทั้งหมด</option>
-      <option value="urgent">🚨 ด่วนมาก</option>
-      <option value="high">⚠️ ด่วน</option>
-      <option value="normal">📌 ปกติ</option>
-    </select>
-  </div>
-  <button class="clear-filter-btn" id="clearFilterBtn" onclick="clearFilters()">✕ ล้างตัวกรอง</button>
-</div>
-<div class="filter-result-info" id="filterResultInfo"></div>
-
-<!-- Board -->
-<div class="board">
-  <div class="col">
-    <div class="col-stripe cs-todo"></div>
-    <div class="col-hd" onclick="toggleCol('todo')" style="cursor:pointer">
-      <div class="col-hl"><span>📋</span><span class="col-lbl" style="color:var(--todo-c)">รอดำเนินการ</span></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-todo" id="cnt-todo">0</span><button class="col-toggle" id="toggle-todo">▾</button></div>
-    </div>
-    <div class="col-body" id="col-todo" ondragover="onDragOver(event,'todo')" ondragleave="onDragLeave(event,'todo')" ondrop="onDrop(event,'todo')"></div>
-  </div>
-  <div class="col">
-    <div class="col-stripe cs-doing"></div>
-    <div class="col-hd" onclick="toggleCol('doing')" style="cursor:pointer">
-      <div class="col-hl"><span>🔧</span><span class="col-lbl" style="color:#b45309">กำลังดำเนินการ</span></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-doing" id="cnt-doing">0</span><button class="col-toggle" id="toggle-doing">▾</button></div>
-    </div>
-    <div class="col-body" id="col-doing" ondragover="onDragOver(event,'doing')" ondragleave="onDragLeave(event,'doing')" ondrop="onDrop(event,'doing')"></div>
-  </div>
-  <div class="col">
-    <div class="col-stripe cs-done"></div>
-    <div class="col-hd" onclick="toggleCol('done')" style="cursor:pointer">
-      <div class="col-hl"><span>✅</span><span class="col-lbl" style="color:#15803d">เสร็จแล้ว</span></div>
-      <div style="display:flex;align-items:center;gap:6px"><span class="cbadge cb-done" id="cnt-done">0</span><button class="col-toggle" id="toggle-done">▾</button></div>
-    </div>
-    <div class="col-body" id="col-done" ondragover="onDragOver(event,'done')" ondragleave="onDragLeave(event,'done')" ondrop="onDrop(event,'done')"></div>
-  </div>
-</div>
-
-<!-- PUBLIC REPORT MODAL -->
-<div class="overlay hidden" id="reportOverlay">
-<div class="modal">
-  <h2>📝 แจ้งปัญหาใหม่</h2>
-  <p class="modal-sub">ปัญหาจะแสดงในบอร์ดกลางให้ลูกบ้านทุกคนเห็น</p>
-  <div class="fg">
-    <label>🏠 บ้านเลขที่ *</label>
-    <select id="inp-house"></select>
-    <div id="reporterBadge" style="display:none;margin-top:8px;padding:8px 12px;
-         background:#e8f4f0;border-radius:8px;font-size:13px;color:#1b5e42;"></div>
-    <div class="anon-row" onclick="toggleAnon('anonCheck','inp-house')"><input type="checkbox" id="anonCheck" onclick="event.stopPropagation();toggleAnon('anonCheck','inp-house')"/><span>🙈 ไม่ประสงค์ออกนาม</span><small>ซ่อนเลขบ้าน</small></div>
-  </div>
-  <div class="fg">
-    <label>🏷️ หมวดหมู่ *</label>
-    <select id="inp-cat">
-      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
-      <option value="น้ำ">💧 น้ำ / ท่อ</option>
-      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
-      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
-      <option value="ประตู">🚪 ประตู / รั้ว</option>
-      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
-      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
-      <option value="จอดรถ">🚗 ที่จอดรถ</option>
-      <option value="สัญญาณ">📡 สัญญาณ / อินเทอร์เน็ต</option>
-      <option value="อื่นๆ">📌 อื่นๆ</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>🚦 ความเร่งด่วน</label>
-    <div class="pri-selector" id="priSelector">
-      <label class="pri-opt sel-urgent" id="pri-urgent"><input type="radio" name="priority" value="urgent"/> 🚨 ด่วนมาก</label>
-      <label class="pri-opt sel-high" id="pri-high"><input type="radio" name="priority" value="high"/> ⚠️ ด่วน</label>
-      <label class="pri-opt sel-normal unsel" id="pri-normal"><input type="radio" name="priority" value="normal" checked/> 📌 ปกติ</label>
-    </div>
-    <p class="field-note">เลือก "ด่วนมาก" สำหรับปัญหาที่กระทบความปลอดภัยหรือต้องการแก้ไขทันที</p>
-  </div>
-  <div class="fg">
-    <label>📌 ปัญหา *</label>
-    <input id="inp-title" type="text" placeholder="เช่น ไฟทางเดินดับ, น้ำประปาไหลอ่อน"/>
-  </div>
-  <div class="fg">
-    <label>📄 รายละเอียดเพิ่มเติม</label>
-    <textarea id="inp-desc" placeholder="อธิบายเพิ่มเติม เช่น ตำแหน่ง อาการ..."></textarea>
-  </div>
-  <div class="fg">
-    <label>📞 เบอร์โทร / อีเมล <span class="opt-lbl">(ไม่บังคับ)</span></label>
-    <input id="inp-contact" type="text" placeholder="เช่น 081-234-5678 หรือ you@email.com"/>
-    <p class="field-note">🔒 เห็นเฉพาะ Admin เท่านั้น — ลูกบ้านคนอื่นไม่เห็น</p>
-  </div>
-  <div class="fg">
-    <label>📷 รูปภาพ / วิดีโอ <span class="opt-lbl">(ไม่บังคับ — สูงสุด 5 ไฟล์)</span></label>
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('mediaInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave()" ondrop="dropFiles(event)">
-      <input type="file" id="mediaInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files)"/>
-      <div class="uz-icon">📎</div><p><strong>คลิกเพื่อเลือก</strong> หรือลากมาวาง</p><p>JPG · PNG · HEIC · MP4</p>
-    </div>
-    <div class="prev-grid" id="previewGrid"></div>
-  </div>
-  <div class="mbtns">
-    <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-    <button class="btn-submit" id="submitBtn" onclick="submitReport()">📩 ส่งแจ้งปัญหา</button>
-  </div>
-</div>
-</div>
-
-<!-- PRIVATE REPORT MODAL -->
-<div class="overlay hidden" id="privateOverlay">
-<div class="modal">
-  <h2>🔒 แจ้งปัญหาแบบส่วนตัว</h2>
-  <p class="modal-sub">ส่งตรงถึงนิติฯ โดยตรง — ไม่แสดงในบอร์ดกลาง</p>
-  <div class="priv-callout">
-    <div class="priv-callout-title">🔐 ความเป็นส่วนตัวของคุณ</div>
-    <p>ปัญหานี้จะเห็นได้เฉพาะนิติฯ เท่านั้น เหมาะสำหรับเรื่องที่เป็นความลับ หรือปัญหาที่เกี่ยวกับเพื่อนบ้านโดยตรง</p>
-  </div>
-  <div class="fg">
-    <label>🏠 บ้านเลขที่ *</label>
-    <select id="priv-house"></select>
-    <div id="privReporterBadge" style="display:none;margin-top:8px;padding:8px 12px;
-         background:#e8f4f0;border-radius:8px;font-size:13px;color:#1b5e42;"></div>
-    <div class="anon-row" onclick="toggleAnon('privAnonCheck','priv-house')"><input type="checkbox" id="privAnonCheck" onclick="event.stopPropagation();toggleAnon('privAnonCheck','priv-house')"/><span>🙈 ไม่ระบุเลขบ้าน</span><small>แม้นิติฯ ก็ไม่เห็น</small></div>
-  </div>
-  <div class="fg">
-    <label>🏷️ หมวดหมู่ *</label>
-    <select id="priv-cat">
-      <option value="เพื่อนบ้าน">🤝 เรื่องเพื่อนบ้าน</option>
-      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
-      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
-      <option value="น้ำ">💧 น้ำ / ท่อ</option>
-      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
-      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
-      <option value="ประตู">🚪 ประตู / รั้ว</option>
-      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
-      <option value="จอดรถ">🚗 ที่จอดรถ</option>
-      <option value="อื่นๆ">📌 อื่นๆ</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>📌 ปัญหา *</label>
-    <input id="priv-title" type="text" placeholder="เช่น เพื่อนบ้านเปิดเสียงดัง, รถจอดขวาง"/>
-  </div>
-  <div class="fg">
-    <label>📄 รายละเอียด</label>
-    <textarea id="priv-desc" placeholder="อธิบายให้นิติฯ ทราบ..."></textarea>
-  </div>
-  <div class="fg">
-    <label>📞 เบอร์โทร / อีเมล <span class="opt-lbl">(ไม่บังคับ)</span></label>
-    <input id="priv-contact" type="text" placeholder="เช่น 081-234-5678 หรือ you@email.com"/>
-  </div>
-  <div class="fg">
-    <label>📷 รูปภาพ / วิดีโอ <span class="opt-lbl">(ไม่บังคับ)</span></label>
-    <div class="upload-zone" onclick="document.getElementById('privMediaInput').click()" ondragover="dragOver(event,true)" ondragleave="dragLeave()" ondrop="dropFiles(event,true)">
-      <input type="file" id="privMediaInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files,true)"/>
-      <div class="uz-icon">📎</div><p><strong>คลิกเพื่อเลือก</strong> หรือลากมาวาง</p>
-    </div>
-    <div class="prev-grid" id="privPreviewGrid"></div>
-  </div>
-  <div class="mbtns">
-    <button class="btn-cancel" onclick="closePrivateModal()">ยกเลิก</button>
-    <button class="btn-submit btn-submit-priv" onclick="submitPrivate()">🔒 ส่งถึงนิติฯ (ส่วนตัว)</button>
-  </div>
-</div>
-</div>
-
-<!-- DETAIL MODAL -->
-<div class="overlay hidden" id="detailOverlay">
-  <div class="modal detail-modal" id="detailModal"></div>
-</div>
-
-<!-- PRIVATE INBOX MODAL -->
-<div class="overlay hidden" id="inboxOverlay">
-<div class="modal inbox-modal">
-  <div class="inbox-hd">
-    <h2 style="color:var(--priv)">📬 กล่องรับปัญหาส่วนตัว</h2>
-    <button class="det-close" onclick="closeInbox()">✕</button>
-  </div>
-  <p class="inbox-notice">🔐 เห็นเฉพาะ Admin เท่านั้น — คลิกที่รายการเพื่อดูรายละเอียดและตอบกลับ</p>
-  <div class="inbox-list" id="inboxList"></div>
-</div>
-</div>
-
-<!-- EDIT CODE VERIFY MODAL -->
-<div class="overlay hidden" id="editVerifyOverlay">
-<div class="modal edit-verify-modal">
-  <h2>✏️ แก้ไขปัญหา</h2>
-  <p class="modal-sub">ใส่รหัส 4 หลักที่ได้รับตอนส่งปัญหา เพื่อยืนยันตัวตน</p>
-  <div class="fg">
-    <label>🔑 รหัสแก้ไข (Edit Code)</label>
-    <input id="verifyCode" type="text" maxlength="4" placeholder="เช่น 4829" style="font-size:1.4rem;letter-spacing:.2em;text-align:center;font-family:monospace;font-weight:700" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')verifyEditCode()"/>
-  </div>
-  <div class="mbtns">
-    <button class="btn-cancel" onclick="closeEditVerify()">ยกเลิก</button>
-    <button class="btn-submit" onclick="verifyEditCode()">✅ ยืนยัน</button>
-  </div>
-</div>
-</div>
-
-<!-- EDIT FORM MODAL -->
-<div class="overlay hidden" id="editFormOverlay">
-<div class="modal">
-  <h2>✏️ แก้ไขปัญหา</h2>
-  <p class="modal-sub">แก้ไขข้อมูล แล้วกดบันทึก</p>
-  <input type="hidden" id="edit-id"/>
-  <div class="fg">
-    <label>🏠 บ้านเลขที่</label>
-    <select id="edit-house"></select>
-    <div class="anon-row" onclick="toggleAnon('editAnonCheck','edit-house')">
-      <input type="checkbox" id="editAnonCheck" onclick="event.stopPropagation();toggleAnon('editAnonCheck','edit-house')"/>
-      <span>🙈 ไม่ประสงค์ออกนาม</span><small>ซ่อนเลขบ้าน</small>
-    </div>
-  </div>
-  <div class="fg">
-    <label>🏷️ หมวดหมู่</label>
-    <select id="edit-cat">
-      <option value="ไฟ">💡 ไฟ / แสงสว่าง</option>
-      <option value="น้ำ">💧 น้ำ / ท่อ</option>
-      <option value="ส่วนกลาง">🏢 พื้นที่ส่วนกลาง</option>
-      <option value="ถนน">🛣️ ถนน / ทางเดิน</option>
-      <option value="ประตู">🚪 ประตู / รั้ว</option>
-      <option value="ความปลอดภัย">🔒 ความปลอดภัย</option>
-      <option value="ขยะ">🗑️ ขยะ / ความสะอาด</option>
-      <option value="จอดรถ">🚗 ที่จอดรถ</option>
-      <option value="สัญญาณ">📡 สัญญาณ / อินเทอร์เน็ต</option>
-      <option value="อื่นๆ">📌 อื่นๆ</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>🚦 ความเร่งด่วน</label>
-    <select id="edit-priority">
-      <option value="urgent">🚨 ด่วนมาก</option>
-      <option value="high">⚠️ ด่วน</option>
-      <option value="normal" selected>📌 ปกติ</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>📌 ปัญหา *</label>
-    <input id="edit-title" type="text"/>
-  </div>
-  <div class="fg">
-    <label>📄 รายละเอียด</label>
-    <textarea id="edit-desc"></textarea>
-  </div>
-  <div class="fg">
-    <label>📞 เบอร์โทร / อีเมล <span class="opt-lbl">(ไม่บังคับ)</span></label>
-    <input id="edit-contact" type="text"/>
-    <p class="field-note">🔒 เห็นเฉพาะ Admin เท่านั้น</p>
-  </div>
-  <div class="fg">
-    <label>📷 รูปภาพ / วิดีโอ ปัจจุบัน</label>
-    <div class="prev-grid" id="editCurrentMedia"></div>
-  </div>
-  <div class="fg">
-    <label>➕ เพิ่มรูป / วิดีโอใหม่ <span class="opt-lbl">(รวมสูงสุด 5 ไฟล์)</span></label>
-    <div class="upload-zone" onclick="document.getElementById('editMediaInput').click()" ondragover="dragOver(event,'edit')" ondragleave="dragLeave()" ondrop="dropFiles(event,'edit')">
-      <input type="file" id="editMediaInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files,'edit')"/>
-      <div class="uz-icon">📎</div><p><strong>คลิกเพื่อเลือก</strong> หรือลากมาวาง</p>
-    </div>
-    <div class="prev-grid" id="editNewMedia"></div>
-  </div>
-  <div class="mbtns">
-    <button class="btn-cancel" onclick="closeEditForm()">ยกเลิก</button>
-    <button class="btn-submit" onclick="saveEdit()">💾 บันทึก</button>
-  </div>
-</div>
-</div>
-
-<!-- ADMIN LOGIN -->
-<div class="overlay hidden" id="adminOverlay">
-<div class="modal admin-modal">
-  <h2>🔑 เข้าสู่ระบบ Admin</h2>
-  <p class="modal-sub">สำหรับนิติบุคคลภัทราวิลล่า 8 เท่านั้น</p>
-  <div class="fg">
-    <label>รหัสผ่าน</label>
-    <input id="adminPw" type="password" placeholder="ใส่รหัสผ่าน" onkeydown="if(event.key==='Enter')loginAdmin()"/>
-  </div>
-  <div class="mbtns">
-    <button class="btn-cancel" onclick="closeAdminModal()">ยกเลิก</button>
-    <button class="btn-submit" onclick="loginAdmin()">เข้าสู่ระบบ</button>
-  </div>
-</div>
-</div>
-
-<!-- Lightbox -->
-<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
-  <button class="lb-close">✕</button>
-  <img id="lbImg" src="" style="display:none"/>
-  <video id="lbVid" controls style="display:none"></video>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- ── EMAILJS — for admin email notifications ── -->
-<!-- Step 1: Sign up free at https://www.emailjs.com -->
-<!-- Step 2: Create a service (Gmail), template, get your keys -->
-<!-- Step 3: Fill in YOUR_PUBLIC_KEY, YOUR_SERVICE_ID, YOUR_TEMPLATE_ID below -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-// ── EMAIL CONFIG — fill these in after setting up EmailJS ──
-const EMAIL_CFG = {
-  publicKey:  'nWHoOf02K6bRVpsfV',
-  serviceId:  'service_ktvu6dn',
-  templateId: 'template_2cj5b2l',
-  adminEmails: ['athaoon@gmail.com', 'mrteam388@gmail.com']
-};
-// Initialize EmailJS
-if(EMAIL_CFG.publicKey){
-  emailjs.init({ publicKey: EMAIL_CFG.publicKey });
-}
-// Called after a new issue is submitted
-window.notifyAdminByEmail = function(params){
-  if(!EMAIL_CFG.publicKey || !EMAIL_CFG.serviceId || !EMAIL_CFG.templateId) return;
-  const baseParams = {
-    reply_to: EMAIL_CFG.adminEmails[0],
-    issue_type: params.isPrivate ? 'แจ้งปัญหาแบบส่วนตัว' : 'แจ้งปัญหาสาธารณะ',
-    house: params.house || '(ไม่ระบุ)',
-    category: params.cat || '—',
-    title: params.title || '—',
-    description: params.desc || '(ไม่มีรายละเอียด)',
-    priority: params.priority === 'urgent' ? 'ด่วนมาก' : params.priority === 'high' ? 'ด่วน' : 'ปกติ',
-    date: params.date || new Date().toLocaleString('th-TH'),
-    board_url: 'https://pattra8.github.io/report/'
-  };
-  Promise.allSettled(
-    EMAIL_CFG.adminEmails.map(email =>
-      emailjs.send(EMAIL_CFG.serviceId, EMAIL_CFG.templateId, {
-        ...baseParams,
-        email
-      })
-    )
-  ).then(results => {
-    results.forEach((result, index) => {
-      if(result.status === 'rejected'){
-        console.warn(`EmailJS error for ${EMAIL_CFG.adminEmails[index]}:`, result.reason);
-      }
-    });
-  });
-};
-</script>
-
-<script>
-// ── Resident Session — pre-fill house selects ──
-(function() {
-  try {
-    const raw = localStorage.getItem('pattra_resident_session_v1');
-    if (!raw) return;
-    const s = JSON.parse(raw);
-    if (!s || !s.expiresAt || Number(s.expiresAt) <= Date.now()) return;
-    const houseNo = s.houseNo;
-    if (!houseNo) return;
-
-    function escH(v) {
-      return String(v||'').replace(/[&<>"']/g,c=>
-        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-    }
-    const badgeHtml = s.residentName
-      ? `🏠 กำลังแจ้งในนาม บ้าน ${escH(houseNo)} · ${escH(s.residentName)}`
-      : `🏠 กำลังแจ้งในนาม บ้าน ${escH(houseNo)}`;
-
-    function trySetHouse(selId, badgeId) {
-      const sel = document.getElementById(selId);
-      const badge = document.getElementById(badgeId);
-      if (!sel) return;
-      const doSet = () => {
-        const opt = Array.from(sel.options).find(o => o.value === houseNo);
-        if (opt) {
-          sel.value = houseNo;
-          if (badge) { badge.innerHTML = badgeHtml; badge.style.display = 'block'; }
-          return true;
-        }
-        return false;
-      };
-      if (!doSet()) {
-        const obs = new MutationObserver(() => { if (doSet()) obs.disconnect(); });
-        obs.observe(sel, { childList: true });
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      trySetHouse('inp-house', 'reporterBadge');
-      trySetHouse('priv-house', 'privReporterBadge');
-    });
-    // Also try immediately in case DOM is already ready
-    if (document.readyState !== 'loading') {
-      trySetHouse('inp-house', 'reporterBadge');
-      trySetHouse('priv-house', 'privReporterBadge');
-    }
-  } catch (_) {}
-})();
-</script>
-
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
-  authDomain: "pattra8-54c3f.firebaseapp.com",
-  projectId: "pattra8-54c3f",
-  storageBucket: "pattra8-54c3f.firebasestorage.app",
-  messagingSenderId: "1045231989781",
-  appId: "1:1045231989781:web:ea20c8380787e82fcf4a1c"
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-const ADMIN_PASSWORDS = ['adminpattra8', 'team388'];
-
-let isAdmin = false;
-let pendingFiles = [], pendingPrivFiles = [];
-let curId = null, curPriv = false;
-let publicIssues = [], privateIssues = [];
-let pendingEditFiles = [], editingId = null, editRemovedMedia = [];
-let editVerifyingId = null;
-
-// ── HOUSE NUMBERS ──
-const HOUSES = [];
-for(let i=1;i<=68;i++){if(i!==57)HOUSES.push('38/'+i);}
-function buildHouseSelect(selId){
-  const sel=document.getElementById(selId);if(!sel)return;
-  sel.innerHTML='<option value="">— เลือกบ้านเลขที่ —</option>';
-  HOUSES.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o);});
-}
-['inp-house','priv-house','edit-house'].forEach(buildHouseSelect);
-
-// ── PRIORITY HELPERS ──
-const PRI_LABEL = {urgent:'🚨 ด่วนมาก', high:'⚠️ ด่วน', normal:'📌 ปกติ'};
-const PRI_CLASS = {urgent:'pri-urgent', high:'pri-high', normal:'pri-normal'};
-const PRI_CARD  = {urgent:'urgent-card', high:'high-card', normal:''};
-
-function getPriority(){
-  const r = document.querySelector('input[name="priority"]:checked');
-  return r ? r.value : 'normal';
-}
-function setPriorityUI(val){
-  ['urgent','high','normal'].forEach(p=>{
-    const lbl=document.getElementById('pri-'+p);
-    if(!lbl)return;
-    const isSelected=(p===val);
-    lbl.classList.remove('unsel');
-    if(!isSelected)lbl.classList.add('unsel');
-    else lbl.classList.remove('unsel');
-  });
-  const radio=document.querySelector(`input[name="priority"][value="${val}"]`);
-  if(radio)radio.checked=true;
-}
-// Make priority labels clickable visual selection
-document.querySelectorAll('.pri-opt').forEach(lbl=>{
-  lbl.addEventListener('click',()=>{
-    const val=lbl.querySelector('input').value;
-    setPriorityUI(val);
-  });
-});
-
-// ── FIRESTORE LISTENERS ──
-const pubQ = query(collection(db,'issues'), orderBy('createdAt','desc'));
-onSnapshot(pubQ, snap=>{
-  publicIssues = snap.docs.map(d=>({...d.data(),id:d.id}));
-  renderBoard();
-  if(curId && !curPriv) openDetail(curId,false);
-  document.getElementById('loadingOverlay').style.display='none';
-}, err=>{console.error(err);document.getElementById('loadingOverlay').style.display='none';});
-setTimeout(()=>{const el=document.getElementById('loadingOverlay');if(el)el.style.display='none';},3000);
-
-const privQ = query(collection(db,'private_issues'), orderBy('createdAt','desc'));
-onSnapshot(privQ, snap=>{
-  privateIssues = snap.docs.map(d=>({...d.data(),id:d.id}));
-  updateBanner();
-  if(curId && curPriv) openDetail(curId,true);
-});
-
-// ── FILTER STATE & LOGIC ──
-let filterState = {search:'', cat:'', status:'', priority:''};
-
-function applyFilters(){
-  filterState.search = document.getElementById('searchInput').value.trim().toLowerCase();
-  filterState.cat    = document.getElementById('filterCat').value;
-  filterState.status = document.getElementById('filterStatus').value;
-  filterState.priority = document.getElementById('filterPri').value;
-  const hasFilter = filterState.search||filterState.cat||filterState.status||filterState.priority;
-  const clearBtn = document.getElementById('clearFilterBtn');
-  clearBtn.classList.toggle('show', !!hasFilter);
-  // update active state on selects
-  ['filterCat','filterStatus','filterPri'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.classList.toggle('active', !!el.value);
-  });
-  renderBoard();
-}
-function clearFilters(){
-  document.getElementById('searchInput').value='';
-  document.getElementById('filterCat').value='';
-  document.getElementById('filterStatus').value='';
-  document.getElementById('filterPri').value='';
-  filterState={search:'',cat:'',status:'',priority:''};
-  document.getElementById('clearFilterBtn').classList.remove('show');
-  ['filterCat','filterStatus','filterPri'].forEach(id=>document.getElementById(id).classList.remove('active'));
-  renderBoard();
-}
-function matchesFilter(item){
-  if(filterState.cat && item.cat!==filterState.cat) return false;
-  if(filterState.status && item.status!==filterState.status) return false;
-  if(filterState.priority && (item.priority||'normal')!==filterState.priority) return false;
-  if(filterState.search){
-    const q=filterState.search;
-    const hay=(item.title+' '+(item.desc||'')+' '+(item.house||'')+' '+item.cat).toLowerCase();
-    if(!hay.includes(q)) return false;
-  }
-  return true;
-}
-
-// ── UTILS ──
-function ds(){return new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
-function toggleAnon(cbId,selId){const cb=document.getElementById(cbId),sel=document.getElementById(selId);sel.disabled=cb.checked;if(cb.checked)sel.value=''}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function sanitizeMedia(arr){return(arr||[]).map(m=>({dataUrl:String(m.dataUrl||''),type:String(m.type||'image')}))}
-function genCode(){return String(Math.floor(1000+Math.random()*9000))}
-
-// ── MODALS ──
-function openModal(){
-  setPriorityUI('normal');
-  document.getElementById('reportOverlay').classList.remove('hidden');
-}
-function closeModal(){
-  document.getElementById('reportOverlay').classList.add('hidden');
-  ['inp-house','inp-title','inp-desc','inp-contact'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('inp-house').disabled=false;
-  document.getElementById('anonCheck').checked=false;
-  setPriorityUI('normal');
-  pendingFiles=[];renderPrev('previewGrid',pendingFiles);
-  document.getElementById('mediaInput').value='';
-  // restore original modal content if it was replaced by success screen
-  const modal=document.getElementById('reportOverlay').querySelector('.modal');
-  if(!modal.querySelector('#submitBtn')){location.reload();}
-}
-document.getElementById('reportOverlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
-
-function openPrivateModal(){document.getElementById('privateOverlay').classList.remove('hidden')}
-function closePrivateModal(){
-  document.getElementById('privateOverlay').classList.add('hidden');
-  ['priv-house','priv-title','priv-desc','priv-contact'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('priv-house').disabled=false;
-  document.getElementById('privAnonCheck').checked=false;
-  pendingPrivFiles=[];renderPrev('privPreviewGrid',pendingPrivFiles);
-  document.getElementById('privMediaInput').value='';
-}
-document.getElementById('privateOverlay').addEventListener('click',function(e){if(e.target===this)closePrivateModal()});
-
-// ── FILE UPLOAD ──
-function dragOver(e,p){e.preventDefault()}
-function dragLeave(){document.querySelectorAll('.upload-zone').forEach(z=>z.classList.remove('drag-over'))}
-function dropFiles(e,p){e.preventDefault();dragLeave();handleFiles(e.dataTransfer.files,p)}
-function compressImage(dataUrl,maxW,maxH,q){
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{
-      let w=img.width,h=img.height;
-      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
-      if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
-      const c=document.createElement('canvas');c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      res(c.toDataURL('image/jpeg',q));
-    };
-    img.src=dataUrl;
-  });
-}
-async function handleFiles(files,p){
-  let buf,gid;
-  if(p==='edit'){buf=pendingEditFiles;gid='editNewMedia'}
-  else if(p){buf=pendingPrivFiles;gid='privPreviewGrid'}
-  else{buf=pendingFiles;gid='previewGrid'}
-  for(const f of Array.from(files)){
-    if(buf.length>=5){toast('⚠️ สูงสุด 5 ไฟล์');break;}
-    if(f.type.startsWith('video')){
-      if(f.size>500*1024){toast('⚠️ วิดีโอใหญ่เกิน 500KB');continue;}
-      const r=new FileReader();
-      await new Promise(res=>{r.onload=ev=>{buf.push({dataUrl:ev.target.result,type:'video'});res();};r.readAsDataURL(f);});
-    }else{
-      const r=new FileReader();
-      const raw=await new Promise(res=>{r.onload=ev=>res(ev.target.result);r.readAsDataURL(f);});
-      const compressed=await compressImage(raw,800,800,0.7);
-      buf.push({dataUrl:compressed,type:'image'});
-    }
-    renderPrev(gid,buf);
-  }
-}
-function renderPrev(gid,buf){
-  const g=document.getElementById(gid);if(!g)return;g.innerHTML='';
-  buf.forEach((f,i)=>{
-    const d=document.createElement('div');d.className='prev-item';
-    d.innerHTML=f.type==='image'?`<img src="${f.dataUrl}"/><button class="prev-rm" onclick="removeFile(${i},'${gid}')">✕</button>`:`<video src="${f.dataUrl}" muted></video><button class="prev-rm" onclick="removeFile(${i},'${gid}')">✕</button>`;
-    g.appendChild(d);
-  });
-}
-function removeFile(i,gid){
-  if(gid==='privPreviewGrid'){pendingPrivFiles.splice(i,1);renderPrev(gid,pendingPrivFiles)}
-  else if(gid==='editNewMedia'){pendingEditFiles.splice(i,1);renderPrev(gid,pendingEditFiles)}
-  else{pendingFiles.splice(i,1);renderPrev(gid,pendingFiles)}
-}
-
-// ── EDIT ──
-function openEditVerify(id){
-  editVerifyingId=id;
-  document.getElementById('verifyCode').value='';
-  document.getElementById('editVerifyOverlay').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('verifyCode').focus(),100);
-}
-function closeEditVerify(){document.getElementById('editVerifyOverlay').classList.add('hidden');editVerifyingId=null}
-document.getElementById('editVerifyOverlay').addEventListener('click',function(e){if(e.target===this)closeEditVerify()});
-function verifyEditCode(){
-  const entered=document.getElementById('verifyCode').value.trim();
-  const item=publicIssues.find(x=>x.id===editVerifyingId);
-  if(!item){toast('❌ ไม่พบปัญหานี้');return}
-  if(!item.editCode){toast('❌ ปัญหานี้ไม่มีรหัสแก้ไข');return}
-  if(item.editCode!==entered){toast('❌ รหัสไม่ถูกต้อง');return}
-  closeEditVerify();
-  openEditForm(item);
-}
-function openEditForm(item){
-  editingId=item.id;
-  pendingEditFiles=[];editRemovedMedia=[];
-  document.getElementById('edit-id').value=item.id;
-  const houseEl=document.getElementById('edit-house');
-  const anonEl=document.getElementById('editAnonCheck');
-  if(item.anon){anonEl.checked=true;houseEl.disabled=true;houseEl.value=''}
-  else{anonEl.checked=false;houseEl.disabled=false;houseEl.value=item.house||''}
-  document.getElementById('edit-cat').value=item.cat||'อื่นๆ';
-  document.getElementById('edit-priority').value=item.priority||'normal';
-  document.getElementById('edit-title').value=item.title||'';
-  document.getElementById('edit-desc').value=item.desc||'';
-  document.getElementById('edit-contact').value=item.contact||'';
-  renderCurrentMedia(item.media||[]);
-  renderPrev('editNewMedia',pendingEditFiles);
-  document.getElementById('editFormOverlay').classList.remove('hidden');
-}
-function closeEditForm(){document.getElementById('editFormOverlay').classList.add('hidden');editingId=null;pendingEditFiles=[];editRemovedMedia=[];document.getElementById('editMediaInput').value=''}
-document.getElementById('editFormOverlay').addEventListener('click',function(e){if(e.target===this)closeEditForm()});
-function renderCurrentMedia(mediaArr){
-  const g=document.getElementById('editCurrentMedia');g.innerHTML='';
-  if(!mediaArr||!mediaArr.length){g.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ไม่มีรูป/วิดีโอ</p>`;return}
-  mediaArr.forEach((f,i)=>{
-    if(editRemovedMedia.includes(i))return;
-    const d=document.createElement('div');d.className='prev-item';d.id='cur-media-'+i;
-    d.innerHTML=f.type==='image'?`<img src="${f.dataUrl}"/><button class="prev-rm" onclick="removeCurrentMedia(${i})">✕</button>`:`<video src="${f.dataUrl}" muted></video><button class="prev-rm" onclick="removeCurrentMedia(${i})">✕</button>`;
-    g.appendChild(d);
-  });
-  if(!g.children.length)g.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ไม่มีรูป/วิดีโอ</p>`;
-}
-function removeCurrentMedia(i){
-  editRemovedMedia.push(i);
-  const el=document.getElementById('cur-media-'+i);if(el)el.remove();
-  const g=document.getElementById('editCurrentMedia');
-  if(!g.children.length)g.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ไม่มีรูป/วิดีโอ</p>`;
-}
-async function saveEdit(){
-  const title=document.getElementById('edit-title').value.trim();
-  if(!title){toast('⚠️ กรุณาระบุปัญหา');return}
-  const anon=document.getElementById('editAnonCheck').checked;
-  const house=document.getElementById('edit-house').value;
-  if(!anon&&!house){toast('⚠️ เลือกบ้านเลขที่ หรือ ไม่ประสงค์ออกนาม');return}
-  const item=publicIssues.find(x=>x.id===editingId);if(!item)return;
-  const keptMedia=(item.media||[]).filter((_,i)=>!editRemovedMedia.includes(i));
-  const totalMedia=[...keptMedia,...pendingEditFiles];
-  if(totalMedia.length>5){toast('⚠️ รูป/วิดีโอ รวมสูงสุด 5 ไฟล์');return}
-  try{
-    await updateDoc(doc(db,'issues',editingId),{
-      house:anon?'(ไม่ประสงค์ออกนาม)':house,anon,
-      cat:document.getElementById('edit-cat').value,
-      priority:document.getElementById('edit-priority').value,
-      title,desc:document.getElementById('edit-desc').value.trim(),
-      contact:document.getElementById('edit-contact').value.trim(),
-      media:sanitizeMedia(totalMedia),edited:true,editDate:ds()
-    });
-    closeEditForm();
-    if(curId===editingId)openDetail(editingId,false);
-    toast('💾 แก้ไขเรียบร้อยแล้ว!');
-  }catch(e){toast('❌ บันทึกไม่สำเร็จ: '+e.message);console.error(e);}
-}
-
-// ── SUBMIT ──
-async function submitReport(){
-  const anon=document.getElementById('anonCheck').checked,house=document.getElementById('inp-house').value;
-  const title=document.getElementById('inp-title').value.trim();
-  const desc=document.getElementById('inp-desc').value.trim();
-  const cat=document.getElementById('inp-cat').value;
-  const contact=document.getElementById('inp-contact').value.trim();
-  const priority=getPriority();
-  if(!anon&&!house){toast('⚠️ เลือกบ้านเลขที่ หรือ ไม่ประสงค์ออกนาม');return}
-  if(!title){toast('⚠️ กรุณาระบุปัญหา');return}
-  const btn=document.getElementById('submitBtn');if(btn){btn.textContent='⏳ กำลังส่ง...';btn.disabled=true;}
-  const code=genCode();
-  try{
-    await addDoc(collection(db,'issues'),{
-      house:anon?'(ไม่ประสงค์ออกนาม)':house,anon,title,desc,cat,contact,priority,
-      status:'todo',date:ds(),media:sanitizeMedia(pendingFiles),votes:0,replies:[],editCode:code,
-      createdAt:serverTimestamp()
-    });
-    pendingFiles=[];
-    // Notify admin by email
-    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ประสงค์ออกนาม)':house,cat,title,desc,priority,date:ds(),isPrivate:false});
-    const modal=document.getElementById('reportOverlay').querySelector('.modal');
-    modal.innerHTML=`
-      <h2>✅ แจ้งปัญหาเรียบร้อยแล้ว!</h2>
-      <p class="modal-sub">ขอบคุณค่ะ ปัญหาของคุณถูกบันทึกในบอร์ดแล้ว</p>
-      <div class="edit-code-box">
-        <div class="ecb-title">🔑 รหัสแก้ไขของคุณ</div>
-        <div class="ecb-sub">เก็บรหัสนี้ไว้ เผื่อต้องการแก้ไขข้อมูลหรือเพิ่มรูปภายหลัง</div>
-        <div class="edit-code-display"><span class="edit-code-num">${code}</span><button class="copy-code-btn" onclick="copyCode('${code}')">📋 Copy</button></div>
-        <div class="ecb-warn">⚠️ กรุณา screenshot หรือ copy รหัสนี้เก็บไว้</div>
-      </div>
-      <div class="mbtns" style="margin-top:18px"><button class="btn-submit" onclick="location.reload()">ปิด</button></div>`;
-  }catch(e){toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่');console.error(e);if(btn){btn.textContent='📩 ส่งแจ้งปัญหา';btn.disabled=false;}}
-}
-function copyCode(code){
-  navigator.clipboard.writeText(code).then(()=>toast('📋 Copy รหัสแล้ว!')).catch(()=>{
-    const t=document.createElement('textarea');t.value=code;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);toast('📋 Copy รหัสแล้ว!');
-  });
-}
-async function submitPrivate(){
-  const anon=document.getElementById('privAnonCheck').checked,house=document.getElementById('priv-house').value;
-  const title=document.getElementById('priv-title').value.trim();
-  const desc=document.getElementById('priv-desc').value.trim();
-  const cat=document.getElementById('priv-cat').value;
-  const contact=document.getElementById('priv-contact').value.trim();
-  if(!anon&&!house){toast('⚠️ เลือกบ้านเลขที่ หรือ ไม่ระบุเลขบ้าน');return}
-  if(!title){toast('⚠️ กรุณาระบุปัญหา');return}
-  try{
-    await addDoc(collection(db,'private_issues'),{
-      house:anon?'(ไม่ระบุ)':house,anon,title,desc,cat,contact,
-      status:'todo',date:ds(),media:sanitizeMedia(pendingPrivFiles),replies:[],createdAt:serverTimestamp()
-    });
-    closePrivateModal();
-    toast('🔒 ส่งถึงนิติฯ เรียบร้อยแล้ว — เห็นเฉพาะ Admin ค่ะ');
-    // Notify admin by email
-    if(window.notifyAdminByEmail) window.notifyAdminByEmail({house:anon?'(ไม่ระบุ)':house,cat,title,desc,priority:'normal',date:ds(),isPrivate:true});
-  }catch(e){toast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่');console.error(e);}
-}
-
-// ── ADMIN ──
-function openAdminLogin(){if(isAdmin){logoutAdmin();return}document.getElementById('adminOverlay').classList.remove('hidden');setTimeout(()=>document.getElementById('adminPw').focus(),100)}
-function closeAdminModal(){document.getElementById('adminOverlay').classList.add('hidden');document.getElementById('adminPw').value=''}
-function setAdminUI(on){
-  document.getElementById('adminToggle').textContent=on?'🟢 Admin Mode':'🔑 Admin';
-  document.getElementById('adminToggle').classList.toggle('admin-on',on);
-}
-function checkAdminSession(){
-  try{
-    const s=JSON.parse(localStorage.getItem('admin_session'));
-    if(s&&Date.now()-s.ts<24*60*60*1000){isAdmin=true;setAdminUI(true);}
-    else localStorage.removeItem('admin_session');
-  }catch(e){}
-}
-function loginAdmin(){
-  if(ADMIN_PASSWORDS.includes(document.getElementById('adminPw').value)){
-    isAdmin=true;
-    localStorage.setItem('admin_session',JSON.stringify({ts:Date.now()}));
-    closeAdminModal();setAdminUI(true);
-    renderBoard();updateBanner();toast('🔑 เข้าสู่ระบบ Admin แล้ว');
-  }else{toast('❌ รหัสผ่านไม่ถูกต้อง');document.getElementById('adminPw').value=''}
-}
-function logoutAdmin(){
-  isAdmin=false;localStorage.removeItem('admin_session');
-  setAdminUI(false);closeInbox();if(curId!==null)closeDetail();renderBoard();updateBanner();toast('👋 ออกจาก Admin Mode แล้ว');
-}
-document.getElementById('adminOverlay').addEventListener('click',function(e){if(e.target===this)closeAdminModal()});
-function updateBanner(){
-  const b=document.getElementById('privBanner'),cnt=privateIssues.length;
-  document.getElementById('privCount').textContent=cnt;
-  if(isAdmin)b.classList.add('show');else b.classList.remove('show');
-}
-
-// ── ACTIONS ──
-async function moveCard(id,status,fromDetail,priv){
-  const col=priv?'private_issues':'issues';
-  try{
-    await updateDoc(doc(db,col,id),{status});
-    const lbl={todo:'📋 รอดำเนินการ',doing:'🔧 กำลังดำเนินการ',done:'✅ เสร็จแล้ว'};
-    toast(`ย้ายไป ${lbl[status]}`);
-    if(fromDetail)openDetail(id,!!priv);
-  }catch(e){toast('❌ อัปเดตไม่สำเร็จ: '+e.message);console.error(e);}
-}
-async function deleteCard(id,fromDetail,priv){
-  if(!confirm('ลบการแจ้งปัญหานี้?'))return;
-  const col=priv?'private_issues':'issues';
-  await deleteDoc(doc(db,col,id));
-  if(fromDetail)closeDetail();
-  toast('🗑️ ลบแล้ว');
-}
-async function upvote(id){
-  const key='voter_'+id;if(sessionStorage.getItem(key)){toast('คุณกดแล้ว 👍');return}
-  const item=publicIssues.find(x=>x.id===id);if(!item)return;
-  await updateDoc(doc(db,'issues',id),{votes:(item.votes||0)+1});
-  sessionStorage.setItem(key,'1');
-  toast('👍 กด +1 แล้ว ขอบคุณ!');
-}
-// ── ADMIN REPLY FILE HANDLING ──
-let replyFiles = {}; // keyed by issueId
-function getReplyFiles(id){ return replyFiles[id]||[]; }
-function setReplyFiles(id,arr){ replyFiles[id]=arr; }
-
-async function handleReplyFiles(id,files){
-  const buf=getReplyFiles(id);
-  for(const f of Array.from(files)){
-    if(buf.length>=5){toast('⚠️ แนบไฟล์ได้สูงสุด 5 ไฟล์');break;}
-    if(f.type==='application/pdf'||f.name.endsWith('.pdf')){
-      if(f.size>1.5*1024*1024){toast('⚠️ PDF ใหญ่เกิน 1.5MB');continue;}
-      const r=new FileReader();
-      await new Promise(res=>{r.onload=ev=>{buf.push({dataUrl:ev.target.result,type:'pdf',name:f.name});res();};r.readAsDataURL(f);});
-    } else if(f.type.startsWith('image/')){
-      const r=new FileReader();
-      const raw=await new Promise(res=>{r.onload=ev=>res(ev.target.result);r.readAsDataURL(f);});
-      const compressed=await compressImage(raw,800,800,0.72);
-      buf.push({dataUrl:compressed,type:'image',name:f.name});
-    } else {
-      toast('⚠️ รองรับเฉพาะรูปภาพและ PDF');continue;
-    }
-  }
-  setReplyFiles(id,buf);
-  renderReplyPreview(id);
-}
-function renderReplyPreview(id){
-  const grid=document.getElementById('rep-prev-'+id);if(!grid)return;
-  const buf=getReplyFiles(id);grid.innerHTML='';
-  buf.forEach((f,i)=>{
-    const d=document.createElement('div');d.className='rap-item';
-    if(f.type==='image') d.innerHTML=`<img src="${f.dataUrl}"/><button class="rap-rm" onclick="removeReplyFile('${id}',${i})">✕</button>`;
-    else d.innerHTML=`<div class="rap-pdf">📄 ${esc(f.name)}</div><button class="rap-rm" onclick="removeReplyFile('${id}',${i})">✕</button>`;
-    grid.appendChild(d);
-  });
-}
-function removeReplyFile(id,i){
-  const buf=getReplyFiles(id);buf.splice(i,1);setReplyFiles(id,buf);renderReplyPreview(id);
-}
-
-async function addReply(id,priv){
-  const inp=document.getElementById('rep-inp-'+id);
-  const text=inp?inp.value.trim():'';
-  const media=getReplyFiles(id);
-  if(!text&&!media.length){toast('⚠️ ใส่ข้อความ หรือแนบไฟล์');return;}
-  const items=priv?privateIssues:publicIssues;
-  const item=items.find(x=>x.id===id);if(!item)return;
-  const newReply={text,date:ds()};
-  if(media.length) newReply.media=sanitizeMedia(media);
-  const replies=[...(item.replies||[]),newReply];
-  const col=priv?'private_issues':'issues';
-  try{
-    await updateDoc(doc(db,col,id),{replies});
-    if(inp)inp.value='';
-    setReplyFiles(id,[]);renderReplyPreview(id);
-    toast('💬 ตอบกลับแล้ว');
-  }catch(e){toast('❌ ส่งไม่สำเร็จ: '+e.message);console.error(e);}
-}
-async function deleteReply(issueId,ri,priv){
-  const items=priv?privateIssues:publicIssues;
-  const item=items.find(x=>x.id===issueId);if(!item)return;
-  const replies=(item.replies||[]).filter((_,i)=>i!==ri);
-  const col=priv?'private_issues':'issues';
-  await updateDoc(doc(db,col,issueId),{replies});
-}
-
-// ── DETAIL MODAL ──
-const CI={ไฟ:'💡',น้ำ:'💧',ส่วนกลาง:'🏢',ความปลอดภัย:'🔒',ขยะ:'🗑️',จอดรถ:'🚗',สัญญาณ:'📡',อื่นๆ:'📌',ถนน:'🛣️',ประตู:'🚪',เพื่อนบ้าน:'🤝'};
-const SL={todo:'📋 รอดำเนินการ',doing:'🔧 กำลังดำเนินการ',done:'✅ เสร็จแล้ว'};
-
-function openDetail(id,priv){
-  const items=priv?privateIssues:publicIssues;
-  const item=items.find(x=>x.id===id);if(!item)return;
-  curId=id;curPriv=!!priv;
-  const pri=item.priority||'normal';
-  const mediaH=item.media&&item.media.length?`<div class="det-media${item.media.length===1?' single-media':''}">${item.media.map(m=>m.type==='image'?`<img src="${m.dataUrl}" onclick="openLB('${m.dataUrl}','image')" title="คลิกดูรูปเต็ม"/>`:`<video src="${m.dataUrl}" onclick="openLB('${m.dataUrl}','video')" muted title="คลิกดูวิดีโอ"></video>`).join('')}</div>`:'';
-  const votes=item.votes||0,voted=sessionStorage.getItem('voter_'+id);
-  let repH='';
-  if((item.replies&&item.replies.length)||isAdmin){
-    repH=`<div class="det-div"></div><div class="det-sec" style="color:#15803d">🏡 ตอบกลับจากนิติฯ</div>`;
-    if(item.replies&&item.replies.length){
-      repH+=`<div class="det-replies">${item.replies.map((r,ri)=>{
-        // render media inside reply bubble
-        let rMediaH='';
-        if(r.media&&r.media.length){
-          rMediaH='<div class="rep-media">';
-          r.media.forEach(m=>{
-            if(m.type==='image') rMediaH+=`<img src="${m.dataUrl}" onclick="openLB('${m.dataUrl}','image')" title="คลิกดูรูปเต็ม"/>`;
-            else rMediaH+=`<a class="rep-pdf-link" href="${m.dataUrl}" download="${esc(m.name||'file.pdf')}" onclick="event.stopPropagation()">📄 ${esc(m.name||'ไฟล์แนบ')}</a>`;
-          });
-          rMediaH+='</div>';
-        }
-        return `<div class="rep-bubble">${r.text?`<p>${esc(r.text)}</p>`:''}${rMediaH}<div class="rep-meta"><span>🏡 นิติฯ · ${r.date}</span>${isAdmin?`<button class="rep-del" onclick="deleteReply('${id}',${ri},${!!priv})">ลบ</button>`:''}</div></div>`;
-      }).join('')}</div>`;
-    } else {
-      repH+=`<p style="font-size:.82rem;color:var(--muted);margin-bottom:10px">ยังไม่มีการตอบกลับ</p>`;
-    }
-    if(isAdmin){
-      repH+=`<div class="rep-input">
-        <div class="rep-input-row">
-          <textarea id="rep-inp-${id}" rows="4" placeholder="ตอบกลับลูกบ้าน...&#10;(กด Enter เพื่อขึ้นบรรทัดใหม่ · กด Ctrl/Cmd+Enter เพื่อส่ง)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();addReply('${id}',${!!priv})}"></textarea>
-          <div class="rep-input-actions">
-            <button class="rep-attach-btn" onclick="document.getElementById('rep-file-${id}').click()" title="แนบรูปหรือ PDF">📎 แนบไฟล์</button>
-            <input type="file" id="rep-file-${id}" class="rep-file-input" accept="image/*,.pdf,application/pdf" multiple onchange="handleReplyFiles('${id}',this.files)"/>
-            <button class="rep-send" onclick="addReply('${id}',${!!priv})">ส่ง ➤</button>
-          </div>
+    <!-- ═══ RESIDENT ═══ -->
+    <main id="residentView" hidden>
+      <div class="privacy-note">
+        <div class="privacy-icon">🔒</div>
+        <div>
+          เรื่องที่แจ้งจะส่ง<b>ถึงนิติบุคคลและกรรมการเท่านั้น</b>
+          ไม่แสดงต่อลูกบ้านท่านอื่น และไม่มีการโพสต์ขึ้นบอร์ดสาธารณะ
+          เมื่อนิติฯ ตอบกลับ คุณจะเห็นข้อความในหน้านี้
         </div>
-        <div class="rep-attach-preview" id="rep-prev-${id}"></div>
-        <p style="font-size:.68rem;color:var(--muted);margin-top:2px">📎 แนบรูปภาพหรือ PDF ได้สูงสุด 5 ไฟล์ · PDF ≤ 1.5MB · Enter ขึ้นบรรทัดใหม่ · Ctrl/Cmd+Enter หรือกด ส่ง</p>
-      </div>`;
-    }
-  }
-  let adminH='';
-  if(isAdmin){
-    adminH=`<div class="det-div"></div><div class="det-sec" style="color:var(--muted)">⚙️ จัดการ (Admin)</div><div class="det-admin-btns">`;
-    if(item.status!=='todo')adminH+=`<button class="dab dab-todo" onclick="moveCard('${id}','todo',true,${!!priv})">📋 รอ</button>`;
-    if(item.status!=='doing')adminH+=`<button class="dab dab-doing" onclick="moveCard('${id}','doing',true,${!!priv})">🔧 ดำเนิน</button>`;
-    if(item.status!=='done')adminH+=`<button class="dab dab-done" onclick="moveCard('${id}','done',true,${!!priv})">✅ เสร็จ</button>`;
-    adminH+=`<button class="dab dab-del" onclick="deleteCard('${id}',true,${!!priv})">🗑️ ลบ</button></div>`;
-  }
-  const contactChip=isAdmin&&item.contact?`<span class="dchip contact">📞 ${esc(item.contact)}</span>`:'';
-  const priChip=pri!=='normal'?`<span class="dchip" style="background:${pri==='urgent'?'var(--p-urgent-bg)':'var(--p-high-bg)'};color:${pri==='urgent'?'var(--p-urgent)':'var(--p-high)'};border-color:${pri==='urgent'?'#fca5a5':'#fdba74'}">${PRI_LABEL[pri]}</span>`:'';
-  document.getElementById('detailModal').innerHTML=`
-    <div class="det-toprow">
-      <div class="det-badges">
-        ${priv?`<span class="det-sbadge dsb-priv">🔒 ปัญหาส่วนตัว</span>`:''}
-        <span class="det-sbadge dsb-${item.status}">${SL[item.status]}</span>
       </div>
-      <button class="det-close" onclick="closeDetail()">✕</button>
+
+      <div class="tabs">
+        <button class="tab active" id="tabForm" type="button">แจ้งเรื่องใหม่</button>
+        <button class="tab" id="tabMine" type="button">เรื่องของฉัน<span class="count" id="mineCount">0</span></button>
+      </div>
+
+      <!-- form -->
+      <section id="paneForm">
+        <div class="card">
+          <div id="formMsg"></div>
+
+          <div class="field">
+            <label class="lab">เรื่องที่ต้องการแจ้ง</label>
+            <div class="chips" id="catChips"></div>
+          </div>
+
+          <div class="field">
+            <label class="lab" for="fTitle">หัวข้อ</label>
+            <input type="text" id="fTitle" maxlength="120" placeholder="เช่น ไฟทางเดินหน้าบ้านดับ" />
+          </div>
+
+          <div class="field">
+            <label class="lab" for="fDetail">รายละเอียด</label>
+            <textarea id="fDetail" maxlength="4000" placeholder="เล่ารายละเอียด สถานที่ และช่วงเวลาที่เกิดเหตุ"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="lab">ความเร่งด่วน</label>
+            <div class="chips" id="priChips"></div>
+          </div>
+
+          <div class="field">
+            <label class="lab">แจ้งในนาม</label>
+            <div class="who">
+              <div class="who-opt on" id="whoNamed">
+                <div class="who-title" id="whoNamedTitle">ในนามบ้านของฉัน</div>
+                <div class="who-sub">นิติฯ ติดต่อกลับได้โดยตรง</div>
+              </div>
+              <div class="who-opt" id="whoAnon">
+                <div class="who-title">ไม่ประสงค์ออกนาม</div>
+                <div class="who-sub">ระบบจะไม่แสดงเลขบ้านให้กรรมการเห็น</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field" id="contactField">
+            <label class="lab" for="fContact">เบอร์ติดต่อกลับ <span class="opt">(ถ้ามี)</span></label>
+            <input type="text" id="fContact" maxlength="120" placeholder="เช่น 081-234-5678" />
+          </div>
+
+          <div class="field">
+            <label class="lab">แนบรูปหรือวิดีโอ <span class="opt">(ถ้ามี)</span></label>
+            <div class="dropzone" id="dropzone">
+              📎 แตะเพื่อเลือกไฟล์
+              <div class="dz-sub">รูปได้สูงสุด 5 รูป · วิดีโอ 1 คลิป (ไม่เกิน 20MB)<br>รูปจะถูกย่อขนาดอัตโนมัติก่อนส่ง</div>
+            </div>
+            <input type="file" id="filePicker" accept="image/*,video/*" multiple hidden />
+            <div class="previews" id="previews"></div>
+          </div>
+
+          <button class="btn" id="submitBtn" type="button">ส่งเรื่องถึงนิติบุคคล</button>
+        </div>
+      </section>
+
+      <!-- my tickets -->
+      <section id="paneMine" hidden>
+        <div id="mineList"></div>
+      </section>
+    </main>
+
+    <!-- ═══ ADMIN ═══ -->
+    <main id="adminView" hidden>
+      <div class="tabs">
+        <button class="tab active" id="tabLive" type="button">เรื่องปัจจุบัน</button>
+        <button class="tab" id="tabArchive" type="button">คลังเรื่องเก่า</button>
+      </div>
+      <div id="paneLive">
+      <div class="stats" id="adminStats"></div>
+      <div class="admin-bar">
+        <input type="text" id="adminSearch" placeholder="ค้นหาเลขที่เรื่อง หรือข้อความ" />
+        <button class="btn ghost small" id="adminRefresh" type="button">รีเฟรช</button>
+      </div>
+      <div class="chips" id="adminCatChips" style="margin:10px 0 4px"></div>
+      <div id="adminList"></div>
+      </div>
+      <section id="paneArchive" hidden>
+        <div class="privacy-note">
+          <div class="privacy-icon">📦</div>
+          <div>บอร์ดแจ้งปัญหาชุดเดิม (ก่อนเปลี่ยนระบบ) เก็บไว้อ่านอย่างเดียว แก้ไขหรือตอบกลับไม่ได้</div>
+        </div>
+        <div id="archiveList"></div>
+      </section>
+    </main>
+
+    <footer>
+      <a href="/">← หน้าแรก</a><br>
+      เรื่องที่แจ้งเห็นเฉพาะผู้แจ้งและกรรมการ · ไฟล์แนบเก็บไว้ 365 วัน<br>
+      Pattra Villa 8 · ภัทราวิลล่า 8
+    </footer>
+  </div>
+
+  <!-- login -->
+  <div class="overlay" id="loginOverlay">
+    <div class="modal">
+      <h2>เข้าสู่ระบบลูกบ้าน</h2>
+      <p>ต้องเข้าสู่ระบบก่อนแจ้งเรื่อง เพื่อให้นิติฯ ตอบกลับถึงคุณได้ — คุณยังเลือกแจ้งแบบไม่ประสงค์ออกนามได้</p>
+      <div class="modal-err" id="loginErr"></div>
+      <div class="field">
+        <label class="lab">บ้านเลขที่</label>
+        <div class="houserow">
+          <div class="prefix">38/</div>
+          <input id="loginSuffix" type="number" inputmode="numeric" placeholder="เช่น 8" min="1" max="99" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="lab">PIN 6 หลัก</label>
+        <input id="loginPin" class="pin-in" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" />
+      </div>
+      <button class="btn" id="loginBtn" type="button">เข้าสู่ระบบ</button>
     </div>
-    <span class="ctag tag-${item.cat}" style="margin-bottom:9px;display:inline-block">${CI[item.cat]||'📌'} ${item.cat}</span>
-    <div class="det-title">${esc(item.title)}</div>
-    <div class="det-chips">
-      <span class="dchip house">🏠 ${esc(item.house)}</span>
-      <span class="dchip">📅 ${item.date}</span>
-      ${priChip}
-      ${contactChip}
-      ${!priv&&votes>0?`<span class="dchip votes">👍 ${votes} คนเจอเหมือนกัน</span>`:''}
-    </div>
-    ${item.desc?`<div class="det-desc">${esc(item.desc)}</div>`:`<p style="font-size:.84rem;color:var(--muted);margin-bottom:14px">— ไม่มีรายละเอียดเพิ่มเติม —</p>`}
-    ${mediaH}
-    ${!priv?`<button class="vbtn ${voted?'voted':''}" onclick="upvote('${id}')" style="margin-bottom:6px">${voted?'✅ คุณกดแล้ว':'👍 เจอเหมือนกัน'}${votes>0?' +'+votes:''}</button>
-    <button class="edit-issue-btn" onclick="openEditVerify('${id}')">✏️ แก้ไขปัญหานี้ (ต้องใช้รหัส)</button>`:''}
-    ${item.edited?`<p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">📝 แก้ไขล่าสุด: ${item.editDate}</p>`:''}
-    ${repH}${adminH}`;
-  document.getElementById('detailOverlay').classList.remove('hidden');
-}
-function closeDetail(){curId=null;document.getElementById('detailOverlay').classList.add('hidden')}
-document.getElementById('detailOverlay').addEventListener('click',function(e){if(e.target===this)closeDetail()});
+  </div>
 
-// ── INBOX ──
-function openInbox(){if(!isAdmin)return;renderInbox();document.getElementById('inboxOverlay').classList.remove('hidden')}
-function closeInbox(){document.getElementById('inboxOverlay').classList.add('hidden')}
-document.getElementById('inboxOverlay').addEventListener('click',function(e){if(e.target===this)closeInbox()});
-function renderInbox(){
-  const list=document.getElementById('inboxList');
-  if(!privateIssues.length){list.innerHTML=`<div class="inbox-empty"><div class="ei">📭</div>ยังไม่มีปัญหาส่วนตัวที่ส่งเข้ามา</div>`;return}
-  list.innerHTML='';
-  privateIssues.forEach(item=>{
-    const div=document.createElement('div');div.className='icard';div.onclick=()=>openDetail(item.id,true);
-    const sc={todo:'ic-todo',doing:'ic-doing',done:'ic-done'}[item.status]||'ic-todo';
-    const rp=item.replies&&item.replies.length?`<div class="icard-reply">🏡 ${esc(item.replies[item.replies.length-1].text)}</div>`:'';
-    div.innerHTML=`<div class="icard-top"><div class="icard-title">${esc(item.title)}</div><div class="icard-date">${item.date}</div></div>
-      <div class="icard-chips"><span class="ichip ic-house">🏠 ${esc(item.house)}</span><span class="ichip ic-cat">${CI[item.cat]||'📌'} ${item.cat}</span>${item.contact?`<span class="ichip ic-contact">📞 ${esc(item.contact)}</span>`:''}<span class="ichip ${sc}">${SL[item.status]}</span></div>
-      ${item.desc?`<div class="icard-desc">${esc(item.desc)}</div>`:''}${rp}`;
-    list.appendChild(div);
-  });
-}
+<script>
+(function () {
+  'use strict';
 
-// ── LIGHTBOX ──
-function openLB(src,type){
-  const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),vid=document.getElementById('lbVid');
-  lb.classList.remove('hidden');
-  if(type==='video'){img.style.display='none';vid.style.display='block';vid.src=src}
-  else{vid.style.display='none';img.style.display='block';img.src=src}
-}
-function closeLightbox(){document.getElementById('lightbox').classList.add('hidden');document.getElementById('lbVid').pause()}
+  var API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/estateIssues';
+  var AUTH_API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth';
+  var ACCESS_API = 'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix';
+  // Shared with pattra8.com so a resident who signed in on the landing page
+  // lands straight in the form.
+  var SESSION_KEY = 'pattra_resident_session_v1';
+  var TTL = 30 * 24 * 60 * 60 * 1000;
 
-// ── RENDER BOARD ──
-function makeCard(item){
-  const div=document.createElement('div');
-  const pri=item.priority||'normal';
-  div.className=`card${PRI_CARD[pri]?' '+PRI_CARD[pri]:''}`;
-  div.onclick=()=>openDetail(item.id,false);
-  if(isAdmin){
-    div.setAttribute('draggable','true');
-    div.setAttribute('data-id',item.id);
-    div.addEventListener('dragstart',e=>{
-      e.dataTransfer.setData('text/plain',item.id);
-      e.dataTransfer.effectAllowed='move';
-      setTimeout(()=>div.classList.add('dragging'),0);
-    });
-    div.addEventListener('dragend',()=>{
-      div.classList.remove('dragging');
-      document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done'));
+  var CATEGORIES = [
+    ['common_area', 'พื้นที่ส่วนกลาง'], ['security', 'ความปลอดภัย'],
+    ['cleanliness', 'ความสะอาด'], ['traffic', 'จราจร / ที่จอดรถ'],
+    ['utility', 'ไฟฟ้า / ประปา'], ['noise', 'เสียงรบกวน'],
+    ['suggestion', 'ข้อเสนอแนะ'], ['feedback', 'ติชม'], ['other', 'อื่น ๆ']
+  ];
+  var PRIORITIES = [['normal', 'ปกติ'], ['high', 'เร่งด่วน'], ['urgent', 'ด่วนมาก']];
+  var STATUSES = [['new', 'เรื่องใหม่'], ['in_progress', 'กำลังดำเนินการ'],
+    ['resolved', 'ดำเนินการแล้ว'], ['closed', 'ปิดเรื่อง']];
+  var MAX_IMAGES = 5, MAX_VIDEOS = 1;
+  var MAX_VIDEO_BYTES = 20 * 1024 * 1024;
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
-  const voted=sessionStorage.getItem('voter_'+item.id),votes=item.votes||0;
-  const hasMedia=item.media&&item.media.length>0;
-  let mvH='';
-  if(isAdmin){
-    mvH=`<div class="mvbtns" onclick="event.stopPropagation()">`;
-    if(item.status!=='todo')mvH+=`<button class="mvb mvb-todo" onclick="moveCard('${item.id}','todo')">📋</button>`;
-    if(item.status!=='doing')mvH+=`<button class="mvb mvb-doing" onclick="moveCard('${item.id}','doing')">🔧</button>`;
-    if(item.status!=='done')mvH+=`<button class="mvb mvb-done" onclick="moveCard('${item.id}','done')">✅</button>`;
-    mvH+=`<button class="mvb mvb-del" onclick="deleteCard('${item.id}')">🗑️</button></div>`;
+  function labelOf(list, key) {
+    for (var i = 0; i < list.length; i++) if (list[i][0] === key) return list[i][1];
+    return key;
   }
-  const lastReply=item.replies&&item.replies.length?item.replies[item.replies.length-1]:null;
-  const rpS=lastReply&&lastReply.text?`<div class="reply-strip"><div class="rs-label">🏡 นิติฯ ตอบ:</div><div class="rs-text">${esc(lastReply.text)}</div></div>`:'\n';
-  const houseLabel=item.anon?'ไม่ระบุ':esc(item.house);
-  const mediaIcon=hasMedia?` <span style="font-size:.65rem;opacity:.5">📎</span>`:'';
-  const priTag=pri!=='normal'?`<span class="pri-badge ${PRI_CLASS[pri]}">${PRI_LABEL[pri]}</span>`:'';
-  div.innerHTML=`<div class="card-body">
-    <div class="card-top-row">
-      <span class="ctag tag-${item.cat}">${CI[item.cat]||'📌'} ${item.cat}</span>
-      <span style="font-size:.72rem;font-weight:700;color:var(--accent)">🏠 ${houseLabel}${mediaIcon}</span>
-    </div>
-    ${priTag?`<div style="margin-bottom:5px">${priTag}</div>`:''}
-    <div class="card-title">${esc(item.title)}</div>
-    <div class="card-actions">
-      <button class="vbtn ${voted?'voted':''}" onclick="event.stopPropagation();upvote('${item.id}')">${voted?'✅':'👍'}${votes>0?' +'+votes:''}</button>
-      ${mvH}
-    </div>
-  </div>${rpS}`;
-  return div;
-}
+  function fmtDate(value) {
+    if (!value) return '';
+    var ms = typeof value === 'number' ? value :
+      (value && value._seconds ? value._seconds * 1000 : Date.parse(value));
+    if (!ms || isNaN(ms)) return '';
+    return new Intl.DateTimeFormat('th-TH', {
+      day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok'
+    }).format(new Date(ms));
+  }
 
-function toggleCol(st){
-  const colEl=document.getElementById('col-'+st).closest('.col');
-  if(!colEl)return;
-  colEl.classList.toggle('collapsed');
-}
+  /* ── session ─────────────────────────────────────────────────────── */
+  var session = null;
+  var canAdmin = false;
+  var mode = 'resident';
 
-function onDragOver(e,st){if(!isAdmin)return;e.preventDefault();e.dataTransfer.dropEffect='move';const col=document.getElementById('col-'+st);col.classList.add('drag-over','drag-over-'+st);}
-function onDragLeave(e,st){const col=document.getElementById('col-'+st);col.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done');}
-async function onDrop(e,newStatus){
-  if(!isAdmin)return;e.preventDefault();
-  const id=e.dataTransfer.getData('text/plain');if(!id)return;
-  const item=publicIssues.find(x=>x.id===id);
-  if(!item||item.status===newStatus)return;
-  document.querySelectorAll('.col-body').forEach(c=>c.classList.remove('drag-over','drag-over-todo','drag-over-doing','drag-over-done'));
-  await moveCard(id,newStatus,false,false);
-}
+  function getSession() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (!s || Number(s.expiresAt) <= Date.now()) return null;
+      return s;
+    } catch (e) { return null; }
+  }
+  function storeSession(houseNo, pin, name) {
+    session = {
+      houseNo: houseNo, pin: pin, residentName: name || '',
+      expiresAt: Date.now() + TTL
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  }
+  function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem('pattra_admin_access_v1');
+    session = null; canAdmin = false;
+  }
+  function renderIdentity() {
+    var box = $('headerIdentity');
+    if (!session) { box.innerHTML = ''; return; }
+    var name = session.residentName || '';
+    var initial = ((name || session.houseNo || '').match(/[\dA-Za-z฀-๿]/) || ['P'])[0];
+    box.innerHTML = '<div class="identity-pill" id="idPill" title="ออกจากระบบ">' +
+      '<div class="pill-avatar">' + esc(initial.toUpperCase()) + '</div><div>' +
+      '<div class="pill-house">บ้าน ' + esc(session.houseNo) + '</div>' +
+      '<div class="pill-name">' + esc(name || 'ลูกบ้าน') + '</div></div></div>';
+    var pill = $('idPill');
+    if (pill) pill.addEventListener('click', function () {
+      clearSession(); renderIdentity(); showLogin();
+    });
+  }
 
-function renderBoard(){
-  const hasFilter=filterState.search||filterState.cat||filterState.status||filterState.priority;
-  const filtered=hasFilter?publicIssues.filter(matchesFilter):publicIssues;
-  const cols={todo:[],doing:[],done:[]};
-  filtered.forEach(item=>(cols[item.status]||cols.todo).push(item));
-  ['todo','doing','done'].forEach(st=>{
-    const col=document.getElementById('col-'+st),cnt=document.getElementById('cnt-'+st);
-    col.innerHTML='';cnt.textContent=cols[st].length;
-    if(!cols[st].length){
-      const allInSt=publicIssues.filter(x=>x.status===st||(!x.status&&st==='todo')).length;
-      const msg=hasFilter&&allInSt>0?`<p style="font-size:.78rem">ไม่มีผลลัพธ์ที่ตรงกัน</p>`:
-        {todo:'📭 ยังไม่มีปัญหาที่รอดำเนินการ',doing:'🔧 ยังไม่มีงานที่กำลังทำ',done:'🎉 ยังไม่มีงานที่เสร็จ'}[st];
-      col.innerHTML=`<div class="empty-col"><div class="ei">${st==='done'?'🎉':st==='doing'?'🔧':'📭'}</div>${msg}</div>`;
-    }else cols[st].forEach(item=>col.appendChild(makeCard(item)));
-  });
+  /* ── api ─────────────────────────────────────────────────────────── */
+  // `keepSession` is set while signing in: a rejected PIN there is a typo, not
+  // an expired session, and bouncing back to the login modal would wipe the
+  // error the resident needs to read.
+  function post(url, payload, keepSession) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        if ((res.status === 401 || res.status === 403) && !keepSession) {
+          clearSession(); renderIdentity(); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+          throw new Error(data.error || 'กรุณาเข้าสู่ระบบใหม่');
+        }
+        if (!res.ok || data.ok === false) throw new Error(data.error || 'เกิดข้อผิดพลาด');
+        return data;
+      });
+    });
+  }
+  function api(action, extra) {
+    var payload = { action: action, houseNo: session.houseNo, pin: session.pin };
+    for (var key in extra) if (Object.prototype.hasOwnProperty.call(extra, key)) {
+      payload[key] = extra[key];
+    }
+    return post(API, payload);
+  }
 
-  // stats bar
-  const total=publicIssues.length;
-  const privTotal=privateIssues.length;
-  const privChip=isAdmin&&privTotal>0?`<div class="schip"><span class="sdot" style="background:var(--priv)"></span>ส่วนตัว <strong>${privTotal}</strong></div>`:'';
-  const urgentCount=publicIssues.filter(x=>(x.priority||'normal')==='urgent'&&x.status!=='done').length;
-  const urgChip=urgentCount>0?`<div class="schip"><span class="sdot" style="background:var(--p-urgent)"></span>ด่วนมาก <strong>${urgentCount}</strong></div>`:'';
-  document.getElementById('statsBar').innerHTML=`
-    <div class="schip"><span class="sdot" style="background:var(--todo-c)"></span>รอดำเนินการ <strong>${publicIssues.filter(x=>x.status==='todo'||!x.status).length}</strong></div>
-    <div class="schip"><span class="sdot" style="background:var(--doing-c)"></span>กำลังดำเนินการ <strong>${publicIssues.filter(x=>x.status==='doing').length}</strong></div>
-    <div class="schip"><span class="sdot" style="background:var(--done-c)"></span>เสร็จแล้ว <strong>${publicIssues.filter(x=>x.status==='done').length}</strong></div>
-    <div class="schip">📊 ทั้งหมด <strong>${total}</strong> รายการ</div>
-    ${urgChip}${privChip}`;
+  /* ── login ───────────────────────────────────────────────────────── */
+  function showLogin(message) {
+    $('loginOverlay').classList.add('open');
+    $('bootState').hidden = true;
+    $('residentView').hidden = true;
+    $('adminView').hidden = true;
+    $('adminToggle').hidden = true;
+    if (message) { $('loginErr').textContent = message; $('loginErr').classList.add('show'); }
+    setTimeout(function () { $('loginSuffix').focus(); }, 80);
+  }
+  function hideLogin() {
+    $('loginOverlay').classList.remove('open');
+    $('loginErr').classList.remove('show');
+  }
+  function doLogin() {
+    var suffix = String($('loginSuffix').value || '').trim();
+    var pin = String($('loginPin').value || '').trim();
+    var err = $('loginErr');
+    if (!suffix) { err.textContent = 'กรุณากรอกเลขบ้าน'; err.classList.add('show'); return; }
+    if (pin.length !== 6) { err.textContent = 'PIN ต้องมี 6 หลัก'; err.classList.add('show'); return; }
+    var houseNo = '38/' + suffix;
+    var btn = $('loginBtn');
+    btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ…';
+    post(AUTH_API, { action: 'verify', houseNo: houseNo, pin: pin }, true)
+      .then(function () {
+        storeSession(houseNo, pin, '');
+        hideLogin(); renderIdentity(); boot();
+      })
+      .catch(function (e) {
+        var raw = e.message || '';
+        err.textContent = /invalid pin/i.test(raw) ? 'PIN ไม่ถูกต้อง' :
+          /not configured/i.test(raw) ? 'บ้านนี้ยังไม่ได้ตั้ง PIN กรุณาติดต่อนิติบุคคล' :
+          (raw || 'เข้าสู่ระบบไม่สำเร็จ');
+        err.classList.add('show');
+      })
+      .then(function () { btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ'; });
+  }
 
-  // filter result info
-  const info=document.getElementById('filterResultInfo');
-  if(hasFilter){
-    const totalFiltered=filtered.length;
-    info.textContent=`🔍 แสดง ${totalFiltered} รายการ (จากทั้งหมด ${total})`;
-    info.classList.add('show');
-  }else{info.classList.remove('show');}
-}
+  /* ── form state ──────────────────────────────────────────────────── */
+  var draft = { category: 'common_area', priority: 'normal', anonymous: false };
+  var files = [];
 
-// ── INIT ──
-checkAdminSession();
-updateBanner();
+  function renderChoiceChips() {
+    $('catChips').innerHTML = CATEGORIES.map(function (c) {
+      return '<button type="button" class="chip' +
+        (draft.category === c[0] ? ' on' : '') + '" data-cat="' + c[0] + '">' +
+        esc(c[1]) + '</button>';
+    }).join('');
+    $('priChips').innerHTML = PRIORITIES.map(function (p) {
+      return '<button type="button" class="chip pri-' + p[0] +
+        (draft.priority === p[0] ? ' on' : '') + '" data-pri="' + p[0] + '">' +
+        esc(p[1]) + '</button>';
+    }).join('');
+  }
+  function renderWho() {
+    $('whoNamed').classList.toggle('on', !draft.anonymous);
+    $('whoAnon').classList.toggle('on', draft.anonymous);
+    $('contactField').hidden = draft.anonymous;
+    $('whoNamedTitle').textContent = session ? 'ในนามบ้าน ' + session.houseNo : 'ในนามบ้านของฉัน';
+  }
 
-// ── GLOBAL EXPOSE ──
-window.toggleCol=toggleCol;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
-window.openModal=openModal;window.closeModal=closeModal;window.openPrivateModal=openPrivateModal;window.closePrivateModal=closePrivateModal;
-window.openAdminLogin=openAdminLogin;window.closeAdminModal=closeAdminModal;window.loginAdmin=loginAdmin;
-window.openEditVerify=openEditVerify;window.closeEditVerify=closeEditVerify;window.verifyEditCode=verifyEditCode;
-window.closeEditForm=closeEditForm;window.saveEdit=saveEdit;window.openInbox=openInbox;window.closeInbox=closeInbox;
-window.closeDetail=closeDetail;window.openDetail=openDetail;window.upvote=upvote;window.moveCard=moveCard;
-window.deleteCard=deleteCard;window.addReply=addReply;window.deleteReply=deleteReply;window.removeFile=removeFile;
-window.removeCurrentMedia=removeCurrentMedia;window.handleFiles=handleFiles;window.toggleAnon=toggleAnon;
-window.openLB=openLB;window.closeLightbox=closeLightbox;window.copyCode=copyCode;
-window.submitReport=submitReport;window.submitPrivate=submitPrivate;window.applyFilters=applyFilters;window.clearFilters=clearFilters;
-window.handleReplyFiles=handleReplyFiles;window.removeReplyFile=removeReplyFile;
+  /* Shrinks a photo in the browser so a phone shot fits comfortably inside
+     one request instead of pushing a 12MP original through the function. */
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('อ่านไฟล์ไม่สำเร็จ')); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error('ไฟล์รูปไม่ถูกต้อง')); };
+        img.onload = function () {
+          var max = 1600;
+          var scale = Math.min(1, max / Math.max(img.width, img.height));
+          var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('อ่านไฟล์ไม่สำเร็จ')); };
+      reader.onload = function () { resolve(reader.result); };
+      reader.readAsDataURL(file);
+    });
+  }
+  function countKind(kind) {
+    return files.filter(function (f) { return f.kind === kind; }).length;
+  }
+  function addFiles(list) {
+    var queue = Array.prototype.slice.call(list || []);
+    var chain = Promise.resolve();
+    queue.forEach(function (file) {
+      chain = chain.then(function () {
+        var isVideo = /^video\//.test(file.type);
+        if (isVideo) {
+          if (countKind('video') >= MAX_VIDEOS) throw new Error('แนบวิดีโอได้ 1 คลิป');
+          if (file.size > MAX_VIDEO_BYTES) throw new Error('วิดีโอใหญ่เกิน 20MB กรุณาตัดให้สั้นลง');
+          return readFileAsDataUrl(file).then(function (dataUrl) {
+            files.push({ kind: 'video', dataUrl: dataUrl, name: file.name });
+          });
+        }
+        if (!/^image\//.test(file.type)) throw new Error('รองรับเฉพาะรูปและวิดีโอ');
+        if (countKind('image') >= MAX_IMAGES) throw new Error('แนบรูปได้สูงสุด 5 รูป');
+        return compressImage(file).then(function (dataUrl) {
+          files.push({ kind: 'image', dataUrl: dataUrl, name: file.name });
+        });
+      });
+    });
+    chain.then(renderPreviews).catch(function (e) {
+      renderPreviews();
+      formMessage('err', e.message);
+    });
+  }
+  function renderPreviews() {
+    $('previews').innerHTML = files.map(function (f, index) {
+      var media = f.kind === 'video' ?
+        '<video src="' + f.dataUrl + '" muted playsinline></video><div class="badge">วิดีโอ</div>' :
+        '<img src="' + f.dataUrl + '" alt="" />';
+      return '<div class="pv">' + media +
+        '<button class="rm" type="button" data-rm="' + index + '">✕</button></div>';
+    }).join('');
+  }
+  function formMessage(kind, text) {
+    $('formMsg').innerHTML = text ? '<div class="msg ' + kind + '">' + esc(text) + '</div>' : '';
+    if (text) $('formMsg').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function submitReport() {
+    var title = String($('fTitle').value || '').trim();
+    var detail = String($('fDetail').value || '').trim();
+    if (!title) { formMessage('err', 'กรุณากรอกหัวข้อ'); return; }
+    if (!detail) { formMessage('err', 'กรุณากรอกรายละเอียด'); return; }
+
+    var btn = $('submitBtn');
+    btn.disabled = true; btn.textContent = 'กำลังส่ง…';
+    formMessage('', '');
+
+    api('submit', {
+      title: title, detail: detail,
+      category: draft.category, priority: draft.priority,
+      anonymous: draft.anonymous,
+      contact: draft.anonymous ? '' : String($('fContact').value || '').trim()
+    }).then(function (data) {
+      var pending = files.slice();
+      var uploaded = 0;
+      function next() {
+        if (!pending.length) return Promise.resolve();
+        var file = pending.shift();
+        btn.textContent = 'กำลังส่งไฟล์ ' + (++uploaded) + '/' + files.length + '…';
+        return api('attach', { issueId: data.id, dataUrl: file.dataUrl }).then(next);
+      }
+      return next().then(function () { return data; });
+    }).then(function (data) {
+      files = []; renderPreviews();
+      $('fTitle').value = ''; $('fDetail').value = ''; $('fContact').value = '';
+      draft.priority = 'normal'; renderChoiceChips();
+      formMessage('ok', 'ส่งเรื่องเรียบร้อยแล้ว เลขที่ ' + data.code +
+        ' — ติดตามคำตอบได้ที่แท็บ "เรื่องของฉัน"');
+      loadMine();
+    }).catch(function (e) {
+      formMessage('err', e.message || 'ส่งไม่สำเร็จ');
+    }).then(function () {
+      btn.disabled = false; btn.textContent = 'ส่งเรื่องถึงนิติบุคคล';
+    });
+  }
+
+  /* ── my tickets ──────────────────────────────────────────────────── */
+  var myIssues = [];
+  var openIssueId = '';
+
+  function loadMine() {
+    return api('myIssues', {}).then(function (data) {
+      myIssues = data.issues || [];
+      var unread = myIssues.filter(function (i) { return i.hasUnreadReply; }).length;
+      $('mineCount').textContent = String(myIssues.length);
+      var tab = $('tabMine');
+      var dot = tab.querySelector('.dot');
+      if (unread && !dot) {
+        dot = document.createElement('span'); dot.className = 'dot'; tab.appendChild(dot);
+      } else if (!unread && dot) { dot.remove(); }
+      renderMine();
+    }).catch(function (e) {
+      $('mineList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
+    });
+  }
+  function mediaHtml(attachments) {
+    if (!attachments || !attachments.length) return '';
+    return '<div class="media-row">' + attachments.map(function (a) {
+      var inner = a.kind === 'video' ?
+        '<video src="' + esc(a.url) + '" muted playsinline></video>' :
+        '<img src="' + esc(a.url) + '" alt="" loading="lazy" />';
+      return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' + inner + '</a>';
+    }).join('') + '</div>';
+  }
+  function repliesHtml(replies) {
+    if (!replies || !replies.length) return '';
+    return '<div class="replies">' + replies.map(function (r) {
+      return '<div class="reply ' + esc(r.author) + '">' +
+        '<div class="reply-head"><span>' + esc(r.authorLabel) + '</span>' +
+        '<span>' + esc(fmtDate(r.createdAt)) + '</span></div>' +
+        '<div class="reply-body">' + esc(r.message) + '</div></div>';
+    }).join('') + '</div>';
+  }
+  function renderMine() {
+    if (!myIssues.length) {
+      $('mineList').innerHTML = '<div class="empty"><span class="big">📭</span>' +
+        'ยังไม่มีเรื่องที่คุณแจ้งไว้<br>แจ้งเรื่องแรกได้ที่แท็บ “แจ้งเรื่องใหม่”</div>';
+      return;
+    }
+    $('mineList').innerHTML = myIssues.map(function (issue) {
+      var open = issue.id === openIssueId;
+      var head = '<div class="t-top">' +
+        '<span class="t-code">' + esc(issue.code) + '</span>' +
+        '<span class="pill st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
+        (issue.priority !== 'normal' ?
+          '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
+        (issue.anonymous ? '<span class="pill anon">ไม่ออกนาม</span>' : '') +
+        (issue.hasUnreadReply ? '<span class="pill unread">ตอบกลับใหม่</span>' : '') +
+        '</div>' +
+        '<div class="t-title">' + esc(issue.title) + '</div>' +
+        '<div class="t-meta">' + esc(issue.categoryLabel) + ' · ' + esc(fmtDate(issue.createdAt)) + '</div>';
+
+      if (!open) {
+        return '<div class="ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
+          head + '<div class="t-preview">' + esc(issue.detail) + '</div></div>';
+      }
+      return '<div class="ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
+        head +
+        '<div class="thread-detail">' +
+          '<div class="detail-text">' + esc(issue.detail) + '</div>' +
+          mediaHtml(issue.attachments) +
+          repliesHtml(issue.replies) +
+          '<div class="reply-box" data-stop="1">' +
+            '<textarea id="replyInput" placeholder="พิมพ์ข้อความเพิ่มเติมถึงนิติฯ"></textarea>' +
+            '<button class="btn small" type="button" data-reply="' + esc(issue.id) + '">ส่ง</button>' +
+          '</div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  /* ── admin ───────────────────────────────────────────────────────── */
+  var adminIssues = [];
+  var adminFilter = { status: '', category: '', search: '' };
+  var adminOpenId = '';
+
+  function loadAdmin() {
+    $('adminList').innerHTML = '<div class="loading"><span class="spinner"></span>กำลังโหลด…</div>';
+    return api('adminList', {
+      status: adminFilter.status,
+      category: adminFilter.category,
+      search: adminFilter.search
+    }).then(function (data) {
+      adminIssues = data.issues || [];
+      renderAdminStats(data.stats || {});
+      renderAdminCats();
+      renderAdminList();
+    }).catch(function (e) {
+      $('adminList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
+    });
+  }
+  function renderAdminStats(stats) {
+    var cells = [['', 'ทั้งหมด', stats.total || 0]].concat(STATUSES.map(function (s) {
+      return [s[0], s[1], stats[s[0]] || 0];
+    }));
+    $('adminStats').innerHTML = cells.map(function (c) {
+      return '<div class="stat' + (adminFilter.status === c[0] ? ' on' : '') +
+        '" data-status="' + c[0] + '"><div class="n">' + c[2] + '</div>' +
+        '<div class="l">' + esc(c[1]) + '</div></div>';
+    }).join('');
+  }
+  function renderAdminCats() {
+    $('adminCatChips').innerHTML = [['', 'ทุกหมวด']].concat(CATEGORIES).map(function (c) {
+      return '<button type="button" class="chip' +
+        (adminFilter.category === c[0] ? ' on' : '') + '" data-acat="' + c[0] + '">' +
+        esc(c[1]) + '</button>';
+    }).join('');
+  }
+  function renderAdminList() {
+    if (!adminIssues.length) {
+      $('adminList').innerHTML = '<div class="empty"><span class="big">✅</span>ไม่มีเรื่องตามเงื่อนไขนี้</div>';
+      return;
+    }
+    $('adminList').innerHTML = adminIssues.map(function (issue) {
+      var open = issue.id === adminOpenId;
+      var head = '<div class="t-top">' +
+        '<span class="t-code">' + esc(issue.code) + '</span>' +
+        '<span class="pill st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
+        (issue.priority !== 'normal' ?
+          '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
+        '<span class="pill' + (issue.anonymous ? ' anon' : '') + '">' + esc(issue.reporterLabel) + '</span>' +
+        '</div>' +
+        '<div class="t-title">' + esc(issue.title) + '</div>' +
+        '<div class="t-meta">' + esc(issue.categoryLabel) + ' · ' + esc(fmtDate(issue.createdAt)) +
+        (issue.replies.length ? ' · ตอบแล้ว ' + issue.replies.length + ' ข้อความ' : '') + '</div>';
+
+      if (!open) {
+        return '<div class="ticket st-' + esc(issue.status) + '" data-aopen="' + esc(issue.id) + '">' +
+          head + '<div class="t-preview">' + esc(issue.detail) + '</div></div>';
+      }
+
+      var notes = issue.internalNotes.length ?
+        '<div class="replies">' + issue.internalNotes.map(function (n) {
+          return '<div class="note-item">📝 ' + esc(n.message) +
+            '<br><small>' + esc(n.authorHouseNo || '') + ' · ' + esc(fmtDate(n.createdAt)) + '</small></div>';
+        }).join('') + '</div>' : '';
+
+      var statusButtons = STATUSES.map(function (s) {
+        return '<button type="button" class="chip' + (issue.status === s[0] ? ' on' : '') +
+          '" data-setstatus="' + s[0] + '" data-id="' + esc(issue.id) + '">' + esc(s[1]) + '</button>';
+      }).join('');
+
+      return '<div class="ticket st-' + esc(issue.status) + '" data-aopen="' + esc(issue.id) + '">' +
+        head +
+        '<div class="thread-detail">' +
+          '<div class="detail-text">' + esc(issue.detail) + '</div>' +
+          (issue.contact ? '<div class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</div>' : '') +
+          mediaHtml(issue.attachments) +
+          repliesHtml(issue.replies) +
+          notes +
+          '<div class="reply-box" data-stop="1">' +
+            '<textarea id="adminReplyInput" placeholder="ตอบกลับถึงผู้แจ้ง (ผู้แจ้งจะเห็นข้อความนี้)"></textarea>' +
+            '<button class="btn small" type="button" data-areply="' + esc(issue.id) + '">ตอบ</button>' +
+          '</div>' +
+          '<div class="reply-box" data-stop="1">' +
+            '<textarea id="adminNoteInput" placeholder="บันทึกภายใน (ผู้แจ้งไม่เห็น)"></textarea>' +
+            '<button class="btn ghost small" type="button" data-anote="' + esc(issue.id) + '">บันทึก</button>' +
+          '</div>' +
+          '<div class="admin-actions" data-stop="1">' + statusButtons + '</div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  // The retired board used its own three-state kanban vocabulary.
+  var LEGACY_STATUS = { todo: 'ยังไม่ดำเนินการ', doing: 'กำลังดำเนินการ', done: 'เสร็จแล้ว' };
+  var archiveLoaded = false;
+  function loadArchive() {
+    $('archiveList').innerHTML = '<div class="loading"><span class="spinner"></span>กำลังโหลด…</div>';
+    return api('adminArchiveList', {}).then(function (data) {
+      var issues = data.issues || [];
+      archiveLoaded = true;
+      if (!issues.length) {
+        $('archiveList').innerHTML = '<div class="empty"><span class="big">📦</span>ยังไม่มีเรื่องในคลัง</div>';
+        return;
+      }
+      $('archiveList').innerHTML = issues.map(function (issue) {
+        return '<div class="ticket st-closed">' +
+          '<div class="t-top">' +
+            '<span class="pill">' + esc(issue.source === 'private_issues' ? 'ส่วนตัว' : 'บอร์ดเก่า') + '</span>' +
+            (issue.status ? '<span class="pill">' +
+              esc(LEGACY_STATUS[issue.status] || issue.status) + '</span>' : '') +
+            (issue.house ? '<span class="pill">' + esc(issue.house) + '</span>' : '') +
+          '</div>' +
+          '<div class="t-title">' + esc(issue.title) + '</div>' +
+          '<div class="t-meta">' + esc(issue.category || '') + ' · ' + esc(issue.date || '') + '</div>' +
+          (issue.detail ? '<div class="detail-text" style="margin-top:9px">' + esc(issue.detail) + '</div>' : '') +
+          mediaHtml(issue.attachments) +
+        '</div>';
+      }).join('');
+    }).catch(function (e) {
+      $('archiveList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
+    });
+  }
+
+  function setMode(next) {
+    mode = next;
+    var admin = next === 'admin';
+    $('adminView').hidden = !admin;
+    $('residentView').hidden = admin;
+    $('adminToggle').textContent = admin ? 'มุมมองลูกบ้าน' : 'หลังบ้าน';
+    $('heroTitle').textContent = admin ? 'หลังบ้าน · เรื่องที่ลูกบ้านแจ้ง' : 'แจ้งปัญหา · เสนอแนะ · ติชม';
+    $('heroSub').textContent = admin ?
+      'เห็นเฉพาะกรรมการ · เรื่องที่แจ้งแบบไม่ประสงค์ออกนามจะไม่แสดงเลขบ้าน' :
+      'ส่งเรื่องถึงนิติบุคคลโดยตรง พร้อมแนบรูปหรือวิดีโอ';
+    if (admin) loadAdmin();
+  }
+
+  /* ── events ──────────────────────────────────────────────────────── */
+  function bindEvents() {
+    $('loginBtn').addEventListener('click', doLogin);
+    $('loginPin').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    $('tabForm').addEventListener('click', function () {
+      $('tabForm').classList.add('active'); $('tabMine').classList.remove('active');
+      $('paneForm').hidden = false; $('paneMine').hidden = true;
+    });
+    $('tabMine').addEventListener('click', function () {
+      $('tabMine').classList.add('active'); $('tabForm').classList.remove('active');
+      $('paneMine').hidden = false; $('paneForm').hidden = true;
+      loadMine();
+    });
+
+    $('catChips').addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-cat]');
+      if (!chip) return;
+      draft.category = chip.getAttribute('data-cat'); renderChoiceChips();
+    });
+    $('priChips').addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-pri]');
+      if (!chip) return;
+      draft.priority = chip.getAttribute('data-pri'); renderChoiceChips();
+    });
+    $('whoNamed').addEventListener('click', function () { draft.anonymous = false; renderWho(); });
+    $('whoAnon').addEventListener('click', function () { draft.anonymous = true; renderWho(); });
+
+    $('dropzone').addEventListener('click', function () { $('filePicker').click(); });
+    $('filePicker').addEventListener('change', function (e) {
+      addFiles(e.target.files); e.target.value = '';
+    });
+    $('previews').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-rm]');
+      if (!btn) return;
+      files.splice(Number(btn.getAttribute('data-rm')), 1); renderPreviews();
+    });
+    $('submitBtn').addEventListener('click', submitReport);
+
+    $('mineList').addEventListener('click', function (e) {
+      var send = e.target.closest('[data-reply]');
+      if (send) {
+        var input = $('replyInput');
+        var message = String(input && input.value || '').trim();
+        if (!message) return;
+        send.disabled = true;
+        api('addComment', { issueId: send.getAttribute('data-reply'), message: message })
+          .then(loadMine)
+          .catch(function (err) { alert(err.message); })
+          .then(function () { send.disabled = false; });
+        return;
+      }
+      if (e.target.closest('[data-stop]')) return;
+      var card = e.target.closest('[data-open]');
+      if (!card) return;
+      var id = card.getAttribute('data-open');
+      var wasOpen = openIssueId === id;
+      openIssueId = wasOpen ? '' : id;
+      renderMine();
+      if (!wasOpen) {
+        var issue = myIssues.filter(function (i) { return i.id === id; })[0];
+        if (issue && issue.hasUnreadReply) {
+          api('markSeen', { issueId: id }).then(loadMine).catch(function () {});
+        }
+      }
+    });
+
+    $('tabLive').addEventListener('click', function () {
+      $('tabLive').classList.add('active'); $('tabArchive').classList.remove('active');
+      $('paneLive').hidden = false; $('paneArchive').hidden = true;
+    });
+    $('tabArchive').addEventListener('click', function () {
+      $('tabArchive').classList.add('active'); $('tabLive').classList.remove('active');
+      $('paneArchive').hidden = false; $('paneLive').hidden = true;
+      if (!archiveLoaded) loadArchive();
+    });
+
+    $('adminToggle').addEventListener('click', function () {
+      setMode(mode === 'admin' ? 'resident' : 'admin');
+    });
+    $('adminRefresh').addEventListener('click', loadAdmin);
+    $('adminSearch').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      adminFilter.search = String(e.target.value || '').trim();
+      loadAdmin();
+    });
+    $('adminStats').addEventListener('click', function (e) {
+      var cell = e.target.closest('[data-status]');
+      if (!cell) return;
+      adminFilter.status = cell.getAttribute('data-status');
+      loadAdmin();
+    });
+    $('adminCatChips').addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-acat]');
+      if (!chip) return;
+      adminFilter.category = chip.getAttribute('data-acat');
+      loadAdmin();
+    });
+    $('adminList').addEventListener('click', function (e) {
+      var reply = e.target.closest('[data-areply]');
+      if (reply) {
+        var input = $('adminReplyInput');
+        var message = String(input && input.value || '').trim();
+        if (!message) return;
+        reply.disabled = true;
+        api('adminReply', { issueId: reply.getAttribute('data-areply'), message: message })
+          .then(loadAdmin).catch(function (err) { alert(err.message); })
+          .then(function () { reply.disabled = false; });
+        return;
+      }
+      var note = e.target.closest('[data-anote]');
+      if (note) {
+        var noteInput = $('adminNoteInput');
+        var noteText = String(noteInput && noteInput.value || '').trim();
+        if (!noteText) return;
+        note.disabled = true;
+        api('adminNote', { issueId: note.getAttribute('data-anote'), message: noteText })
+          .then(loadAdmin).catch(function (err) { alert(err.message); })
+          .then(function () { note.disabled = false; });
+        return;
+      }
+      var status = e.target.closest('[data-setstatus]');
+      if (status) {
+        api('adminUpdate', {
+          issueId: status.getAttribute('data-id'),
+          status: status.getAttribute('data-setstatus')
+        }).then(loadAdmin).catch(function (err) { alert(err.message); });
+        return;
+      }
+      if (e.target.closest('[data-stop]')) return;
+      var card = e.target.closest('[data-aopen]');
+      if (!card) return;
+      var id = card.getAttribute('data-aopen');
+      adminOpenId = adminOpenId === id ? '' : id;
+      renderAdminList();
+    });
+  }
+
+  /* ── boot ────────────────────────────────────────────────────────── */
+  function resolveAdminAccess() {
+    return post(ACCESS_API, {
+      action: 'resolve', houseNo: session.houseNo, pin: session.pin
+    }).then(function (data) {
+      var access = data.access || data;
+      var permissions = (access && access.permissions) || {};
+      canAdmin = access && access.active !== false &&
+        permissions['admin.portal'] === true && permissions['admin.issues'] === true;
+      $('adminToggle').hidden = !canAdmin;
+    }).catch(function () { $('adminToggle').hidden = true; });
+  }
+
+  function boot() {
+    session = getSession();
+    if (!session) { showLogin(); return; }
+    renderIdentity();
+    $('bootState').hidden = true;
+    $('residentView').hidden = false;
+    renderChoiceChips();
+    renderWho();
+    loadMine();
+    resolveAdminAccess();
+  }
+
+  bindEvents();
+  boot();
+})();
 </script>
 </body>
 </html>
