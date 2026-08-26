@@ -599,6 +599,7 @@
   var session = null;
   var canAdmin = false;
   var mode = 'resident';
+  var pendingSubmitAfterLogin = false;
 
   function getSession() {
     try {
@@ -621,7 +622,11 @@
   }
   function renderIdentity() {
     var box = $('headerIdentity');
-    if (!session) { box.innerHTML = ''; return; }
+    if (!session) {
+      box.innerHTML = '<button class="btn ghost small" id="loginShortcut" type="button">เรื่องของฉัน</button>';
+      $('loginShortcut').addEventListener('click', function () { showLogin(); });
+      return;
+    }
     var name = session.residentName || '';
     var initial = ((name || session.houseNo || '').match(/[\dA-Za-z฀-๿]/) || ['P'])[0];
     box.innerHTML = '<div class="identity-pill" id="idPill" title="ออกจากระบบ">' +
@@ -630,7 +635,7 @@
       '<div class="pill-name">' + esc(name || 'ลูกบ้าน') + '</div></div></div>';
     var pill = $('idPill');
     if (pill) pill.addEventListener('click', function () {
-      clearSession(); renderIdentity(); showLogin();
+      clearSession(); renderIdentity(); showGuestForm();
     });
   }
 
@@ -664,10 +669,9 @@
 
   /* ── login ───────────────────────────────────────────────────────── */
   function showLogin(message) {
-    $('loginOverlay').classList.add('open');
     $('bootState').hidden = true;
-    $('residentView').hidden = true;
-    $('adminView').hidden = true;
+    if (!session) showGuestForm();
+    $('loginOverlay').classList.add('open');
     $('adminToggle').hidden = true;
     if (message) { $('loginErr').textContent = message; $('loginErr').classList.add('show'); }
     setTimeout(function () { $('loginSuffix').focus(); }, 80);
@@ -687,8 +691,14 @@
     btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ…';
     post(AUTH_API, { action: 'verify', houseNo: houseNo, pin: pin }, true)
       .then(function () {
+        var shouldSubmit = pendingSubmitAfterLogin;
+        pendingSubmitAfterLogin = false;
         storeSession(houseNo, pin, '');
         hideLogin(); renderIdentity(); boot();
+        if (shouldSubmit) {
+          showReportForm(false);
+          setTimeout(submitReport, 0);
+        }
       })
       .catch(function (e) {
         var raw = e.message || '';
@@ -818,6 +828,11 @@
     var detail = String($('fDetail').value || '').trim();
     if (!title) { formMessage('err', 'กรุณากรอกหัวข้อ'); return; }
     if (!detail) { formMessage('err', 'กรุณากรอกรายละเอียด'); return; }
+    if (!session) {
+      pendingSubmitAfterLogin = true;
+      showLogin();
+      return;
+    }
 
     var btn = $('submitBtn');
     btn.disabled = true; btn.textContent = 'กำลังส่ง…';
@@ -844,6 +859,10 @@
       showReceipt(data.id);
       return loadMine();
     }).catch(function (e) {
+      if (!session && $('loginOverlay').classList.contains('open')) {
+        pendingSubmitAfterLogin = true;
+        return;
+      }
       formMessage('err', e.message || 'ส่งไม่สำเร็จ');
     }).then(function () {
       btn.disabled = false; btn.textContent = 'ส่งเรื่องให้กรรมการ';
@@ -1182,6 +1201,7 @@
   }
 
   function showMine(issueId) {
+    if (!session) { showLogin(); return; }
     openIssueId = issueId || '';
     editIssueId = ''; editFiles = [];
     $('paneMine').hidden = false; $('paneForm').hidden = true;
@@ -1198,6 +1218,7 @@
     $('privacyNote').hidden = false;
     $('heroKicker').textContent = 'RESIDENT SUPPORT';
     $('heroTitle').textContent = 'แจ้งปัญหา / เสนอแนะ';
+    $('formBackBtn').hidden = !session;
     if (reset) resetFormView();
     window.scrollTo({ top:0, behavior:'smooth' });
   }
@@ -1398,9 +1419,21 @@
     }).catch(function () { $('adminToggle').hidden = true; });
   }
 
+  function showGuestForm() {
+    mode = 'resident';
+    $('bootState').hidden = true;
+    $('residentView').hidden = false;
+    $('adminView').hidden = true;
+    $('adminToggle').hidden = true;
+    renderChoiceChips();
+    renderWho();
+    renderPreviews();
+    showReportForm(false);
+  }
+
   function boot() {
     session = getSession();
-    if (!session) { showLogin(); return; }
+    if (!session) { renderIdentity(); showGuestForm(); return; }
     renderIdentity();
     $('bootState').hidden = true;
     $('residentView').hidden = false;
