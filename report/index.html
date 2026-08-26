@@ -99,7 +99,7 @@
 
     .field { margin-bottom:11px; }
     .field label.lab {
-      display:block; font-size:12.5px; font-weight:600;
+      display:block; font-size:15.5px; font-weight:700;
       color:var(--text-soft); margin-bottom:6px;
     }
     .lab .opt { font-weight:400; color:var(--text-muted); }
@@ -110,6 +110,13 @@
     }
     input[type=text]:focus, textarea:focus, select:focus { border-color:var(--accent); }
     textarea { min-height:88px; line-height:1.6; }
+    #fDetail { min-height:160px; }
+    .category-select {
+      appearance:none; -webkit-appearance:none; cursor:pointer; font-weight:600;
+      padding-right:42px; background-color:var(--card);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%236b5d4a' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 15px center;
+    }
     .chips { display:flex; flex-wrap:wrap; gap:7px; }
     .chip {
       padding:7px 12px; border-radius:99px; border:1.5px solid var(--border);
@@ -316,7 +323,7 @@
   <header class="site-header">
     <a class="brand" href="/">
       <div class="brand-mark">Pattra Villa 8</div>
-      <div class="brand-sub">Resident Services</div>
+      <div class="brand-sub">Report an Issue</div>
     </a>
     <div class="header-actions">
       <button id="adminToggle" class="btn ghost small" type="button" hidden>หลังบ้าน</button>
@@ -326,7 +333,7 @@
 
   <div class="wrap">
     <section class="hero">
-      <div class="title" id="heroTitle">แจ้งเรื่องถึงกรรมการ</div>
+      <div class="title" id="heroTitle">Resident Support</div>
     </section>
 
     <div id="bootState" class="loading"><span class="spinner"></span>กำลังโหลด…</div>
@@ -350,7 +357,7 @@
 
           <div class="field">
             <label class="lab">เรื่องที่ต้องการแจ้ง</label>
-            <div class="chips" id="catChips"></div>
+            <select class="category-select" id="fCategory" aria-label="เรื่องที่ต้องการแจ้ง"></select>
           </div>
 
           <div class="field">
@@ -423,7 +430,7 @@
     <footer>
       <a href="/">← หน้าแรก</a><br>
       เรื่องที่แจ้งเห็นเฉพาะผู้แจ้งและกรรมการ · ไฟล์แนบเก็บไว้ 365 วัน<br>
-      Pattra Villa 8 · ภัทราวิลล่า 8
+      Pattra Villa 8
     </footer>
   </div>
 
@@ -615,10 +622,9 @@
   var lastSubmittedId = '';
 
   function renderChoiceChips() {
-    $('catChips').innerHTML = CATEGORIES.map(function (c) {
-      return '<button type="button" class="chip' +
-        (draft.category === c[0] ? ' on' : '') + '" data-cat="' + c[0] + '">' +
-        esc(c[1]) + '</button>';
+    $('fCategory').innerHTML = CATEGORIES.map(function (c) {
+      return '<option value="' + c[0] + '"' +
+        (draft.category === c[0] ? ' selected' : '') + '>' + esc(c[1]) + '</option>';
     }).join('');
   }
   function renderWho() {
@@ -1060,7 +1066,7 @@
     $('adminView').hidden = !admin;
     $('residentView').hidden = admin;
     $('adminToggle').textContent = admin ? 'มุมมองลูกบ้าน' : 'หลังบ้าน';
-    $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' : 'แจ้งเรื่องถึงกรรมการ';
+    $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' : 'Resident Support';
     if (admin) loadAdmin();
   }
 
@@ -1088,10 +1094,8 @@
       loadMine();
     });
 
-    $('catChips').addEventListener('click', function (e) {
-      var chip = e.target.closest('[data-cat]');
-      if (!chip) return;
-      draft.category = chip.getAttribute('data-cat'); renderChoiceChips();
+    $('fCategory').addEventListener('change', function (e) {
+      draft.category = e.target.value;
     });
     $('whoNamed').addEventListener('click', function () { draft.anonymous = false; renderWho(); });
     $('whoAnon').addEventListener('click', function () { draft.anonymous = true; renderWho(); });
