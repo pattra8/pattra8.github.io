@@ -106,12 +106,13 @@
 
     .field { margin-bottom:18px; }
     .field label.lab {
-      display:block; font-size:14px; font-weight:600;
+      display:block; font-size:13.5px; font-weight:500; line-height:1.65;
       color:var(--text); margin-bottom:7px;
     }
     .lab .opt { font-weight:400; color:var(--text-muted); }
     input[type=text], textarea, select {
-      width:100%; font-family:inherit; font-size:15.5px; color:var(--text);
+      width:100%; font-family:inherit; font-size:14px; font-weight:400;
+      line-height:1.65; color:var(--text);
       padding:12px 13px; border:1px solid var(--border); border-radius:13px;
       background:var(--card); outline:none; resize:vertical;
     }
@@ -119,13 +120,19 @@
     textarea { min-height:88px; line-height:1.6; }
     #fDetail { min-height:150px; }
     .category-select {
-      appearance:none; -webkit-appearance:none; cursor:pointer; font-weight:600;
+      appearance:none; -webkit-appearance:none; cursor:pointer; font-weight:400;
       padding-right:42px; background-color:var(--card);
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%236b5d4a' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat:no-repeat; background-position:right 15px center;
     }
     .chips { display:flex; flex-wrap:wrap; gap:7px; }
-    #whoChips .chip { flex:1; }
+    #whoChips .chip {
+      flex:1; min-height:62px; text-align:left; padding:10px 12px;
+      display:flex; flex-direction:column; justify-content:center; gap:2px;
+    }
+    .who-option-title { font-size:13.5px; font-weight:600; color:var(--text); }
+    .who-option-note { font-size:11px; font-weight:400; color:var(--text-muted); line-height:1.45; }
+    #whoChips .chip.on .who-option-title { color:var(--accent-deep); }
     .chip {
       padding:10px 13px; border-radius:12px; border:1px solid var(--border);
       background:var(--card); color:var(--text-soft); font-size:13px;
@@ -136,7 +143,8 @@
     .chip.pri-urgent.on { background:var(--err-bg); border-color:#c2795f; color:var(--err); }
 
     .dropzone {
-      border:1px dashed #d1bea0; border-radius:13px; padding:15px 14px;
+      border:1px dashed #d1bea0; border-radius:13px; padding:22px 14px;
+      min-height:120px; display:flex; flex-direction:column; justify-content:center;
       text-align:center; cursor:pointer; background:var(--bg-soft);
       font-size:13.5px; color:var(--text-soft);
     }
@@ -210,9 +218,10 @@
     .ticket.st-resolved { border-left-color:#4d7c3f; }
     .ticket.st-closed { border-left-color:#9c8c76; }
     .resident-ticket {
-      background:transparent; border:0; border-top:1px solid var(--border-soft);
-      border-left:5px solid var(--neutral); border-radius:0;
-      box-shadow:none; padding:18px 0 18px 15px; margin:0;
+      background:#fff; border:1px solid var(--border-soft);
+      border-left:5px solid var(--neutral); border-radius:15px;
+      box-shadow:0 5px 18px rgba(60,40,20,.045);
+      padding:16px 17px; margin:0;
     }
     .resident-ticket.st-new { border-left-color:var(--accent); }
     .resident-ticket.st-in_progress { border-left-color:var(--info); }
@@ -234,8 +243,16 @@
     .pill.pri-urgent { background:var(--err-bg); color:var(--err); }
     .pill.anon { background:#ece7f6; color:#5b4a8a; }
     .pill.unread { background:#c0392b; color:#fff; }
-    .t-title { font-size:16.5px; font-weight:700; color:var(--text); line-height:1.45; }
-    .t-meta { font-size:11.5px; color:var(--text-muted); margin-top:6px; }
+    .t-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; }
+    .ticket-context { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .category-badge, .identity-badge {
+      display:inline-flex; align-items:center; min-height:25px; padding:3px 9px;
+      border-radius:7px; font-size:11px; font-weight:500; line-height:1.5;
+    }
+    .category-badge { background:var(--warn-bg); color:var(--accent-deep); }
+    .identity-badge { background:var(--info-bg); color:var(--info); }
+    .identity-badge.anon { background:#ece7f6; color:#5b4a8a; }
+    .t-meta { font-size:11.5px; color:var(--text-muted); }
     .t-preview {
       font-size:13.5px; color:var(--text-soft); margin-top:11px; line-height:1.65;
       display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
@@ -263,6 +280,7 @@
     .reply-box { display:flex; gap:8px; margin-top:12px; align-items:flex-start; }
     .reply-box textarea { min-height:52px; font-size:14px; }
     .mine-summary { display:flex; gap:7px; margin:17px 0 11px; overflow-x:auto; }
+    #mineList { display:flex; flex-direction:column; gap:14px; }
     .summary-chip { flex:0 0 auto; border:1px solid var(--border); border-radius:99px; padding:6px 11px; font-size:11.5px; color:var(--text-soft); }
     .summary-chip.on { border-color:var(--accent); color:var(--accent-deep); background:var(--warn-bg); }
 
@@ -401,8 +419,14 @@
           <div class="field">
             <label class="lab">แจ้งในนาม</label>
             <div class="chips" id="whoChips">
-              <button type="button" class="chip on" id="whoNamed"><span id="whoNamedTitle">บ้านของฉัน</span></button>
-              <button type="button" class="chip" id="whoAnon">ไม่ประสงค์ออกนาม</button>
+              <button type="button" class="chip on" id="whoNamed">
+                <span class="who-option-title" id="whoNamedTitle">ในนามบ้านของฉัน</span>
+                <span class="who-option-note">กรรมการจะเห็นเลขที่บ้าน</span>
+              </button>
+              <button type="button" class="chip" id="whoAnon">
+                <span class="who-option-title">ไม่ออกนาม</span>
+                <span class="who-option-note">ไม่แสดงเลขที่บ้านต่อกรรมการ</span>
+              </button>
             </div>
           </div>
 
@@ -665,7 +689,7 @@
     $('whoNamed').classList.toggle('on', !draft.anonymous);
     $('whoAnon').classList.toggle('on', draft.anonymous);
     $('contactField').hidden = draft.anonymous;
-    $('whoNamedTitle').textContent = session ? 'บ้าน ' + session.houseNo : 'บ้านของฉัน';
+    $('whoNamedTitle').textContent = session ? 'ในนามบ้าน ' + session.houseNo : 'ในนามบ้านของฉัน';
   }
 
   /* Shrinks a photo in the browser so a phone shot fits comfortably inside
@@ -956,13 +980,18 @@
         '<span class="pill st-' + esc(issue.status) + '">' + esc(residentStatusLabel(issue.status)) + '</span>' +
         (issue.priority !== 'normal' ?
           '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
-        (issue.anonymous ? '<span class="pill anon">ไม่ออกนาม</span>' : '') +
         (issue.hasUnreadReply ? '<span class="pill unread">ตอบกลับใหม่</span>' : '') +
         '</div>';
+      var identityLabel = issue.anonymous ? 'ไม่ออกนาม' :
+        'ในนามบ้าน ' + (session ? session.houseNo : 'ของฉัน');
       var head = '<div class="ticket-header"><div>' +
         '<div class="t-title">' + esc(issue.title) + '</div>' +
-        '<div class="t-meta">' + esc(labelOf(CATEGORIES, issue.category)) + ' · ' +
-        esc(fmtDate(issue.createdAt)) + '</div></div>' + pills + '</div>';
+        '<div class="ticket-context">' +
+          '<span class="category-badge">' + esc(labelOf(CATEGORIES, issue.category)) + '</span>' +
+          '<span class="identity-badge' + (issue.anonymous ? ' anon' : '') + '">' +
+            esc(identityLabel) + '</span>' +
+          '<span class="t-meta">' + esc(fmtDate(issue.createdAt)) + '</span>' +
+        '</div></div>' + pills + '</div>';
 
       if (!open) {
         return '<div class="ticket resident-ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
