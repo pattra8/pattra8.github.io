@@ -160,6 +160,19 @@
     .msg { border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.6; margin:12px 0; }
     .msg.err { background:var(--err-bg); color:var(--err); }
     .msg.ok { background:var(--ok-bg); color:var(--ok); }
+    .receipt {
+      text-align:center; padding:30px 18px; animation:receiptIn .28s ease-out;
+    }
+    .receipt-icon {
+      width:54px; height:54px; margin:0 auto 13px; border-radius:50%;
+      display:grid; place-items:center; background:var(--ok-bg); color:var(--ok);
+      font-size:28px; font-weight:700;
+    }
+    .receipt h2 { margin:0; color:var(--text); font-size:21px; }
+    .receipt p { margin:7px 0 20px; color:var(--text-muted); font-size:13.5px; }
+    .receipt-actions { display:flex; flex-wrap:wrap; gap:9px; justify-content:center; }
+    .receipt-actions .btn { width:auto; min-width:128px; }
+    @keyframes receiptIn { from { opacity:0; transform:translateY(6px); } }
     .loading { text-align:center; padding:38px 0; color:var(--text-muted); font-size:14px; }
     .spinner {
       display:inline-block; width:18px; height:18px;
@@ -182,7 +195,6 @@
     .ticket.st-resolved { border-left-color:#4d7c3f; }
     .ticket.st-closed { border-left-color:#9c8c76; }
     .t-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
-    .t-code { font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; color:var(--accent-text); }
     .pill {
       font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;
       background:var(--neutral-bg); color:var(--neutral); white-space:nowrap;
@@ -206,8 +218,15 @@
     .thread-detail { border-top:1px dashed var(--border); margin-top:13px; padding-top:13px; }
     .detail-text { font-size:14px; line-height:1.75; color:var(--text-body); white-space:pre-wrap; }
     .media-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
-    .media-row a { display:block; width:88px; height:88px; border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+    .media-thumb { display:block; width:88px; height:88px; padding:0; cursor:zoom-in; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:#000; }
     .media-row img, .media-row video { width:100%; height:100%; object-fit:cover; display:block; }
+    .edit-box { margin-top:13px; padding:13px; border-radius:13px; background:var(--bg-soft); }
+    .edit-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
+    .edit-actions .btn { flex:1; }
+    .saved-media { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+    .saved-media-item { position:relative; }
+    .saved-media-item .media-thumb { cursor:default; }
+    .saved-media-item .rm { position:absolute; top:4px; right:4px; border:0; border-radius:50%; width:24px; height:24px; color:#fff; background:rgba(0,0,0,.72); cursor:pointer; }
     .replies { margin-top:14px; display:flex; flex-direction:column; gap:9px; }
     .reply { border-radius:12px; padding:11px 13px; font-size:13.5px; line-height:1.7; }
     .reply.admin { background:var(--warn-bg); }
@@ -238,6 +257,10 @@
       display:none; align-items:center; justify-content:center; padding:20px; z-index:60;
     }
     .overlay.open { display:flex; }
+    .media-overlay { background:rgba(20,16,12,.88); z-index:90; cursor:zoom-out; }
+    .media-viewer { position:relative; width:min(94vw,900px); max-height:90dvh; display:grid; place-items:center; }
+    .media-viewer img, .media-viewer video { max-width:100%; max-height:88dvh; border-radius:12px; box-shadow:0 18px 60px rgba(0,0,0,.38); }
+    .media-close { position:absolute; top:-12px; right:-8px; width:38px; height:38px; border:0; border-radius:50%; background:#fff; color:var(--text); font-size:20px; cursor:pointer; z-index:1; }
     .modal {
       background:var(--card); border-radius:20px; padding:26px 22px;
       width:100%; max-width:360px; box-shadow:var(--shadow);
@@ -322,7 +345,7 @@
 
       <!-- form -->
       <section id="paneForm">
-        <div class="card">
+        <div class="card" id="formCard">
           <div id="formMsg"></div>
 
           <div class="field">
@@ -382,7 +405,7 @@
       <div id="paneLive">
       <div class="stats" id="adminStats"></div>
       <div class="admin-bar">
-        <input type="text" id="adminSearch" placeholder="ค้นหาเลขที่เรื่อง หรือข้อความ" />
+        <input type="text" id="adminSearch" placeholder="ค้นหาหัวข้อหรือรายละเอียด" />
         <button class="btn ghost small" id="adminRefresh" type="button">รีเฟรช</button>
       </div>
       <div class="chips" id="adminCatChips" style="margin:10px 0 4px"></div>
@@ -402,6 +425,13 @@
       เรื่องที่แจ้งเห็นเฉพาะผู้แจ้งและกรรมการ · ไฟล์แนบเก็บไว้ 365 วัน<br>
       Pattra Villa 8 · ภัทราวิลล่า 8
     </footer>
+  </div>
+
+  <div class="overlay media-overlay" id="mediaOverlay" aria-hidden="true">
+    <div class="media-viewer" id="mediaViewer" role="dialog" aria-modal="true" aria-label="ไฟล์แนบ">
+      <button class="media-close" id="mediaClose" type="button" aria-label="ปิด">✕</button>
+      <div id="mediaStage"></div>
+    </div>
   </div>
 
   <!-- login -->
@@ -442,6 +472,7 @@
   // truth for labels (they also drive the LINE notice and the archive view).
   var CATEGORIES = [
     ['common_area', '🏡 พื้นที่ส่วนกลาง'], ['security', '🛡️ ความปลอดภัย'],
+    ['pool', '🏊 สระว่ายน้ำ'], ['fitness', '🏋️ ฟิตเนส'], ['garden', '🌳 สวน'],
     ['cleanliness', '🧹 ความสะอาด'], ['traffic', '🚗 จราจร / ที่จอดรถ'],
     ['utility', '💡 ไฟฟ้า / ประปา'], ['noise', '🔊 เสียง / ความเป็นส่วนตัว'],
     ['suggestion', '📝 ข้อเสนอแนะ'], ['feedback', '💬 ข้อกังวล'],
@@ -581,6 +612,7 @@
   /* ── form state ──────────────────────────────────────────────────── */
   var draft = { category: 'common_area', anonymous: false };
   var files = [];
+  var lastSubmittedId = '';
 
   function renderChoiceChips() {
     $('catChips').innerHTML = CATEGORIES.map(function (c) {
@@ -669,6 +701,28 @@
     if (text) $('formMsg').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  function showReceipt(issueId) {
+    lastSubmittedId = issueId;
+    var card = $('formCard');
+    Array.prototype.forEach.call(card.children, function (child) { child.hidden = true; });
+    var receipt = document.createElement('div');
+    receipt.className = 'receipt'; receipt.id = 'receipt';
+    receipt.innerHTML = '<div class="receipt-icon">✓</div><h2>ได้รับเรื่องแล้ว</h2>' +
+      '<p>กรรมการได้รับเรื่องของคุณเรียบร้อยแล้ว</p>' +
+      '<div class="receipt-actions">' +
+        '<button class="btn ghost small" type="button" data-new-report>แจ้งเพิ่ม</button>' +
+        '<button class="btn small" type="button" data-view-report>ดูเรื่องที่เพิ่งแจ้ง</button>' +
+      '</div>';
+    card.appendChild(receipt);
+    receipt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function resetFormView() {
+    var receipt = $('receipt');
+    if (receipt) receipt.remove();
+    Array.prototype.forEach.call($('formCard').children, function (child) { child.hidden = false; });
+    formMessage('', '');
+  }
+
   function submitReport() {
     var title = String($('fTitle').value || '').trim();
     var detail = String($('fDetail').value || '').trim();
@@ -697,19 +751,20 @@
     }).then(function (data) {
       files = []; renderPreviews();
       $('fTitle').value = ''; $('fDetail').value = ''; $('fContact').value = '';
-      formMessage('ok', 'ได้รับเรื่องแล้ว เลขที่ ' + data.code +
-        ' — ติดตามคำตอบได้ที่แท็บ "เรื่องของฉัน"');
-      loadMine();
+      showReceipt(data.id);
+      return loadMine();
     }).catch(function (e) {
       formMessage('err', e.message || 'ส่งไม่สำเร็จ');
     }).then(function () {
-      btn.disabled = false; btn.textContent = 'ส่งเรื่องถึงนิติบุคคล';
+      btn.disabled = false; btn.textContent = 'ส่งเรื่องให้กรรมการ';
     });
   }
 
   /* ── my tickets ──────────────────────────────────────────────────── */
   var myIssues = [];
   var openIssueId = '';
+  var editIssueId = '';
+  var editFiles = [];
 
   function loadMine() {
     return api('myIssues', {}).then(function (data) {
@@ -732,8 +787,103 @@
       var inner = a.kind === 'video' ?
         '<video src="' + esc(a.url) + '" muted playsinline></video>' :
         '<img src="' + esc(a.url) + '" alt="" loading="lazy" />';
-      return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' + inner + '</a>';
+      return '<button class="media-thumb" type="button" data-media-url="' + esc(a.url) +
+        '" data-media-kind="' + esc(a.kind) + '">' + inner + '</button>';
     }).join('') + '</div>';
+  }
+  function openMedia(url, kind) {
+    $('mediaStage').innerHTML = kind === 'video' ?
+      '<video src="' + esc(url) + '" controls autoplay playsinline></video>' :
+      '<img src="' + esc(url) + '" alt="ไฟล์แนบ" />';
+    $('mediaOverlay').classList.add('open');
+    $('mediaOverlay').setAttribute('aria-hidden', 'false');
+  }
+  function closeMedia() {
+    $('mediaOverlay').classList.remove('open');
+    $('mediaOverlay').setAttribute('aria-hidden', 'true');
+    $('mediaStage').innerHTML = '';
+  }
+  function editIssueHtml(issue) {
+    var cats = CATEGORIES.map(function (c) {
+      return '<option value="' + c[0] + '"' + (issue.category === c[0] ? ' selected' : '') +
+        '>' + esc(c[1]) + '</option>';
+    }).join('');
+    var saved = (issue.attachments || []).map(function (a) {
+      var media = a.kind === 'video' ? '<video src="' + esc(a.url) + '" muted playsinline></video>' :
+        '<img src="' + esc(a.url) + '" alt="" />';
+      return '<div class="saved-media-item">' +
+        '<div class="media-thumb">' + media + '</div>' +
+        '<button class="rm" type="button" data-remove-media="' + esc(a.storagePath) +
+        '" data-id="' + esc(issue.id) + '" aria-label="ลบไฟล์">✕</button></div>';
+    }).join('');
+    return '<div class="edit-box" data-stop="1">' +
+      '<div class="field"><label class="lab">หมวดหมู่</label><select id="editCategory">' + cats + '</select></div>' +
+      '<div class="field"><label class="lab">หัวข้อ</label><input id="editTitle" type="text" maxlength="120" value="' + esc(issue.title) + '"></div>' +
+      '<div class="field"><label class="lab">รายละเอียด</label><textarea id="editDetail" maxlength="4000">' + esc(issue.detail) + '</textarea></div>' +
+      (saved ? '<label class="lab">ไฟล์ที่แนบไว้</label><div class="saved-media">' + saved + '</div>' : '') +
+      '<label class="dropzone" for="editFilePicker">📎 เพิ่มรูปหรือวิดีโอ</label>' +
+      '<input id="editFilePicker" type="file" accept="image/*,video/*" multiple hidden>' +
+      '<div class="previews" id="editPreviews"></div>' +
+      '<div class="edit-actions"><button class="btn ghost small" type="button" data-cancel-edit>ยกเลิก</button>' +
+      '<button class="btn small" type="button" data-save-edit="' + esc(issue.id) + '">บันทึกการแก้ไข</button></div></div>';
+  }
+  function renderEditPreviews() {
+    var box = $('editPreviews');
+    if (!box) return;
+    box.innerHTML = editFiles.map(function (f, index) {
+      var media = f.kind === 'video' ?
+        '<video src="' + f.dataUrl + '" muted playsinline></video><div class="badge">วิดีโอ</div>' :
+        '<img src="' + f.dataUrl + '" alt="" />';
+      return '<div class="pv">' + media + '<button class="rm" type="button" data-rm-edit="' +
+        index + '">✕</button></div>';
+    }).join('');
+  }
+  function addEditFiles(list, issue) {
+    var existing = issue.attachments || [];
+    var queue = Array.prototype.slice.call(list || []);
+    var chain = Promise.resolve();
+    queue.forEach(function (file) {
+      chain = chain.then(function () {
+        var isVideo = /^video\//.test(file.type);
+        var currentKind = editFiles.filter(function (f) { return f.kind === (isVideo ? 'video' : 'image'); }).length;
+        var savedKind = existing.filter(function (f) { return f.kind === (isVideo ? 'video' : 'image'); }).length;
+        if (isVideo) {
+          if (savedKind + currentKind >= MAX_VIDEOS) throw new Error('แนบวิดีโอได้ 1 คลิป');
+          if (file.size > MAX_VIDEO_BYTES) throw new Error('วิดีโอใหญ่เกิน 20MB กรุณาตัดให้สั้นลง');
+          return readFileAsDataUrl(file).then(function (dataUrl) {
+            editFiles.push({ kind: 'video', dataUrl: dataUrl });
+          });
+        }
+        if (!/^image\//.test(file.type)) throw new Error('รองรับเฉพาะรูปและวิดีโอ');
+        if (savedKind + currentKind >= MAX_IMAGES) throw new Error('แนบรูปได้สูงสุด 5 รูป');
+        return compressImage(file).then(function (dataUrl) {
+          editFiles.push({ kind: 'image', dataUrl: dataUrl });
+        });
+      });
+    });
+    chain.then(renderEditPreviews).catch(function (e) { alert(e.message); });
+  }
+  function saveIssueEdit(button) {
+    var issueId = button.getAttribute('data-save-edit');
+    var title = String($('editTitle').value || '').trim();
+    var detail = String($('editDetail').value || '').trim();
+    if (!title || !detail) { alert('กรุณากรอกหัวข้อและรายละเอียด'); return; }
+    button.disabled = true; button.textContent = 'กำลังบันทึก…';
+    api('updateIssue', {
+      issueId: issueId, title: title, detail: detail, category: $('editCategory').value
+    }).then(function () {
+      var pending = editFiles.slice();
+      function next() {
+        if (!pending.length) return Promise.resolve();
+        return api('attach', { issueId: issueId, dataUrl: pending.shift().dataUrl }).then(next);
+      }
+      return next();
+    }).then(function () {
+      editIssueId = ''; editFiles = [];
+      return loadMine();
+    }).catch(function (err) {
+      alert(err.message); button.disabled = false; button.textContent = 'บันทึกการแก้ไข';
+    });
   }
   function repliesHtml(replies) {
     if (!replies || !replies.length) return '';
@@ -753,7 +903,6 @@
     $('mineList').innerHTML = myIssues.map(function (issue) {
       var open = issue.id === openIssueId;
       var head = '<div class="t-top">' +
-        '<span class="t-code">' + esc(issue.code) + '</span>' +
         '<span class="pill st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
         (issue.priority !== 'normal' ?
           '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
@@ -772,6 +921,8 @@
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
           mediaHtml(issue.attachments) +
+          (editIssueId === issue.id ? editIssueHtml(issue) :
+            '<div data-stop="1" style="margin-top:12px"><button class="btn ghost small" type="button" data-edit="' + esc(issue.id) + '">แก้ไขเรื่องนี้</button></div>') +
           repliesHtml(issue.replies) +
           '<div class="reply-box" data-stop="1">' +
             '<textarea id="replyInput" placeholder="พิมพ์ข้อความเพิ่มเติมถึงนิติฯ"></textarea>' +
@@ -826,7 +977,6 @@
     $('adminList').innerHTML = adminIssues.map(function (issue) {
       var open = issue.id === adminOpenId;
       var head = '<div class="t-top">' +
-        '<span class="t-code">' + esc(issue.code) + '</span>' +
         '<span class="pill st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
         (issue.priority !== 'normal' ?
           '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
@@ -925,6 +1075,13 @@
       $('tabForm').classList.add('active'); $('tabMine').classList.remove('active');
       $('paneForm').hidden = false; $('paneMine').hidden = true;
     });
+    $('formCard').addEventListener('click', function (e) {
+      if (e.target.closest('[data-new-report]')) { resetFormView(); return; }
+      if (e.target.closest('[data-view-report]')) {
+        openIssueId = lastSubmittedId;
+        $('tabMine').click();
+      }
+    });
     $('tabMine').addEventListener('click', function () {
       $('tabMine').classList.add('active'); $('tabForm').classList.remove('active');
       $('paneMine').hidden = false; $('paneForm').hidden = true;
@@ -951,6 +1108,30 @@
     $('submitBtn').addEventListener('click', submitReport);
 
     $('mineList').addEventListener('click', function (e) {
+      var edit = e.target.closest('[data-edit]');
+      if (edit) {
+        editIssueId = edit.getAttribute('data-edit'); editFiles = []; renderMine(); return;
+      }
+      if (e.target.closest('[data-cancel-edit]')) {
+        editIssueId = ''; editFiles = []; renderMine(); return;
+      }
+      var saveEdit = e.target.closest('[data-save-edit]');
+      if (saveEdit) { saveIssueEdit(saveEdit); return; }
+      var removeMedia = e.target.closest('[data-remove-media]');
+      if (removeMedia) {
+        if (!confirm('ลบไฟล์นี้ออกจากเรื่องใช่ไหม')) return;
+        removeMedia.disabled = true;
+        api('removeAttachment', {
+          issueId: removeMedia.getAttribute('data-id'),
+          storagePath: removeMedia.getAttribute('data-remove-media')
+        }).then(loadMine).catch(function (err) { alert(err.message); removeMedia.disabled = false; });
+        return;
+      }
+      var removeEdit = e.target.closest('[data-rm-edit]');
+      if (removeEdit) {
+        editFiles.splice(Number(removeEdit.getAttribute('data-rm-edit')), 1);
+        renderEditPreviews(); return;
+      }
       var send = e.target.closest('[data-reply]');
       if (send) {
         var input = $('replyInput');
@@ -963,6 +1144,7 @@
           .then(function () { send.disabled = false; });
         return;
       }
+      if (e.target.closest('[data-media-url]')) return;
       if (e.target.closest('[data-stop]')) return;
       var card = e.target.closest('[data-open]');
       if (!card) return;
@@ -976,6 +1158,27 @@
           api('markSeen', { issueId: id }).then(loadMine).catch(function () {});
         }
       }
+    });
+    $('mineList').addEventListener('change', function (e) {
+      if (e.target.id !== 'editFilePicker') return;
+      var issue = myIssues.filter(function (i) { return i.id === editIssueId; })[0];
+      if (issue) addEditFiles(e.target.files, issue);
+      e.target.value = '';
+    });
+
+    document.addEventListener('click', function (e) {
+      var media = e.target.closest('[data-media-url]');
+      if (media) {
+        e.preventDefault(); e.stopPropagation();
+        openMedia(media.getAttribute('data-media-url'), media.getAttribute('data-media-kind'));
+      }
+    });
+    $('mediaClose').addEventListener('click', closeMedia);
+    $('mediaOverlay').addEventListener('click', function (e) {
+      if (e.target === $('mediaOverlay')) closeMedia();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMedia();
     });
 
     $('tabLive').addEventListener('click', function () {
@@ -1040,6 +1243,7 @@
         }).then(loadAdmin).catch(function (err) { alert(err.message); });
         return;
       }
+      if (e.target.closest('[data-media-url]')) return;
       if (e.target.closest('[data-stop]')) return;
       var card = e.target.closest('[data-aopen]');
       if (!card) return;
