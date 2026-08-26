@@ -281,6 +281,20 @@
     .reply-box textarea { min-height:52px; font-size:14px; }
     .mine-summary { display:flex; gap:7px; margin:17px 0 11px; overflow-x:auto; }
     #mineList { display:flex; flex-direction:column; gap:14px; }
+    .detail-mode .tabs { display:none; }
+    .detail-mode #paneMine { padding-top:14px; }
+    .mine-detail-toolbar { display:flex; align-items:center; margin-bottom:18px; }
+    .detail-back {
+      display:inline-flex; align-items:center; gap:7px; border:0; background:transparent;
+      color:var(--accent-deep); padding:5px 0; cursor:pointer; font:500 13px/1.5 inherit;
+    }
+    .detail-back::before { content:'←'; font-size:18px; line-height:1; }
+    .resident-ticket.issue-detail {
+      border:0; border-radius:0; box-shadow:none; padding:0; background:transparent;
+    }
+    .issue-detail .t-title { font-size:20px; line-height:1.5; }
+    .issue-detail .thread-detail { margin-top:18px; padding-top:18px; }
+    .issue-detail .detail-text { font-size:15px; line-height:1.8; }
     .summary-chip { flex:0 0 auto; border:1px solid var(--border); border-radius:99px; padding:6px 11px; font-size:11.5px; color:var(--text-soft); }
     .summary-chip.on { border-color:var(--accent); color:var(--accent-deep); background:var(--warn-bg); }
 
@@ -964,6 +978,16 @@
     var doneCount = myIssues.filter(function (i) {
       return i.status === 'resolved' || i.status === 'closed';
     }).length;
+    var selectedIssue = openIssueId ? myIssues.filter(function (i) {
+      return i.id === openIssueId;
+    })[0] : null;
+    if (openIssueId && !selectedIssue) openIssueId = '';
+    $('residentView').classList.toggle('detail-mode', !!selectedIssue);
+    $('mineSummary').hidden = !!selectedIssue;
+    if (!$('paneMine').hidden) {
+      $('heroKicker').textContent = selectedIssue ? 'MY REPORT' : 'RESIDENT SUPPORT';
+      $('heroTitle').textContent = selectedIssue ? 'รายละเอียดเรื่อง' : 'ติดตามเรื่องของคุณ';
+    }
     $('mineSummary').innerHTML =
       '<span class="summary-chip on">ทั้งหมด ' + myIssues.length + '</span>' +
       '<span class="summary-chip">รับเรื่องแล้ว ' + newCount + '</span>' +
@@ -974,7 +998,10 @@
         'เริ่มแจ้งเรื่องได้ที่แท็บ “แจ้งปัญหา”</div>';
       return;
     }
-    $('mineList').innerHTML = myIssues.map(function (issue) {
+    var issuesToRender = selectedIssue ? [selectedIssue] : myIssues;
+    $('mineList').innerHTML = (selectedIssue ?
+      '<div class="mine-detail-toolbar"><button class="detail-back" type="button" data-detail-back>กลับไปปัญหาของฉัน</button></div>' : '') +
+      issuesToRender.map(function (issue) {
       var open = issue.id === openIssueId;
       var pills = '<div class="t-top">' +
         '<span class="pill st-' + esc(issue.status) + '">' + esc(residentStatusLabel(issue.status)) + '</span>' +
@@ -997,7 +1024,7 @@
         return '<div class="ticket resident-ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
           head + '<div class="t-preview">' + esc(issue.detail) + '</div></div>';
       }
-      return '<div class="ticket resident-ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
+      return '<article class="ticket resident-ticket issue-detail st-' + esc(issue.status) + '">' +
         head +
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
@@ -1009,7 +1036,7 @@
             '<textarea id="replyInput" placeholder="พิมพ์ข้อความเพิ่มเติมถึงนิติฯ"></textarea>' +
             '<button class="btn small" type="button" data-reply="' + esc(issue.id) + '">ส่ง</button>' +
           '</div>' +
-        '</div></div>';
+        '</div></article>';
     }).join('');
   }
 
@@ -1141,9 +1168,11 @@
     $('adminView').hidden = !admin;
     $('residentView').hidden = admin;
     $('adminToggle').textContent = admin ? 'มุมมองลูกบ้าน' : 'หลังบ้าน';
-    $('heroKicker').textContent = admin ? 'COMMITTEE DESK' : 'RESIDENT SUPPORT';
+    $('heroKicker').textContent = admin ? 'COMMITTEE DESK' :
+      (openIssueId ? 'MY REPORT' : 'RESIDENT SUPPORT');
     $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' :
-      ($('paneMine').hidden ? 'แจ้งปัญหา / เสนอแนะ' : 'ติดตามเรื่องของคุณ');
+      ($('paneMine').hidden ? 'แจ้งปัญหา / เสนอแนะ' :
+        (openIssueId ? 'รายละเอียดเรื่อง' : 'ติดตามเรื่องของคุณ'));
     if (admin) loadAdmin();
   }
 
@@ -1155,9 +1184,12 @@
     });
 
     $('tabForm').addEventListener('click', function () {
+      openIssueId = ''; editIssueId = ''; editFiles = [];
+      $('residentView').classList.remove('detail-mode');
       $('tabForm').classList.add('active'); $('tabMine').classList.remove('active');
       $('paneForm').hidden = false; $('paneMine').hidden = true;
       $('privacyNote').hidden = false;
+      $('heroKicker').textContent = 'RESIDENT SUPPORT';
       $('heroTitle').textContent = 'แจ้งปัญหา / เสนอแนะ';
     });
     $('formCard').addEventListener('click', function (e) {
@@ -1171,7 +1203,6 @@
       $('tabMine').classList.add('active'); $('tabForm').classList.remove('active');
       $('paneMine').hidden = false; $('paneForm').hidden = true;
       $('privacyNote').hidden = true;
-      $('heroTitle').textContent = 'ติดตามเรื่องของคุณ';
       loadMine();
     });
 
@@ -1193,6 +1224,12 @@
     $('submitBtn').addEventListener('click', submitReport);
 
     $('mineList').addEventListener('click', function (e) {
+      if (e.target.closest('[data-detail-back]')) {
+        openIssueId = ''; editIssueId = ''; editFiles = [];
+        renderMine();
+        window.scrollTo({ top:0, behavior:'smooth' });
+        return;
+      }
       var edit = e.target.closest('[data-edit]');
       if (edit) {
         editIssueId = edit.getAttribute('data-edit'); editFiles = []; renderMine(); return;
@@ -1234,14 +1271,12 @@
       var card = e.target.closest('[data-open]');
       if (!card) return;
       var id = card.getAttribute('data-open');
-      var wasOpen = openIssueId === id;
-      openIssueId = wasOpen ? '' : id;
+      openIssueId = id;
       renderMine();
-      if (!wasOpen) {
-        var issue = myIssues.filter(function (i) { return i.id === id; })[0];
-        if (issue && issue.hasUnreadReply) {
-          api('markSeen', { issueId: id }).then(loadMine).catch(function () {});
-        }
+      window.scrollTo({ top:0, behavior:'smooth' });
+      var issue = myIssues.filter(function (i) { return i.id === id; })[0];
+      if (issue && issue.hasUnreadReply) {
+        api('markSeen', { issueId: id }).then(loadMine).catch(function () {});
       }
     });
     $('mineList').addEventListener('change', function (e) {
