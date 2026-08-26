@@ -6,7 +6,7 @@
   <title>แจ้งปัญหา · Pattra Villa 8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=Outfit:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg:#f9f3e9; --bg-soft:#f3ecdd; --card:#ffffff; --border:#e6dcc7;
@@ -22,24 +22,24 @@
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html, body { margin:0; padding:0; }
     body {
-      font-family:'IBM Plex Sans Thai', system-ui, sans-serif;
+      font-family:'Anuphan', system-ui, sans-serif;
       background:var(--bg); color:var(--text-body);
       min-height:100dvh; padding:0 0 70px;
     }
-    .wrap { width:100%; max-width:620px; margin:0 auto; padding:0 14px; }
+    .wrap { width:100%; max-width:720px; margin:0 auto; padding:0 14px; }
     .mono { font-family:'IBM Plex Mono', monospace; }
     [hidden] { display:none !important; }
 
     /* ── header ── */
     .site-header {
       display:flex; align-items:center; justify-content:space-between; gap:12px;
-      background:var(--bg); border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,.94); border-bottom:1px solid var(--border);
       padding:0 18px; height:68px; position:sticky; top:0; z-index:40;
     }
     .brand { display:flex; flex-direction:column; text-decoration:none; }
     .brand-mark {
-      font-family:"Cormorant Garamond", serif; font-weight:700; font-size:21px;
-      color:var(--text); letter-spacing:.2em;
+      font-family:'Outfit', sans-serif; font-weight:700; font-size:17px;
+      color:var(--text); letter-spacing:.11em;
     }
     .brand-sub {
       font-size:10px; color:var(--text-muted); letter-spacing:.18em;
@@ -60,8 +60,14 @@
     .pill-name { font-size:.72rem; color:var(--text-muted); line-height:1.2; }
 
     /* ── hero ── */
-    .hero { text-align:center; margin:14px 0 2px; }
-    .title { font-size:21px; font-weight:700; color:var(--text); letter-spacing:.01em; }
+    .app-surface {
+      background:var(--card); border:1px solid var(--border); border-radius:28px;
+      box-shadow:0 22px 60px rgba(60,40,20,.09); margin-top:22px; overflow:hidden;
+    }
+    .hero { text-align:left; margin:0; padding:27px 28px 0; }
+    .hero-kicker { font-family:'Outfit',sans-serif; font-size:11px; font-weight:600; letter-spacing:.13em; color:var(--text-muted); }
+    .title { font-size:29px; font-weight:700; color:var(--text); letter-spacing:-.035em; margin-top:4px; }
+    #residentView, #adminView { padding:0 28px 30px; }
 
     /* ── cards & shared bits ── */
     .card {
@@ -69,48 +75,49 @@
       border-radius:var(--radius); box-shadow:var(--shadow);
       padding:14px 15px; margin:11px 0;
     }
+    #formCard { border:0; border-radius:0; box-shadow:none; padding:15px 0 0; margin:0; }
     .privacy-note {
       display:flex; gap:10px; align-items:center;
       background:var(--info-bg); border:1px solid #cfe0ea; color:#254a63;
-      border-radius:12px; padding:10px 14px; margin:12px 0 4px;
+      border-radius:14px; padding:11px 13px; margin:16px 0 22px;
       font-size:13px; line-height:1.5;
     }
     .privacy-note b { color:#183c52; }
-    .privacy-icon { font-size:16px; line-height:1.3; }
+    .privacy-icon { width:25px; height:25px; border-radius:8px; display:grid; place-items:center; background:#fff; color:var(--accent); font-size:13px; }
 
-    .tabs { display:flex; gap:8px; margin:12px 0 4px; }
+    .tabs { display:flex; gap:7px; margin:18px 0 4px; }
     .tab {
-      flex:1; text-align:center; padding:10px 8px; border-radius:12px; cursor:pointer;
-      font-size:14px; font-weight:600; border:1.5px solid var(--border);
-      background:var(--card); color:var(--text-soft); position:relative;
+      flex:0 0 auto; text-align:center; padding:9px 15px; border-radius:99px; cursor:pointer;
+      font-size:13px; font-weight:500; border:1px solid transparent;
+      background:transparent; color:var(--text-soft); position:relative;
       font-family:inherit;
     }
-    .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .tab.active { background:var(--text); border-color:var(--text); color:#fff; }
     .tab .count {
       display:inline-block; min-width:20px; padding:0 5px; margin-left:5px;
-      border-radius:99px; background:var(--bg-soft); color:var(--text-soft);
+      border-radius:99px; background:var(--accent); color:#fff;
       font-size:11.5px; font-weight:700; line-height:18px;
     }
-    .tab.active .count { background:rgba(255,255,255,.28); color:#fff; }
+    .tab.active .count { background:var(--accent); color:#fff; }
     .tab .dot {
       position:absolute; top:7px; right:9px; width:8px; height:8px;
       border-radius:50%; background:#c0392b;
     }
 
-    .field { margin-bottom:11px; }
+    .field { margin-bottom:18px; }
     .field label.lab {
-      display:block; font-size:15.5px; font-weight:700;
-      color:var(--text-soft); margin-bottom:6px;
+      display:block; font-size:14px; font-weight:600;
+      color:var(--text); margin-bottom:7px;
     }
     .lab .opt { font-weight:400; color:var(--text-muted); }
     input[type=text], textarea, select {
       width:100%; font-family:inherit; font-size:15.5px; color:var(--text);
-      padding:11px 12px; border:1.5px solid var(--border); border-radius:12px;
+      padding:12px 13px; border:1px solid var(--border); border-radius:13px;
       background:var(--card); outline:none; resize:vertical;
     }
     input[type=text]:focus, textarea:focus, select:focus { border-color:var(--accent); }
     textarea { min-height:88px; line-height:1.6; }
-    #fDetail { min-height:160px; }
+    #fDetail { min-height:150px; }
     .category-select {
       appearance:none; -webkit-appearance:none; cursor:pointer; font-weight:600;
       padding-right:42px; background-color:var(--card);
@@ -118,17 +125,18 @@
       background-repeat:no-repeat; background-position:right 15px center;
     }
     .chips { display:flex; flex-wrap:wrap; gap:7px; }
+    #whoChips .chip { flex:1; }
     .chip {
-      padding:7px 12px; border-radius:99px; border:1.5px solid var(--border);
+      padding:10px 13px; border-radius:12px; border:1px solid var(--border);
       background:var(--card); color:var(--text-soft); font-size:13px;
       font-weight:600; cursor:pointer; font-family:inherit;
     }
-    .chip.on { background:#f7e6cd; border-color:var(--accent); color:var(--accent-text); }
+    .chip.on { background:#f7e6cd; border-color:var(--accent); color:var(--accent-deep); }
     .chip.pri-high.on { background:var(--warn-bg); border-color:#d08b3a; color:var(--warn); }
     .chip.pri-urgent.on { background:var(--err-bg); border-color:#c2795f; color:var(--err); }
 
     .dropzone {
-      border:1.5px dashed var(--border); border-radius:13px; padding:18px 14px;
+      border:1px dashed #d1bea0; border-radius:13px; padding:15px 14px;
       text-align:center; cursor:pointer; background:var(--bg-soft);
       font-size:13.5px; color:var(--text-soft);
     }
@@ -151,8 +159,8 @@
     }
 
     .btn {
-      width:100%; font-family:inherit; font-size:16.5px; font-weight:600;
-      padding:15px; border:none; border-radius:12px; background:var(--accent);
+      width:100%; font-family:inherit; font-size:15px; font-weight:600;
+      padding:14px; border:none; border-radius:13px; background:var(--accent);
       color:#fff; cursor:pointer;
     }
     .btn:hover { background:var(--accent-deep); }
@@ -197,27 +205,39 @@
       border-left:4px solid var(--neutral); border-radius:14px;
       box-shadow:var(--shadow); padding:14px 15px; margin-bottom:11px; cursor:pointer;
     }
-    .ticket.st-new { border-left-color:#c0392b; }
-    .ticket.st-in_progress { border-left-color:var(--accent); }
+    .ticket.st-new { border-left-color:var(--accent); }
+    .ticket.st-in_progress { border-left-color:var(--warn); }
     .ticket.st-resolved { border-left-color:#4d7c3f; }
     .ticket.st-closed { border-left-color:#9c8c76; }
-    .t-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
+    .resident-ticket {
+      background:transparent; border:0; border-top:1px solid var(--border-soft);
+      border-left:5px solid var(--neutral); border-radius:0;
+      box-shadow:none; padding:18px 0 18px 15px; margin:0;
+    }
+    .resident-ticket.st-new { border-left-color:var(--accent); }
+    .resident-ticket.st-in_progress { border-left-color:var(--info); }
+    .resident-ticket.st-resolved { border-left-color:#4d7c3f; }
+    .resident-ticket.st-closed { border-left-color:#9c8c76; }
+    .ticket-header { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .ticket-header .t-top { justify-content:flex-end; }
+    .t-top { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:7px; }
+    .ticket-header .t-top { margin:0; }
     .pill {
       font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;
       background:var(--neutral-bg); color:var(--neutral); white-space:nowrap;
     }
     .pill.st-new { background:var(--err-bg); color:var(--err); }
-    .pill.st-in_progress { background:var(--warn-bg); color:var(--warn); }
+    .pill.st-in_progress { background:var(--info-bg); color:var(--info); }
     .pill.st-resolved { background:var(--ok-bg); color:var(--ok); }
     .pill.st-closed { background:var(--neutral-bg); color:var(--neutral); }
     .pill.pri-high { background:var(--warn-bg); color:var(--warn); }
     .pill.pri-urgent { background:var(--err-bg); color:var(--err); }
     .pill.anon { background:#ece7f6; color:#5b4a8a; }
     .pill.unread { background:#c0392b; color:#fff; }
-    .t-title { font-size:15.5px; font-weight:700; color:var(--text); line-height:1.5; }
+    .t-title { font-size:16.5px; font-weight:700; color:var(--text); line-height:1.45; }
     .t-meta { font-size:11.5px; color:var(--text-muted); margin-top:6px; }
     .t-preview {
-      font-size:13px; color:var(--text-soft); margin-top:7px; line-height:1.6;
+      font-size:13.5px; color:var(--text-soft); margin-top:11px; line-height:1.65;
       display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
     }
 
@@ -242,6 +262,9 @@
     .reply-body { white-space:pre-wrap; color:var(--text-body); }
     .reply-box { display:flex; gap:8px; margin-top:12px; align-items:flex-start; }
     .reply-box textarea { min-height:52px; font-size:14px; }
+    .mine-summary { display:flex; gap:7px; margin:17px 0 11px; overflow-x:auto; }
+    .summary-chip { flex:0 0 auto; border:1px solid var(--border); border-radius:99px; padding:6px 11px; font-size:11.5px; color:var(--text-soft); }
+    .summary-chip.on { border-color:var(--accent); color:var(--accent-deep); background:var(--warn-bg); }
 
     /* ── admin ── */
     .stats { display:flex; gap:7px; overflow-x:auto; padding:2px 0 6px; }
@@ -302,7 +325,10 @@
 
     @media (max-width:620px) {
       .site-header { padding:0 14px; }
-      .title { font-size:19px; }
+      .app-surface { margin-top:12px; border-radius:22px; }
+      .hero { padding:23px 20px 0; }
+      #residentView, #adminView { padding:0 20px 24px; }
+      .title { font-size:25px; }
     }
     /* On a phone the wordmark, the backend button and the identity pill all
        want the same row; let the wordmark shrink instead of wrapping. */
@@ -332,22 +358,24 @@
   </header>
 
   <div class="wrap">
+    <div class="app-surface">
     <section class="hero">
-      <div class="title" id="heroTitle">Resident Support</div>
+      <div class="hero-kicker" id="heroKicker">RESIDENT SUPPORT</div>
+      <div class="title" id="heroTitle">แจ้งปัญหา / เสนอแนะ</div>
     </section>
 
     <div id="bootState" class="loading"><span class="spinner"></span>กำลังโหลด…</div>
 
     <!-- ═══ RESIDENT ═══ -->
     <main id="residentView" hidden>
-      <div class="privacy-note">
-        <div class="privacy-icon">🔒</div>
-        <div>เรื่องที่แจ้งจะส่งถึง<b>กรรมการเท่านั้น</b></div>
+      <div class="tabs">
+        <button class="tab active" id="tabForm" type="button">แจ้งปัญหา</button>
+        <button class="tab" id="tabMine" type="button">ปัญหาของฉัน<span class="count" id="mineCount">0</span></button>
       </div>
 
-      <div class="tabs">
-        <button class="tab active" id="tabForm" type="button">แจ้งเรื่องใหม่</button>
-        <button class="tab" id="tabMine" type="button">เรื่องของฉัน<span class="count" id="mineCount">0</span></button>
+      <div class="privacy-note" id="privacyNote">
+        <div class="privacy-icon">✓</div>
+        <div>เรื่องที่แจ้งจะส่งตรงถึงกรรมการและเห็นเฉพาะผู้เกี่ยวข้อง</div>
       </div>
 
       <!-- form -->
@@ -356,7 +384,7 @@
           <div id="formMsg"></div>
 
           <div class="field">
-            <label class="lab">เรื่องที่ต้องการแจ้ง</label>
+            <label class="lab">ประเภทเรื่อง</label>
             <select class="category-select" id="fCategory" aria-label="เรื่องที่ต้องการแจ้ง"></select>
           </div>
 
@@ -373,8 +401,8 @@
           <div class="field">
             <label class="lab">แจ้งในนาม</label>
             <div class="chips" id="whoChips">
-              <button type="button" class="chip on" id="whoNamed"><span id="whoNamedTitle">🏠 บ้านของฉัน</span></button>
-              <button type="button" class="chip" id="whoAnon">🙈 ไม่ประสงค์ออกนาม</button>
+              <button type="button" class="chip on" id="whoNamed"><span id="whoNamedTitle">บ้านของฉัน</span></button>
+              <button type="button" class="chip" id="whoAnon">ไม่ประสงค์ออกนาม</button>
             </div>
           </div>
 
@@ -386,7 +414,7 @@
           <div class="field">
             <label class="lab">แนบรูปหรือวิดีโอ <span class="opt">(ถ้ามี)</span></label>
             <div class="dropzone" id="dropzone">
-              📎 แตะเพื่อเลือกไฟล์
+              ＋ เพิ่มรูปหรือวิดีโอประกอบ
               <div class="dz-sub">รูปได้สูงสุด 5 รูป · วิดีโอ 1 คลิป (ไม่เกิน 20MB)</div>
             </div>
             <input type="file" id="filePicker" accept="image/*,video/*" multiple hidden />
@@ -399,6 +427,7 @@
 
       <!-- my tickets -->
       <section id="paneMine" hidden>
+        <div class="mine-summary" id="mineSummary"></div>
         <div id="mineList"></div>
       </section>
     </main>
@@ -426,6 +455,7 @@
         <div id="archiveList"></div>
       </section>
     </main>
+    </div>
 
     <footer>
       <a href="/">← หน้าแรก</a><br>
@@ -478,12 +508,12 @@
   // functions/domains/issues/contracts.js — the server is the source of
   // truth for labels (they also drive the LINE notice and the archive view).
   var CATEGORIES = [
-    ['common_area', '🏡 พื้นที่ส่วนกลาง'], ['security', '🛡️ ความปลอดภัย'],
-    ['pool', '🏊 สระว่ายน้ำ'], ['fitness', '🏋️ ฟิตเนส'], ['garden', '🌳 สวน'],
-    ['cleanliness', '🧹 ความสะอาด'], ['traffic', '🚗 จราจร / ที่จอดรถ'],
-    ['utility', '💡 ไฟฟ้า / ประปา'], ['noise', '🔊 เสียง / ความเป็นส่วนตัว'],
-    ['suggestion', '📝 ข้อเสนอแนะ'], ['feedback', '💬 ข้อกังวล'],
-    ['other', '💭 อื่น ๆ']
+    ['common_area', 'พื้นที่ส่วนกลาง'], ['security', 'ความปลอดภัย'],
+    ['pool', 'สระว่ายน้ำ'], ['fitness', 'ฟิตเนส'], ['garden', 'สวน'],
+    ['cleanliness', 'ความสะอาด'], ['traffic', 'จราจร / ที่จอดรถ'],
+    ['utility', 'ไฟฟ้า / ประปา'], ['noise', 'เสียง / ความเป็นส่วนตัว'],
+    ['suggestion', 'ข้อเสนอแนะ'], ['feedback', 'ข้อกังวล'],
+    ['other', 'อื่น ๆ']
   ];
   var STATUSES = [['new', 'เรื่องใหม่'], ['in_progress', 'กำลังดำเนินการ'],
     ['resolved', 'ดำเนินการแล้ว'], ['closed', 'ปิดเรื่อง']];
@@ -499,6 +529,10 @@
   function labelOf(list, key) {
     for (var i = 0; i < list.length; i++) if (list[i][0] === key) return list[i][1];
     return key;
+  }
+  function residentStatusLabel(status) {
+    return {new: 'รับเรื่องแล้ว', in_progress: 'กำลังดูแล',
+      resolved: 'ดำเนินการแล้ว', closed: 'ปิดเรื่อง'}[status] || 'รับเรื่องแล้ว';
   }
   function fmtDate(value) {
     if (!value) return '';
@@ -631,7 +665,7 @@
     $('whoNamed').classList.toggle('on', !draft.anonymous);
     $('whoAnon').classList.toggle('on', draft.anonymous);
     $('contactField').hidden = draft.anonymous;
-    $('whoNamedTitle').textContent = session ? '🏠 บ้าน ' + session.houseNo : '🏠 บ้านของฉัน';
+    $('whoNamedTitle').textContent = session ? 'บ้าน ' + session.houseNo : 'บ้านของฉัน';
   }
 
   /* Shrinks a photo in the browser so a phone shot fits comfortably inside
@@ -827,7 +861,7 @@
       '<div class="field"><label class="lab">หัวข้อ</label><input id="editTitle" type="text" maxlength="120" value="' + esc(issue.title) + '"></div>' +
       '<div class="field"><label class="lab">รายละเอียด</label><textarea id="editDetail" maxlength="4000">' + esc(issue.detail) + '</textarea></div>' +
       (saved ? '<label class="lab">ไฟล์ที่แนบไว้</label><div class="saved-media">' + saved + '</div>' : '') +
-      '<label class="dropzone" for="editFilePicker">📎 เพิ่มรูปหรือวิดีโอ</label>' +
+      '<label class="dropzone" for="editFilePicker">＋ เพิ่มรูปหรือวิดีโอ</label>' +
       '<input id="editFilePicker" type="file" accept="image/*,video/*" multiple hidden>' +
       '<div class="previews" id="editPreviews"></div>' +
       '<div class="edit-actions"><button class="btn ghost small" type="button" data-cancel-edit>ยกเลิก</button>' +
@@ -901,28 +935,40 @@
     }).join('') + '</div>';
   }
   function renderMine() {
+    var newCount = myIssues.filter(function (i) { return i.status === 'new'; }).length;
+    var progressCount = myIssues.filter(function (i) { return i.status === 'in_progress'; }).length;
+    var doneCount = myIssues.filter(function (i) {
+      return i.status === 'resolved' || i.status === 'closed';
+    }).length;
+    $('mineSummary').innerHTML =
+      '<span class="summary-chip on">ทั้งหมด ' + myIssues.length + '</span>' +
+      '<span class="summary-chip">รับเรื่องแล้ว ' + newCount + '</span>' +
+      '<span class="summary-chip">กำลังดูแล ' + progressCount + '</span>' +
+      (doneCount ? '<span class="summary-chip">เรียบร้อย ' + doneCount + '</span>' : '');
     if (!myIssues.length) {
-      $('mineList').innerHTML = '<div class="empty"><span class="big">📭</span>' +
-        'ยังไม่มีเรื่องที่คุณแจ้งไว้<br>แจ้งเรื่องแรกได้ที่แท็บ “แจ้งเรื่องใหม่”</div>';
+      $('mineList').innerHTML = '<div class="empty">ยังไม่มีเรื่องที่คุณแจ้งไว้<br>' +
+        'เริ่มแจ้งเรื่องได้ที่แท็บ “แจ้งปัญหา”</div>';
       return;
     }
     $('mineList').innerHTML = myIssues.map(function (issue) {
       var open = issue.id === openIssueId;
-      var head = '<div class="t-top">' +
-        '<span class="pill st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
+      var pills = '<div class="t-top">' +
+        '<span class="pill st-' + esc(issue.status) + '">' + esc(residentStatusLabel(issue.status)) + '</span>' +
         (issue.priority !== 'normal' ?
           '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
         (issue.anonymous ? '<span class="pill anon">ไม่ออกนาม</span>' : '') +
         (issue.hasUnreadReply ? '<span class="pill unread">ตอบกลับใหม่</span>' : '') +
-        '</div>' +
+        '</div>';
+      var head = '<div class="ticket-header"><div>' +
         '<div class="t-title">' + esc(issue.title) + '</div>' +
-        '<div class="t-meta">' + esc(issue.categoryLabel) + ' · ' + esc(fmtDate(issue.createdAt)) + '</div>';
+        '<div class="t-meta">' + esc(labelOf(CATEGORIES, issue.category)) + ' · ' +
+        esc(fmtDate(issue.createdAt)) + '</div></div>' + pills + '</div>';
 
       if (!open) {
-        return '<div class="ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
+        return '<div class="ticket resident-ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
           head + '<div class="t-preview">' + esc(issue.detail) + '</div></div>';
       }
-      return '<div class="ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
+      return '<div class="ticket resident-ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
         head +
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
@@ -1066,7 +1112,9 @@
     $('adminView').hidden = !admin;
     $('residentView').hidden = admin;
     $('adminToggle').textContent = admin ? 'มุมมองลูกบ้าน' : 'หลังบ้าน';
-    $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' : 'Resident Support';
+    $('heroKicker').textContent = admin ? 'COMMITTEE DESK' : 'RESIDENT SUPPORT';
+    $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' :
+      ($('paneMine').hidden ? 'แจ้งปัญหา / เสนอแนะ' : 'ติดตามเรื่องของคุณ');
     if (admin) loadAdmin();
   }
 
@@ -1080,6 +1128,8 @@
     $('tabForm').addEventListener('click', function () {
       $('tabForm').classList.add('active'); $('tabMine').classList.remove('active');
       $('paneForm').hidden = false; $('paneMine').hidden = true;
+      $('privacyNote').hidden = false;
+      $('heroTitle').textContent = 'แจ้งปัญหา / เสนอแนะ';
     });
     $('formCard').addEventListener('click', function (e) {
       if (e.target.closest('[data-new-report]')) { resetFormView(); return; }
@@ -1091,6 +1141,8 @@
     $('tabMine').addEventListener('click', function () {
       $('tabMine').classList.add('active'); $('tabForm').classList.remove('active');
       $('paneMine').hidden = false; $('paneForm').hidden = true;
+      $('privacyNote').hidden = true;
+      $('heroTitle').textContent = 'ติดตามเรื่องของคุณ';
       loadMine();
     });
 
