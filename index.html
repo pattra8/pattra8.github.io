@@ -390,6 +390,89 @@
     .service-card.resident-only-card { display: none; }
     .service-card.resident-only-card.show { display: flex; }
 
+    /* ── gated sections (committee / operations) ── */
+    /* Each section reveals itself only when it holds a card the viewer may
+       open — see revealGatedSections() — so a resident's page simply ends
+       after their own services. */
+    .gated-section { margin-top: 8px; }
+    .gated-section[hidden] { display: none; }
+    .gated-section .section-eyebrow { margin-top: 4px; }
+
+    .ops-section { margin-bottom: 64px; }
+    .ops-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px 18px;
+      cursor: pointer;
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      font-size: 14px;
+      color: var(--muted);
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .ops-toggle:hover { background: var(--bg3); border-color: var(--gold-light); }
+    .ops-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .ops-icon { font-size: 16px; }
+    .ops-label { font-weight: 500; color: var(--text); }
+    .ops-count {
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+    .ops-chevron { margin-left: auto; color: var(--gold); transition: transform 0.22s; }
+    .ops-toggle[aria-expanded="true"] .ops-chevron { transform: rotate(180deg); }
+    .ops-grid { margin-top: 14px; }
+    .ops-grid[hidden] { display: none; }
+
+    /* ── report inbox badge ── */
+    .inbox-count {
+      display: inline-block;
+      margin-left: 7px;
+      padding: 1px 9px;
+      border-radius: 99px;
+      background: var(--gold);
+      color: #fff;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      vertical-align: 2px;
+    }
+    .inbox-count[hidden] { display: none; }
+    .service-card.inbox-card.show { border-color: var(--gold-light); }
+
+    /* ── featured announcement headline ── */
+    /* .service-desc is a clamped -webkit-box; once the live headline replaces
+       the static copy the slot has to become an ordinary block again. */
+    #announceFeatureDesc:has(.feature-headline) {
+      display: block;
+      -webkit-line-clamp: none;
+      overflow: visible;
+    }
+    .feature-date {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .feature-headline {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
     .service-card.admin-only-card::before {
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
       opacity: 0.55;
@@ -1387,24 +1470,35 @@
 <!-- ─── MAIN ─── -->
 <main class="main">
 
+  <!-- ═══ SECTION 1 · RESIDENTS ═══ -->
   <div class="section-eyebrow">Our Services</div>
-  <div class="section-title">เลือกบริการที่ต้องการ</div>
+  <div class="section-title">สำหรับลูกบ้าน</div>
 
   <div class="services-grid">
 
-    <!-- 1. แจ้งปัญหา -->
-    <a href="/report/" class="service-card featured">
-      <div class="tag">Live</div>
-      <div class="service-icon">🔧</div>
-      <div class="service-title">แจ้งปัญหา / ซ่อมแซม</div>
-      <p class="service-desc">แจ้งปัญหาภายในโครงการ ติดตามสถานะการแก้ไขแบบ real-time</p>
+    <!-- Featured: announcements. It leads because it is the one card whose
+         content actually changes between visits — the latest headline is
+         pulled into the description by renderAnnouncements(). -->
+    <a href="/announce/" class="service-card featured">
+      <div class="service-icon">📢</div>
+      <div class="service-title">ประกาศ &amp; ข่าวสาร</div>
+      <p class="service-desc" id="announceFeatureDesc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
       <span class="service-cta">
-        Go to Board
+        Announcements
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </span>
     </a>
 
-    <!-- 3. ข้อมูลลูกบ้าน -->
+    <a href="/report/" class="service-card">
+      <div class="service-icon">🔧</div>
+      <div class="service-title">แจ้งปัญหา / ซ่อมแซม</div>
+      <p class="service-desc">แจ้งเรื่องถึงกรรมการ แนบรูปได้ และติดตามคำตอบในหน้าเดียว</p>
+      <span class="service-cta">
+        Report an Issue
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
     <a href="/data/" class="service-card">
       <div class="service-icon">🏠</div>
       <div class="service-title">ข้อมูลลูกบ้าน</div>
@@ -1415,7 +1509,6 @@
       </span>
     </a>
 
-    <!-- 4. ทะเบียนรถเข้า-ออก -->
     <a href="/vehicle/" class="service-card">
       <div class="service-icon">🚗</div>
       <div class="service-title">ทะเบียนรถเข้า-ออก</div>
@@ -1426,7 +1519,6 @@
       </span>
     </a>
 
-    <!-- 5. สถานะที่จอดรถ -->
     <a href="/parking/" class="service-card">
       <div class="service-icon">🅿️</div>
       <div class="service-title">สถานะที่จอดรถ</div>
@@ -1437,18 +1529,37 @@
       </span>
     </a>
 
-    <!-- 7. ประกาศ -->
-    <a href="/announce/" class="service-card">
-      <div class="service-icon">📢</div>
-      <div class="service-title">ประกาศ & ข่าวสาร</div>
-      <p class="service-desc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
+    <a href="/visitorboard/" class="service-card">
+      <div class="service-icon">🔎</div>
+      <div class="service-title">ภาพรวม Visitor หมู่บ้าน</div>
+      <p class="service-desc">ดูสรุปรถเข้า-ออกวันนี้ทั้งหมู่บ้าน ค้นหาทะเบียนรถภายนอกที่มาเยือน เพื่อความอุ่นใจของทุกบ้าน</p>
       <span class="service-cta">
-        Announcements
+        Visitor Overview
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </span>
     </a>
 
-    <!-- 8. แจ้งทิ้งของใหญ่ — ซ่อนชั่วคราว 2026-07-23 (ลบ style ออกเพื่อเปิดคืน) -->
+    <a href="/myvisitor/" class="service-card">
+      <div class="service-icon">🪪</div>
+      <div class="service-title">My Visitor</div>
+      <p class="service-desc">ดูประวัติผู้มาติดต่อบ้านคุณ พร้อมรูปบัตร/รถ ย้อนหลังได้</p>
+      <span class="service-cta">
+        My Visitor
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <a href="/myreceipt/" class="service-card resident-only-card" data-resident-card>
+      <div class="service-icon">🧾</div>
+      <div class="service-title">ใบเสร็จของฉัน</div>
+      <p class="service-desc">ดูและดาวน์โหลดใบเสร็จรับเงินค่าส่วนกลาง/ค่าจอดรถของบ้านคุณ บันทึกเป็น PDF ได้ทุกใบ</p>
+      <span class="service-cta">
+        My Receipts
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
+    <!-- แจ้งทิ้งของใหญ่ — ซ่อนชั่วคราว 2026-07-23 (ลบ style ออกเพื่อเปิดคืน) -->
     <a href="/pickup/" class="service-card" style="display:none">
       <div class="tag">New</div>
       <div class="service-icon">🗑️</div>
@@ -1460,161 +1571,160 @@
       </span>
     </a>
 
-    <!-- 9. ภาพรวม Visitor ทั้งหมู่บ้าน ประจำวัน (open to all residents) -->
-    <a href="/visitorboard/" class="service-card">
-      <div class="tag">New</div>
-      <div class="service-icon">🔎</div>
-      <div class="service-title">ภาพรวม Visitor หมู่บ้าน</div>
-      <p class="service-desc">ดูสรุปรถเข้า-ออกวันนี้ทั้งหมู่บ้าน ค้นหาทะเบียนรถภายนอกที่มาเยือน เพื่อความอุ่นใจของทุกบ้าน</p>
-      <span class="service-cta">
-        Visitor Overview
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 10. My Visitor: per-house visitor intake history (open to all residents) -->
-    <a href="/myvisitor/" class="service-card">
-      <div class="tag">New</div>
-      <div class="service-icon">🪪</div>
-      <div class="service-title">My Visitor</div>
-      <p class="service-desc">ดูประวัติผู้มาติดต่อบ้านคุณ พร้อมรูปบัตร/รถ ย้อนหลังได้</p>
-      <span class="service-cta">
-        My Visitor
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- 11. ใบเสร็จของฉัน: per-house receipts (shown when logged in) -->
-    <a href="/myreceipt/" class="service-card resident-only-card" data-resident-card>
-      <div class="tag">New</div>
-      <div class="service-icon">🧾</div>
-      <div class="service-title">ใบเสร็จของฉัน</div>
-      <p class="service-desc">ดูและดาวน์โหลดใบเสร็จรับเงินค่าส่วนกลาง/ค่าจอดรถของบ้านคุณ บันทึกเป็น PDF ได้ทุกใบ</p>
-      <span class="service-cta">
-        My Receipts
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: Asset Insurance -->
-    <a href="/insurance/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="insurance.view">
-      <div class="tag">เฉพาะกรรมการ</div>
-      <div class="service-icon">🛡️</div>
-      <div class="service-title">Asset Insurance</div>
-      <p class="service-desc">จัดเก็บเอกสารประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง</p>
-      <span class="service-cta">
-        Insurance Files
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: Blueprints -->
-    <a href="/blueprints/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="blueprints.view">
-      <div class="tag">เฉพาะกรรมการ</div>
-      <div class="service-icon">📐</div>
-      <div class="service-title">Blueprints</div>
-      <p class="service-desc">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท</p>
-      <span class="service-cta">
-        Open Plans
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: Pay Status -->
-    <a href="/paystatus/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="expense.view">
-      <div class="tag">เฉพาะกรรมการ</div>
-      <div class="service-icon">💳</div>
-      <div class="service-title">Pay Status</div>
-      <p class="service-desc">ตรวจสอบสถานะค่าส่วนกลางครึ่งปีหลัง รายการรอตรวจ และบ้านที่ยังไม่พบสลิป</p>
-      <span class="service-cta">
-        Payment Status
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: Expense -->
-    <a href="/expense/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="expense.view">
-      <div class="tag">เฉพาะกรรมการ</div>
-      <div class="service-icon">🧾</div>
-      <div class="service-title">Expense</div>
-      <p class="service-desc">บันทึกและติดตามรายจ่ายนิติบุคคล สรุปยอดรายเดือนและรายปี</p>
-      <span class="service-cta">
-        View Expenses
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: LPR Log -->
-    <a href="/lprlog/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="admin.audit">
-      <div class="tag">เฉพาะกรรมการ</div>
-      <div class="service-icon">🚘</div>
-      <div class="service-title">LPR Log</div>
-      <p class="service-desc">บันทึกรถเข้า-ออกรายวัน แยกลูกบ้าน · รถภายนอก (ป้าย ยี่ห้อ สี) · สแกนไม่พบ</p>
-      <span class="service-cta">
-        View Daily Log
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: Visitor Log -->
-    <a href="/visitors/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="admin.audit">
-      <div class="tag">เฉพาะกรรมการ</div>
-      <div class="service-icon">🪪</div>
-      <div class="service-title">Visitor Log</div>
-      <p class="service-desc">ตรวจสอบผู้มาติดต่อผ่าน LINE หน้าป้อม รูปภาพ ทะเบียนรถ และประวัติการเข้า-ออก</p>
-      <span class="service-cta">
-        View Visitor Log
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: LINE Flex Routing -->
-    <a href="/line-flex/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="admin.portal">
-      <div class="tag">เฉพาะประธาน</div>
-      <div class="service-icon">🔀</div>
-      <div class="service-title">LINE Flex Routing</div>
-      <p class="service-desc">กำหนดปลายทาง sandbox / prd สำหรับ daily, night, รปภ., pattra pay และ pattra report</p>
-      <span class="service-cta">
-        Routing Config
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- President only: System Health -->
-    <a href="/system-health/" class="service-card admin-only-card"
-      data-admin-card data-access-permission="admin.portal">
-      <div class="tag">เฉพาะประธาน</div>
-      <div class="service-icon">◉</div>
-      <div class="service-title">System Health</div>
-      <p class="service-desc">ตรวจสอบกล้อง ANPR 8241/8242, NVR, การเก็บภาพ และระบบอัตโนมัติ พร้อมสั่ง reboot กล้องแยกรายตัว</p>
-      <span class="service-cta">
-        Operations Monitor
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
-    <!-- Admin only: LINE Broadcast -->
-    <a href="/line-broadcast/" class="service-card admin-only-card" data-admin-card
-      data-access-permission="admin.portal">
-      <div class="tag">เฉพาะประธาน</div>
-      <div class="service-icon">✦</div>
-      <div class="service-title">LINE Broadcast</div>
-      <p class="service-desc">ส่งข้อความและรูปหลายรูปจาก Pattra Villa 8 เข้า Sandbox หรือเลือกกลุ่ม Production</p>
-      <span class="service-cta">
-        Compose Message
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </span>
-    </a>
-
   </div>
 
+  <!-- ═══ SECTION 2 · COMMITTEE ═══ -->
+  <!-- The whole section is hidden until applyAdminAccess() finds at least one
+       card the viewer may open, so residents never see a locked shelf. -->
+  <section class="gated-section" id="committeeSection" hidden>
+    <div class="section-eyebrow">Committee</div>
+    <div class="section-title">สำหรับกรรมการ</div>
+
+    <div class="services-grid">
+
+      <!-- The report inbox. Replaces the "หลังบ้าน" toggle that used to hide
+           inside /report/'s own header. -->
+      <a href="/report/?view=admin" class="service-card admin-only-card inbox-card"
+        data-admin-card data-access-permission="admin.issues" id="issueInboxCard">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">📮</div>
+        <div class="service-title">
+          กล่องรับเรื่อง<span class="inbox-count" id="issueInboxCount" hidden></span>
+        </div>
+        <p class="service-desc">อ่านและตอบเรื่องที่ลูกบ้านแจ้งเข้ามา ทั้งแบบระบุบ้านและไม่ประสงค์ออกนาม</p>
+        <span class="service-cta">
+          Open Inbox
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/paystatus/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="expense.view">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">💳</div>
+        <div class="service-title">Pay Status</div>
+        <p class="service-desc">ตรวจสอบสถานะค่าส่วนกลางครึ่งปีหลัง รายการรอตรวจ และบ้านที่ยังไม่พบสลิป</p>
+        <span class="service-cta">
+          Payment Status
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/expense/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="expense.view">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">🧾</div>
+        <div class="service-title">Expense</div>
+        <p class="service-desc">บันทึกและติดตามรายจ่ายนิติบุคคล สรุปยอดรายเดือนและรายปี</p>
+        <span class="service-cta">
+          View Expenses
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/lprlog/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="admin.audit">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">🚘</div>
+        <div class="service-title">LPR Log</div>
+        <p class="service-desc">บันทึกรถเข้า-ออกรายวัน แยกลูกบ้าน · รถภายนอก (ป้าย ยี่ห้อ สี) · สแกนไม่พบ</p>
+        <span class="service-cta">
+          View Daily Log
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/visitors/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="admin.audit">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">🪪</div>
+        <div class="service-title">Visitor Log</div>
+        <p class="service-desc">ตรวจสอบผู้มาติดต่อผ่าน LINE หน้าป้อม รูปภาพ ทะเบียนรถ และประวัติการเข้า-ออก</p>
+        <span class="service-cta">
+          View Visitor Log
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/insurance/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="insurance.view">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">🛡️</div>
+        <div class="service-title">Asset Insurance</div>
+        <p class="service-desc">จัดเก็บเอกสารประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง</p>
+        <span class="service-cta">
+          Insurance Files
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/blueprints/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="blueprints.view">
+        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="service-icon">📐</div>
+        <div class="service-title">Blueprints</div>
+        <p class="service-desc">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท</p>
+        <span class="service-cta">
+          Open Plans
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ═══ SECTION 3 · OPERATIONS ═══ -->
+  <!-- Folded shut by default: three tools, one operator, no reason to spend a
+       screen of the landing page on them. -->
+  <section class="gated-section ops-section" id="opsSection" hidden>
+    <button class="ops-toggle" id="opsToggle" type="button"
+      aria-expanded="false" aria-controls="opsGrid">
+      <span class="ops-icon">⚙︎</span>
+      <span class="ops-label">เครื่องมือระบบ</span>
+      <span class="ops-count" id="opsCount"></span>
+      <span class="ops-chevron" aria-hidden="true">▾</span>
+    </button>
+
+    <div class="services-grid ops-grid" id="opsGrid" hidden>
+
+      <a href="/system-health/" class="service-card admin-only-card"
+        data-admin-card data-access-permission="admin.portal">
+        <div class="tag">เฉพาะประธาน</div>
+        <div class="service-icon">◉</div>
+        <div class="service-title">System Health</div>
+        <p class="service-desc">ตรวจสอบกล้อง ANPR 8241/8242, NVR, การเก็บภาพ และระบบอัตโนมัติ พร้อมสั่ง reboot กล้องแยกรายตัว</p>
+        <span class="service-cta">
+          Operations Monitor
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/line-flex/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="admin.portal">
+        <div class="tag">เฉพาะประธาน</div>
+        <div class="service-icon">🔀</div>
+        <div class="service-title">LINE Flex Routing</div>
+        <p class="service-desc">กำหนดปลายทาง sandbox / prd สำหรับ daily, night, รปภ., pattra pay และ pattra report</p>
+        <span class="service-cta">
+          Routing Config
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="/line-broadcast/" class="service-card admin-only-card" data-admin-card
+        data-access-permission="admin.portal">
+        <div class="tag">เฉพาะประธาน</div>
+        <div class="service-icon">✦</div>
+        <div class="service-title">LINE Broadcast</div>
+        <p class="service-desc">ส่งข้อความและรูปหลายรูปจาก Pattra Villa 8 เข้า Sandbox หรือเลือกกลุ่ม Production</p>
+        <span class="service-cta">
+          Compose Message
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+    </div>
+  </section>
 
   <!-- Announcements -->
   <div id="announce">
@@ -1779,6 +1889,17 @@ async function resolveAdminAccess() {
   }
 }
 
+// A section with nothing in it for this viewer is not an empty shelf — it is
+// simply not part of their page.
+function revealGatedSections() {
+  document.querySelectorAll('.gated-section').forEach(section => {
+    const visible = section.querySelectorAll('[data-admin-card].show').length;
+    section.hidden = visible === 0;
+    const count = section.querySelector('.ops-count');
+    if (count) count.textContent = visible + ' รายการ';
+  });
+}
+
 function applyAdminAccess(access) {
   currentAdminAccess = access;
   document.querySelectorAll('[data-admin-card]').forEach(card => {
@@ -1788,12 +1909,66 @@ function applyAdminAccess(access) {
     );
     card.classList.toggle('show', canAccess);
   });
+  revealGatedSections();
+  renderIssueInboxCount(access);
   const btn = document.getElementById('adminHomeBtn');
   if (btn) {
     btn.textContent = 'Admin';
     btn.style.display = access?.active &&
       access.permissions?.['admin.portal'] ? '' : 'none';
   }
+}
+
+// ── Report inbox badge ──
+// adminStats returns counts only — no ticket text ever reaches this page.
+const ESTATE_ISSUES_URL =
+  'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/estateIssues';
+let issueCountLoaded = false;
+
+async function renderIssueInboxCount(access) {
+  const badge = document.getElementById('issueInboxCount');
+  if (!badge) return;
+  if (!access?.active || !access.permissions?.['admin.issues']) {
+    badge.hidden = true;
+    issueCountLoaded = false;
+    return;
+  }
+  if (issueCountLoaded) return;
+  const session = getResidentSession();
+  if (!session?.houseNo || !session?.pin) return;
+  issueCountLoaded = true;
+  try {
+    const response = await fetch(ESTATE_ISSUES_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'adminStats',
+        houseNo: session.houseNo,
+        pin: session.pin
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    const open = Number(data?.stats?.open || 0);
+    if (!response.ok || !data.ok || open <= 0) { badge.hidden = true; return; }
+    badge.textContent = open;
+    badge.title = open + ' เรื่องที่ยังไม่ปิด';
+    badge.hidden = false;
+  } catch {
+    // A badge is a nicety; a failed count must never break the landing page.
+    badge.hidden = true;
+    issueCountLoaded = false;
+  }
+}
+
+// ── Operations section fold ──
+const opsToggle = document.getElementById('opsToggle');
+if (opsToggle) {
+  opsToggle.addEventListener('click', () => {
+    const grid = document.getElementById('opsGrid');
+    const open = opsToggle.getAttribute('aria-expanded') === 'true';
+    opsToggle.setAttribute('aria-expanded', String(!open));
+    grid.hidden = open;
+  });
 }
 
 // Resident-only cards (e.g. My Receipts) appear once a resident is logged in.
@@ -2138,9 +2313,27 @@ function formatDate(item) {
   return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+// The featured card earns its size by carrying the newest headline rather
+// than a fixed description of what announcements are.
+function renderAnnounceFeature() {
+  const slot = document.getElementById('announceFeatureDesc');
+  if (!slot) return;
+  const latest = announcements[0];
+  if (!latest) return;
+  const src = latest.createdAt?.toDate ? latest.createdAt.toDate() : null;
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+    'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const when = src
+    ? `${src.getDate()} ${months[src.getMonth()]} ${src.getFullYear() + 543}`
+    : (latest.dateText || '');
+  slot.innerHTML = (when ? `<span class="feature-date">ล่าสุด · ${esc(when)}</span>` : '') +
+    `<span class="feature-headline">${esc(latest.title)}</span>`;
+}
+
 function renderAnnouncements() {
   const pageItems = announcements.slice(0, pageSize);
   pager.innerHTML = '';
+  renderAnnounceFeature();
 
   if (!pageItems.length) {
     grid.innerHTML = '<div class="announce-empty">ยังไม่มีประกาศจากนิติบุคคล</div>';
