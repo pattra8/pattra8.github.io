@@ -1412,6 +1412,61 @@
         font-size: 9.5px;
       }
     }
+
+    /* ── mobile "long box" — the lead card of each section spans the full
+       row and drops the CTA line, so it reads as a headline entry instead
+       of a taller sibling in the 2-up grid (see mockup). ── */
+    @media (max-width: 640px) {
+      .services-grid > .service-card.featured,
+      .services-grid > .service-card.inbox-card {
+        grid-column: 1 / -1;
+        padding: 18px 18px 20px;
+        gap: 9px;
+        border: 1.5px solid var(--gold-light);
+        border-radius: 18px;
+      }
+      .services-grid > .service-card.featured .service-icon,
+      .services-grid > .service-card.inbox-card .service-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        font-size: 22px;
+      }
+      .services-grid > .service-card.featured .service-title,
+      .services-grid > .service-card.inbox-card .service-title {
+        font-size: 19px;
+        font-weight: 500;
+        line-height: 1.3;
+        margin-top: 2px;
+      }
+      .services-grid > .service-card.featured .service-desc,
+      .services-grid > .service-card.inbox-card .service-desc {
+        font-size: 13.5px;
+        line-height: 1.5;
+        -webkit-line-clamp: 2;
+      }
+      /* the long box is self-explanatory — the English CTA only adds noise */
+      .services-grid > .service-card.featured .service-cta,
+      .services-grid > .service-card.inbox-card .service-cta {
+        display: none;
+      }
+      /* the corner tag would collide with the wider title, so it becomes a
+         banner across the top of the box */
+      .services-grid > .service-card.inbox-card .tag {
+        position: static;
+        display: block;
+        width: 100%;
+        margin-bottom: 3px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        text-align: left;
+        font-size: 11px;
+        letter-spacing: 0.02em;
+        background: var(--gold-pale);
+        border-color: rgba(184,151,90,0.35);
+        color: var(--gold);
+      }
+    }
   </style>
 </head>
 <body>
