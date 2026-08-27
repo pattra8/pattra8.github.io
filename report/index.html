@@ -333,8 +333,11 @@
       border-radius:99px; padding:0 6px; min-width:19px; text-align:center;
     }
     .seg button.on .n { background:var(--accent); color:#fff; }
-    /* An empty bucket should not compete with a full one for attention. */
-    .seg .n.zero { background:transparent; color:#c0b39c; }
+    /* A bucket with nothing in it carries no number at all and cannot be
+       selected — five zeros in a row was the whole reason this bar read as
+       noise instead of a count. */
+    .seg button.empty { color:#bfb29c; cursor:default; }
+    .seg button.empty:hover { background:transparent; }
     .icon-btn {
       flex:0 0 auto; width:39px; display:grid; place-items:center; cursor:pointer;
       border:1px solid var(--border); border-radius:11px; background:var(--card);
@@ -391,6 +394,39 @@
     .tk-open { margin-left:auto; font-size:12.5px; font-weight:600; color:var(--accent-text); }
     .note-item { background:#f4f0e6; border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.6; color:var(--text-soft); }
     .admin-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+
+    /* ── thread sheet ──
+       Reading a resident and writing back is the whole job of this desk, so it
+       takes the screen instead of unfolding inside a list row. */
+    .overlay.sheet-overlay { z-index:50; padding:0; }
+    .sheet {
+      background:var(--card); width:min(680px,100%); height:100%;
+      display:flex; flex-direction:column; border-radius:0;
+      box-shadow:0 24px 60px rgba(40,26,10,.3);
+    }
+    .sheet-head {
+      flex:0 0 auto; display:flex; align-items:flex-start; gap:10px;
+      padding:16px 18px 13px; border-bottom:1px solid var(--border);
+      background:var(--card);
+    }
+    .sheet-head-tx { flex:1; min-width:0; }
+    .sheet-head .tk-who { margin-bottom:9px; }
+    .sheet-head .tk-title { font-size:18px; margin:0; }
+    .sheet-close {
+      flex:0 0 auto; width:34px; height:34px; border-radius:50%; cursor:pointer;
+      border:1px solid var(--border); background:var(--bg-soft);
+      color:var(--text-soft); font-size:14px; font-family:inherit;
+    }
+    .sheet-close:hover { border-color:var(--accent); color:var(--accent-text); }
+    .sheet-body { flex:1; min-height:0; overflow-y:auto; padding:16px 18px 22px; }
+    .sheet-body .thread-detail { border-top:0; margin-top:0; padding-top:0; }
+    .sheet-tags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    /* Phone gets the whole screen; on a desktop the list stays visible around
+       the edges so the sheet reads as one thread out of many. */
+    @media (min-width:660px) {
+      .overlay.sheet-overlay { padding:28px; }
+      .sheet { border-radius:18px; height:auto; max-height:100%; }
+    }
 
     /* ── login ── */
     .overlay {
@@ -561,7 +597,9 @@
     <main id="adminView" hidden>
       <div class="tabs">
         <button class="tab active" id="tabLive" type="button">เรื่องปัจจุบัน</button>
-        <button class="tab" id="tabArchive" type="button">คลังเรื่องเก่า</button>
+        <!-- Old board archive: kept wired up but out of sight. Nobody works
+             from it day to day; unhide this button to bring it back. -->
+        <button class="tab" id="tabArchive" type="button" hidden>คลังเรื่องเก่า</button>
         <button class="tab tab-switch" id="tabResidentView" type="button">มุมมองลูกบ้าน</button>
       </div>
       <div id="paneLive">
@@ -591,6 +629,16 @@
       เรื่องที่แจ้งเห็นเฉพาะผู้แจ้งและกรรมการ · ไฟล์แนบเก็บไว้ 365 วัน<br>
       Pattra Villa 8
     </footer>
+  </div>
+
+  <div class="overlay sheet-overlay" id="issueOverlay" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="รายละเอียดเรื่อง">
+      <div class="sheet-head">
+        <div class="sheet-head-tx" id="issueSheetHead"></div>
+        <button class="sheet-close" id="issueSheetClose" type="button" aria-label="ปิด">✕</button>
+      </div>
+      <div class="sheet-body" id="issueSheetBody"></div>
+    </div>
   </div>
 
   <div class="overlay media-overlay" id="mediaOverlay" aria-hidden="true">
@@ -1158,6 +1206,9 @@
       adminIssues = data.issues || [];
       renderAdminStats(data.stats || {});
       renderAdminList();
+      // A reply or a status change reloads the board underneath; the open sheet
+      // has to pick up the same new state instead of showing the old thread.
+      if (issueSheetOpen()) renderIssueSheet();
     }).catch(function (e) {
       $('adminList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
     });
@@ -1169,9 +1220,11 @@
       return [s[0], SEG_LABELS[s[0]] || s[1], stats[s[0]] || 0];
     }));
     $('adminStats').innerHTML = cells.map(function (c) {
-      return '<button type="button" class="' + (adminFilter.status === c[0] ? 'on' : '') +
-        '" data-status="' + c[0] + '">' + esc(c[1]) +
-        ' <span class="n' + (c[2] ? '' : ' zero') + '">' + c[2] + '</span></button>';
+      var empty = !c[2];
+      var cls = (adminFilter.status === c[0] ? 'on' : '') + (empty ? ' empty' : '');
+      return '<button type="button" class="' + cls.trim() + '"' +
+        (empty ? '' : ' data-status="' + c[0] + '"') + '>' + esc(c[1]) +
+        (empty ? '' : ' <span class="n">' + c[2] + '</span>') + '</button>';
     }).join('');
   }
   // Who sent it, first thing on the card. An anonymous report has to be
@@ -1210,33 +1263,47 @@
       return;
     }
     $('adminList').innerHTML = adminIssues.map(function (issue) {
-      var open = issue.id === adminOpenId;
-      var head = adminCardHead(issue) +
-        '<div class="tk-title">' + esc(issue.title) + '</div>';
+      return '<div class="tk' + (issue.status === 'new' ? ' unread' : '') +
+        '" data-aopen="' + esc(issue.id) + '">' +
+        adminCardHead(issue) +
+        '<div class="tk-title">' + esc(issue.title) + '</div>' +
+        '<div class="tk-body">' + esc(issue.detail) + '</div>' +
+        adminCardFoot(issue, 'อ่านและตอบ →') +
+        '</div>';
+    }).join('');
+  }
 
-      if (!open) {
-        return '<div class="tk' + (issue.status === 'new' ? ' unread' : '') +
-          '" data-aopen="' + esc(issue.id) + '">' +
-          head +
-          '<div class="tk-body">' + esc(issue.detail) + '</div>' +
-          adminCardFoot(issue, 'อ่านและตอบ →') +
-          '</div>';
-      }
+  // The thread lives in a sheet over the list: full width for the resident's
+  // words, and the list keeps its place underneath instead of reflowing.
+  function renderIssueSheet() {
+    var issue = null;
+    for (var i = 0; i < adminIssues.length; i++) {
+      if (adminIssues[i].id === adminOpenId) { issue = adminIssues[i]; break; }
+    }
+    if (!issue) { closeIssueSheet(); return; }
 
-      var notes = issue.internalNotes.length ?
-        '<div class="replies">' + issue.internalNotes.map(function (n) {
-          return '<div class="note-item">📝 ' + esc(n.message) +
-            '<br><small>' + esc(n.authorHouseNo || '') + ' · ' + esc(fmtDate(n.createdAt)) + '</small></div>';
-        }).join('') + '</div>' : '';
+    $('issueSheetHead').innerHTML = adminCardHead(issue) +
+      '<div class="tk-title">' + esc(issue.title) + '</div>';
 
-      var statusButtons = STATUSES.map(function (s) {
-        return '<button type="button" class="chip' + (issue.status === s[0] ? ' on' : '') +
-          '" data-setstatus="' + s[0] + '" data-id="' + esc(issue.id) + '">' + esc(s[1]) + '</button>';
-      }).join('');
+    var notes = issue.internalNotes.length ?
+      '<div class="replies">' + issue.internalNotes.map(function (n) {
+        return '<div class="note-item">📝 ' + esc(n.message) +
+          '<br><small>' + esc(n.authorHouseNo || '') + ' · ' + esc(fmtDate(n.createdAt)) + '</small></div>';
+      }).join('') + '</div>' : '';
 
-      return '<div class="tk" data-aopen="' + esc(issue.id) + '">' +
-        head +
-        adminCardFoot(issue, 'ย่อเรื่อง ↑') +
+    var statusButtons = STATUSES.map(function (s) {
+      return '<button type="button" class="chip' + (issue.status === s[0] ? ' on' : '') +
+        '" data-setstatus="' + s[0] + '" data-id="' + esc(issue.id) + '">' + esc(s[1]) + '</button>';
+    }).join('');
+
+    var images = issue.attachments.length;
+    $('issueSheetBody').innerHTML =
+      '<div class="sheet-tags">' +
+        '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
+        (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
+        (issue.replies.length ?
+          '<span class="tk-thread">ตอบแล้ว ' + issue.replies.length + '</span>' : '') +
+      '</div>' +
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
           (issue.contact ? '<div class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</div>' : '') +
@@ -1252,8 +1319,28 @@
             '<button class="btn ghost small" type="button" data-anote="' + esc(issue.id) + '">บันทึก</button>' +
           '</div>' +
           '<div class="admin-actions" data-stop="1">' + statusButtons + '</div>' +
-        '</div></div>';
-    }).join('');
+        '</div>';
+  }
+
+  function openIssueSheet(id) {
+    adminOpenId = id;
+    renderIssueSheet();
+    if (!adminOpenId) return;
+    $('issueOverlay').classList.add('open');
+    $('issueOverlay').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    $('issueSheetBody').scrollTop = 0;
+  }
+
+  function closeIssueSheet() {
+    adminOpenId = '';
+    $('issueOverlay').classList.remove('open');
+    $('issueOverlay').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function issueSheetOpen() {
+    return $('issueOverlay').classList.contains('open');
   }
 
   // The retired board used its own three-state kanban vocabulary.
@@ -1437,7 +1524,11 @@
       if (e.target === $('mediaOverlay')) closeMedia();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeMedia();
+      if (e.key !== 'Escape') return;
+      // Innermost layer first: an image opened from a thread closes back to the
+      // thread, not all the way out to the list.
+      if ($('mediaOverlay').classList.contains('open')) { closeMedia(); return; }
+      if (issueSheetOpen()) closeIssueSheet();
     });
 
     $('tabLive').addEventListener('click', function () {
@@ -1465,7 +1556,14 @@
       adminFilter.status = cell.getAttribute('data-status');
       loadAdmin();
     });
-    $('adminList').addEventListener('click', function (e) {
+    $('issueSheetClose').addEventListener('click', closeIssueSheet);
+    $('issueOverlay').addEventListener('click', function (e) {
+      if (e.target === $('issueOverlay')) closeIssueSheet();
+    });
+
+    // Reply, note and status controls live in the sheet now; the list keeps the
+    // same handler so nothing breaks if a control ever moves back onto a card.
+    function adminActionClick(e) {
       var reply = e.target.closest('[data-areply]');
       if (reply) {
         var input = $('adminReplyInput');
@@ -1499,11 +1597,10 @@
       if (e.target.closest('[data-media-url]')) return;
       if (e.target.closest('[data-stop]')) return;
       var card = e.target.closest('[data-aopen]');
-      if (!card) return;
-      var id = card.getAttribute('data-aopen');
-      adminOpenId = adminOpenId === id ? '' : id;
-      renderAdminList();
-    });
+      if (card) openIssueSheet(card.getAttribute('data-aopen'));
+    }
+    $('adminList').addEventListener('click', adminActionClick);
+    $('issueSheetBody').addEventListener('click', adminActionClick);
   }
 
   /* ── boot ────────────────────────────────────────────────────────── */
