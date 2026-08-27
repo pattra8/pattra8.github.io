@@ -330,14 +330,18 @@
     #adminDone .tk:hover { opacity:1; }
 
     /* ── ticket card: who sent it, what it says ── */
+    /* Each report is its own object on the page. Separation comes from air and
+       a lifted edge rather than from a coloured stripe — a stripe every card
+       carries distinguishes nothing. */
     .tk {
-      background:var(--card); border:1px solid var(--border-soft);
-      border-radius:15px; padding:15px 17px; margin-bottom:11px; cursor:pointer;
-      box-shadow:0 1px 2px rgba(60,40,20,.04);
+      background:var(--card); border:1px solid var(--border);
+      border-radius:17px; padding:18px 19px 15px; margin-bottom:20px;
+      cursor:pointer; box-shadow:0 3px 12px rgba(60,40,20,.07);
+      transition:box-shadow .15s ease, transform .15s ease;
     }
-    /* Unanswered work gets an edge, not a badge — the pill said "เรื่องใหม่"
-       on every card in the list and so distinguished nothing. */
-    .tk.st-new { border-left:3px solid var(--accent); padding-left:15px; }
+    .tk:hover {
+      box-shadow:0 7px 20px rgba(60,40,20,.11); transform:translateY(-1px);
+    }
     .tk-who { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
     .tk-av {
       width:36px; height:36px; border-radius:50%; flex:0 0 auto;
@@ -376,14 +380,6 @@
     /* Category, demoted from a filter row to a quiet label. */
     .tk-tag { font-size:11.5px; color:var(--text-muted); background:#f7f2e6; border-radius:7px; padding:3px 9px; }
     .tk-att { font-size:11.5px; color:var(--text-muted); }
-    .tk-thread { font-size:11.5px; color:var(--accent-text); font-weight:500; background:#fdf5e9; border-radius:7px; padding:3px 9px; }
-    /* Whose turn it is — the only thing on the card worth chasing across a
-       list, so it sits alone on the right and is the only coloured word. */
-    .tk-wait {
-      margin-left:auto; font-size:12px; font-weight:600;
-      color:var(--accent-text); background:#fdf3e4; border-radius:7px; padding:4px 10px;
-    }
-    .tk-wait.sent { font-weight:500; color:var(--text-muted); background:transparent; padding:4px 0; }
     .admin-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 
     /* ── thread sheet ──
@@ -393,6 +389,9 @@
     .sheet {
       background:var(--card); width:min(680px,100%); height:100%;
       display:flex; flex-direction:column; border-radius:0;
+      /* The head and foot paint their own backgrounds; without this they run
+         straight over the rounded corners and the sheet reads as a hard box. */
+      overflow:hidden;
       box-shadow:0 24px 60px rgba(40,26,10,.3);
     }
     .sheet-head {
@@ -423,23 +422,11 @@
     }
     .sheet-foot .reply-box { margin-top:0; }
     .sheet-foot textarea { background:var(--card); }
-    .foot-row {
-      display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:9px;
-    }
-    /* The only mark this desk keeps. Not a workflow state — an archive
-       gesture, and normally ticked on the way out with a reply. */
-    .done-check {
-      display:flex; align-items:center; gap:8px; cursor:pointer;
-      font-size:13px; color:var(--text-soft); user-select:none;
-    }
-    .done-check input { width:17px; height:17px; accent-color:var(--accent); margin:0; }
-    .foot-row .linkish { margin-left:auto; }
-    .reopened { font-size:12.5px; color:var(--ok); font-weight:500; }
     /* Phone gets the whole screen; on a desktop the list stays visible around
        the edges so the sheet reads as one thread out of many. */
     @media (min-width:660px) {
       .overlay.sheet-overlay { padding:28px; }
-      .sheet { border-radius:18px; height:auto; max-height:100%; }
+      .sheet { border-radius:20px; height:auto; max-height:100%; }
     }
 
     /* ── login ── */
@@ -1236,17 +1223,6 @@
     return fmtDate(value);
   }
 
-  // The one thing a triage list has to answer: is the ball in our court?
-  // lastReplyBy already comes down from redactIssueForAdmin — a bare reply
-  // count never said who was waiting.
-  function waitingBadge(issue) {
-    if (!OPEN_STATUSES[issue.status]) return '';
-    if (!issue.replies.length) return '<span class="tk-wait">รอเราตอบ</span>';
-    return issue.lastReplyBy === 'resident' ?
-      '<span class="tk-wait">รอเราตอบ</span>' :
-      '<span class="tk-wait sent">ตอบไปแล้ว · รอลูกบ้าน</span>';
-  }
-
   // Who sent it, first thing on the card. An anonymous report has to be
   // unmistakable at a glance — it is the one thing the committee must not
   // misread, and redactIssueForAdmin has already stripped the house number.
@@ -1275,7 +1251,8 @@
     return '<div class="tk-foot">' +
       '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
       (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
-      waitingBadge(issue) +
+      (issue.replies.length ?
+        '<span class="tk-att">💬 ' + issue.replies.length + '</span>' : '') +
     '</div>';
   }
 
@@ -1335,21 +1312,10 @@
     // resident. Stored notes stay in Firestore; adminNote still exists on the
     // server. The four-state workflow is gone too — nobody had time to keep it
     // truthful, and a stale status is worse than none.
-    var done = !OPEN_STATUSES[issue.status];
     $('issueSheetFoot').innerHTML =
       '<div class="reply-box" data-stop="1">' +
         '<textarea id="adminReplyInput" placeholder="พิมพ์ตอบผู้แจ้ง…"></textarea>' +
         '<button class="btn small" type="button" data-areply="' + esc(issue.id) + '">ตอบ</button>' +
-      '</div>' +
-      '<div class="foot-row" data-stop="1">' +
-        (done ?
-          '<span class="reopened">✓ เรื่องนี้จบแล้ว</span>' +
-          '<button class="linkish" type="button" data-adone="open" data-id="' +
-            esc(issue.id) + '">เปิดเรื่องนี้อีกครั้ง</button>' :
-          '<label class="done-check"><input type="checkbox" id="closeWithReply">' +
-            'ตอบแล้วจบเลย</label>' +
-          '<button class="linkish" type="button" data-adone="done" data-id="' +
-            esc(issue.id) + '">ทำเสร็จแล้ว →</button>') +
       '</div>';
   }
 
@@ -1593,26 +1559,10 @@
         var input = $('adminReplyInput');
         var message = String(input && input.value || '').trim();
         if (!message) return;
-        var alsoClose = $('closeWithReply') && $('closeWithReply').checked;
-        var issueId = reply.getAttribute('data-areply');
         reply.disabled = true;
-        // Answering and finishing are one gesture, so the resident always hears
-        // about it — a thread never closes in silence.
-        api('adminReply', { issueId: issueId, message: message })
-          .then(function () {
-            return alsoClose ?
-              api('adminUpdate', { issueId: issueId, status: 'resolved' }) : null;
-          })
+        api('adminReply', { issueId: reply.getAttribute('data-areply'), message: message })
           .then(loadAdmin).catch(function (err) { alert(err.message); })
           .then(function () { reply.disabled = false; });
-        return;
-      }
-      var mark = e.target.closest('[data-adone]');
-      if (mark) {
-        api('adminUpdate', {
-          issueId: mark.getAttribute('data-id'),
-          status: mark.getAttribute('data-adone') === 'done' ? 'resolved' : 'new'
-        }).then(loadAdmin).catch(function (err) { alert(err.message); });
         return;
       }
       if (e.target.closest('[data-media-url]')) return;
