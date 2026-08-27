@@ -311,17 +311,84 @@
     .summary-chip.on { border-color:var(--accent); color:var(--accent-deep); background:var(--warn-bg); }
 
     /* ── admin ── */
-    .stats { display:flex; gap:7px; overflow-x:auto; padding:2px 0 6px; }
-    .stat {
-      flex:0 0 auto; background:var(--card); border:1px solid var(--border-soft);
-      border-radius:12px; padding:9px 13px; min-width:78px; text-align:center;
-      cursor:pointer;
+    /* ── committee toolbar: status segments + search, one row ── */
+    .admin-bar { display:flex; gap:8px; margin:0 0 14px; align-items:stretch; }
+    .admin-bar input { flex:1; min-width:0; padding:9px 12px; border-radius:11px; }
+    .seg {
+      display:flex; flex:0 0 auto; gap:2px; padding:3px;
+      background:var(--bg-soft); border-radius:11px;
     }
-    .stat.on { border-color:var(--accent); background:#fdf7ee; }
-    .stat .n { font-size:19px; font-weight:700; color:var(--text); }
-    .stat .l { font-size:11px; color:var(--text-muted); margin-top:1px; }
-    .admin-bar { display:flex; gap:8px; margin:10px 0 4px; }
-    .admin-bar input { flex:1; }
+    .seg button {
+      display:flex; align-items:center; gap:5px; border:0; background:transparent;
+      border-radius:8px; padding:7px 11px; cursor:pointer; font-family:inherit;
+      font-size:12.5px; font-weight:500; color:var(--text-soft); white-space:nowrap;
+    }
+    .seg button.on {
+      background:var(--card); color:var(--text); font-weight:600;
+      box-shadow:0 1px 3px rgba(60,40,20,.1);
+    }
+    .seg .n {
+      font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px;
+      font-weight:600; background:var(--border); color:#5c4f3d;
+      border-radius:99px; padding:0 6px; min-width:19px; text-align:center;
+    }
+    .seg button.on .n { background:var(--accent); color:#fff; }
+    /* An empty bucket should not compete with a full one for attention. */
+    .seg .n.zero { background:transparent; color:#c0b39c; }
+    .icon-btn {
+      flex:0 0 auto; width:39px; display:grid; place-items:center; cursor:pointer;
+      border:1px solid var(--border); border-radius:11px; background:var(--card);
+      color:var(--text-soft); font-size:15px; font-family:inherit;
+    }
+    .icon-btn:hover { border-color:var(--accent); color:var(--accent-text); }
+
+    /* ── ticket card: who sent it, what it says ── */
+    .tk {
+      background:var(--card); border:1px solid var(--border-soft);
+      border-radius:15px; padding:15px 17px; margin-bottom:11px; cursor:pointer;
+      box-shadow:0 1px 2px rgba(60,40,20,.04);
+    }
+    .tk.unread { border-color:var(--accent); box-shadow:0 1px 2px rgba(60,40,20,.04), 0 0 0 1px rgba(196,122,44,.18); }
+    .tk-who { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+    .tk-av {
+      width:36px; height:36px; border-radius:50%; flex:0 0 auto;
+      display:grid; place-items:center; font-size:12.5px; font-weight:700;
+      background:#f7e6cd; color:var(--accent-deep); letter-spacing:-.02em;
+    }
+    .tk-av.anon { background:var(--neutral-bg); color:var(--text-muted); font-size:15px; }
+    .tk-who-tx { flex:1; min-width:0; }
+    .tk-name { font-size:14px; font-weight:600; line-height:1.35; color:var(--text); }
+    .tk-sub {
+      font-size:11.5px; color:var(--text-muted); line-height:1.4;
+      display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+    }
+    .tk-sub .code { font-family:ui-monospace,'SF Mono',Menlo,monospace; font-weight:600; color:var(--accent-text); }
+    .tk-st {
+      flex:0 0 auto; border-radius:99px; padding:3px 11px;
+      font-size:11px; font-weight:600; white-space:nowrap;
+      background:var(--neutral-bg); color:var(--neutral);
+    }
+    .tk-st.st-new { background:var(--warn-bg); color:var(--accent-deep); }
+    .tk-st.st-in_progress { background:var(--info-bg); color:var(--info); }
+    .tk-st.st-resolved { background:var(--ok-bg); color:var(--ok); }
+    .tk-title {
+      font-size:16px; font-weight:600; line-height:1.4;
+      letter-spacing:-.01em; color:var(--text); margin-bottom:5px;
+    }
+    .tk-body {
+      font-size:13.5px; color:var(--text-soft); line-height:1.65;
+      white-space:pre-wrap;
+      display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden;
+    }
+    .tk-foot {
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+      margin-top:12px; padding-top:11px; border-top:1px solid #f2ebdb;
+    }
+    /* Category, demoted from a filter row to a quiet label. */
+    .tk-tag { font-size:11.5px; color:var(--text-muted); background:#f7f2e6; border-radius:7px; padding:3px 9px; }
+    .tk-att { font-size:11.5px; color:var(--text-muted); }
+    .tk-thread { font-size:11.5px; color:var(--accent-text); font-weight:500; background:#fdf5e9; border-radius:7px; padding:3px 9px; }
+    .tk-open { margin-left:auto; font-size:12.5px; font-weight:600; color:var(--accent-text); }
     .note-item { background:#f4f0e6; border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.6; color:var(--text-soft); }
     .admin-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 
@@ -373,6 +440,12 @@
       .hero { padding:23px 20px 0; }
       #residentView, #adminView { padding:0 20px 24px; }
       .title { font-size:25px; }
+      /* Five status segments plus a search field never fit one phone row —
+         give the segments their own scrollable line. */
+      .admin-bar { flex-wrap:wrap; }
+      .seg { flex:1 1 100%; overflow-x:auto; scrollbar-width:none; }
+      .seg::-webkit-scrollbar { display:none; }
+      .seg button { flex:0 0 auto; }
     }
     /* On a phone the wordmark, the backend button and the identity pill all
        want the same row; let the wordmark shrink instead of wrapping. */
@@ -492,12 +565,15 @@
         <button class="tab tab-switch" id="tabResidentView" type="button">มุมมองลูกบ้าน</button>
       </div>
       <div id="paneLive">
-      <div class="stats" id="adminStats"></div>
+      <!-- One line of chrome: status segments carry their own counts, and the
+           category filter is gone — a ticket's category is a tag on the card,
+           not a way to slice a list this short. -->
       <div class="admin-bar">
-        <input type="text" id="adminSearch" placeholder="ค้นหาหัวข้อหรือรายละเอียด" />
-        <button class="btn ghost small" id="adminRefresh" type="button">รีเฟรช</button>
+        <div class="seg" id="adminStats"></div>
+        <input type="text" id="adminSearch" placeholder="ค้นหา" />
+        <button class="icon-btn" id="adminRefresh" type="button" title="รีเฟรช"
+          aria-label="รีเฟรช">↻</button>
       </div>
-      <div class="chips" id="adminCatChips" style="margin:10px 0 4px"></div>
       <div id="adminList"></div>
       </div>
       <section id="paneArchive" hidden>
@@ -1081,29 +1157,53 @@
     }).then(function (data) {
       adminIssues = data.issues || [];
       renderAdminStats(data.stats || {});
-      renderAdminCats();
       renderAdminList();
     }).catch(function (e) {
       $('adminList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
     });
   }
+  // Short labels — five full status names will not fit one row on a phone.
+  var SEG_LABELS = { new: 'ใหม่', in_progress: 'กำลังทำ', resolved: 'เสร็จ', closed: 'ปิด' };
   function renderAdminStats(stats) {
     var cells = [['', 'ทั้งหมด', stats.total || 0]].concat(STATUSES.map(function (s) {
-      return [s[0], s[1], stats[s[0]] || 0];
+      return [s[0], SEG_LABELS[s[0]] || s[1], stats[s[0]] || 0];
     }));
     $('adminStats').innerHTML = cells.map(function (c) {
-      return '<div class="stat' + (adminFilter.status === c[0] ? ' on' : '') +
-        '" data-status="' + c[0] + '"><div class="n">' + c[2] + '</div>' +
-        '<div class="l">' + esc(c[1]) + '</div></div>';
+      return '<button type="button" class="' + (adminFilter.status === c[0] ? 'on' : '') +
+        '" data-status="' + c[0] + '">' + esc(c[1]) +
+        ' <span class="n' + (c[2] ? '' : ' zero') + '">' + c[2] + '</span></button>';
     }).join('');
   }
-  function renderAdminCats() {
-    $('adminCatChips').innerHTML = [['', 'ทุกหมวด']].concat(CATEGORIES).map(function (c) {
-      return '<button type="button" class="chip' +
-        (adminFilter.category === c[0] ? ' on' : '') + '" data-acat="' + c[0] + '">' +
-        esc(c[1]) + '</button>';
-    }).join('');
+  // Who sent it, first thing on the card. An anonymous report has to be
+  // unmistakable at a glance — it is the one thing the committee must not
+  // misread, and redactIssueForAdmin has already stripped the house number.
+  function adminCardHead(issue) {
+    var anon = issue.anonymous;
+    var suffix = String(issue.houseNo || '').split('/').pop();
+    return '<div class="tk-who">' +
+      '<div class="tk-av' + (anon ? ' anon' : '') + '">' +
+        (anon ? '🙈' : esc(suffix)) + '</div>' +
+      '<div class="tk-who-tx">' +
+        '<div class="tk-name">' +
+          (anon ? 'ไม่ประสงค์ออกนาม' : 'บ้าน ' + esc(issue.houseNo)) + '</div>' +
+        '<div class="tk-sub"><span class="code">' + esc(issue.code) + '</span>' +
+          '<span>· ' + esc(fmtDate(issue.createdAt)) + '</span></div>' +
+      '</div>' +
+      '<span class="tk-st st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
+    '</div>';
   }
+
+  function adminCardFoot(issue, action) {
+    var images = issue.attachments.length;
+    return '<div class="tk-foot">' +
+      '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
+      (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
+      (issue.replies.length ?
+        '<span class="tk-thread">ตอบแล้ว ' + issue.replies.length + '</span>' : '') +
+      '<span class="tk-open">' + esc(action) + '</span>' +
+    '</div>';
+  }
+
   function renderAdminList() {
     if (!adminIssues.length) {
       $('adminList').innerHTML = '<div class="empty"><span class="big">✅</span>ไม่มีเรื่องตามเงื่อนไขนี้</div>';
@@ -1111,19 +1211,16 @@
     }
     $('adminList').innerHTML = adminIssues.map(function (issue) {
       var open = issue.id === adminOpenId;
-      var head = '<div class="t-top">' +
-        '<span class="pill st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
-        (issue.priority !== 'normal' ?
-          '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
-        '<span class="pill' + (issue.anonymous ? ' anon' : '') + '">' + esc(issue.reporterLabel) + '</span>' +
-        '</div>' +
-        '<div class="t-title">' + esc(issue.title) + '</div>' +
-        '<div class="t-meta">' + esc(issue.categoryLabel) + ' · ' + esc(fmtDate(issue.createdAt)) +
-        (issue.replies.length ? ' · ตอบแล้ว ' + issue.replies.length + ' ข้อความ' : '') + '</div>';
+      var head = adminCardHead(issue) +
+        '<div class="tk-title">' + esc(issue.title) + '</div>';
 
       if (!open) {
-        return '<div class="ticket st-' + esc(issue.status) + '" data-aopen="' + esc(issue.id) + '">' +
-          head + '<div class="t-preview">' + esc(issue.detail) + '</div></div>';
+        return '<div class="tk' + (issue.status === 'new' ? ' unread' : '') +
+          '" data-aopen="' + esc(issue.id) + '">' +
+          head +
+          '<div class="tk-body">' + esc(issue.detail) + '</div>' +
+          adminCardFoot(issue, 'อ่านและตอบ →') +
+          '</div>';
       }
 
       var notes = issue.internalNotes.length ?
@@ -1137,8 +1234,9 @@
           '" data-setstatus="' + s[0] + '" data-id="' + esc(issue.id) + '">' + esc(s[1]) + '</button>';
       }).join('');
 
-      return '<div class="ticket st-' + esc(issue.status) + '" data-aopen="' + esc(issue.id) + '">' +
+      return '<div class="tk" data-aopen="' + esc(issue.id) + '">' +
         head +
+        adminCardFoot(issue, 'ย่อเรื่อง ↑') +
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
           (issue.contact ? '<div class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</div>' : '') +
@@ -1365,12 +1463,6 @@
       var cell = e.target.closest('[data-status]');
       if (!cell) return;
       adminFilter.status = cell.getAttribute('data-status');
-      loadAdmin();
-    });
-    $('adminCatChips').addEventListener('click', function (e) {
-      var chip = e.target.closest('[data-acat]');
-      if (!chip) return;
-      adminFilter.category = chip.getAttribute('data-acat');
       loadAdmin();
     });
     $('adminList').addEventListener('click', function (e) {
