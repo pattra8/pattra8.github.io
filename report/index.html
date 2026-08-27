@@ -311,39 +311,23 @@
     .summary-chip.on { border-color:var(--accent); color:var(--accent-deep); background:var(--warn-bg); }
 
     /* ── admin ── */
-    /* ── committee toolbar: status segments + search, one row ── */
-    .admin-bar { display:flex; gap:8px; margin:0 0 14px; align-items:stretch; }
-    .admin-bar input { flex:1; min-width:0; padding:9px 12px; border-radius:11px; }
-    .seg {
-      display:flex; flex:0 0 auto; gap:2px; padding:3px;
-      background:var(--bg-soft); border-radius:11px;
+    .desk-exit { display:flex; justify-content:flex-end; margin:14px 0 6px; }
+    .linkish {
+      border:0; background:transparent; cursor:pointer; font-family:inherit;
+      font-size:13px; font-weight:500; color:var(--text-muted); padding:5px 2px;
     }
-    .seg button {
-      display:flex; align-items:center; gap:5px; border:0; background:transparent;
-      border-radius:8px; padding:7px 11px; cursor:pointer; font-family:inherit;
-      font-size:12.5px; font-weight:500; color:var(--text-soft); white-space:nowrap;
+    .linkish:hover { color:var(--accent-text); }
+    /* Settled tickets: one quiet line, not a section header competing with
+       the work that is still open. */
+    .done-toggle {
+      display:block; width:100%; margin:6px 0 2px; padding:12px;
+      border:1px dashed var(--border); border-radius:13px; cursor:pointer;
+      background:transparent; font-family:inherit; font-size:13px;
+      font-weight:500; color:var(--text-muted);
     }
-    .seg button.on {
-      background:var(--card); color:var(--text); font-weight:600;
-      box-shadow:0 1px 3px rgba(60,40,20,.1);
-    }
-    .seg .n {
-      font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px;
-      font-weight:600; background:var(--border); color:#5c4f3d;
-      border-radius:99px; padding:0 6px; min-width:19px; text-align:center;
-    }
-    .seg button.on .n { background:var(--accent); color:#fff; }
-    /* A bucket with nothing in it carries no number at all and cannot be
-       selected — five zeros in a row was the whole reason this bar read as
-       noise instead of a count. */
-    .seg button.empty { color:#bfb29c; cursor:default; }
-    .seg button.empty:hover { background:transparent; }
-    .icon-btn {
-      flex:0 0 auto; width:39px; display:grid; place-items:center; cursor:pointer;
-      border:1px solid var(--border); border-radius:11px; background:var(--card);
-      color:var(--text-soft); font-size:15px; font-family:inherit;
-    }
-    .icon-btn:hover { border-color:var(--accent); color:var(--accent-text); }
+    .done-toggle:hover { border-color:var(--accent); color:var(--accent-text); }
+    #adminDone .tk { opacity:.72; }
+    #adminDone .tk:hover { opacity:1; }
 
     /* ── ticket card: who sent it, what it says ── */
     .tk {
@@ -351,7 +335,9 @@
       border-radius:15px; padding:15px 17px; margin-bottom:11px; cursor:pointer;
       box-shadow:0 1px 2px rgba(60,40,20,.04);
     }
-    .tk.unread { border-color:var(--accent); box-shadow:0 1px 2px rgba(60,40,20,.04), 0 0 0 1px rgba(196,122,44,.18); }
+    /* Unanswered work gets an edge, not a badge — the pill said "เรื่องใหม่"
+       on every card in the list and so distinguished nothing. */
+    .tk.st-new { border-left:3px solid var(--accent); padding-left:15px; }
     .tk-who { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
     .tk-av {
       width:36px; height:36px; border-radius:50%; flex:0 0 auto;
@@ -391,8 +377,13 @@
     .tk-tag { font-size:11.5px; color:var(--text-muted); background:#f7f2e6; border-radius:7px; padding:3px 9px; }
     .tk-att { font-size:11.5px; color:var(--text-muted); }
     .tk-thread { font-size:11.5px; color:var(--accent-text); font-weight:500; background:#fdf5e9; border-radius:7px; padding:3px 9px; }
-    .tk-open { margin-left:auto; font-size:12.5px; font-weight:600; color:var(--accent-text); }
-    .note-item { background:#f4f0e6; border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.6; color:var(--text-soft); }
+    /* Whose turn it is — the only thing on the card worth chasing across a
+       list, so it sits alone on the right and is the only coloured word. */
+    .tk-wait {
+      margin-left:auto; font-size:12px; font-weight:600;
+      color:var(--accent-text); background:#fdf3e4; border-radius:7px; padding:4px 10px;
+    }
+    .tk-wait.sent { font-weight:500; color:var(--text-muted); background:transparent; padding:4px 0; }
     .admin-actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 
     /* ── thread sheet ──
@@ -421,6 +412,29 @@
     .sheet-body { flex:1; min-height:0; overflow-y:auto; padding:16px 18px 22px; }
     .sheet-body .thread-detail { border-top:0; margin-top:0; padding-top:0; }
     .sheet-tags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    /* Sided bubbles, admin-side only. The resident's own view inverts "us" and
+       "them", so this alignment stays scoped to the committee sheet. */
+    #issueSheetBody .reply { max-width:86%; }
+    #issueSheetBody .reply.admin { margin-left:auto; }
+    #issueSheetBody .reply.resident { background:var(--card); border:1px solid var(--border); }
+    .sheet-foot {
+      flex:0 0 auto; padding:12px 18px 15px;
+      border-top:1px solid var(--border); background:var(--bg-soft);
+    }
+    .sheet-foot .reply-box { margin-top:0; }
+    .sheet-foot textarea { background:var(--card); }
+    .foot-row {
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:9px;
+    }
+    /* The only mark this desk keeps. Not a workflow state — an archive
+       gesture, and normally ticked on the way out with a reply. */
+    .done-check {
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+      font-size:13px; color:var(--text-soft); user-select:none;
+    }
+    .done-check input { width:17px; height:17px; accent-color:var(--accent); margin:0; }
+    .foot-row .linkish { margin-left:auto; }
+    .reopened { font-size:12.5px; color:var(--ok); font-weight:500; }
     /* Phone gets the whole screen; on a desktop the list stays visible around
        the edges so the sheet reads as one thread out of many. */
     @media (min-width:660px) {
@@ -476,12 +490,6 @@
       .hero { padding:23px 20px 0; }
       #residentView, #adminView { padding:0 20px 24px; }
       .title { font-size:25px; }
-      /* Five status segments plus a search field never fit one phone row —
-         give the segments their own scrollable line. */
-      .admin-bar { flex-wrap:wrap; }
-      .seg { flex:1 1 100%; overflow-x:auto; scrollbar-width:none; }
-      .seg::-webkit-scrollbar { display:none; }
-      .seg button { flex:0 0 auto; }
     }
     /* On a phone the wordmark, the backend button and the identity pill all
        want the same row; let the wordmark shrink instead of wrapping. */
@@ -595,24 +603,22 @@
 
     <!-- ═══ ADMIN ═══ -->
     <main id="adminView" hidden>
-      <div class="tabs">
+      <!-- A single tab is not a tab, so the live/archive pair is hidden rather
+           than shown as a one-item choice; leaving the desk is an exit link,
+           not a sibling destination. Unhide these to bring the archive back. -->
+      <div class="tabs" hidden>
         <button class="tab active" id="tabLive" type="button">เรื่องปัจจุบัน</button>
-        <!-- Old board archive: kept wired up but out of sight. Nobody works
-             from it day to day; unhide this button to bring it back. -->
-        <button class="tab" id="tabArchive" type="button" hidden>คลังเรื่องเก่า</button>
-        <button class="tab tab-switch" id="tabResidentView" type="button">มุมมองลูกบ้าน</button>
+        <button class="tab" id="tabArchive" type="button">คลังเรื่องเก่า</button>
+      </div>
+      <div class="desk-exit">
+        <button class="linkish" id="tabResidentView" type="button">มุมมองลูกบ้าน →</button>
       </div>
       <div id="paneLive">
-      <!-- One line of chrome: status segments carry their own counts, and the
-           category filter is gone — a ticket's category is a tag on the card,
-           not a way to slice a list this short. -->
-      <div class="admin-bar">
-        <div class="seg" id="adminStats"></div>
-        <input type="text" id="adminSearch" placeholder="ค้นหา" />
-        <button class="icon-btn" id="adminRefresh" type="button" title="รีเฟรช"
-          aria-label="รีเฟรช">↻</button>
-      </div>
+      <!-- No filter chrome. The desk opens on what is unfinished, because that
+           is what it is opened for; everything settled hides behind one link
+           at the foot of the list. -->
       <div id="adminList"></div>
+      <div id="adminDone"></div>
       </div>
       <section id="paneArchive" hidden>
         <div class="privacy-note">
@@ -638,6 +644,9 @@
         <button class="sheet-close" id="issueSheetClose" type="button" aria-label="ปิด">✕</button>
       </div>
       <div class="sheet-body" id="issueSheetBody"></div>
+      <!-- Writing back is what this sheet is for, so the composer is pinned
+           rather than parked at the end of however long the thread got. -->
+      <div class="sheet-foot" id="issueSheetFoot"></div>
     </div>
   </div>
 
@@ -692,8 +701,8 @@
     ['suggestion', 'ข้อเสนอแนะ'], ['feedback', 'ข้อกังวล'],
     ['other', 'อื่น ๆ']
   ];
-  var STATUSES = [['new', 'เรื่องใหม่'], ['in_progress', 'กำลังดำเนินการ'],
-    ['resolved', 'ดำเนินการแล้ว'], ['closed', 'ปิดเรื่อง']];
+  // The stored statuses still exist server-side; this desk no longer asks the
+  // committee to curate them. See OPEN_STATUSES for the only split it keeps.
   var MAX_IMAGES = 5, MAX_VIDEOS = 1;
   var MAX_VIDEO_BYTES = 20 * 1024 * 1024;
 
@@ -1193,46 +1202,61 @@
 
   /* ── admin ───────────────────────────────────────────────────────── */
   var adminIssues = [];
-  var adminFilter = { status: '', category: '', search: '' };
   var adminOpenId = '';
+  var showDone = false;
+  // Everything before "done" is work the committee still owes someone.
+  var OPEN_STATUSES = { 'new': true, in_progress: true };
 
   function loadAdmin() {
     $('adminList').innerHTML = '<div class="loading"><span class="spinner"></span>กำลังโหลด…</div>';
-    return api('adminList', {
-      status: adminFilter.status,
-      category: adminFilter.category,
-      search: adminFilter.search
-    }).then(function (data) {
+    return api('adminList', {}).then(function (data) {
       adminIssues = data.issues || [];
-      renderAdminStats(data.stats || {});
       renderAdminList();
       // A reply or a status change reloads the board underneath; the open sheet
       // has to pick up the same new state instead of showing the old thread.
       if (issueSheetOpen()) renderIssueSheet();
     }).catch(function (e) {
       $('adminList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
+      $('adminDone').innerHTML = '';
     });
   }
-  // Short labels — five full status names will not fit one row on a phone.
-  var SEG_LABELS = { new: 'ใหม่', in_progress: 'กำลังทำ', resolved: 'เสร็จ', closed: 'ปิด' };
-  function renderAdminStats(stats) {
-    var cells = [['', 'ทั้งหมด', stats.total || 0]].concat(STATUSES.map(function (s) {
-      return [s[0], SEG_LABELS[s[0]] || s[1], stats[s[0]] || 0];
-    }));
-    $('adminStats').innerHTML = cells.map(function (c) {
-      var empty = !c[2];
-      var cls = (adminFilter.status === c[0] ? 'on' : '') + (empty ? ' empty' : '');
-      return '<button type="button" class="' + cls.trim() + '"' +
-        (empty ? '' : ' data-status="' + c[0] + '"') + '>' + esc(c[1]) +
-        (empty ? '' : ' <span class="n">' + c[2] + '</span>') + '</button>';
-    }).join('');
+
+  // Minutes and hours are how a triage list is actually read; the exact
+  // timestamp belongs in the thread, where someone is reading properly.
+  function fmtAgo(value) {
+    var ms = typeof value === 'number' ? value :
+      (value && value._seconds ? value._seconds * 1000 : Date.parse(value));
+    if (!ms || isNaN(ms)) return '';
+    var mins = Math.round((Date.now() - ms) / 60000);
+    if (mins < 1) return 'เมื่อครู่';
+    if (mins < 60) return mins + ' นาทีที่แล้ว';
+    if (mins < 1440) return Math.round(mins / 60) + ' ชม.ที่แล้ว';
+    var days = Math.round(mins / 1440);
+    if (days < 8) return days + ' วันที่แล้ว';
+    return fmtDate(value);
   }
+
+  // The one thing a triage list has to answer: is the ball in our court?
+  // lastReplyBy already comes down from redactIssueForAdmin — a bare reply
+  // count never said who was waiting.
+  function waitingBadge(issue) {
+    if (!OPEN_STATUSES[issue.status]) return '';
+    if (!issue.replies.length) return '<span class="tk-wait">รอเราตอบ</span>';
+    return issue.lastReplyBy === 'resident' ?
+      '<span class="tk-wait">รอเราตอบ</span>' :
+      '<span class="tk-wait sent">ตอบไปแล้ว · รอลูกบ้าน</span>';
+  }
+
   // Who sent it, first thing on the card. An anonymous report has to be
   // unmistakable at a glance — it is the one thing the committee must not
   // misread, and redactIssueForAdmin has already stripped the house number.
-  function adminCardHead(issue) {
+  function adminCardHead(issue, absolute) {
     var anon = issue.anonymous;
     var suffix = String(issue.houseNo || '').split('/').pop();
+    // In the list every open ticket would carry the same pill, which tells the
+    // reader nothing; only a settled one is worth labelling.
+    var pill = OPEN_STATUSES[issue.status] ? '' :
+      '<span class="tk-st st-resolved">จบแล้ว</span>';
     return '<div class="tk-who">' +
       '<div class="tk-av' + (anon ? ' anon' : '') + '">' +
         (anon ? '🙈' : esc(suffix)) + '</div>' +
@@ -1240,37 +1264,45 @@
         '<div class="tk-name">' +
           (anon ? 'ไม่ประสงค์ออกนาม' : 'บ้าน ' + esc(issue.houseNo)) + '</div>' +
         '<div class="tk-sub"><span class="code">' + esc(issue.code) + '</span>' +
-          '<span>· ' + esc(fmtDate(issue.createdAt)) + '</span></div>' +
-      '</div>' +
-      '<span class="tk-st st-' + esc(issue.status) + '">' + esc(issue.statusLabel) + '</span>' +
+          '<span>· ' + esc(absolute ? fmtDate(issue.createdAt) : fmtAgo(issue.createdAt)) +
+          '</span></div>' +
+      '</div>' + pill +
     '</div>';
   }
 
-  function adminCardFoot(issue, action) {
+  function adminCardFoot(issue) {
     var images = issue.attachments.length;
     return '<div class="tk-foot">' +
       '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
       (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
-      (issue.replies.length ?
-        '<span class="tk-thread">ตอบแล้ว ' + issue.replies.length + '</span>' : '') +
-      '<span class="tk-open">' + esc(action) + '</span>' +
+      waitingBadge(issue) +
     '</div>';
   }
 
+  function adminCard(issue) {
+    return '<div class="tk st-' + esc(issue.status) +
+      '" data-aopen="' + esc(issue.id) + '">' +
+      adminCardHead(issue) +
+      '<div class="tk-title">' + esc(issue.title) + '</div>' +
+      '<div class="tk-body">' + esc(issue.detail) + '</div>' +
+      adminCardFoot(issue) +
+      '</div>';
+  }
+
   function renderAdminList() {
-    if (!adminIssues.length) {
-      $('adminList').innerHTML = '<div class="empty"><span class="big">✅</span>ไม่มีเรื่องตามเงื่อนไขนี้</div>';
-      return;
-    }
-    $('adminList').innerHTML = adminIssues.map(function (issue) {
-      return '<div class="tk' + (issue.status === 'new' ? ' unread' : '') +
-        '" data-aopen="' + esc(issue.id) + '">' +
-        adminCardHead(issue) +
-        '<div class="tk-title">' + esc(issue.title) + '</div>' +
-        '<div class="tk-body">' + esc(issue.detail) + '</div>' +
-        adminCardFoot(issue, 'อ่านและตอบ →') +
-        '</div>';
-    }).join('');
+    var open = [], done = [];
+    adminIssues.forEach(function (issue) {
+      (OPEN_STATUSES[issue.status] ? open : done).push(issue);
+    });
+
+    $('adminList').innerHTML = open.length ? open.map(adminCard).join('') :
+      '<div class="empty"><span class="big">✅</span>' +
+        (done.length ? 'ตอบครบทุกเรื่องแล้ว' : 'ยังไม่มีเรื่องแจ้งเข้ามา') + '</div>';
+
+    $('adminDone').innerHTML = done.length ?
+      '<button class="done-toggle" type="button" id="doneToggle">' +
+        (showDone ? 'ซ่อนเรื่องที่จบแล้ว' : 'เรื่องที่จบแล้ว (' + done.length + ')') +
+      '</button>' + (showDone ? done.map(adminCard).join('') : '') : '';
   }
 
   // The thread lives in a sheet over the list: full width for the resident's
@@ -1282,44 +1314,43 @@
     }
     if (!issue) { closeIssueSheet(); return; }
 
-    $('issueSheetHead').innerHTML = adminCardHead(issue) +
+    $('issueSheetHead').innerHTML = adminCardHead(issue, true) +
       '<div class="tk-title">' + esc(issue.title) + '</div>';
-
-    var notes = issue.internalNotes.length ?
-      '<div class="replies">' + issue.internalNotes.map(function (n) {
-        return '<div class="note-item">📝 ' + esc(n.message) +
-          '<br><small>' + esc(n.authorHouseNo || '') + ' · ' + esc(fmtDate(n.createdAt)) + '</small></div>';
-      }).join('') + '</div>' : '';
-
-    var statusButtons = STATUSES.map(function (s) {
-      return '<button type="button" class="chip' + (issue.status === s[0] ? ' on' : '') +
-        '" data-setstatus="' + s[0] + '" data-id="' + esc(issue.id) + '">' + esc(s[1]) + '</button>';
-    }).join('');
 
     var images = issue.attachments.length;
     $('issueSheetBody').innerHTML =
       '<div class="sheet-tags">' +
         '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
         (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
-        (issue.replies.length ?
-          '<span class="tk-thread">ตอบแล้ว ' + issue.replies.length + '</span>' : '') +
       '</div>' +
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
           (issue.contact ? '<div class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</div>' : '') +
           mediaHtml(issue.attachments) +
           repliesHtml(issue.replies) +
-          notes +
-          '<div class="reply-box" data-stop="1">' +
-            '<textarea id="adminReplyInput" placeholder="ตอบกลับถึงผู้แจ้ง (ผู้แจ้งจะเห็นข้อความนี้)"></textarea>' +
-            '<button class="btn small" type="button" data-areply="' + esc(issue.id) + '">ตอบ</button>' +
-          '</div>' +
-          '<div class="reply-box" data-stop="1">' +
-            '<textarea id="adminNoteInput" placeholder="บันทึกภายใน (ผู้แจ้งไม่เห็น)"></textarea>' +
-            '<button class="btn ghost small" type="button" data-anote="' + esc(issue.id) + '">บันทึก</button>' +
-          '</div>' +
-          '<div class="admin-actions" data-stop="1">' + statusButtons + '</div>' +
         '</div>';
+
+    // Internal notes are gone on purpose: two textareas that differed only by
+    // placeholder were one mis-click away from publishing a private note to the
+    // resident. Stored notes stay in Firestore; adminNote still exists on the
+    // server. The four-state workflow is gone too — nobody had time to keep it
+    // truthful, and a stale status is worse than none.
+    var done = !OPEN_STATUSES[issue.status];
+    $('issueSheetFoot').innerHTML =
+      '<div class="reply-box" data-stop="1">' +
+        '<textarea id="adminReplyInput" placeholder="พิมพ์ตอบผู้แจ้ง…"></textarea>' +
+        '<button class="btn small" type="button" data-areply="' + esc(issue.id) + '">ตอบ</button>' +
+      '</div>' +
+      '<div class="foot-row" data-stop="1">' +
+        (done ?
+          '<span class="reopened">✓ เรื่องนี้จบแล้ว</span>' +
+          '<button class="linkish" type="button" data-adone="open" data-id="' +
+            esc(issue.id) + '">เปิดเรื่องนี้อีกครั้ง</button>' :
+          '<label class="done-check"><input type="checkbox" id="closeWithReply">' +
+            'ตอบแล้วจบเลย</label>' +
+          '<button class="linkish" type="button" data-adone="done" data-id="' +
+            esc(issue.id) + '">ทำเสร็จแล้ว →</button>') +
+      '</div>';
   }
 
   function openIssueSheet(id) {
@@ -1544,18 +1575,6 @@
     $('tabResidentView').addEventListener('click', function () {
       setMode('resident');
     });
-    $('adminRefresh').addEventListener('click', loadAdmin);
-    $('adminSearch').addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter') return;
-      adminFilter.search = String(e.target.value || '').trim();
-      loadAdmin();
-    });
-    $('adminStats').addEventListener('click', function (e) {
-      var cell = e.target.closest('[data-status]');
-      if (!cell) return;
-      adminFilter.status = cell.getAttribute('data-status');
-      loadAdmin();
-    });
     $('issueSheetClose').addEventListener('click', closeIssueSheet);
     $('issueOverlay').addEventListener('click', function (e) {
       if (e.target === $('issueOverlay')) closeIssueSheet();
@@ -1564,33 +1583,35 @@
     // Reply, note and status controls live in the sheet now; the list keeps the
     // same handler so nothing breaks if a control ever moves back onto a card.
     function adminActionClick(e) {
+      if (e.target.closest('#doneToggle')) {
+        showDone = !showDone;
+        renderAdminList();
+        return;
+      }
       var reply = e.target.closest('[data-areply]');
       if (reply) {
         var input = $('adminReplyInput');
         var message = String(input && input.value || '').trim();
         if (!message) return;
+        var alsoClose = $('closeWithReply') && $('closeWithReply').checked;
+        var issueId = reply.getAttribute('data-areply');
         reply.disabled = true;
-        api('adminReply', { issueId: reply.getAttribute('data-areply'), message: message })
+        // Answering and finishing are one gesture, so the resident always hears
+        // about it — a thread never closes in silence.
+        api('adminReply', { issueId: issueId, message: message })
+          .then(function () {
+            return alsoClose ?
+              api('adminUpdate', { issueId: issueId, status: 'resolved' }) : null;
+          })
           .then(loadAdmin).catch(function (err) { alert(err.message); })
           .then(function () { reply.disabled = false; });
         return;
       }
-      var note = e.target.closest('[data-anote]');
-      if (note) {
-        var noteInput = $('adminNoteInput');
-        var noteText = String(noteInput && noteInput.value || '').trim();
-        if (!noteText) return;
-        note.disabled = true;
-        api('adminNote', { issueId: note.getAttribute('data-anote'), message: noteText })
-          .then(loadAdmin).catch(function (err) { alert(err.message); })
-          .then(function () { note.disabled = false; });
-        return;
-      }
-      var status = e.target.closest('[data-setstatus]');
-      if (status) {
+      var mark = e.target.closest('[data-adone]');
+      if (mark) {
         api('adminUpdate', {
-          issueId: status.getAttribute('data-id'),
-          status: status.getAttribute('data-setstatus')
+          issueId: mark.getAttribute('data-id'),
+          status: mark.getAttribute('data-adone') === 'done' ? 'resolved' : 'new'
         }).then(loadAdmin).catch(function (err) { alert(err.message); });
         return;
       }
@@ -1600,7 +1621,9 @@
       if (card) openIssueSheet(card.getAttribute('data-aopen'));
     }
     $('adminList').addEventListener('click', adminActionClick);
+    $('adminDone').addEventListener('click', adminActionClick);
     $('issueSheetBody').addEventListener('click', adminActionClick);
+    $('issueSheetFoot').addEventListener('click', adminActionClick);
   }
 
   /* ── boot ────────────────────────────────────────────────────────── */
