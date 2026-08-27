@@ -93,6 +93,9 @@
       font-family:inherit;
     }
     .tab.active { background:var(--text); border-color:var(--text); color:#fff; }
+    /* Leaves the committee desk. Pushed to the far edge so it never reads as
+       a third thing to browse alongside the two real tabs. */
+    .tab-switch { margin-left:auto; border-color:var(--border); color:var(--text-muted); }
     .tab .count {
       display:inline-block; min-width:20px; padding:0 5px; margin-left:5px;
       border-radius:99px; background:var(--accent); color:#fff;
@@ -395,7 +398,6 @@
       <div class="brand-sub">Report an Issue</div>
     </a>
     <div class="header-actions">
-      <button id="adminToggle" class="btn ghost small" type="button" hidden>หลังบ้าน</button>
       <div id="headerIdentity"></div>
     </div>
   </header>
@@ -487,6 +489,7 @@
       <div class="tabs">
         <button class="tab active" id="tabLive" type="button">เรื่องปัจจุบัน</button>
         <button class="tab" id="tabArchive" type="button">คลังเรื่องเก่า</button>
+        <button class="tab tab-switch" id="tabResidentView" type="button">มุมมองลูกบ้าน</button>
       </div>
       <div id="paneLive">
       <div class="stats" id="adminStats"></div>
@@ -672,7 +675,7 @@
     $('bootState').hidden = true;
     if (!session) showGuestForm();
     $('loginOverlay').classList.add('open');
-    $('adminToggle').hidden = true;
+    canAdmin = false;
     if (message) { $('loginErr').textContent = message; $('loginErr').classList.add('show'); }
     setTimeout(function () { $('loginSuffix').focus(); }, 80);
   }
@@ -1191,7 +1194,12 @@
     var admin = next === 'admin';
     $('adminView').hidden = !admin;
     $('residentView').hidden = admin;
-    $('adminToggle').textContent = admin ? 'มุมมองลูกบ้าน' : 'หลังบ้าน';
+    // Arriving straight on the committee desk from the landing page leaves the
+    // resident panes untouched, so switching back needs a defined destination.
+    if (!admin && $('paneMine').hidden && $('paneForm').hidden) {
+      if (session) showMine(''); else showReportForm(false);
+      return;
+    }
     $('heroKicker').textContent = admin ? 'COMMITTEE DESK' :
       (openIssueId ? 'MY REPORT' : 'RESIDENT SUPPORT');
     $('heroTitle').textContent = admin ? 'เรื่องจากลูกบ้าน' :
@@ -1344,8 +1352,8 @@
       if (!archiveLoaded) loadArchive();
     });
 
-    $('adminToggle').addEventListener('click', function () {
-      setMode(mode === 'admin' ? 'resident' : 'admin');
+    $('tabResidentView').addEventListener('click', function () {
+      setMode('resident');
     });
     $('adminRefresh').addEventListener('click', loadAdmin);
     $('adminSearch').addEventListener('keydown', function (e) {
@@ -1413,10 +1421,19 @@
     }).then(function (data) {
       var access = data.access || data;
       var permissions = (access && access.permissions) || {};
-      canAdmin = access && access.active !== false &&
-        permissions['admin.portal'] === true && permissions['admin.issues'] === true;
-      $('adminToggle').hidden = !canAdmin;
-    }).catch(function () { $('adminToggle').hidden = true; });
+      // admin.issues alone, matching what estateIssues actually enforces.
+      // The page used to demand admin.portal on top of it, which locked out
+      // every committee member who was not the chair.
+      canAdmin = Boolean(access) && access.active !== false &&
+        permissions['admin.issues'] === true;
+    }).catch(function () { canAdmin = false; });
+  }
+
+  // The landing page links committee members straight to the desk.
+  function wantsAdminView() {
+    try {
+      return new URLSearchParams(location.search).get('view') === 'admin';
+    } catch (e) { return false; }
   }
 
   function showGuestForm() {
@@ -1424,7 +1441,6 @@
     $('bootState').hidden = true;
     $('residentView').hidden = false;
     $('adminView').hidden = true;
-    $('adminToggle').hidden = true;
     renderChoiceChips();
     renderWho();
     renderPreviews();
@@ -1439,8 +1455,14 @@
     $('residentView').hidden = false;
     renderChoiceChips();
     renderWho();
-    loadMine();
-    resolveAdminAccess();
+    var toAdmin = wantsAdminView();
+    if (!toAdmin) loadMine();
+    resolveAdminAccess().then(function () {
+      if (!toAdmin) return;
+      // No permission — fall through to the ordinary resident view rather than
+      // showing an error; the backend would reject every call anyway.
+      if (canAdmin) setMode('admin'); else loadMine();
+    });
   }
 
   bindEvents();
