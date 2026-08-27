@@ -1601,7 +1601,11 @@
         var move = pg.getAttribute('data-pg').split(':');
         pageAdmin = Number(move[1]);
         renderAdminList();
-        window.scrollTo({ top: $('adminList').offsetTop - 20, behavior: 'smooth' });
+        // Back to the top of the list, not wherever the last page's tenth card
+        // happened to leave the viewport.
+        var box = (move[0] === 'a' ? $('adminList') : $('adminDone'))
+          .getBoundingClientRect();
+        window.scrollTo({ top: window.scrollY + box.top - 24, behavior: 'smooth' });
         return;
       }
       var reply = e.target.closest('[data-areply]');
