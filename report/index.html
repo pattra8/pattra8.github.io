@@ -267,6 +267,14 @@
     .media-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
     .media-thumb { display:block; width:88px; height:88px; padding:0; cursor:zoom-in; border-radius:10px; overflow:hidden; border:1px solid var(--border); background:#000; }
     .media-row img, .media-row video { width:100%; height:100%; object-fit:cover; display:block; }
+    .media-row.detail-gallery {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+      gap:12px; margin-top:18px;
+    }
+    .detail-gallery .media-thumb {
+      width:100%; height:auto; aspect-ratio:4/3; border-radius:14px;
+      box-shadow:0 4px 14px rgba(56,38,18,.09);
+    }
     .edit-box { margin-top:13px; padding:13px; border-radius:13px; background:var(--bg-soft); }
     .edit-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
     .edit-actions .btn { flex:1; }
@@ -285,7 +293,8 @@
     .mine-summary { display:flex; gap:7px; margin:17px 0 11px; overflow-x:auto; }
     #mineList { display:flex; flex-direction:column; gap:14px; }
     .detail-mode #paneMine { padding-top:14px; }
-    .mine-detail-toolbar { display:flex; align-items:center; margin-bottom:18px; }
+    .mine-detail-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+    .mine-detail-toolbar .detail-edit { margin-left:auto; }
     .detail-back {
       display:inline-flex; align-items:center; gap:7px; border:0; background:transparent;
       color:var(--accent-deep); padding:5px 0; cursor:pointer; font:500 13px/1.5 inherit;
@@ -297,6 +306,14 @@
     .issue-detail .t-title { font-size:20px; line-height:1.5; }
     .issue-detail .thread-detail { margin-top:18px; padding-top:18px; }
     .issue-detail .detail-text { font-size:15px; line-height:1.8; }
+    .resident-ticket.edit-view {
+      border:1px solid var(--border); border-radius:18px; padding:24px;
+      background:var(--card); box-shadow:0 6px 22px rgba(60,40,20,.07);
+    }
+    .edit-view .edit-box { margin:0; padding:0; background:transparent; }
+    .edit-intro { margin-bottom:22px; }
+    .edit-intro h2 { margin:0 0 5px; font-size:20px; color:var(--text); }
+    .edit-intro p { margin:0; color:var(--text-muted); font-size:13px; line-height:1.6; }
     .form-toolbar { display:flex; align-items:center; margin:15px 0 6px; }
     .report-cta-wrap {
       position:sticky; bottom:12px; z-index:12; display:flex; justify-content:flex-end;
@@ -311,7 +328,6 @@
     .summary-chip.on { border-color:var(--accent); color:var(--accent-deep); background:var(--warn-bg); }
 
     /* ── admin ── */
-    .desk-exit { display:flex; justify-content:flex-end; margin:14px 0 6px; }
     .linkish {
       border:0; background:transparent; cursor:pointer; font-family:inherit;
       font-size:13px; font-weight:500; color:var(--text-muted); padding:5px 2px;
@@ -441,6 +457,12 @@
     @media (min-width:660px) {
       .overlay.sheet-overlay { padding:28px; }
       .sheet { border-radius:20px; height:auto; max-height:100%; }
+    }
+    @media (max-width:540px) {
+      .media-row.detail-gallery { grid-template-columns:1fr; }
+      .resident-ticket.edit-view { padding:18px 15px; }
+      .mine-detail-toolbar { align-items:flex-start; }
+      .mine-detail-toolbar .detail-edit { white-space:nowrap; }
     }
 
     /* ── login ── */
@@ -610,9 +632,6 @@
       <div class="tabs" hidden>
         <button class="tab active" id="tabLive" type="button">เรื่องปัจจุบัน</button>
         <button class="tab" id="tabArchive" type="button">คลังเรื่องเก่า</button>
-      </div>
-      <div class="desk-exit">
-        <button class="linkish" id="tabResidentView" type="button">มุมมองลูกบ้าน →</button>
       </div>
       <div id="paneLive">
       <!-- One chronological list keeps the desk neutral: replies are a
@@ -1018,9 +1037,10 @@
       $('mineList').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>';
     });
   }
-  function mediaHtml(attachments) {
+  function mediaHtml(attachments, gallery) {
     if (!attachments || !attachments.length) return '';
-    return '<div class="media-row">' + attachments.map(function (a) {
+    return '<div class="media-row' + (gallery ? ' detail-gallery' : '') + '">' +
+      attachments.map(function (a) {
       var inner = a.kind === 'video' ?
         '<video src="' + esc(a.url) + '" muted playsinline></video>' :
         '<img src="' + esc(a.url) + '" alt="" loading="lazy" />';
@@ -1145,7 +1165,8 @@
     $('mineSummary').hidden = !!selectedIssue;
     if (!$('paneMine').hidden) {
       $('heroKicker').textContent = selectedIssue ? 'MY REPORT' : 'RESIDENT SUPPORT';
-      $('heroTitle').textContent = selectedIssue ? 'รายละเอียดเรื่อง' : 'เรื่องของฉัน';
+      $('heroTitle').textContent = editIssueId ? 'แก้ไขเรื่อง' :
+        (selectedIssue ? 'รายละเอียดเรื่อง' : 'เรื่องของฉัน');
     }
     $('mineSummary').innerHTML =
       '<span class="summary-chip on">ทั้งหมด ' + myIssues.length + '</span>' +
@@ -1159,7 +1180,13 @@
     }
     var issuesToRender = selectedIssue ? [selectedIssue] : myIssues;
     $('mineList').innerHTML = (selectedIssue ?
-      '<div class="mine-detail-toolbar"><button class="detail-back" type="button" data-detail-back>กลับไปเรื่องของฉัน</button></div>' : '') +
+      '<div class="mine-detail-toolbar">' +
+        '<button class="detail-back" type="button" data-detail-back>กลับไปเรื่องของฉัน</button>' +
+        (editIssueId ?
+          '<button class="linkish detail-edit" type="button" data-cancel-edit>ยกเลิก</button>' :
+          '<button class="btn ghost small detail-edit" type="button" data-edit="' +
+            esc(selectedIssue.id) + '">แก้ไขเรื่อง</button>') +
+      '</div>' : '') +
       issuesToRender.map(function (issue) {
       var open = issue.id === openIssueId;
       var pills = '<div class="t-top">' +
@@ -1183,13 +1210,17 @@
         return '<div class="ticket resident-ticket st-' + esc(issue.status) + '" data-open="' + esc(issue.id) + '">' +
           head + '<div class="t-preview">' + esc(issue.detail) + '</div></div>';
       }
+      if (editIssueId === issue.id) {
+        return '<article class="ticket resident-ticket edit-view">' +
+          '<div class="edit-intro"><h2>แก้ไขข้อมูลที่แจ้ง</h2>' +
+          '<p>ปรับเฉพาะข้อมูลที่ต้องการ แล้วกดบันทึกเมื่อเรียบร้อย</p></div>' +
+          editIssueHtml(issue) + '</article>';
+      }
       return '<article class="ticket resident-ticket issue-detail st-' + esc(issue.status) + '">' +
         head +
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
-          mediaHtml(issue.attachments) +
-          (editIssueId === issue.id ? editIssueHtml(issue) :
-            '<div data-stop="1" style="margin-top:12px"><button class="btn ghost small" type="button" data-edit="' + esc(issue.id) + '">แก้ไขเรื่องนี้</button></div>') +
+          mediaHtml(issue.attachments, true) +
           repliesHtml(issue.replies) +
           '<div class="reply-box" data-stop="1">' +
             '<textarea id="replyInput" placeholder="พิมพ์ข้อความเพิ่มเติมถึงนิติฯ"></textarea>' +
@@ -1322,7 +1353,7 @@
         '<div class="thread-detail">' +
           '<div class="detail-text">' + esc(issue.detail) + '</div>' +
           (issue.contact ? '<div class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</div>' : '') +
-          mediaHtml(issue.attachments) +
+          mediaHtml(issue.attachments, true) +
           repliesHtml(issue.replies) +
         '</div>';
 
@@ -1557,9 +1588,6 @@
       if (!archiveLoaded) loadArchive();
     });
 
-    $('tabResidentView').addEventListener('click', function () {
-      setMode('resident');
-    });
     $('issueSheetClose').addEventListener('click', closeIssueSheet);
     $('issueOverlay').addEventListener('click', function (e) {
       if (e.target === $('issueOverlay')) closeIssueSheet();
