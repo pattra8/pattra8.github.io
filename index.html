@@ -446,32 +446,6 @@
     .inbox-count[hidden] { display: none; }
     .service-card.inbox-card.show { border-color: var(--gold-light); }
 
-    /* ── featured announcement headline ── */
-    /* .service-desc is a clamped -webkit-box; once the live headline replaces
-       the static copy the slot has to become an ordinary block again. */
-    #announceFeatureDesc:has(.feature-headline) {
-      display: block;
-      -webkit-line-clamp: none;
-      overflow: visible;
-    }
-    .feature-date {
-      display: block;
-      font-size: 10px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 4px;
-    }
-    .feature-headline {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 1.5;
-      color: var(--text);
-    }
 
     .service-card.admin-only-card::before {
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
@@ -1476,13 +1450,12 @@
 
   <div class="services-grid">
 
-    <!-- Featured: announcements. It leads because it is the one card whose
-         content actually changes between visits — the latest headline is
-         pulled into the description by renderAnnouncements(). -->
+    <!-- Featured: announcements. Deliberately leads instead of the report
+         card so the page does not open on a problem-reporting note. -->
     <a href="/announce/" class="service-card featured">
       <div class="service-icon">📢</div>
       <div class="service-title">ประกาศ &amp; ข่าวสาร</div>
-      <p class="service-desc" id="announceFeatureDesc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
+      <p class="service-desc">ประกาศสำคัญจากนิติบุคคล กิจกรรมชุมชน และข่าวสารทั่วไป</p>
       <span class="service-cta">
         Announcements
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -2313,27 +2286,9 @@ function formatDate(item) {
   return source.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// The featured card earns its size by carrying the newest headline rather
-// than a fixed description of what announcements are.
-function renderAnnounceFeature() {
-  const slot = document.getElementById('announceFeatureDesc');
-  if (!slot) return;
-  const latest = announcements[0];
-  if (!latest) return;
-  const src = latest.createdAt?.toDate ? latest.createdAt.toDate() : null;
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
-    'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const when = src
-    ? `${src.getDate()} ${months[src.getMonth()]} ${src.getFullYear() + 543}`
-    : (latest.dateText || '');
-  slot.innerHTML = (when ? `<span class="feature-date">ล่าสุด · ${esc(when)}</span>` : '') +
-    `<span class="feature-headline">${esc(latest.title)}</span>`;
-}
-
 function renderAnnouncements() {
   const pageItems = announcements.slice(0, pageSize);
   pager.innerHTML = '';
-  renderAnnounceFeature();
 
   if (!pageItems.length) {
     grid.innerHTML = '<div class="announce-empty">ยังไม่มีประกาศจากนิติบุคคล</div>';
