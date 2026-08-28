@@ -1483,6 +1483,8 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
 </head>
 <body>
 
@@ -2058,7 +2060,27 @@ function escH(s) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
+// The pill + account menu now live in /assets/resident-badge.js so every page
+// shows the same items. This page keeps its own markup as a fallback for the
+// (unlikely) case where that file fails to load.
+let badgeMounted = false;
+function mountResidentBadge() {
+  if (!window.PattraBadge) return false;
+  window.PattraBadge.mount('#headerIdentity', {
+    onLogin: showLoginModal,
+    onLogout: () => {
+      clearCachedAdminAccess();
+      applyAdminAccess(null);
+      applyResidentCards(false);
+      clearServiceLinks();
+    }
+  });
+  badgeMounted = true;
+  return true;
+}
+
 function renderHeaderIdentity(session) {
+  if (badgeMounted) { window.PattraBadge.refresh(); return; }
   const el = document.getElementById('headerIdentity');
   if (!el) return;
   if (!session) {
@@ -2178,7 +2200,7 @@ async function handleLoginSubmit() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const session = getResidentSession();
-  renderHeaderIdentity(session);
+  if (!mountResidentBadge()) renderHeaderIdentity(session);
   renderAdminCards();
   applyResidentCards(!!session);
   if (session) updateServiceLinks(session.houseNo);
