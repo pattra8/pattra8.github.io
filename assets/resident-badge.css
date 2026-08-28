@@ -1,0 +1,140 @@
+/* ── Pattra Villa 8 · แบดจ์บัญชีลูกบ้าน (shared) ─────────────────────────────
+   Published to https://pattra8.com/assets/resident-badge.css and loaded by
+   every page that shows a signed-in resident. Source of truth for the account
+   menu lives here — do not fork this into a page's own <style>.
+
+   Classes are `pv-` prefixed so they never collide with a page's own
+   .identity-pill / .profile-dropdown rules. Colours fall back to the estate
+   palette when a page does not define the custom properties.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-badge {
+  position: relative;
+  display: inline-block;
+  font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif;
+  text-align: left;
+}
+
+.pv-badge > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 12px 4px 5px;
+  border: 1.5px solid var(--accent-soft, #e8b577);
+  border-radius: 999px;
+  background: var(--accent-pale, #f7e6cd);
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pv-badge > summary::-webkit-details-marker { display: none; }
+.pv-badge > summary::marker { content: ''; }
+.pv-badge > summary:hover,
+.pv-badge[open] > summary { background: #fff; }
+
+.pv-badge-avatar {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent, #c47a2c);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.pv-badge-text { min-width: 0; }
+.pv-badge-house {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text, #2a2218);
+  line-height: 1.2;
+}
+.pv-badge-name {
+  font-size: 11.5px;
+  color: var(--text-soft, #6b5d4a);
+  line-height: 1.25;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pv-badge-chev {
+  font-size: 10px;
+  color: var(--accent-text, #9a5c1f);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.pv-badge[open] .pv-badge-chev { transform: rotate(180deg); }
+
+.pv-badge-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 216px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--accent-soft, #e8b577);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(60, 40, 20, 0.16);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Pages that hang the badge on the left edge (the /data/ and /vehicle/
+   context bar) opt out of the right-aligned menu. */
+.pv-badge[data-align="left"] .pv-badge-menu { right: auto; left: 0; }
+
+.pv-badge-menu a,
+.pv-badge-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  text-decoration: none;
+  color: var(--text, #2a2218);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pv-badge-menu a:hover,
+.pv-badge-menu button:hover { background: var(--accent-pale, #f7e6cd); }
+
+.pv-badge-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border-soft, #efe8d6);
+}
+.pv-badge-menu .pv-badge-logout { color: #9a3322; font-weight: 600; }
+
+/* Signed-out state — a page passes onLogin to open its own modal instead. */
+.pv-badge-login {
+  padding: 8px 16px;
+  border: 1.5px solid var(--accent-soft, #e8b577);
+  border-radius: 999px;
+  background: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-text, #9a5c1f);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+.pv-badge-login:hover { background: var(--accent-pale, #f7e6cd); }
+
+@media (max-width: 640px) {
+  .pv-badge-name { display: none; }
+  .pv-badge-menu { min-width: 200px; }
+}
