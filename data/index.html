@@ -2057,14 +2057,6 @@
       : `รถยนต์ ${cars.length} คัน · มอเตอร์ไซค์ ${motos.length} คัน`;
 
     sec.innerHTML = `
-      <div class="owner-bar">
-        <div class="owner-house">${esc(r.house_no)}</div>
-        <div class="owner-info">
-          <div class="owner-name">${esc(r.name || '(ไม่ระบุชื่อ)')}</div>
-          <div class="owner-meta">บ้านเลขที่ ${esc(r.house_no)}</div>
-        </div>
-      </div>
-
       <div class="info-header">
         <div class="info-title">ข้อมูลส่วนตัว</div>
         <button class="edit-btn" onclick="openModal('${esc(r.house_no)}')">
@@ -2388,6 +2380,19 @@
     performSearch(q);
   });
 
+  // Other pages send residents here to change their PIN — this page owns the
+  // dialog, so the shared account menu links to /data/?house=X&action=changepin
+  // instead of every page re-implementing it.
+  function openPinChangeFromUrl(houseNo) {
+    let action = '';
+    try { action = new URLSearchParams(location.search).get('action') || ''; } catch (e) { return; }
+    if (action !== 'changepin') return;
+    const url = new URL(location.href);
+    url.searchParams.delete('action');
+    history.replaceState(null, '', url);
+    requestResidentPinChange(houseNo);
+  }
+
   // Auto-load from URL/session context on page open
   (async function autoLoadFromContext() {
     const h = getStoredHouse();
@@ -2405,6 +2410,7 @@
     primeSearchInput(h);
 
     const found = await performSearch(h);
+    if (found) openPinChangeFromUrl(h);
     if (!found) {
       clearStoredHouse();
       hideContextBar();
