@@ -1981,14 +1981,6 @@
     const carsAtQuota = cars.length >= carQuota;
 
     const ownerHtml = `
-      <div class="owner-bar">
-        <div class="owner-house">${esc(currentRecord.house_no)}</div>
-        <div class="owner-info">
-          <div class="owner-name">${esc(currentRecord.name || '(ไม่ระบุชื่อ)')}</div>
-          <div class="owner-meta">บ้านเลขที่ ${esc(currentRecord.house_no)}${currentRecord.phone ? ' · ' + esc(maskPhone(currentRecord.phone)) : ''}</div>
-        </div>
-      </div>
-
       <div class="vehicles-header">
         <div class="vehicles-title">ทะเบียนรถ<span class="vehicles-title-count">(รวม ${total} คัน · 🚗 รถยนต์ ${cars.length}/${carQuota} · 🏍️ มอเตอร์ไซค์ ${motos.length} คัน)</span></div>
         <button class="add-btn" id="addBtn"><span class="plus">+</span> เพิ่มรถ</button>
