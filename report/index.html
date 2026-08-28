@@ -341,16 +341,25 @@
       font-size:12.5px; line-height:1.7; color:var(--text-muted); background:var(--card);
     }
     /* The foot holds one clear next move; the composer unfolds out of it. */
+    .tl-danger {
+      margin-top:22px; padding-top:16px; border-top:1px solid var(--border-soft);
+      display:flex; justify-content:center;
+    }
+    .tl-danger button {
+      border:1px solid #e8c6bb; border-radius:10px; background:transparent;
+      color:#86341e; cursor:pointer; padding:8px 16px; font:500 12.5px/1.5 inherit;
+    }
+    .tl-danger button:hover { background:var(--err-bg); }
     .tl-actions { display:flex; gap:9px; align-items:center; }
     .tl-actions .btn { padding:11px 10px; }
     .tl-actions .tl-main { flex:1; }
-    .reply-send { display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .reply-send { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
     .reply-send .linkish { font-size:11.5px; }
     .tl-foot .reply-box { display:none; }
     .tl-foot.composing .reply-box { display:flex; }
     .tl-foot.composing .tl-actions { display:none; }
     .reply-box { display:flex; gap:8px; margin-top:12px; align-items:flex-start; }
-    .reply-box textarea { min-height:52px; font-size:14px; }
+    .reply-box textarea { min-height:140px; font-size:15px; line-height:1.7; padding:12px 14px; }
     .mine-summary { display:flex; gap:7px; margin:17px 0 11px; overflow-x:auto; }
     .inbox-alert {
       display:flex; align-items:center; gap:11px; width:100%; margin:17px 0 12px;
@@ -482,7 +491,6 @@
       font-size:11.5px; color:var(--text-muted); line-height:1.4;
       display:flex; gap:6px; align-items:center; flex-wrap:wrap;
     }
-    .tk-sub .code { font-family:ui-monospace,'SF Mono',Menlo,monospace; font-weight:600; color:var(--accent-text); }
     .tk-st {
       flex:0 0 auto; border-radius:99px; padding:3px 11px;
       font-size:11px; font-weight:600; white-space:nowrap;
@@ -634,7 +642,7 @@
       .sheet-body { padding:14px 14px 18px; }
       .sheet-foot { padding:10px 14px calc(12px + env(safe-area-inset-bottom)); }
       .sheet-foot .reply-box { align-items:stretch; }
-      .sheet-foot textarea { min-height:44px; max-height:110px; }
+      .sheet-foot textarea { min-height:120px; max-height:200px; }
       .sheet-foot .btn { min-width:58px; min-height:44px; }
     }
   </style>
@@ -1568,8 +1576,8 @@
       '<div class="tk-who-tx">' +
         '<div class="tk-name">' +
           (anon ? 'ไม่ประสงค์ออกนาม' : 'บ้าน ' + esc(issue.houseNo)) + '</div>' +
-        '<div class="tk-sub"><span class="code">' + esc(issue.code) + '</span>' +
-          '<span>· ' + esc(absolute ? fmtDate(issue.createdAt) : fmtAgo(issue.createdAt)) +
+        '<div class="tk-sub"><span>' +
+          esc(absolute ? fmtDate(issue.createdAt) : fmtAgo(issue.createdAt)) +
           '</span></div>' +
       '</div>' +
     '</div>';
@@ -1656,7 +1664,10 @@
         '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
         (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
       '</div>' +
-      timelineHtml(issue, true);
+      timelineHtml(issue, true) +
+      '<div class="tl-danger" data-stop="1">' +
+        '<button type="button" data-adelete="' + esc(issue.id) + '">ลบเรื่องนี้ถาวร</button>' +
+      '</div>';
 
     // Internal notes are gone on purpose: two textareas that differed only by
     // placeholder were one mis-click away from publishing a private note to the
@@ -1883,7 +1894,11 @@
     });
     $('mediaClose').addEventListener('click', closeMedia);
     $('mediaOverlay').addEventListener('click', function (e) {
-      if (e.target === $('mediaOverlay')) closeMedia();
+      // Everything except the picture itself is "outside": the centring box
+      // fills most of the screen, so testing for the overlay alone left the
+      // viewer tapping a dead zone and wondering why nothing closed.
+      if (e.target.closest('#mediaStage img, #mediaStage video')) return;
+      closeMedia();
     });
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape') return;
@@ -1945,6 +1960,26 @@
         }).catch(function (err) {
           alert(err.message);
           status.disabled = false;
+        });
+        return;
+      }
+      var del = e.target.closest('[data-adelete]');
+      if (del) {
+        var issueId = del.getAttribute('data-adelete');
+        var subject = '';
+        for (var d = 0; d < adminIssues.length; d++) {
+          if (adminIssues[d].id === issueId) { subject = adminIssues[d].title; break; }
+        }
+        if (!confirm('ลบ “' + subject + '” ถาวรใช่ไหม\n\n' +
+          'ข้อความ รูปแนบ และบทสนทนาทั้งหมดจะหายไป กู้คืนไม่ได้ ' +
+          'และผู้แจ้งจะไม่เห็นเรื่องนี้อีก')) return;
+        del.disabled = true;
+        api('adminDelete', { issueId: issueId }).then(function () {
+          closeIssueSheet();
+          return loadAdmin();
+        }).catch(function (err) {
+          alert(err.message);
+          del.disabled = false;
         });
         return;
       }
