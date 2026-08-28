@@ -48,6 +48,13 @@
     font-size:11px; color:var(--text-muted); line-height:1.2; margin-top:1px;
     word-break:break-word; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
+  .profile-menu { position:relative; }
+  .profile-menu > summary { list-style:none; }
+  .profile-menu > summary::-webkit-details-marker { display:none; }
+  .profile-dropdown { position:absolute; z-index:120; top:calc(100% + 8px); right:0; width:220px; padding:7px; background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 14px 34px rgba(49,38,29,.16); }
+  .profile-dropdown a,.profile-dropdown button { display:flex; width:100%; box-sizing:border-box; align-items:center; gap:9px; border:0; border-radius:9px; padding:10px 11px; background:transparent; color:var(--text); font:inherit; font-size:13px; text-align:left; text-decoration:none; cursor:pointer; }
+  .profile-dropdown a:hover,.profile-dropdown button:hover { background:var(--bg-soft); }
+  .profile-dropdown .profile-logout { color:#a33b32; border-top:1px solid var(--border); border-radius:0 0 9px 9px; margin-top:4px; }
   @media (max-width:560px) {
     .resident-banner { max-width:56vw; }
     .resident-avatar { width:26px; height:26px; font-size:11px; }
@@ -192,13 +199,20 @@
   <div class="wrap">
     <div class="site-header">
       <a href="/" class="home-link">← หน้าแรก</a>
-      <div class="resident-banner" id="residentBanner" style="display:none;" title="กดเพื่อออกจากระบบ">
+      <details class="profile-menu" id="profileMenu" style="display:none;">
+      <summary class="resident-banner" id="residentBanner" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชี">
         <div class="resident-avatar" id="residentAvatar">38</div>
         <div class="resident-meta">
           <div class="resident-house" id="residentHouse">บ้าน 38/—</div>
           <div class="resident-name" id="residentName">—</div>
         </div>
+      </summary>
+      <div class="profile-dropdown">
+        <a id="profileDataLink" href="/data/">👤 แก้ไขข้อมูลส่วนตัว</a>
+        <a id="profileVehicleLink" href="/vehicle/">🚗 ลงทะเบียนรถยนต์</a>
+        <button class="profile-logout" id="profileLogout" type="button">ออกจากระบบ</button>
       </div>
+      </details>
     </div>
 
     <h1>🧾 ใบเสร็จของฉัน</h1>
@@ -285,14 +299,18 @@
   function renderResidentBanner() {
     var s = getSession();
     var banner = document.getElementById('residentBanner');
-    if (!s) { banner.style.display = 'none'; return; }
+    var menu = document.getElementById('profileMenu');
+    if (!s) { menu.style.display = 'none'; return; }
     var houseNo = String(s.houseNo || '38/—');
     var name = residentDisplayName(s);
     var initial = (name.match(/[ก-๙A-Za-z0-9]/) || houseNo.match(/[0-9A-Za-z]/) || ['P'])[0];
     document.getElementById('residentAvatar').textContent = String(initial).toUpperCase();
     document.getElementById('residentHouse').textContent = 'บ้าน ' + houseNo;
     document.getElementById('residentName').textContent = name;
-    banner.style.display = 'flex';
+    var houseQuery = encodeURIComponent(houseNo);
+    document.getElementById('profileDataLink').href = '/data/?house=' + houseQuery;
+    document.getElementById('profileVehicleLink').href = '/vehicle/?house=' + houseQuery;
+    menu.style.display = 'block';
   }
 
   function showLogin(msg) {
@@ -310,7 +328,7 @@
     renderResidentBanner();
   }
 
-  document.getElementById('residentBanner').addEventListener('click', function() {
+  document.getElementById('profileLogout').addEventListener('click', function() {
     if (!confirm('ออกจากระบบ?')) return;
     localStorage.removeItem(SESSION_KEY);
     document.getElementById('listRoot').innerHTML = '';

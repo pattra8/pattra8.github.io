@@ -54,6 +54,15 @@
     }
     .pill-house { font-size:.8rem; font-weight:700; color:var(--text); line-height:1.2; }
     .pill-name { font-size:.72rem; color:var(--muted); line-height:1.2; }
+    .profile-menu { position:relative; }
+    .profile-menu > summary { list-style:none; }
+    .profile-menu > summary::-webkit-details-marker { display:none; }
+    .pill-chevron { color:var(--muted); font-size:10px; margin-left:2px; transition:transform .18s; }
+    .profile-menu[open] .pill-chevron { transform:rotate(180deg); }
+    .profile-dropdown { position:absolute; z-index:220; top:calc(100% + 8px); right:0; width:220px; padding:7px; background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:0 14px 34px rgba(49,38,29,.16); }
+    .profile-dropdown a,.profile-dropdown button { display:flex; width:100%; box-sizing:border-box; align-items:center; gap:9px; border:0; border-radius:9px; padding:10px 11px; background:transparent; color:var(--text); font:inherit; font-size:13px; text-align:left; text-decoration:none; cursor:pointer; }
+    .profile-dropdown a:hover,.profile-dropdown button:hover { background:var(--amber-bg); }
+    .profile-dropdown .profile-logout { color:#a33b32; border-top:1px solid var(--line); border-radius:0 0 9px 9px; margin-top:4px; }
     .hero { text-align:center; margin:22px 0 4px; background:var(--card); border:1px solid var(--line);
       border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin:16px 0 10px; }
     .ornament { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px; }
@@ -410,11 +419,15 @@
       if(!s){elIdentity.innerHTML=''; return;}
       var name=residentName(s.houseNo);
       var initial=((name||s.houseNo||'').match(/[\dA-Za-z฀-๿]/)||['P'])[0].toUpperCase();
-      elIdentity.innerHTML='<div class="identity-pill" id="idPill" title="ออกจากระบบ">'+
+      var houseQuery=encodeURIComponent(s.houseNo);
+      elIdentity.innerHTML='<details class="profile-menu"><summary class="identity-pill" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชี">'+
         '<div class="pill-avatar">'+esc(initial)+'</div><div>'+
         '<div class="pill-house">บ้าน '+esc(s.houseNo)+'</div>'+
-        '<div class="pill-name">'+esc(name||'กรรมการ')+'</div></div></div>';
-      var p=document.getElementById('idPill');
+        '<div class="pill-name">'+esc(name||'กรรมการ')+'</div></div><span class="pill-chevron" aria-hidden="true">▼</span></summary>'+
+        '<div class="profile-dropdown"><a href="/data/?house='+houseQuery+'">👤 แก้ไขข้อมูลส่วนตัว</a>'+
+        '<a href="/vehicle/?house='+houseQuery+'">🚗 ลงทะเบียนรถยนต์</a>'+
+        '<button class="profile-logout" id="profileLogout" type="button">ออกจากระบบ</button></div></details>';
+      var p=document.getElementById('profileLogout');
       if(p) p.addEventListener('click',function(){localStorage.removeItem(KEY); renderIdentity(null); showLogin();});
     }
     function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}

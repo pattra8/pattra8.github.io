@@ -1167,6 +1167,24 @@
       cursor: pointer; transition: background 0.2s; white-space: nowrap;
     }
     .identity-pill:hover { background: var(--bg3); }
+    .profile-menu { position: relative; }
+    .profile-menu > summary { list-style: none; }
+    .profile-menu > summary::-webkit-details-marker { display: none; }
+    .pill-chevron { color: var(--taupe-mid); font-size: 11px; margin-left: 2px; transition: transform .18s; }
+    .profile-menu[open] .pill-chevron { transform: rotate(180deg); }
+    .profile-dropdown {
+      position: absolute; z-index: 1200; top: calc(100% + 8px); right: 0;
+      width: 224px; padding: 7px; background: var(--card); border: 1px solid var(--bg3);
+      border-radius: 14px; box-shadow: 0 14px 36px rgba(49,38,29,.16);
+    }
+    .profile-dropdown a, .profile-dropdown button {
+      display: flex; width: 100%; align-items: center; gap: 10px; box-sizing: border-box;
+      border: 0; border-radius: 9px; padding: 10px 11px; background: transparent;
+      color: var(--taupe); font: inherit; font-size: 13px; text-align: left;
+      text-decoration: none; cursor: pointer;
+    }
+    .profile-dropdown a:hover, .profile-dropdown button:hover { background: var(--gold-pale); }
+    .profile-dropdown .profile-logout { color: #a33b32; border-top: 1px solid var(--bg3); border-radius: 0 0 9px 9px; margin-top: 4px; }
     .pill-avatar {
       width: 28px; height: 28px; border-radius: 50%;
       background: var(--gold); color: #fff; flex-shrink: 0;
@@ -2042,15 +2060,24 @@ function renderHeaderIdentity(session) {
     return;
   }
   const initial = (session.residentName || session.houseNo).charAt(0).toUpperCase();
+  const houseQuery = encodeURIComponent(session.houseNo);
   el.innerHTML = `
-    <div class="identity-pill" onclick="logoutResident()" title="กดเพื่อออกจากระบบ">
+    <details class="profile-menu">
+    <summary class="identity-pill" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชีของบ้าน ${escH(session.houseNo)}">
       <div class="pill-avatar">${escH(initial)}</div>
       <div>
         <div class="pill-house">บ้าน ${escH(session.houseNo)}</div>
         ${session.residentName
           ? `<div class="pill-name">${escH(session.residentName)}</div>` : ''}
       </div>
-    </div>`;
+      <span class="pill-chevron" aria-hidden="true">▼</span>
+    </summary>
+    <div class="profile-dropdown">
+      <a href="/data/?house=${houseQuery}">👤 แก้ไขข้อมูลส่วนตัว</a>
+      <a href="/vehicle/?house=${houseQuery}">🚗 ลงทะเบียนรถยนต์</a>
+      <button class="profile-logout" type="button" onclick="logoutResident()">ออกจากระบบ</button>
+    </div>
+    </details>`;
 }
 
 function logoutResident() {
