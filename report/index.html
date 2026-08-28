@@ -868,7 +868,7 @@
   }
   function residentStatusLabel(status, category) {
     if (status === 'new') return 'ส่งถึงกรรมการแล้ว';
-    if (status === 'in_progress') return 'กำลังดูแล';
+    if (status === 'in_progress') return 'กำลังดำเนินการ';
     return category === 'suggestion' || category === 'feedback' ?
       'รับทราบแล้ว' : 'ดำเนินการแล้ว';
   }
@@ -1451,7 +1451,7 @@
       '<button class="summary-chip' + (mineFilter === 'all' ? ' on' : '') +
         '" type="button" data-mine-filter="all">ทั้งหมด ' + myIssues.length + '</button>' +
       '<button class="summary-chip' + (mineFilter === 'active' ? ' on' : '') +
-        '" type="button" data-mine-filter="active">กำลังดูแล ' + activeCount + '</button>' +
+        '" type="button" data-mine-filter="active">กำลังดำเนินการ ' + activeCount + '</button>' +
       '<button class="summary-chip' + (mineFilter === 'done' ? ' on' : '') +
         '" type="button" data-mine-filter="done">สิ้นสุดแล้ว ' + doneCount + '</button>';
     if (!myIssues.length) {
