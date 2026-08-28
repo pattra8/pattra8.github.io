@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ภาพรวม Visitor หมู่บ้าน · Pattra Villa 8</title>
+<link rel="stylesheet" href="/assets/resident-badge.css">
+<script src="/assets/resident-badge.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -212,13 +214,13 @@
   <div class="wrap">
     <div class="site-header">
       <a href="/" class="home-link">← หน้าแรก</a>
-      <div class="resident-banner" id="residentBanner" style="display:none;">
+      <div id="headerIdentity"><div class="resident-banner" id="residentBanner" style="display:none;">
         <div class="resident-avatar" id="residentAvatar">38</div>
         <div class="resident-meta">
           <div class="resident-house" id="residentHouse">บ้าน 38/—</div>
           <div class="resident-name" id="residentName">—</div>
         </div>
-      </div>
+      </div></div>
     </div>
 
     <h1>🔎 ภาพรวม Visitor หมู่บ้าน</h1>
@@ -339,7 +341,7 @@
   function getSession() {
     try {
       var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      if (!s || Number(s.expiresAt) <= Date.now()) { localStorage.removeItem(SESSION_KEY); return null; }
+      if (!s || Number(s.expiresAt) <= Date.now()) return null;
       return s;
     } catch (e) { return null; }
   }
@@ -360,7 +362,9 @@
     return String((s && s.residentName) || '').trim() || 'เจ้าของบ้าน';
   }
 
+  var badgeMounted = false;
   function renderResidentBanner() {
+    if (badgeMounted) { window.PattraBadge.refresh(); return; }
     var s = getSession();
     var banner = document.getElementById('residentBanner');
     if (!s) {
@@ -374,6 +378,19 @@
     document.getElementById('residentHouse').textContent = 'บ้าน ' + houseNo;
     document.getElementById('residentName').textContent = name;
     banner.style.display = 'flex';
+  }
+
+  function mountResidentBadge() {
+    if (!window.PattraBadge) return false;
+    window.PattraBadge.mount('#headerIdentity', {
+      onLogin: showLogin,
+      onLogout: function() {
+        document.getElementById('visitorList').innerHTML = '';
+        showLogin();
+      }
+    });
+    badgeMounted = true;
+    return true;
   }
 
   function showLogin(msg) {
@@ -534,9 +551,14 @@
       cache: 'no-store',
       body: JSON.stringify({action: 'visitorBoard', houseNo: s.houseNo, pin: s.pin, reportDate: currentDate})
     }).then(function(res) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem(SESSION_KEY);
-        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      if (res.status === 403) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('visitorList').innerHTML = '<div class="empty-state">บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้</div>';
         return null;
       }
       return res.json().then(function(data) { return {ok: res.ok, data: data}; });
@@ -556,6 +578,7 @@
     });
   }
 
+  document.addEventListener('DOMContentLoaded', mountResidentBadge);
   loadReport();
 </script>
 
