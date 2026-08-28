@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ประกาศข่าวสาร · Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Sans+Thai+Looped:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -936,8 +938,10 @@
 </header>
 
 <script>
-// ── Resident Session — read-only (no login prompt) ──
-(function() {
+// ── Resident Session — shared badge with read-only fallback ──
+var badgeMounted = false;
+function renderHeaderIdentity() {
+  if (badgeMounted) { window.PattraBadge.refresh(); return; }
   try {
     const raw = localStorage.getItem('pattra_resident_session_v1');
     if (!raw) return;
@@ -970,7 +974,16 @@
         </div>
       </div>`;
   } catch (_) {}
-})();
+}
+function mountResidentBadge() {
+  if (!window.PattraBadge) return false;
+  window.PattraBadge.mount('#headerIdentity');
+  badgeMounted = true;
+  return true;
+}
+document.addEventListener('DOMContentLoaded', function () {
+  if (!mountResidentBadge()) renderHeaderIdentity();
+});
 </script>
 
 
