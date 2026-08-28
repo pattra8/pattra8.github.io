@@ -262,7 +262,7 @@
     .announce-card {
       background: var(--card);
       border-radius: var(--radius-card);
-      padding: 36px 38px;
+      padding: 0;
       border: 1px solid var(--border-soft);
       box-shadow: var(--shadow-card);
       transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
@@ -345,6 +345,96 @@
       word-wrap: break-word;
       letter-spacing: 0.005em;
     }
+
+    /* ─── COLLAPSED LIST ROW ───
+       The page used to print every announcement in full, so one long notice
+       pushed the rest off the screen. Each item is now a heading row; the body
+       and its attachments open on demand, one at a time. */
+    .ann-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      padding: 22px 26px;
+      background: none;
+      border: 0;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .ann-bullet {
+      width: 10px;
+      height: 10px;
+      margin-top: 9px;
+      border-radius: 50%;
+      background: var(--type-default-strip);
+      flex-shrink: 0;
+    }
+    .announce-card.urgent .ann-bullet { background: var(--type-urgent-strip); }
+    .announce-card.info   .ann-bullet { background: var(--type-info-strip); }
+    .announce-card.event  .ann-bullet { background: var(--type-event-strip); }
+
+    .ann-head-main { flex: 1; min-width: 0; }
+
+    .ann-head .announce-meta { margin-bottom: 8px; gap: 10px; }
+
+    .ann-head .announce-title {
+      display: block;
+      font-size: 20px;
+      line-height: 1.4;
+      margin-bottom: 0;
+    }
+
+    .ann-preview {
+      display: block;
+      margin-top: 6px;
+      font-size: 14.5px;
+      color: var(--text-soft);
+      line-height: 1.55;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    .announce-card.open .ann-preview { display: none; }
+
+    .ann-attach {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .ann-chev {
+      flex-shrink: 0;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--accent-text);
+      transition: transform 0.22s;
+    }
+    .announce-card.open .ann-chev { transform: rotate(180deg); }
+
+    .ann-detail {
+      margin: 0 26px;
+      padding: 18px 0 24px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .ann-detail[hidden] { display: none; }
+
+    .ann-detail .announce-body p { margin: 0 0 12px; }
+    .ann-detail .announce-body p:last-child { margin-bottom: 0; }
+    .ann-detail .announce-body ul {
+      margin: 0 0 12px;
+      padding-left: 22px;
+      list-style: disc;
+    }
+    .ann-detail .announce-body li { margin-bottom: 6px; }
+    .ann-detail .announce-body { white-space: normal; }
 
     .announce-empty {
       background: var(--card);
@@ -774,7 +864,10 @@
       .main { padding: 16px 16px 64px; }
 
       .announce-grid { gap: 14px; }
-      .announce-card { padding: 26px 22px; border-radius: 16px; }
+      .announce-card { border-radius: 16px; }
+      .ann-head { padding: 18px 18px; gap: 12px; }
+      .ann-head .announce-title { font-size: 18px; }
+      .ann-detail { margin: 0 18px; padding: 16px 0 20px; }
       .announce-title { font-size: 22px; line-height: 1.32; }
       .announce-body { font-size: 17px; line-height: 1.85; }
       .announce-meta { gap: 10px; margin-bottom: 14px; }
@@ -816,7 +909,8 @@
     }
 
     @media (max-width: 380px) {
-      .announce-card { padding: 22px 18px; }
+      .ann-head { padding: 16px 15px; }
+      .ann-detail { margin: 0 15px; }
       .announce-title { font-size: 20px; }
       .announce-body { font-size: 16.5px; }
     }
@@ -1115,6 +1209,36 @@ function formatDate(item) {
   return `${source.getDate()} ${months[source.getMonth()]} ${source.getFullYear() + 543}`;
 }
 
+// A one-line taste of the notice for the collapsed row.
+function buildPreview(body) {
+  const text = String(body || '').replace(/\s+/g, ' ').trim();
+  return text.length > 140 ? text.slice(0, 137) + '…' : text;
+}
+
+// Bodies are written as plain text in the admin form: a few short lines, often
+// already marked up by hand with "-", "•" or "1." Render those as a real
+// bullet list and everything else as paragraphs, so a long notice reads as
+// points instead of one unbroken block.
+function formatBody(body) {
+  const lines = String(body || '').split(/\r?\n/).map(line => line.trim());
+  const html = [];
+  let list = [];
+  const flushList = () => {
+    if (!list.length) return;
+    html.push('<ul>' + list.map(li => `<li>${esc(li)}</li>`).join('') + '</ul>');
+    list = [];
+  };
+  lines.forEach(line => {
+    if (!line) { flushList(); return; }
+    const bullet = line.match(/^(?:[-–—•*·]|\(?\d{1,2}[.)])\s+(.*)$/);
+    if (bullet) { list.push(bullet[1]); return; }
+    flushList();
+    html.push(`<p>${esc(line)}</p>`);
+  });
+  flushList();
+  return html.join('') || `<p>${esc(body)}</p>`;
+}
+
 function renderAnnouncements() {
   const totalPages = Math.max(1, Math.ceil(announcements.length / pageSize));
   currentPage = Math.min(currentPage, totalPages);
@@ -1127,21 +1251,56 @@ function renderAnnouncements() {
     return;
   }
 
-  grid.innerHTML = pageItems.map(item => {
+  grid.innerHTML = pageItems.map((item, index) => {
     const type = (item.type || '').toLowerCase();
     const typeLabel = TYPE_LABELS[type] || TYPE_LABELS[''];
+    const attachCount = (item.photos || []).length;
+    const panelId = `annPanel${index}`;
     return `
       <article class="announce-card ${esc(type)}">
-        <div class="announce-meta">
-          <span class="announce-badge">${esc(typeLabel)}</span>
-          <span class="announce-date">${esc(formatDate(item))}</span>
+        <button class="ann-head" type="button" aria-expanded="false" aria-controls="${panelId}">
+          <span class="ann-bullet" aria-hidden="true"></span>
+          <span class="ann-head-main">
+            <span class="announce-meta">
+              <span class="announce-badge">${esc(typeLabel)}</span>
+              <span class="announce-date">${esc(formatDate(item))}</span>
+              ${attachCount ? `<span class="ann-attach">📎 ${attachCount}</span>` : ''}
+            </span>
+            <span class="announce-title">${esc(item.title)}</span>
+            <span class="ann-preview">${esc(buildPreview(item.body))}</span>
+          </span>
+          <span class="ann-chev" aria-hidden="true">▾</span>
+        </button>
+        <div class="ann-detail" id="${panelId}" hidden>
+          <div class="announce-body">${formatBody(item.body)}</div>
+          ${buildPhotoStrip(item.photos)}
         </div>
-        <h2 class="announce-title">${esc(item.title)}</h2>
-        <div class="announce-body">${esc(item.body)}</div>
-        ${buildPhotoStrip(item.photos)}
       </article>
     `;
   }).join('');
+
+  // One announcement open at a time — the page stays a scannable list of
+  // headings instead of turning back into a wall of text.
+  grid.querySelectorAll('.ann-head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.announce-card');
+      const panel = card.querySelector('.ann-detail');
+      const willOpen = panel.hidden;
+      grid.querySelectorAll('.announce-card.open').forEach(other => {
+        if (other === card) return;
+        other.classList.remove('open');
+        other.querySelector('.ann-detail').hidden = true;
+        other.querySelector('.ann-head').setAttribute('aria-expanded', 'false');
+      });
+      panel.hidden = !willOpen;
+      card.classList.toggle('open', willOpen);
+      head.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) {
+        const top = card.getBoundingClientRect().top + window.scrollY - 90;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      }
+    });
+  });
 
   // Gallery image clicks → lightbox
   grid.querySelectorAll('.announce-gallery').forEach(gallery => {
