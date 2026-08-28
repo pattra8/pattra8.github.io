@@ -1655,7 +1655,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('loginPin').focus();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeLoginModal(); closeLightbox(); closeMyRequest(); }
+    if (e.key === 'Escape') {
+      closeLoginModal(); closeLightbox(); closeMyRequest();
+      document.querySelectorAll('.profile-menu[open]').forEach(menu => { menu.open = false; });
+    }
+  });
+});
+document.addEventListener('click', event => {
+  document.querySelectorAll('.profile-menu[open]').forEach(menu => {
+    if (!menu.contains(event.target)) menu.open = false;
   });
 });
 </script>

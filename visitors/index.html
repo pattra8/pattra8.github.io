@@ -792,8 +792,10 @@
       if(e.key==='Escape'){
         if(elPreviewOverlay.classList.contains('open')) closePreview();
         else if(elEditOverlay.classList.contains('open')) closeEdit();
+        document.querySelectorAll('.profile-menu[open]').forEach(function(menu){menu.open=false;});
       }
     });
+    document.addEventListener('click',function(e){document.querySelectorAll('.profile-menu[open]').forEach(function(menu){if(!menu.contains(e.target))menu.open=false;});});
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});

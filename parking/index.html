@@ -36,6 +36,15 @@ body{font-family:"Sarabun",sans-serif;background:linear-gradient(180deg,var(--bg
 .hbtn-add{background:var(--taupe);border:1px solid var(--taupe);color:white;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:"Sarabun",sans-serif;display:none;align-items:center;gap:5px;transition:all .2s;letter-spacing:.08em;text-transform:uppercase;}
 .hbtn-add:hover{background:var(--gold);border-color:var(--gold);}
 .hdr.admin-on .hbtn-add{display:flex;}
+.layout-tools{position:relative;display:none;}
+.layout-tools>summary{list-style:none;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--gold);color:var(--gold);padding:8px 13px;border-radius:8px;font-size:11px;cursor:pointer;font-family:"Sarabun",sans-serif;letter-spacing:.06em;white-space:nowrap;}
+.layout-tools>summary::-webkit-details-marker{display:none;}
+.layout-tools[open]>summary{background:var(--gold);color:#fff;}
+.layout-tools-menu{position:absolute;z-index:1300;top:calc(100% + 8px);right:0;width:190px;padding:6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 14px 34px rgba(49,38,29,.18);}
+.layout-tools-menu .hbtn{display:flex;width:100%;align-items:center;border:0;border-radius:8px;padding:10px 11px;text-align:left;text-transform:none;letter-spacing:0;color:var(--taupe);}
+.layout-tools-menu .hbtn:hover{background:var(--gold-pale);color:var(--taupe);}
+.layout-tools-menu .hbtn.active{background:var(--gold-pale);color:var(--gold);}
+.layout-tools-menu #saveBtn{background:var(--taupe);color:#fff;}
 
 /* ── MAIN ── */
 .main{flex:1;display:flex;overflow:hidden;}
@@ -206,11 +215,16 @@ body.edit-mode .map-container::after{
     <div id="headerIdentity"></div>
     <div class="live"><div class="dot"></div> LIVE</div>
     <div class="sync-chip" id="syncLabel">Updated --:--</div>
-    <button class="hbtn" id="editBtn"  onclick="toggleEdit()" style="display:none">✏️ แก้ตำแหน่ง</button>
-    <button class="hbtn" id="alignBtn" onclick="autoAlignAll()" style="display:none">📐 Auto Align</button>
-    <button class="hbtn" id="saveBtn"  onclick="savePositions()" style="display:none">💾 บันทึก</button>
-    <button class="hbtn" id="resetBtn" onclick="resetPositions()" style="display:none">↺ Reset</button>
-    <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()" style="display:none">⬇ Backup</button>
+    <details class="layout-tools" id="layoutTools">
+      <summary>⚙️ จัดการผัง <span aria-hidden="true">▾</span></summary>
+      <div class="layout-tools-menu">
+        <button class="hbtn" id="editBtn" onclick="toggleEdit()">✏️ แก้ตำแหน่ง</button>
+        <button class="hbtn" id="alignBtn" onclick="autoAlignAll()">📐 จัดแนวอัตโนมัติ</button>
+        <button class="hbtn" id="saveBtn" onclick="savePositions()" style="display:none">💾 บันทึก</button>
+        <button class="hbtn" id="resetBtn" onclick="resetPositions()">↺ คืนค่าผัง</button>
+        <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()">⬇ ดาวน์โหลด Backup</button>
+      </div>
+    </details>
     <button class="hbtn-add" id="addBtn" onclick="openAddModal()">＋ เพิ่มช่องจอด</button>
   </div>
 </div>
@@ -762,10 +776,7 @@ async function syncEditAccess() {
 function unlockEditing(roleLabel) {
   isAdmin = true;
   document.getElementById('hdr').classList.add('admin-on');
-  document.getElementById('editBtn').style.display = 'block';
-  document.getElementById('alignBtn').style.display = 'block';
-  document.getElementById('resetBtn').style.display = 'block';
-  document.getElementById('backupBtn').style.display = 'block';
+  document.getElementById('layoutTools').style.display = 'block';
   showNotif('ok', `✏️ โหมดแก้ไข — ${roleLabel || 'กรรมการ'}`);
 }
 
@@ -773,11 +784,9 @@ function lockEditing() {
   if (editMode) setEditMode(false, { restore: false });
   isAdmin = false;
   document.getElementById('hdr').classList.remove('admin-on');
-  document.getElementById('editBtn').style.display = 'none';
-  document.getElementById('alignBtn').style.display = 'none';
+  document.getElementById('layoutTools').style.display = 'none';
+  document.getElementById('layoutTools').open = false;
   document.getElementById('saveBtn').style.display = 'none';
-  document.getElementById('resetBtn').style.display = 'none';
-  document.getElementById('backupBtn').style.display = 'none';
 }
 
 // ── EDIT MODE ──
@@ -1432,7 +1441,15 @@ document.getElementById('loginSuffix').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('loginPin').focus();
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLoginModal();
+  if (e.key === 'Escape') {
+    closeLoginModal();
+    document.querySelectorAll('.profile-menu[open],.layout-tools[open]').forEach(menu => { menu.open = false; });
+  }
+});
+document.addEventListener('click', e => {
+  document.querySelectorAll('.profile-menu[open],.layout-tools[open]').forEach(menu => {
+    if (!menu.contains(e.target)) menu.open = false;
+  });
 });
 window.addEventListener('storage', e => {
   if (e.key === RESIDENT_SESSION_KEY) {

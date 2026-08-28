@@ -1842,6 +1842,14 @@
   }
 
   bindEvents();
+  document.addEventListener('click', function (event) {
+    document.querySelectorAll('.profile-menu[open]').forEach(function (menu) {
+      if (!menu.contains(event.target)) menu.open = false;
+    });
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') document.querySelectorAll('.profile-menu[open]').forEach(function (menu) { menu.open = false; });
+  });
   boot();
 })();
 </script>

@@ -539,11 +539,19 @@
       window.print();
     }
   });
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeReceipt(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeReceipt();
+      document.querySelectorAll('.profile-menu[open]').forEach(function(menu) { menu.open = false; });
+    }
+  });
 
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('[data-view]');
     if (btn) openReceipt(btn.getAttribute('data-view'), btn);
+    document.querySelectorAll('.profile-menu[open]').forEach(function(menu) {
+      if (!menu.contains(e.target)) menu.open = false;
+    });
   });
 
   // Boot: reuse pattra8.com session if present, else prompt login.

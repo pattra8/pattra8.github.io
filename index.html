@@ -2552,6 +2552,14 @@ onSnapshot(announceQuery, snapshot => {
   grid.innerHTML = '<div class="announce-empty">ไม่สามารถโหลดประกาศได้ในขณะนี้</div>';
   pager.innerHTML = '';
 });
+document.addEventListener('click', event => {
+  document.querySelectorAll('.profile-menu[open]').forEach(menu => {
+    if (!menu.contains(event.target)) menu.open = false;
+  });
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') document.querySelectorAll('.profile-menu[open]').forEach(menu => { menu.open = false; });
+});
 </script>
 
 </body>
