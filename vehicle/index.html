@@ -207,6 +207,64 @@
       white-space: nowrap;
     }
     .context-bar-link:hover { background: #fff; }
+    /* ── identity badge menu ──
+       The bar used to carry "เปลี่ยน PIN" and "ออก" as loose buttons next to a
+       cross-link to the sibling page. Account actions now live inside the
+       house/name badge (change PIN sits just above sign-out), and the freed
+       slot holds a plain way back to the landing page. */
+    .ctx-menu { position: relative; min-width: 0; margin-right: auto; }
+    .ctx-menu > summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      list-style: none;
+      cursor: pointer;
+      padding: 4px 12px 4px 4px;
+      border-radius: 999px;
+      border: 1.5px solid var(--accent-soft);
+      background: rgba(255,255,255,0.55);
+      transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ctx-menu > summary::-webkit-details-marker { display: none; }
+    .ctx-menu > summary:hover,
+    .ctx-menu[open] > summary { background: #fff; }
+    .ctx-chev {
+      font-size: 12px;
+      color: var(--accent-deep);
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .ctx-menu[open] .ctx-chev { transform: rotate(180deg); }
+    .ctx-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 200px;
+      background: #fff;
+      border: 1px solid var(--accent-soft);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(60,40,20,0.14);
+      padding: 6px;
+      z-index: 120;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ctx-dropdown button {
+      background: none;
+      border: 0;
+      font: inherit;
+      text-align: left;
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .ctx-dropdown button:hover { background: var(--accent-pale); }
+    .ctx-dropdown button.ctx-logout { color: #9a3322; }
+
     .context-bar-exit {
       background: transparent;
       border: 1.5px solid var(--accent-soft);
@@ -1206,21 +1264,27 @@
     </div>
   </a>
   <div class="header-actions">
-    <a href="/data/" class="header-btn" id="navData">ข้อมูลลูกบ้าน</a>
     <a href="/data/admin.html" class="header-btn">Admin</a>
   </div>
 </header>
 
 <div class="context-bar" id="contextBar" hidden>
   <div class="context-bar-inner">
-    <div class="context-bar-pin">📍</div>
-    <div class="context-bar-info">
-      <span class="context-bar-house">บ้าน <strong id="ctxHouse">—</strong></span>
-      <span class="context-bar-name" id="ctxName"></span>
-    </div>
-    <a class="context-bar-link" id="ctxOtherLink" href="/data/">→ ข้อมูลลูกบ้าน</a>
-    <button class="context-bar-exit" id="ctxChangePin" type="button">เปลี่ยน PIN</button>
-    <button class="context-bar-exit" id="ctxExit" type="button">ออก</button>
+    <details class="ctx-menu" id="ctxMenu">
+      <summary>
+        <span class="context-bar-pin">📍</span>
+        <span class="context-bar-info">
+          <span class="context-bar-house">บ้าน <strong id="ctxHouse">—</strong></span>
+          <span class="context-bar-name" id="ctxName"></span>
+        </span>
+        <span class="ctx-chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="ctx-dropdown">
+        <button type="button" id="ctxChangePin">🔑 เปลี่ยน PIN</button>
+        <button type="button" class="ctx-logout" id="ctxExit">ออกจากระบบ</button>
+      </div>
+    </details>
+    <a class="context-bar-link" href="/">← หน้าแรก</a>
   </div>
 </div>
 
@@ -1328,7 +1392,6 @@
     const url = new URL(location.href);
     url.searchParams.set('house', houseNo);
     history.replaceState(null, '', url);
-    updateNavLinks(houseNo);
   }
   function clearStoredHouse() {
     sessionStorage.removeItem(SESSION_KEY);
@@ -1336,27 +1399,15 @@
     const url = new URL(location.href);
     url.searchParams.delete('house');
     history.replaceState(null, '', url);
-    updateNavLinks(null);
   }
   function clearContextState() {
     delete document.documentElement.dataset.ctx;
-  }
-  function updateNavLinks(houseNo) {
-    const navData = document.getElementById('navData');
-    if (navData) {
-      navData.href = houseNo ? `/data/?house=${encodeURIComponent(houseNo)}` : '/data/';
-    }
   }
   function showContextBar(record) {
     const bar = document.getElementById('contextBar');
     document.documentElement.dataset.ctx = record.house_no || '1';
     document.getElementById('ctxHouse').textContent = record.house_no || '—';
     document.getElementById('ctxName').textContent = record.name || '';
-    const link = document.getElementById('ctxOtherLink');
-    if (link) {
-      link.href = `/data/?house=${encodeURIComponent(record.house_no)}`;
-      link.textContent = '→ ข้อมูลลูกบ้าน';
-    }
     bar.hidden = false;
     const landing = document.getElementById('landingSection');
     if (landing) landing.style.display = 'none';
@@ -1374,15 +1425,27 @@
     }
     currentRecord = null;
   }
+  document.addEventListener('click', event => {
+    const menu = document.getElementById('ctxMenu');
+    if (menu && menu.open && !menu.contains(event.target)) menu.open = false;
+  });
+  document.addEventListener('keydown', event => {
+    const menu = document.getElementById('ctxMenu');
+    if (event.key === 'Escape' && menu) menu.open = false;
+  });
   document.addEventListener('DOMContentLoaded', () => {
     const exitBtn = document.getElementById('ctxExit');
     if (exitBtn) exitBtn.addEventListener('click', () => {
+      const menu = document.getElementById('ctxMenu');
+      if (menu) menu.open = false;
       clearStoredHouse();
       hideContextBar();
       primeSearchInput();
     });
     const changePinBtn = document.getElementById('ctxChangePin');
     if (changePinBtn) changePinBtn.addEventListener('click', () => {
+      const menu = document.getElementById('ctxMenu');
+      if (menu) menu.open = false;
       const houseNo = currentRecord?.house_no || getStoredHouse();
       requestResidentPinChange(houseNo);
     });
@@ -1924,9 +1987,6 @@
           <div class="owner-name">${esc(currentRecord.name || '(ไม่ระบุชื่อ)')}</div>
           <div class="owner-meta">บ้านเลขที่ ${esc(currentRecord.house_no)}${currentRecord.phone ? ' · ' + esc(maskPhone(currentRecord.phone)) : ''}</div>
         </div>
-        <div class="owner-actions">
-          <a href="/data/?house=${encodeURIComponent(currentRecord.house_no)}">ดูข้อมูลลูกบ้าน →</a>
-        </div>
       </div>
 
       <div class="vehicles-header">
@@ -2295,7 +2355,6 @@
   // Auto-load from URL/session context on page open
   (async function autoLoadFromContext() {
     const h = getStoredHouse();
-    updateNavLinks(h);
     if (!h || !isValidHouseContext(h)) {
       clearStoredHouse();
       hideContextBar();
