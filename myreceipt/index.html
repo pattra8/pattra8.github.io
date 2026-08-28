@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ใบเสร็จของฉัน · Pattra Villa 8</title>
+<link rel="stylesheet" href="/assets/resident-badge.css">
+<script src="/assets/resident-badge.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -199,7 +201,7 @@
   <div class="wrap">
     <div class="site-header">
       <a href="/" class="home-link">← หน้าแรก</a>
-      <details class="profile-menu" id="profileMenu" style="display:none;">
+      <div id="headerIdentity"><details class="profile-menu" id="profileMenu" style="display:none;">
       <summary class="resident-banner" id="residentBanner" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชี">
         <div class="resident-avatar" id="residentAvatar">38</div>
         <div class="resident-meta">
@@ -212,7 +214,7 @@
         <a id="profileVehicleLink" href="/vehicle/">🚗 ลงทะเบียนรถยนต์</a>
         <button class="profile-logout" id="profileLogout" type="button">ออกจากระบบ</button>
       </div>
-      </details>
+      </details></div>
     </div>
 
     <h1>🧾 ใบเสร็จของฉัน</h1>
@@ -279,7 +281,7 @@
   function getSession() {
     try {
       var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      if (!s || Number(s.expiresAt) <= Date.now()) { localStorage.removeItem(SESSION_KEY); return null; }
+      if (!s || Number(s.expiresAt) <= Date.now()) return null;
       return s;
     } catch (e) { return null; }
   }
@@ -296,7 +298,9 @@
   function residentDisplayName(s) {
     return String((s && s.residentName) || '').trim() || 'เจ้าของบ้าน';
   }
+  var badgeMounted = false;
   function renderResidentBanner() {
+    if (badgeMounted) { window.PattraBadge.refresh(); return; }
     var s = getSession();
     var banner = document.getElementById('residentBanner');
     var menu = document.getElementById('profileMenu');
@@ -311,6 +315,19 @@
     document.getElementById('profileDataLink').href = '/data/?house=' + houseQuery;
     document.getElementById('profileVehicleLink').href = '/vehicle/?house=' + houseQuery;
     menu.style.display = 'block';
+  }
+
+  function mountResidentBadge() {
+    if (!window.PattraBadge) return false;
+    window.PattraBadge.mount('#headerIdentity', {
+      onLogin: showLogin,
+      onLogout: function() {
+        document.getElementById('listRoot').innerHTML = '';
+        showLogin();
+      }
+    });
+    badgeMounted = true;
+    return true;
   }
 
   function showLogin(msg) {
@@ -463,9 +480,14 @@
       cache: 'no-store',
       body: JSON.stringify({action: 'myReceipts', houseNo: s.houseNo, pin: s.pin})
     }).then(function(res) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem(SESSION_KEY);
-        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      if (res.status === 403) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('listRoot').innerHTML = '<div class="empty-state">บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้</div>';
         return null;
       }
       return res.json().then(function(data) { return {ok: res.ok, data: data}; });
@@ -501,9 +523,15 @@
       cache: 'no-store',
       body: JSON.stringify({action: 'myReceiptDoc', houseNo: s.houseNo, pin: s.pin, id: id})
     }).then(function(res) {
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         localStorage.removeItem(SESSION_KEY);
-        showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      if (res.status === 403) {
+        cardBtn.disabled = false;
+        cardBtn.innerHTML = label;
+        alert('บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้');
         return null;
       }
       return res.json().then(function(data) { return {ok: res.ok, data: data}; });
@@ -553,6 +581,8 @@
       if (!menu.contains(e.target)) menu.open = false;
     });
   });
+
+  document.addEventListener('DOMContentLoaded', mountResidentBadge);
 
   // Boot: reuse pattra8.com session if present, else prompt login.
   (function boot() {
