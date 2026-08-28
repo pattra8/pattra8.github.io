@@ -1233,6 +1233,9 @@
       return i.id === openIssueId;
     })[0] : null;
     if (openIssueId && !selectedIssue) openIssueId = '';
+    var selectedDone = selectedIssue &&
+      (selectedIssue.status === 'resolved' || selectedIssue.status === 'closed');
+    if (selectedDone) editIssueId = '';
     $('residentView').classList.toggle('detail-mode', !!selectedIssue);
     $('mineSummary').hidden = !!selectedIssue;
     $('residentInboxAlert').hidden = !!selectedIssue || !unreadIssues.length;
@@ -1272,8 +1275,9 @@
         '<button class="detail-back" type="button" data-detail-back>กลับไปเรื่องของฉัน</button>' +
         (editIssueId ?
           '<button class="linkish detail-edit" type="button" data-cancel-edit>ยกเลิก</button>' :
-          '<button class="btn ghost small detail-edit" type="button" data-edit="' +
-            esc(selectedIssue.id) + '">แก้ไขเรื่อง</button>') +
+          (selectedDone ? '' :
+            '<button class="btn ghost small detail-edit" type="button" data-edit="' +
+              esc(selectedIssue.id) + '">แก้ไขเรื่อง</button>')) +
       '</div>' : '') +
       issuesToRender.map(function (issue) {
       var open = issue.id === openIssueId;
