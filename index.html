@@ -1431,11 +1431,12 @@
       }
     }
 
-    /* ── mobile "long box" — the lead card of each section spans the full
-       row and drops the CTA line, so it reads as a headline entry instead
-       of a taller sibling in the 2-up grid (see mockup). ── */
+    /* ── mobile "long box" — the committee inbox spans the full row and drops
+       the CTA line, so it reads as a headline entry instead of a taller
+       sibling in the 2-up grid (see mockup). The announcements card used to
+       do the same; it now sits in the grid at the ordinary square size like
+       every other resident service. ── */
     @media (max-width: 640px) {
-      .services-grid > .service-card.featured,
       .services-grid > .service-card.inbox-card {
         grid-column: 1 / -1;
         padding: 18px 18px 20px;
@@ -1443,28 +1444,24 @@
         border: 1.5px solid var(--gold-light);
         border-radius: 18px;
       }
-      .services-grid > .service-card.featured .service-icon,
       .services-grid > .service-card.inbox-card .service-icon {
         width: 48px;
         height: 48px;
         border-radius: 12px;
         font-size: 22px;
       }
-      .services-grid > .service-card.featured .service-title,
       .services-grid > .service-card.inbox-card .service-title {
         font-size: 19px;
         font-weight: 500;
         line-height: 1.3;
         margin-top: 2px;
       }
-      .services-grid > .service-card.featured .service-desc,
       .services-grid > .service-card.inbox-card .service-desc {
         font-size: 13.5px;
         line-height: 1.5;
         -webkit-line-clamp: 2;
       }
       /* the long box is self-explanatory — the English CTA only adds noise */
-      .services-grid > .service-card.featured .service-cta,
       .services-grid > .service-card.inbox-card .service-cta {
         display: none;
       }
@@ -1868,13 +1865,23 @@ const RESIDENT_AUTH_URL =
 const ADMIN_ACCESS_URL =
   'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/adminAccessMatrix';
 
+// The 30-day stamp used to be fixed at sign-in, so a resident who visits every
+// week was still logged out on day 30 — and usually noticed on a sub-page
+// (/report/) while this page still showed the old header from the back/forward
+// cache. Slide the window on every read from an active page.
+function renewResidentSession(s) {
+  if (Number(s.expiresAt) - Date.now() > RESIDENT_TTL_MS / 2) return s;
+  s.expiresAt = Date.now() + RESIDENT_TTL_MS;
+  try { localStorage.setItem(RESIDENT_SESSION_KEY, JSON.stringify(s)); } catch { /* private mode */ }
+  return s;
+}
 function getResidentSession() {
   try {
     const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
-    if (!s || Number(s.expiresAt) <= Date.now()) {
+    if (!s || !s.houseNo || !s.pin || Number(s.expiresAt) <= Date.now()) {
       localStorage.removeItem(RESIDENT_SESSION_KEY); return null;
     }
-    return s;
+    return renewResidentSession(s);
   } catch { return null; }
 }
 function storeResidentSession(houseNo, pin, residentName) {
@@ -2087,6 +2094,10 @@ function logoutResident() {
   renderHeaderIdentity(null);
   applyAdminAccess(null);
   applyResidentCards(false);
+  clearServiceLinks();
+}
+
+function clearServiceLinks() {
   document.querySelectorAll('a[href^="/data/"],a[href^="/vehicle/"]').forEach(a => {
     a.href = a.getAttribute('href').split('?')[0];
   });
@@ -2188,8 +2199,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Repaint from whatever the session actually is now. Mobile browsers restore
+// this page from the back/forward cache without re-running DOMContentLoaded,
+// so the header could keep showing a house pill for a session that had already
+// expired — the resident then tapped through to /report/ and was asked to sign
+// in again. `storage` covers the same drift across tabs.
+function resyncResidentUi() {
+  const session = getResidentSession();
+  renderHeaderIdentity(session);
+  applyResidentCards(!!session);
+  if (session) updateServiceLinks(session.houseNo); else clearServiceLinks();
+  renderAdminCards();
+}
+window.addEventListener('pageshow', e => { if (e.persisted) resyncResidentUi(); });
 window.addEventListener('storage', e => {
-  if (e.key === RESIDENT_SESSION_KEY) renderAdminCards();
+  if (e.key === RESIDENT_SESSION_KEY) resyncResidentUi();
 });
 </script>
 
