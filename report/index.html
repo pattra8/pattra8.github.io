@@ -1403,14 +1403,13 @@
   function adminQueueState(issue) {
     if (issue.queueState) return issue.queueState;
     if (issue.status === 'resolved' || issue.status === 'closed') return 'done';
-    if (issue.status === 'new' || !issue.replies.length) return 'needs_action';
-    return issue.lastReplyBy === 'resident' ? 'needs_action' : 'waiting';
+    return issue.status === 'in_progress' ? 'waiting' : 'needs_action';
   }
 
   function adminQueueLabel(issue) {
     var state = adminQueueState(issue);
     if (state === 'done') return 'เสร็จแล้ว';
-    if (state === 'waiting') return 'รอติดตาม';
+    if (state === 'waiting') return 'กำลังดำเนินการ';
     return issue.lastReplyBy === 'resident' ? 'ลูกบ้านตอบเพิ่ม' : 'เรื่องใหม่';
   }
 
@@ -1431,9 +1430,9 @@
     adminIssues.forEach(function (issue) { counts[adminQueueState(issue)] += 1; });
     $('adminQueueTabs').innerHTML =
       '<button class="queue-tab' + (adminQueue === 'needs_action' ? ' on' : '') +
-        '" type="button" data-queue="needs_action">ต้องทำ <strong>' + counts.needs_action + '</strong></button>' +
+        '" type="button" data-queue="needs_action">เรื่องใหม่ <strong>' + counts.needs_action + '</strong></button>' +
       '<button class="queue-tab' + (adminQueue === 'waiting' ? ' on' : '') +
-        '" type="button" data-queue="waiting">รอติดตาม <strong>' + counts.waiting + '</strong></button>' +
+        '" type="button" data-queue="waiting">กำลังดำเนินการ <strong>' + counts.waiting + '</strong></button>' +
       '<button class="queue-tab' + (adminQueue === 'done' ? ' on' : '') +
         '" type="button" data-queue="done">เสร็จแล้ว <strong>' + counts.done + '</strong></button>';
     var visibleIssues = adminIssues.filter(function (issue) {
@@ -1446,7 +1445,7 @@
     $('adminList').innerHTML = visibleIssues.length ?
       '<div class="group-label">' +
         (adminQueue === 'needs_action' ? 'เรื่องที่ต้องดำเนินการ' :
-          (adminQueue === 'waiting' ? 'เรื่องที่ตอบแล้วและกำลังติดตาม' : 'เรื่องที่เสร็จแล้ว')) +
+          (adminQueue === 'waiting' ? 'เรื่องที่กำลังดำเนินการ' : 'เรื่องที่เสร็จแล้ว')) +
         ' <span>' + visibleIssues.length + '</span></div>' +
       pageSlice(visibleIssues, pageAdmin).map(adminCard).join('') +
       pagerHtml(visibleIssues.length, pageAdmin, 'all') :
@@ -1486,7 +1485,7 @@
     $('issueSheetFoot').innerHTML =
       '<div class="workflow-actions" data-stop="1">' +
         '<button class="btn ghost small" type="button" data-astatus="in_progress" data-issue="' +
-          esc(issue.id) + '">รอติดตาม</button>' +
+          esc(issue.id) + '">กำลังดำเนินการ</button>' +
         '<button class="btn small done-action" type="button" data-astatus="resolved" data-issue="' +
           esc(issue.id) + '">เสร็จแล้ว</button>' +
       '</div>' +
