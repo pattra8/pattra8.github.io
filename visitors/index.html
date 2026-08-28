@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>รายการผู้มาติดต่อ · Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -393,7 +395,7 @@
   (function(){
     'use strict';
     var API='https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/visitorIntakeAdmin';
-    var KEY='pattra_visitor_intake_session_v1';
+    var KEY='pattra_resident_session_v1';
     var TTL=30*24*60*60*1000;
     var elDate=document.getElementById('date'), elReload=document.getElementById('reload'),
       elPrev=document.getElementById('prev'), elNext=document.getElementById('next'),
@@ -415,7 +417,9 @@
 
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
     function residentName(houseNo){try{var r=JSON.parse(localStorage.getItem('pattra_resident_session_v1')||'null'); if(r&&r.houseNo===houseNo&&r.residentName) return r.residentName;}catch(e){} return '';}
+    var badgeMounted=false;
     function renderIdentity(s){
+      if(badgeMounted){window.PattraBadge.refresh(); return;}
       if(!s){elIdentity.innerHTML=''; return;}
       var name=residentName(s.houseNo);
       var initial=((name||s.houseNo||'').match(/[\dA-Za-z฀-๿]/)||['P'])[0].toUpperCase();
@@ -429,6 +433,15 @@
         '<button class="profile-logout" id="profileLogout" type="button">ออกจากระบบ</button></div></details>';
       var p=document.getElementById('profileLogout');
       if(p) p.addEventListener('click',function(){localStorage.removeItem(KEY); renderIdentity(null); showLogin();});
+    }
+    function mountResidentBadge(){
+      if(!window.PattraBadge) return false;
+      window.PattraBadge.mount('#headerIdentity',{
+        onLogin:showLogin,
+        onLogout:function(){renderIdentity(null); showLogin();}
+      });
+      badgeMounted=true;
+      return true;
     }
     function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
     function session(){try{var s=JSON.parse(localStorage.getItem(KEY)||'null'); if(!s||s.expiresAt<Date.now()) return null; return s;}catch(e){return null;}}
@@ -629,7 +642,8 @@
         var data=await call({action:'list',houseNo:s.houseNo,pin:s.pin,visitDate:elDate.value});
         renderIdentity(s); renderDashboard(data.records||[], data.stats||{}); render(data.records||[]);
       }catch(err){
-        if(err.status===401||err.status===403){localStorage.removeItem(KEY); showLogin('เลขบ้าน/PIN ไม่ถูกต้อง หรือไม่มีสิทธิ์กรรมการ'); elList.innerHTML=''; return;}
+        if(err.status===401){localStorage.removeItem(KEY); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); elList.innerHTML=''; return;}
+        if(err.status===403){elList.innerHTML='<div class="note err">บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้</div>'; return;}
         elList.innerHTML='<div class="note err">โหลดข้อมูลไม่สำเร็จ<br><small>'+esc(err.message)+'</small></div>';
       }finally{elReload.disabled=false;}
     }
@@ -658,7 +672,8 @@
         await call({action:'delete',houseNo:s.houseNo,pin:s.pin,recordId:id});
         load();
       }catch(err){
-        if(err.status===401||err.status===403){localStorage.removeItem(KEY); showLogin('หมดสิทธิ์ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(err.status===401){localStorage.removeItem(KEY); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(err.status===403){alert('บัญชีนี้ไม่มีสิทธิ์ทำรายการนี้'); return;}
         if(btn){btn.disabled=false; btn.textContent='ลบ';}
         alert('ลบไม่สำเร็จ: '+err.message);
       }
@@ -713,7 +728,8 @@
         closeEdit();
         load();
       }catch(err){
-        if(err.status===401||err.status===403){localStorage.removeItem(KEY); closeEdit(); showLogin('หมดสิทธิ์ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(err.status===401){localStorage.removeItem(KEY); closeEdit(); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(err.status===403){elEditErr.textContent='บัญชีนี้ไม่มีสิทธิ์ทำรายการนี้'; elEditErr.classList.add('show'); return;}
         elEditErr.textContent='Save failed: '+err.message;
         elEditErr.classList.add('show');
       }finally{
@@ -756,7 +772,8 @@
         await call({action:'delete',houseNo:s.houseNo,pin:s.pin,recordIds:ids});
         load();
       }catch(err){
-        if(err.status===401||err.status===403){localStorage.removeItem(KEY); showLogin('หมดสิทธิ์ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(err.status===401){localStorage.removeItem(KEY); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return;}
+        if(err.status===403){alert('บัญชีนี้ไม่มีสิทธิ์ทำรายการนี้'); return;}
         alert('ลบไม่สำเร็จ: '+err.message);
       }finally{elBulkDel.disabled=false; elBulkDel.textContent='ลบที่เลือก';}
     });
@@ -799,6 +816,7 @@
     elLogin.addEventListener('click',login);
     elHouse.addEventListener('keydown',function(e){if(e.key==='Enter') elPin.focus();});
     elPin.addEventListener('keydown',function(e){if(e.key==='Enter') login();});
+    document.addEventListener('DOMContentLoaded',mountResidentBadge);
     load();
   })();
   </script>
