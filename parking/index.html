@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PATTRA VILLA 8 - Parking System</title>
-<!-- profile-menu-deploy: 3628ac4 -->
+<link rel="stylesheet" href="/assets/resident-badge.css">
+<script src="/assets/resident-badge.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700;800&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--taupe:#3d3530;--taupe-mid:#6b5f58;--gold:#b8975a;--gold-light:#cead75;--gold-pale:#f2e9d8;--bg:#faf7f2;--bg2:#f0ebe3;--bg3:#e8e0d4;--card:#ffffff;--text:#2e2820;--muted:#8a7f76;--border:#e4ddd3;--accent:#38bdf8;--amber:#b8975a;--map-w:600;--map-h:677;--shadow:0 2px 16px rgba(61,53,48,0.07);--shadow-hover:0 10px 40px rgba(61,53,48,0.13);}
@@ -36,15 +37,6 @@ body{font-family:"Sarabun",sans-serif;background:linear-gradient(180deg,var(--bg
 .hbtn-add{background:var(--taupe);border:1px solid var(--taupe);color:white;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:"Sarabun",sans-serif;display:none;align-items:center;gap:5px;transition:all .2s;letter-spacing:.08em;text-transform:uppercase;}
 .hbtn-add:hover{background:var(--gold);border-color:var(--gold);}
 .hdr.admin-on .hbtn-add{display:flex;}
-.layout-tools{position:relative;display:none;}
-.layout-tools>summary{list-style:none;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--gold);color:var(--gold);padding:8px 13px;border-radius:8px;font-size:11px;cursor:pointer;font-family:"Sarabun",sans-serif;letter-spacing:.06em;white-space:nowrap;}
-.layout-tools>summary::-webkit-details-marker{display:none;}
-.layout-tools[open]>summary{background:var(--gold);color:#fff;}
-.layout-tools-menu{position:absolute;z-index:1300;top:calc(100% + 8px);right:0;width:190px;padding:6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 14px 34px rgba(49,38,29,.18);}
-.layout-tools-menu .hbtn{display:flex;width:100%;align-items:center;border:0;border-radius:8px;padding:10px 11px;text-align:left;text-transform:none;letter-spacing:0;color:var(--taupe);}
-.layout-tools-menu .hbtn:hover{background:var(--gold-pale);color:var(--taupe);}
-.layout-tools-menu .hbtn.active{background:var(--gold-pale);color:var(--gold);}
-.layout-tools-menu #saveBtn{background:var(--taupe);color:#fff;}
 
 /* ── MAIN ── */
 .main{flex:1;display:flex;overflow:hidden;}
@@ -72,6 +64,7 @@ body.edit-mode .edit-hint{display:block;}
 
 body.edit-mode .slot{cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,0.55),0 0 0 2px rgba(245,158,11,0.6);}
 body.edit-mode .slot:active{cursor:grabbing;transform:scale(1.08);filter:brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.5));z-index:50;}
+body.edit-mode .slot.resizing{cursor:ew-resize;transform:none;filter:brightness(1.12);}
 
 /* New slot animation */
 .slot.new-slot{animation:popIn .35s cubic-bezier(.17,.67,.35,1.4) forwards,newglow 2s 0.35s infinite;}
@@ -87,6 +80,12 @@ body.edit-mode .slot .del-btn{display:flex;}
 .slot .edit-btn{position:absolute;top:-7px;left:-7px;width:16px;height:16px;background:#38bdf8;border:1.5px solid white;border-radius:50%;font-size:9px;color:white;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:30;font-weight:900;line-height:1;}
 body.edit-mode .slot .edit-btn{display:flex;}
 .slot .edit-btn:hover{background:#0284c7;transform:scale(1.2);}
+
+/* Width resize handle — available only while editing */
+.slot .resize-handle{position:absolute;right:-7px;top:50%;width:14px;height:26px;transform:translateY(-50%);display:none;align-items:center;justify-content:center;cursor:ew-resize;z-index:31;touch-action:none;}
+.slot .resize-handle::before{content:"";width:5px;height:18px;border-radius:5px;background:#fff;border:1.5px solid var(--gold);box-shadow:0 2px 7px rgba(61,53,48,.38);transition:width .15s,background .15s;}
+body.edit-mode .slot .resize-handle{display:flex;}
+.slot .resize-handle:hover::before,.slot.resizing .resize-handle::before{width:7px;background:var(--gold-pale);}
 
 /* ── DECORATIVE ── */
 .entrance{position:absolute;z-index:10;pointer-events:none;}
@@ -171,11 +170,6 @@ body.edit-mode .map-container::after{
 .header-btn:hover{background:var(--gold);color:#fff;}
 .identity-pill{display:flex;align-items:center;gap:8px;background:var(--gold-pale);border:1px solid var(--gold-light);border-radius:99px;padding:4px 14px 4px 6px;cursor:pointer;transition:background .2s;white-space:nowrap;}
 .identity-pill:hover{background:var(--bg3);}
-.profile-menu{position:relative;}.profile-menu>summary{list-style:none;}.profile-menu>summary::-webkit-details-marker{display:none;}
-.pill-chevron{color:var(--muted);font-size:10px;margin-left:2px;transition:transform .18s;}.profile-menu[open] .pill-chevron{transform:rotate(180deg);}
-.profile-dropdown{position:absolute;z-index:1200;top:calc(100% + 8px);right:0;width:220px;padding:7px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 14px 34px rgba(49,38,29,.16);}
-.profile-dropdown a,.profile-dropdown button{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:9px;border:0;border-radius:9px;padding:10px 11px;background:transparent;color:var(--taupe);font:inherit;font-size:13px;text-align:left;text-decoration:none;cursor:pointer;}
-.profile-dropdown a:hover,.profile-dropdown button:hover{background:var(--gold-pale);}.profile-dropdown .profile-logout{color:#a33b32;border-top:1px solid var(--border);border-radius:0 0 9px 9px;margin-top:4px;}
 .pill-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;}
 .pill-house{font-size:.8rem;font-weight:700;color:var(--taupe);line-height:1.2;}
 .pill-name{font-size:.72rem;color:var(--muted);line-height:1.2;}
@@ -215,16 +209,11 @@ body.edit-mode .map-container::after{
     <div id="headerIdentity"></div>
     <div class="live"><div class="dot"></div> LIVE</div>
     <div class="sync-chip" id="syncLabel">Updated --:--</div>
-    <details class="layout-tools" id="layoutTools">
-      <summary>⚙️ จัดการผัง <span aria-hidden="true">▾</span></summary>
-      <div class="layout-tools-menu">
-        <button class="hbtn" id="editBtn" onclick="toggleEdit()">✏️ แก้ตำแหน่ง</button>
-        <button class="hbtn" id="alignBtn" onclick="autoAlignAll()">📐 จัดแนวอัตโนมัติ</button>
-        <button class="hbtn" id="saveBtn" onclick="savePositions()" style="display:none">💾 บันทึก</button>
-        <button class="hbtn" id="resetBtn" onclick="resetPositions()">↺ คืนค่าผัง</button>
-        <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()">⬇ ดาวน์โหลด Backup</button>
-      </div>
-    </details>
+    <button class="hbtn" id="editBtn"  onclick="toggleEdit()" style="display:none">✏️ แก้ตำแหน่ง</button>
+    <button class="hbtn" id="alignBtn" onclick="autoAlignAll()" style="display:none">📐 Auto Align</button>
+    <button class="hbtn" id="saveBtn"  onclick="savePositions()" style="display:none">💾 บันทึก</button>
+    <button class="hbtn" id="resetBtn" onclick="resetPositions()" style="display:none">↺ Reset</button>
+    <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()" style="display:none">⬇ Backup</button>
     <button class="hbtn-add" id="addBtn" onclick="openAddModal()">＋ เพิ่มช่องจอด</button>
   </div>
 </div>
@@ -258,7 +247,7 @@ body.edit-mode .map-container::after{
     <div class="slot rented"  data-id="/45"       data-status="เช่าประจำ"   data-house="45"     data-note=""                       style="left:395px;top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/45</span><span class="slot-sub">เช่าประจำ</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
     <div class="slot rented"  data-id="/67"       data-status="เช่าประจำ"   data-house="67"     data-note=""                       style="left:453px;top:526px;width:46px;height:36px;" onclick="hc(event,this)"><span class="slot-label">/67</span><span class="slot-sub">เช่าประจำ</span><div class="del-btn" onclick="delSlot(event,this)">✕</div></div>
 
-    <div class="edit-hint">✏️ โหมดแก้ไข — ลาก slot / กด ✕ เพื่อลบ · กด Shift = ปิด snap</div>
+    <div class="edit-hint">✏️ ลากเพื่อย้าย · ลากขอบขวาเพื่อปรับความกว้าง · กด Shift = ปิด snap</div>
 
     <!-- Alignment guides (shown while dragging) -->
     <div class="guide h" id="gH" style="display:none"></div>
@@ -341,8 +330,9 @@ body.edit-mode .map-container::after{
   <div class="modal">
     <h2>＋ เพิ่มช่องจอดรถ</h2>
     <div class="field">
-      <label>ชื่อช่อง *</label>
+      <label>ชื่อที่แสดง *</label>
       <input type="text" id="new-id" placeholder="เช่น /55, วนจอด D, V4"/>
+      <small style="color:var(--muted)">ตั้งชื่อซ้ำได้ — ระบบจะแยกแต่ละ cell ด้วยรหัสภายใน</small>
     </div>
     <div class="field">
       <label>ประเภท *</label>
@@ -374,8 +364,9 @@ body.edit-mode .map-container::after{
   <div class="modal">
     <h2>✎ แก้ไขช่องจอด <span id="edit-orig" style="color:#94a3b8;font-weight:500;font-size:13px"></span></h2>
     <div class="field">
-      <label>ชื่อช่อง *</label>
+      <label>ชื่อที่แสดง *</label>
       <input type="text" id="edit-id" placeholder="เช่น /55, วนจอด D, V4"/>
+      <small style="color:var(--muted)">ตั้งชื่อซ้ำได้ — ชื่อนี้ใช้สำหรับแสดงผลเท่านั้น</small>
     </div>
     <div class="field">
       <label>ประเภท *</label>
@@ -390,6 +381,10 @@ body.edit-mode .map-container::after{
     <div class="field">
       <label>สถานะที่แสดง (เช่น ว่าง, เช่าอยู่, รอ confirm)</label>
       <input type="text" id="edit-sub" placeholder="เว้นว่าง = ใช้ตามประเภท"/>
+    </div>
+    <div class="field">
+      <label>ความกว้างของ cell (px)</label>
+      <input type="number" id="edit-width" min="32" max="300" step="1" inputmode="numeric"/>
     </div>
     <div class="field">
       <label>บ้านเลขที่</label>
@@ -430,6 +425,7 @@ const layoutDocRef = doc(db, 'parking', 'layout');
 // ── STATE ──
 let isAdmin = false, editMode = false;
 let dragging = null, startX, startY, origLeft, origTop, clickSX, clickSY;
+let resizing = null, resizeStartX = 0, origWidth = 0;
 let slotSeq = 0;
 let mapScale = 1;
 let lastRemoteLayout = [];
@@ -520,6 +516,9 @@ function ensureSlotIdentity(el) {
   if (!el.dataset.slotKey) {
     el.dataset.slotKey = 'static:' + (el.dataset.id || ('slot-' + (++slotSeq)));
   }
+  if (!el.dataset.displayName) {
+    el.dataset.displayName = el.dataset.id || '';
+  }
   if (!el.dataset.dynamic) {
     el.dataset.dynamic = '0';
   }
@@ -527,15 +526,18 @@ function ensureSlotIdentity(el) {
 
 function collectSlotRecord(el) {
   ensureSlotIdentity(el);
+  const displayName = el.dataset.displayName || el.dataset.id || '';
   return {
     key: el.dataset.slotKey,
-    id: el.dataset.id,
+    displayName,
+    id: displayName,
     type: el.dataset.type || el.classList[1] || 'free',
     status: el.dataset.status || '',
     house: el.dataset.house || '',
     note: el.dataset.note || '',
     left: el.style.left,
     top: el.style.top,
+    width: el.style.width || `${el.offsetWidth || SLOT_W}px`,
     dynamic: el.dataset.dynamic === '1'
   };
 }
@@ -548,16 +550,20 @@ function captureCurrentLayout() {
   return [...document.querySelectorAll('.slot')].map(collectSlotRecord);
 }
 
-function normalizeSlotRecord(record) {
+function normalizeSlotRecord(record, index = 0) {
+  const displayName = record.displayName ?? record.id ?? '';
+  const widthValue = parseFloat(record.width);
   return {
-    key: record.key || `slot:${record.id}`,
-    id: record.id || '',
+    key: record.key || `legacy:${index}:${displayName}`,
+    displayName,
+    id: displayName,
     type: record.type || 'free',
     status: record.status || '',
     house: record.house || '',
     note: record.note || '',
     left: record.left || '0px',
     top: record.top || '0px',
+    width: `${Number.isFinite(widthValue) ? Math.max(MIN_SLOT_W, Math.min(MAX_SLOT_W, widthValue)) : SLOT_W}px`,
     dynamic: Boolean(record.dynamic)
   };
 }
@@ -565,7 +571,8 @@ function normalizeSlotRecord(record) {
 function applySlotState(el, record) {
   ensureSlotIdentity(el);
   el.dataset.slotKey = record.key || el.dataset.slotKey;
-  el.dataset.id = record.id;
+  el.dataset.displayName = record.displayName;
+  el.dataset.id = record.displayName;
   el.dataset.type = record.type;
   el.dataset.status = record.status || '';
   el.dataset.house = record.house || '';
@@ -574,13 +581,13 @@ function applySlotState(el, record) {
   el.className = 'slot ' + record.type;
   el.style.left = record.left;
   el.style.top = record.top;
-  el.style.width = SLOT_W + 'px';
+  el.style.width = record.width;
   el.style.height = SLOT_H + 'px';
 
-  const labelSize = record.id.length > 4 ? '8px' : '12px';
+  const labelSize = getSlotLabelSize(record.displayName, parseFloat(record.width));
   const labelEl = el.querySelector('.slot-label');
   if (labelEl) {
-    labelEl.textContent = record.id;
+    labelEl.textContent = record.displayName;
     labelEl.style.fontSize = labelSize;
   }
   const subEl = el.querySelector('.slot-sub');
@@ -590,7 +597,7 @@ function applySlotState(el, record) {
 }
 
 function applyLayout(records) {
-  const normalized = records.map(normalizeSlotRecord);
+  const normalized = records.map((record, index) => normalizeSlotRecord(record, index));
   document.querySelectorAll('.slot').forEach(ensureSlotIdentity);
   const incoming = new Set(normalized.map(record => record.key));
   document.querySelectorAll('.slot').forEach(el => {
@@ -630,7 +637,7 @@ function subscribeLayout() {
       return;
     }
     const slots = Array.isArray(data?.slots) && data.slots.length
-      ? data.slots.map(normalizeSlotRecord)
+      ? data.slots.map((record, index) => normalizeSlotRecord(record, index))
       : cloneLayout(defaultLayout.length ? defaultLayout : captureCurrentLayout());
     lastRemoteLayout = cloneLayout(slots);
     remoteLayoutReady = true;
@@ -776,7 +783,10 @@ async function syncEditAccess() {
 function unlockEditing(roleLabel) {
   isAdmin = true;
   document.getElementById('hdr').classList.add('admin-on');
-  document.getElementById('layoutTools').style.display = 'block';
+  document.getElementById('editBtn').style.display = 'block';
+  document.getElementById('alignBtn').style.display = 'block';
+  document.getElementById('resetBtn').style.display = 'block';
+  document.getElementById('backupBtn').style.display = 'block';
   showNotif('ok', `✏️ โหมดแก้ไข — ${roleLabel || 'กรรมการ'}`);
 }
 
@@ -784,9 +794,11 @@ function lockEditing() {
   if (editMode) setEditMode(false, { restore: false });
   isAdmin = false;
   document.getElementById('hdr').classList.remove('admin-on');
-  document.getElementById('layoutTools').style.display = 'none';
-  document.getElementById('layoutTools').open = false;
+  document.getElementById('editBtn').style.display = 'none';
+  document.getElementById('alignBtn').style.display = 'none';
   document.getElementById('saveBtn').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('backupBtn').style.display = 'none';
 }
 
 // ── EDIT MODE ──
@@ -849,11 +861,7 @@ function addSlot() {
   const house = document.getElementById('new-house').value.trim();
   const note  = document.getElementById('new-note').value.trim();
   if (!id) { showNotif('err', '❌ กรุณาใส่ชื่อช่อง'); return; }
-  // Check duplicate
-  if (document.querySelector(`.slot[data-id="${id}"]`)) {
-    showNotif('err', '❌ ชื่อช่องซ้ำกัน'); return;
-  }
-  createSlotEl({ id, type, status: TYPE_STATUS[type], house, note }, true);
+  createSlotEl({ displayName: id, id, type, status: TYPE_STATUS[type], house, note }, true);
   closeAddModal();
   updateCounts();
   setDirty(true);
@@ -861,24 +869,42 @@ function addSlot() {
 }
 
 function createSlotEl(data, isNew) {
-  const { id, type, status, house, note } = data;
+  const displayName = data.displayName ?? data.id ?? '';
+  const { type, status, house, note } = data;
   const el = document.createElement('div');
   el.className = `slot ${type}${isNew ? ' new-slot' : ''}`;
   el.dataset.slotKey = data.key || data.slotKey || nextSlotKey();
-  el.dataset.id = id;
+  el.dataset.displayName = displayName;
+  el.dataset.id = displayName;
   el.dataset.type = type;
   el.dataset.status = status;
   el.dataset.house = house || '';
   el.dataset.note = note || '';
   el.dataset.dynamic = '1';
 
-  const labelSize = id.length > 4 ? '8px' : '12px';
-  el.innerHTML = `<span class="slot-label" style="font-size:${labelSize}">${id}</span><span class="slot-sub">${status}</span><div class="edit-btn" onclick="openEditModal(event,this)">✎</div><div class="del-btn" onclick="delSlot(event,this)">✕</div>`;
+  const labelSize = getSlotLabelSize(displayName, parseFloat(data.width) || SLOT_W);
+  const label = document.createElement('span');
+  label.className = 'slot-label';
+  label.style.fontSize = labelSize;
+  label.textContent = displayName;
+  const sub = document.createElement('span');
+  sub.className = 'slot-sub';
+  sub.textContent = status;
+  const edit = document.createElement('div');
+  edit.className = 'edit-btn';
+  edit.textContent = '✎';
+  edit.setAttribute('onclick', 'openEditModal(event,this)');
+  const del = document.createElement('div');
+  del.className = 'del-btn';
+  del.textContent = '✕';
+  del.setAttribute('onclick', 'delSlot(event,this)');
+  el.append(label, sub, edit, del);
 
   // Center of map
   const left = data.left || '274px';
   const top  = data.top  || '310px';
-  el.style.cssText = `left:${left};top:${top};width:${SLOT_W}px;height:${SLOT_H}px;`;
+  const width = data.width || `${SLOT_W}px`;
+  el.style.cssText = `left:${left};top:${top};width:${width};height:${SLOT_H}px;`;
   el.setAttribute('onclick', 'hc(event,this)');
   el.addEventListener('click', e => hc(e, el));
 
@@ -905,6 +931,7 @@ function createSlotEl(data, isNew) {
   }, { passive: true });
 
   document.getElementById('mapContainer').appendChild(el);
+  injectResizeHandle(el);
 
   // Remove new-slot class after animation
   if (isNew) setTimeout(() => el.classList.remove('new-slot'), 400);
@@ -917,11 +944,13 @@ function openEditModal(e, btn) {
   if (!editMode) return;
   const slot = btn.closest('.slot');
   editingSlot = slot;
-  document.getElementById('edit-orig').textContent  = `(เดิม: ${slot.dataset.id})`;
-  document.getElementById('edit-id').value          = slot.dataset.id  || '';
+  const displayName = slot.dataset.displayName || slot.dataset.id || '';
+  document.getElementById('edit-orig').textContent  = `(เดิม: ${displayName})`;
+  document.getElementById('edit-id').value          = displayName;
   document.getElementById('edit-type').value        = slot.dataset.type
                                                       || slot.classList[1] || 'free';
   document.getElementById('edit-sub').value         = slot.querySelector('.slot-sub')?.textContent || '';
+  document.getElementById('edit-width').value       = Math.round(parseFloat(slot.style.width) || slot.offsetWidth || SLOT_W);
   document.getElementById('edit-house').value       = slot.dataset.house || '';
   document.getElementById('edit-note').value        = slot.dataset.note  || '';
   document.getElementById('editModal').classList.add('show');
@@ -937,24 +966,24 @@ function saveEdit() {
   const newId = document.getElementById('edit-id').value.trim();
   const type  = document.getElementById('edit-type').value;
   const sub   = document.getElementById('edit-sub').value.trim();
+  const width = clampSlotWidth(slot, Number(document.getElementById('edit-width').value));
   const house = document.getElementById('edit-house').value.trim();
   const note  = document.getElementById('edit-note').value.trim();
   if (!newId) { showNotif('err', '❌ ใส่ชื่อช่อง'); return; }
-  // Check duplicate id (skip self)
-  const dup = document.querySelector(`.slot[data-id="${newId}"]`);
-  if (dup && dup !== slot) { showNotif('err', '❌ ชื่อช่องซ้ำ'); return; }
 
   // Update class (type) — keep "slot" + new type, preserve "new-slot" if present
   const wasNew = slot.classList.contains('new-slot');
   slot.className = 'slot ' + type + (wasNew ? ' new-slot' : '');
   // Update data attrs
+  slot.dataset.displayName = newId;
   slot.dataset.id     = newId;
   slot.dataset.type   = type;
   slot.dataset.status = sub || TYPE_STATUS[type];
   slot.dataset.house  = house;
   slot.dataset.note   = note;
+  slot.style.width    = width + 'px';
   // Update visible label
-  const labelSize = newId.length > 4 ? '8px' : '12px';
+  const labelSize = getSlotLabelSize(newId, width);
   const labelEl = slot.querySelector('.slot-label');
   if (labelEl) { labelEl.textContent = newId; labelEl.style.fontSize = labelSize; }
   const subEl = slot.querySelector('.slot-sub');
@@ -969,13 +998,72 @@ function saveEdit() {
 // Inject ✎ button into static (HTML-defined) slots that don't have one yet
 function injectEditButtons() {
   document.querySelectorAll('.slot').forEach(slot => {
-    if (slot.querySelector('.edit-btn')) return;
-    const btn = document.createElement('div');
-    btn.className = 'edit-btn';
-    btn.textContent = '✎';
-    btn.setAttribute('onclick', 'openEditModal(event,this)');
-    slot.appendChild(btn);
+    if (!slot.querySelector('.edit-btn')) {
+      const btn = document.createElement('div');
+      btn.className = 'edit-btn';
+      btn.textContent = '✎';
+      btn.setAttribute('onclick', 'openEditModal(event,this)');
+      slot.appendChild(btn);
+    }
+    injectResizeHandle(slot);
   });
+}
+
+const MIN_SLOT_W = 32;
+const MAX_SLOT_W = 300;
+
+function getSlotLabelSize(displayName, width) {
+  const name = String(displayName || '');
+  if (name.length <= 4) return '12px';
+  return width >= Math.min(MAX_SLOT_W, 28 + name.length * 7) ? '11px' : '8px';
+}
+
+function refreshSlotLabelSize(slot) {
+  const label = slot.querySelector('.slot-label');
+  if (!label) return;
+  label.style.fontSize = getSlotLabelSize(
+    slot.dataset.displayName || slot.dataset.id || '',
+    parseFloat(slot.style.width) || slot.offsetWidth || SLOT_W
+  );
+}
+
+function clampSlotWidth(slot, value) {
+  const cont = document.getElementById('mapContainer');
+  const left = parseFloat(slot.style.left) || 0;
+  const available = Math.max(MIN_SLOT_W, cont.clientWidth - left);
+  const numeric = Number.isFinite(value) ? value : (parseFloat(slot.style.width) || SLOT_W);
+  return Math.max(MIN_SLOT_W, Math.min(MAX_SLOT_W, available, numeric));
+}
+
+function beginResize(slot, clientX) {
+  if (!editMode) return;
+  resizing = slot;
+  resizeStartX = clientX;
+  origWidth = parseFloat(slot.style.width) || slot.offsetWidth || SLOT_W;
+  slot.classList.add('resizing');
+  slot.style.zIndex = 55;
+  slot.style.transition = 'none';
+}
+
+function injectResizeHandle(slot) {
+  if (slot.querySelector('.resize-handle')) return;
+  const handle = document.createElement('div');
+  handle.className = 'resize-handle';
+  handle.setAttribute('role', 'button');
+  handle.setAttribute('aria-label', 'ปรับความกว้าง cell');
+  handle.addEventListener('mousedown', e => {
+    if (!editMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    beginResize(slot, e.clientX);
+  });
+  handle.addEventListener('touchstart', e => {
+    if (!editMode) return;
+    e.preventDefault();
+    e.stopPropagation();
+    beginResize(slot, e.touches[0].clientX);
+  }, { passive: false });
+  slot.appendChild(handle);
 }
 
 // ── DELETE SLOT ──
@@ -1136,6 +1224,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Shift') snapDisabled 
 document.addEventListener('keyup',   e => { if (e.key === 'Shift') snapDisabled = false; });
 
 document.addEventListener('mousemove', e => {
+  if (resizing) {
+    const rawWidth = origWidth + (e.clientX - resizeStartX) / mapScale;
+    const width = snapDisabled ? clampSlotWidth(resizing, rawWidth) : clampSlotWidth(resizing, snapToGrid(rawWidth));
+    resizing.style.width = width + 'px';
+    refreshSlotLabelSize(resizing);
+    return;
+  }
   if (!dragging) return;
   const rawL = origLeft + (e.clientX - startX) / mapScale;
   const rawT = origTop  + (e.clientY - startY) / mapScale;
@@ -1150,6 +1245,12 @@ document.addEventListener('mousemove', e => {
   }
 });
 document.addEventListener('touchmove', e => {
+  if (resizing) {
+    const rawWidth = origWidth + (e.touches[0].clientX - resizeStartX) / mapScale;
+    resizing.style.width = clampSlotWidth(resizing, snapToGrid(rawWidth)) + 'px';
+    refreshSlotLabelSize(resizing);
+    return;
+  }
   if (!dragging) return;
   const t = e.touches[0];
   const rawL = origLeft + (t.clientX - startX) / mapScale;
@@ -1159,6 +1260,13 @@ document.addEventListener('touchmove', e => {
   dragging.style.top  = tp + 'px';
 }, { passive: true });
 document.addEventListener('mouseup', () => {
+  if (resizing) {
+    resizing.classList.remove('resizing');
+    resizing.style.zIndex = 10;
+    resizing.style.transition = 'filter .15s,transform .1s';
+    if (Math.abs((parseFloat(resizing.style.width) || 0) - origWidth) > 0.1) setDirty(true);
+    resizing = null;
+  }
   if (dragging) {
     dragging.style.zIndex = 10;
     dragging.style.transition = 'filter .15s,transform .1s';
@@ -1170,6 +1278,13 @@ document.addEventListener('mouseup', () => {
   }
 });
 document.addEventListener('touchend', () => {
+  if (resizing) {
+    resizing.classList.remove('resizing');
+    resizing.style.zIndex = 10;
+    resizing.style.transition = 'filter .15s,transform .1s';
+    if (Math.abs((parseFloat(resizing.style.width) || 0) - origWidth) > 0.1) setDirty(true);
+    resizing = null;
+  }
   if (dragging) {
     dragging.style.zIndex = 10;
     dragging.style.transition = 'filter .15s,transform .1s';
@@ -1317,9 +1432,7 @@ const RESIDENT_AUTH_URL =
 function getResidentSession() {
   try {
     const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
-    if (!s || Number(s.expiresAt) <= Date.now()) {
-      localStorage.removeItem(RESIDENT_SESSION_KEY); return null;
-    }
+    if (!s || Number(s.expiresAt) <= Date.now()) return null;
     return s;
   } catch { return null; }
 }
@@ -1337,6 +1450,7 @@ function escH(s) {
 }
 
 function renderHeaderIdentity(session) {
+  if (badgeMounted) { window.PattraBadge.refresh(); return; }
   const el = document.getElementById('headerIdentity');
   if (!el) return;
   if (!session) {
@@ -1345,21 +1459,29 @@ function renderHeaderIdentity(session) {
     return;
   }
   const initial = (session.residentName || session.houseNo).charAt(0).toUpperCase();
-  const houseQuery = encodeURIComponent(session.houseNo);
   el.innerHTML = `
-    <details class="profile-menu"><summary class="identity-pill" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชี">
+    <div class="identity-pill" onclick="logoutResident()" title="กดเพื่อออกจากระบบ">
       <div class="pill-avatar">${escH(initial)}</div>
       <div>
         <div class="pill-house">บ้าน ${escH(session.houseNo)}</div>
         ${session.residentName
           ? `<div class="pill-name">${escH(session.residentName)}</div>` : ''}
       </div>
-      <span class="pill-chevron" aria-hidden="true">▼</span>
-    </summary><div class="profile-dropdown">
-      <a href="/data/?house=${houseQuery}">👤 แก้ไขข้อมูลส่วนตัว</a>
-      <a href="/vehicle/?house=${houseQuery}">🚗 ลงทะเบียนรถยนต์</a>
-      <button class="profile-logout" type="button" onclick="logoutResident()">ออกจากระบบ</button>
-    </div></details>`;
+    </div>`;
+}
+
+var badgeMounted = false;
+function mountResidentBadge() {
+  if (!window.PattraBadge) return false;
+  window.PattraBadge.mount('#headerIdentity', {
+    onLogin: showLoginModal,
+    onLogout: function () {
+      localStorage.removeItem(ADMIN_ACCESS_CACHE_KEY);
+      lockEditing();
+    }
+  });
+  badgeMounted = true;
+  return true;
 }
 
 function logoutResident() {
@@ -1441,16 +1563,9 @@ document.getElementById('loginSuffix').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('loginPin').focus();
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeLoginModal();
-    document.querySelectorAll('.profile-menu[open],.layout-tools[open]').forEach(menu => { menu.open = false; });
-  }
+  if (e.key === 'Escape') closeLoginModal();
 });
-document.addEventListener('click', e => {
-  document.querySelectorAll('.profile-menu[open],.layout-tools[open]').forEach(menu => {
-    if (!menu.contains(e.target)) menu.open = false;
-  });
-});
+document.addEventListener('DOMContentLoaded', mountResidentBadge);
 window.addEventListener('storage', e => {
   if (e.key === RESIDENT_SESSION_KEY) {
     renderHeaderIdentity(getResidentSession());
