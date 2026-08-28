@@ -889,11 +889,22 @@
   var mode = 'resident';
   var pendingSubmitAfterLogin = false;
 
+  // The shared pattra8.com session carries a fixed 30-day stamp that used to
+  // never move, so a resident who signs in once and keeps using the site was
+  // still dropped on day 30 — and the drop only showed up here, because the
+  // landing page kept painting its old header from the back/forward cache.
+  // Slide the window whenever the session is read from an active page.
+  function renewSession(s) {
+    if (Number(s.expiresAt) - Date.now() > TTL / 2) return s;
+    s.expiresAt = Date.now() + TTL;
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch (e) { /* private mode */ }
+    return s;
+  }
   function getSession() {
     try {
       var s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-      if (!s || Number(s.expiresAt) <= Date.now()) return null;
-      return s;
+      if (!s || !s.houseNo || !s.pin || Number(s.expiresAt) <= Date.now()) return null;
+      return renewSession(s);
     } catch (e) { return null; }
   }
   function storeSession(houseNo, pin, name) {
@@ -943,7 +954,11 @@
       body: JSON.stringify(payload)
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
-        if ((res.status === 401 || res.status === 403) && !keepSession) {
+        // Only a rejected credential (401) invalidates the session. A 403 means
+        // "this account may not do *this*" — usually a committee-only action —
+        // and wiping the shared pattra8.com session there logged the resident
+        // out of every tool on the site.
+        if (res.status === 401 && !keepSession) {
           clearSession(); renderIdentity(); showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
           throw new Error(data.error || 'กรุณาเข้าสู่ระบบใหม่');
         }
@@ -2064,6 +2079,25 @@
       if (canAdmin) setMode('admin'); else loadMine();
     });
   }
+
+  // The whole site shares one session, and mobile browsers restore this page
+  // from the back/forward cache without re-running boot(). Re-read storage on
+  // every restore (and when another tab signs in or out) so this page never
+  // asks for a PIN the resident has already given elsewhere.
+  function syncSessionFromStorage() {
+    var next = getSession();
+    var sameHouse = !!next && !!session && next.houseNo === session.houseNo;
+    if (sameHouse || (!next && !session)) { session = next; return; }
+    session = next;
+    renderIdentity();
+    if (session) { hideLogin(); boot(); } else { showGuestForm(); }
+  }
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) syncSessionFromStorage();
+  });
+  window.addEventListener('storage', function (event) {
+    if (event.key === SESSION_KEY) syncSessionFromStorage();
+  });
 
   bindEvents();
   document.addEventListener('click', function (event) {
