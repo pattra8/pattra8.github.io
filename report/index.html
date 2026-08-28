@@ -662,6 +662,8 @@
       .sheet-foot .btn { min-width:58px; min-height:44px; }
     }
   </style>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -919,7 +921,21 @@
     localStorage.removeItem('pattra_admin_access_v1');
     session = null; canAdmin = false;
   }
+  // Shared account menu — see /assets/resident-badge.js. The markup below is
+  // the fallback for a failed asset load.
+  var badgeMounted = false;
+  function mountResidentBadge() {
+    if (!window.PattraBadge) return false;
+    window.PattraBadge.mount('#headerIdentity', {
+      onLogin: function () { showLogin(); },
+      onLogout: function () { clearSession(); showGuestForm(); }
+    });
+    badgeMounted = true;
+    return true;
+  }
+
   function renderIdentity() {
+    if (badgeMounted) { window.PattraBadge.refresh(); return; }
     var box = $('headerIdentity');
     if (!session) {
       box.innerHTML = '<button class="btn ghost small" id="loginShortcut" type="button">เรื่องของฉัน</button>';
@@ -2100,6 +2116,10 @@
   });
 
   bindEvents();
+  // The shared badge is a deferred script, so it is only defined once the
+  // document has finished parsing — mount it then and let it repaint over the
+  // fallback header this page has already drawn.
+  document.addEventListener('DOMContentLoaded', function () { mountResidentBadge(); });
   document.addEventListener('click', function (event) {
     document.querySelectorAll('.profile-menu[open]').forEach(function (menu) {
       if (!menu.contains(event.target)) menu.open = false;
