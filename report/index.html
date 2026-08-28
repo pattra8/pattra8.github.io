@@ -796,9 +796,11 @@
     for (var i = 0; i < list.length; i++) if (list[i][0] === key) return list[i][1];
     return key;
   }
-  function residentStatusLabel(status) {
-    return {new: 'รับเรื่องแล้ว', in_progress: 'กำลังดูแล',
-      resolved: 'ดำเนินการแล้ว', closed: 'ปิดเรื่อง'}[status] || 'รับเรื่องแล้ว';
+  function residentStatusLabel(status, category) {
+    if (status === 'new') return 'ส่งถึงกรรมการแล้ว';
+    if (status === 'in_progress') return 'กำลังดูแล';
+    return category === 'suggestion' || category === 'feedback' ?
+      'รับทราบแล้ว' : 'ดำเนินการแล้ว';
   }
   function fmtDate(value) {
     if (!value) return '';
@@ -1247,7 +1249,7 @@
       '<button class="summary-chip' + (mineFilter === 'active' ? ' on' : '') +
         '" type="button" data-mine-filter="active">กำลังดูแล ' + activeCount + '</button>' +
       '<button class="summary-chip' + (mineFilter === 'done' ? ' on' : '') +
-        '" type="button" data-mine-filter="done">เสร็จแล้ว ' + doneCount + '</button>';
+        '" type="button" data-mine-filter="done">สิ้นสุดแล้ว ' + doneCount + '</button>';
     if (!myIssues.length) {
       $('mineList').innerHTML = '<div class="empty">ยังไม่มีเรื่องที่คุณแจ้งไว้<br>' +
         'เริ่มแจ้งเรื่องได้ที่แท็บ “แจ้งปัญหา”</div>';
@@ -1276,7 +1278,8 @@
       issuesToRender.map(function (issue) {
       var open = issue.id === openIssueId;
       var pills = '<div class="t-top">' +
-        '<span class="pill st-' + esc(issue.status) + '">' + esc(residentStatusLabel(issue.status)) + '</span>' +
+        '<span class="pill st-' + esc(issue.status) + '">' +
+          esc(issue.statusLabel || residentStatusLabel(issue.status, issue.category)) + '</span>' +
         (issue.priority !== 'normal' ?
           '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
         (issue.hasUnreadReply ? '<span class="pill unread">ตอบกลับใหม่</span>' : '') +
@@ -1408,7 +1411,7 @@
 
   function adminQueueLabel(issue) {
     var state = adminQueueState(issue);
-    if (state === 'done') return 'เสร็จแล้ว';
+    if (state === 'done') return 'ปิดเรื่อง';
     if (state === 'waiting') return 'กำลังดำเนินการ';
     return issue.lastReplyBy === 'resident' ? 'ลูกบ้านตอบเพิ่ม' : 'เรื่องใหม่';
   }
@@ -1434,7 +1437,7 @@
       '<button class="queue-tab' + (adminQueue === 'waiting' ? ' on' : '') +
         '" type="button" data-queue="waiting">กำลังดำเนินการ <strong>' + counts.waiting + '</strong></button>' +
       '<button class="queue-tab' + (adminQueue === 'done' ? ' on' : '') +
-        '" type="button" data-queue="done">เสร็จแล้ว <strong>' + counts.done + '</strong></button>';
+        '" type="button" data-queue="done">ปิดเรื่อง <strong>' + counts.done + '</strong></button>';
     var visibleIssues = adminIssues.filter(function (issue) {
       return adminQueueState(issue) === adminQueue;
     }).sort(function (a, b) {
@@ -1445,7 +1448,7 @@
     $('adminList').innerHTML = visibleIssues.length ?
       '<div class="group-label">' +
         (adminQueue === 'needs_action' ? 'เรื่องที่ต้องดำเนินการ' :
-          (adminQueue === 'waiting' ? 'เรื่องที่กำลังดำเนินการ' : 'เรื่องที่เสร็จแล้ว')) +
+          (adminQueue === 'waiting' ? 'เรื่องที่กำลังดำเนินการ' : 'เรื่องที่ปิดแล้ว')) +
         ' <span>' + visibleIssues.length + '</span></div>' +
       pageSlice(visibleIssues, pageAdmin).map(adminCard).join('') +
       pagerHtml(visibleIssues.length, pageAdmin, 'all') :
@@ -1487,7 +1490,7 @@
         '<button class="btn ghost small" type="button" data-astatus="in_progress" data-issue="' +
           esc(issue.id) + '">กำลังดำเนินการ</button>' +
         '<button class="btn small done-action" type="button" data-astatus="resolved" data-issue="' +
-          esc(issue.id) + '">เสร็จแล้ว</button>' +
+          esc(issue.id) + '">ปิดเรื่อง</button>' +
       '</div>' +
       '<div class="reply-box" data-stop="1">' +
         '<textarea id="adminReplyInput" placeholder="พิมพ์ตอบผู้แจ้ง…"></textarea>' +
