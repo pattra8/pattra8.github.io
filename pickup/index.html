@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>แจ้งทิ้งของใหญ่ — Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -897,9 +899,7 @@ let currentRound = null; // { isOpen, roundLabel, nextPickupDate, currentRoundId
 function getResidentSession() {
   try {
     const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
-    if (!s || Number(s.expiresAt) <= Date.now()) {
-      localStorage.removeItem(RESIDENT_SESSION_KEY); return null;
-    }
+    if (!s || Number(s.expiresAt) <= Date.now()) return null;
     return s;
   } catch { return null; }
 }
@@ -917,6 +917,7 @@ function escH(s) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 function renderHeaderIdentity(session) {
+  if (badgeMounted) { window.PattraBadge.refresh(); return; }
   const el = document.getElementById('headerIdentity');
   if (!el) return;
   if (!session) {
@@ -943,6 +944,16 @@ function doLogout() {
   if (!confirm('ออกจากระบบ?')) return;
   clearResidentSession();
   renderPage();
+}
+var badgeMounted = false;
+function mountResidentBadge() {
+  if (!window.PattraBadge) return false;
+  window.PattraBadge.mount('#headerIdentity', {
+    onLogin: showLoginModal,
+    onLogout: function () { renderPage(); }
+  });
+  badgeMounted = true;
+  return true;
 }
 
 // ── Items + per-item photos ─────────────────────────────────────────────────
@@ -1642,6 +1653,7 @@ function renderPage() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  mountResidentBadge();
   addItemRow();
   renderPage();
 
