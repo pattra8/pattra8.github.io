@@ -1254,7 +1254,7 @@
         white-space: nowrap;
       }
       .logo-sub { display: none; }
-      .header-actions { display: none; }
+      .header-actions .header-btn { display: none; }
       .context-bar {
         top: 58px;
         padding: 8px 16px;
@@ -1299,6 +1299,8 @@
       .btn-cancel, .btn-submit { width: 100%; }
     }
   </style>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
 </head>
 <body>
 
@@ -1310,6 +1312,7 @@
     </div>
   </a>
   <div class="header-actions">
+    <div id="residentBadge"></div>
     <a href="admin.html" class="header-btn">Admin</a>
   </div>
 </header>
@@ -1485,6 +1488,9 @@
     url.searchParams.set('house', houseNo);
     history.replaceState(null, '', url);
   }
+  // Forget the house this tab is showing. Deliberately does NOT touch the
+  // shared pattra8.com session: every failed lookup calls this, and wiping the
+  // session there signed the resident out of the whole site.
   function clearStoredHouse() {
     const previousHouse = sessionStorage.getItem(SESSION_KEY) || getResidentSession()?.houseNo;
     if (previousHouse) {
@@ -1492,10 +1498,14 @@
       clearSurveyCache(previousHouse);
     }
     sessionStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(RESIDENT_SESSION_KEY);
     const url = new URL(location.href);
     url.searchParams.delete('house');
     history.replaceState(null, '', url);
+  }
+  // Actually sign out — only the account menu calls this.
+  function signOutResident() {
+    clearStoredHouse();
+    localStorage.removeItem(RESIDENT_SESSION_KEY);
   }
   function clearContextState() {
     delete document.documentElement.dataset.ctx;
@@ -1530,12 +1540,33 @@
     const menu = document.getElementById('ctxMenu');
     if (event.key === 'Escape' && menu) menu.open = false;
   });
+  // Shared account menu (/assets/resident-badge.js). It replaces this page's
+  // own house menu whenever the resident is actually signed in; the local menu
+  // below stays for a failed asset load and for the guest unlock-by-PIN path.
+  function mountResidentBadge() {
+    if (!window.PattraBadge || !window.PattraBadge.getSession()) return false;
+    const host = document.getElementById('residentBadge');
+    const local = document.getElementById('ctxMenu');
+    if (!host) return false;
+    window.PattraBadge.mount(host, {
+      align: 'left',
+      onLogout: () => {
+        clearStoredHouse();
+        hideContextBar();
+        primeSearchInput();
+      }
+    });
+    if (local) local.hidden = true;
+    return true;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    mountResidentBadge();
     const exitBtn = document.getElementById('ctxExit');
     if (exitBtn) exitBtn.addEventListener('click', () => {
       const menu = document.getElementById('ctxMenu');
       if (menu) menu.open = false;
-      clearStoredHouse();
+      signOutResident();
       hideContextBar();
       primeSearchInput();
     });
