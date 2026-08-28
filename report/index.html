@@ -291,12 +291,64 @@
     .saved-media-item { position:relative; }
     .saved-media-item .media-thumb { cursor:default; }
     .saved-media-item .rm { position:absolute; top:4px; right:4px; border:0; border-radius:50%; width:24px; height:24px; color:#fff; background:rgba(0,0,0,.72); cursor:pointer; }
-    .replies { margin-top:14px; display:flex; flex-direction:column; gap:9px; }
-    .reply { border-radius:12px; padding:11px 13px; font-size:13.5px; line-height:1.7; }
-    .reply.admin { background:var(--warn-bg); }
-    .reply.resident { background:var(--bg-soft); }
-    .reply-head { font-size:11.5px; font-weight:700; color:var(--text-soft); margin-bottom:4px; display:flex; justify-content:space-between; gap:8px; }
-    .reply-body { white-space:pre-wrap; color:var(--text-body); }
+    /* ── timeline ──
+       One report is a sequence, not a chat log: filed → looked after → done.
+       Every durable event we actually store (the report itself, each reply, the
+       moment it was closed) is a node on one spine, and the open end of the
+       spine says what the reader is waiting for. Status is read off the spine,
+       so the old row of competing status buttons is gone. */
+    .steps { margin-top:11px; }
+    .step-bars { display:flex; gap:5px; }
+    .step-bars i { flex:1; height:4px; border-radius:2px; background:var(--border); }
+    .step-bars i.on { background:var(--accent); }
+    .step-bars i.fin { background:var(--ok); }
+    .step-now { margin-top:7px; font-size:11.5px; color:var(--text-muted); }
+    .step-now b { color:var(--text-soft); font-weight:600; }
+    .timeline { position:relative; padding-left:26px; display:flex; flex-direction:column; gap:15px; }
+    .timeline::before {
+      content:''; position:absolute; left:7px; top:6px; bottom:6px; width:2px;
+      background:var(--border-soft);
+    }
+    .tl-node { position:relative; }
+    .tl-node::before {
+      content:''; position:absolute; left:-23px; top:5px; width:10px; height:10px;
+      border-radius:50%; background:var(--card); border:2px solid #d8c8aa;
+    }
+    .tl-node.done::before { background:var(--ok); border-color:var(--ok); }
+    .tl-node.now::before {
+      background:var(--accent); border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(196,122,44,.16);
+    }
+    .tl-when { font-size:10.5px; color:var(--text-muted); font-family:'IBM Plex Mono', monospace; }
+    .tl-what { font-size:12.5px; font-weight:600; color:var(--text); margin-top:1px; }
+    .tl-card {
+      margin-top:7px; background:var(--card); border:1px solid var(--border);
+      border-radius:13px; padding:11px 13px; font-size:13.5px; line-height:1.75;
+      color:var(--text-body); white-space:pre-wrap;
+    }
+    .tl-card.mine { background:var(--warn-bg); border-color:#ecd4ad; }
+    .tl-card .t-meta { white-space:normal; margin-top:8px; display:block; }
+    .tl-card .media-row.detail-gallery {
+      grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; margin-top:10px;
+    }
+    /* A photo is evidence, not the whole thread — it stays inside the card
+       instead of pushing the reply below the fold. */
+    .tl-card .detail-gallery .media-thumb {
+      border-radius:11px; aspect-ratio:16/10; max-height:180px;
+    }
+    .tl-wait {
+      margin-top:7px; border:1px dashed #d8c8aa; border-radius:13px; padding:10px 12px;
+      font-size:12.5px; line-height:1.7; color:var(--text-muted); background:var(--card);
+    }
+    /* The foot holds one clear next move; the composer unfolds out of it. */
+    .tl-actions { display:flex; gap:9px; align-items:center; }
+    .tl-actions .btn { padding:11px 10px; }
+    .tl-actions .tl-main { flex:1; }
+    .reply-send { display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .reply-send .linkish { font-size:11.5px; }
+    .tl-foot .reply-box { display:none; }
+    .tl-foot.composing .reply-box { display:flex; }
+    .tl-foot.composing .tl-actions { display:none; }
     .reply-box { display:flex; gap:8px; margin-top:12px; align-items:flex-start; }
     .reply-box textarea { min-height:52px; font-size:14px; }
     .mine-summary { display:flex; gap:7px; margin:17px 0 11px; overflow-x:auto; }
@@ -325,7 +377,7 @@
     }
     .issue-detail .t-title { font-size:20px; line-height:1.5; }
     .issue-detail .thread-detail { margin-top:18px; padding-top:18px; }
-    .issue-detail .detail-text { font-size:15px; line-height:1.8; }
+    .issue-detail .tl-card { font-size:14.5px; line-height:1.8; }
     .resident-ticket.edit-view {
       border:1px solid var(--border); border-radius:18px; padding:24px;
       background:var(--card); box-shadow:0 6px 22px rgba(60,40,20,.07);
@@ -387,8 +439,6 @@
     .queue-state.waiting::before { background:#4a819d; }
     .queue-state.done { color:#4d7c3f; }
     .queue-state.done::before { background:#5d914d; }
-    .workflow-actions { display:flex; gap:8px; margin-bottom:10px; }
-    .workflow-actions .btn { flex:1; min-height:42px; }
     .btn.done-action { background:#4d7c3f; }
     .pager {
       display:flex; align-items:center; justify-content:center; gap:14px;
@@ -486,13 +536,9 @@
     }
     .sheet-close:hover { border-color:var(--accent); color:var(--accent-text); }
     .sheet-body { flex:1; min-height:0; overflow-y:auto; padding:16px 18px 22px; }
-    .sheet-body .thread-detail { border-top:0; margin-top:0; padding-top:0; }
     .sheet-tags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-    /* Sided bubbles, admin-side only. The resident's own view inverts "us" and
-       "them", so this alignment stays scoped to the committee sheet. */
-    #issueSheetBody .reply { max-width:86%; }
-    #issueSheetBody .reply.admin { margin-left:auto; }
-    #issueSheetBody .reply.resident { background:var(--card); border:1px solid var(--border); }
+    .sheet-head .steps { margin-top:12px; }
+    .sheet-body .timeline { padding-bottom:4px; }
     .sheet-foot {
       flex:0 0 auto; padding:12px 18px 15px;
       border-top:1px solid var(--border); background:var(--bg-soft);
@@ -1212,14 +1258,148 @@
       alert(err.message); button.disabled = false; button.textContent = 'บันทึกการแก้ไข';
     });
   }
-  function repliesHtml(replies) {
-    if (!replies || !replies.length) return '';
-    return '<div class="replies">' + replies.map(function (r) {
-      return '<div class="reply ' + esc(r.author) + '">' +
-        '<div class="reply-head"><span>' + esc(r.authorLabel) + '</span>' +
-        '<span>' + esc(fmtDate(r.createdAt)) + '</span></div>' +
-        '<div class="reply-body">' + esc(r.message) + '</div></div>';
-    }).join('') + '</div>';
+  /* ── timeline ────────────────────────────────────────────────────── */
+  // A report is read as a sequence, so it is drawn as one. Every node comes
+  // from something durable — the report, a stored reply, resolvedAt — and the
+  // open node at the end says what is being waited for. Nothing here invents
+  // an event the backend does not keep.
+  function issueIsDone(issue) {
+    return issue.status === 'resolved' || issue.status === 'closed';
+  }
+  function msOf(value) {
+    if (!value) return 0;
+    var ms = typeof value === 'number' ? value :
+      (value && value._seconds ? value._seconds * 1000 : Date.parse(value));
+    return isNaN(ms) ? 0 : ms;
+  }
+  function stepsHtml(issue, forAdmin) {
+    var done = issueIsDone(issue);
+    var moving = done || issue.status === 'in_progress' || (issue.replies || []).length > 0;
+    var doneLabel = forAdmin ? 'ปิดเรื่องแล้ว' :
+      residentStatusLabel(issue.status, issue.category);
+    var movingLabel = forAdmin ? 'กำลังดำเนินการ' : 'กำลังดูแล';
+    var now = done ? doneLabel : (moving ? movingLabel : 'ส่งถึงกรรมการแล้ว');
+    var step = done ? 3 : (moving ? 2 : 1);
+    return '<div class="steps">' +
+      '<div class="step-bars">' +
+        '<i class="' + (done ? 'fin' : 'on') + '"></i>' +
+        '<i class="' + (done ? 'fin' : (moving ? 'on' : '')) + '"></i>' +
+        '<i class="' + (done ? 'fin' : '') + '"></i>' +
+      '</div>' +
+      '<div class="step-now">ขั้นที่ ' + step + ' จาก 3 · <b>' + esc(now) + '</b></div>' +
+    '</div>';
+  }
+  // The tail of the spine. For the committee it is a nudge with the real gap in
+  // days; for the resident it is a plain statement of who holds the ball.
+  function waitingNodeHtml(issue, forAdmin) {
+    var replies = issue.replies || [];
+    var lastMs = replies.length ?
+      msOf(replies[replies.length - 1].createdAt) : msOf(issue.createdAt);
+    var days = lastMs ? Math.floor((Date.now() - lastMs) / 86400000) : 0;
+    var head;
+    var note;
+    if (forAdmin) {
+      head = replies.length ? 'รอความคืบหน้า' : 'รอกรรมการรับเรื่อง';
+      note = days >= 1 ?
+        'เงียบมา ' + days + ' วันแล้ว — อัปเดตให้ผู้แจ้งรู้สักหน่อยไหม' :
+        'ตอบผู้แจ้งได้จากปุ่มข้างล่าง';
+    } else {
+      head = issue.status === 'in_progress' ? 'กรรมการกำลังดูแลอยู่' : 'รอกรรมการรับเรื่อง';
+      note = 'กรรมการจะตอบกลับในหน้านี้ และคุณจะเห็นแจ้งเตือนเมื่อมีคำตอบใหม่';
+    }
+    return '<div class="tl-node now">' +
+      '<div class="tl-what">' + esc(head) + '</div>' +
+      '<div class="tl-wait">' + esc(note) + '</div>' +
+    '</div>';
+  }
+  function timelineHtml(issue, forAdmin) {
+    var openLabel = forAdmin ?
+      (issue.anonymous ? 'ไม่ประสงค์ออกนามแจ้งเรื่อง' : 'ลูกบ้านแจ้งเรื่อง') :
+      'คุณแจ้งเรื่อง';
+    var nodes = ['<div class="tl-node done">' +
+      '<div class="tl-when">' + esc(fmtDate(issue.createdAt)) + '</div>' +
+      '<div class="tl-what">' + esc(openLabel) + '</div>' +
+      '<div class="tl-card">' + esc(issue.detail) +
+        (forAdmin && issue.contact ?
+          '<span class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</span>' : '') +
+        mediaHtml(issue.attachments, true) +
+      '</div>' +
+    '</div>'];
+
+    (issue.replies || []).forEach(function (reply) {
+      var mine = forAdmin ? reply.author === 'admin' : reply.author === 'resident';
+      var who = reply.author === 'admin' ?
+        (forAdmin ? 'กรรมการตอบกลับ' : 'กรรมการตอบกลับ') :
+        (forAdmin ? 'ผู้แจ้งตอบกลับ' : 'คุณตอบกลับ');
+      nodes.push('<div class="tl-node done">' +
+        '<div class="tl-when">' + esc(fmtDate(reply.createdAt)) + '</div>' +
+        '<div class="tl-what">' + esc(who) + '</div>' +
+        '<div class="tl-card' + (mine ? ' mine' : '') + '">' + esc(reply.message) + '</div>' +
+      '</div>');
+    });
+
+    if (issueIsDone(issue)) {
+      nodes.push('<div class="tl-node done">' +
+        (issue.resolvedAt ?
+          '<div class="tl-when">' + esc(fmtDate(issue.resolvedAt)) + '</div>' : '') +
+        '<div class="tl-what">' + (forAdmin ? 'ปิดเรื่องแล้ว' :
+          esc(residentStatusLabel(issue.status, issue.category))) + '</div>' +
+      '</div>');
+    } else {
+      nodes.push(waitingNodeHtml(issue, forAdmin));
+    }
+    return '<div class="timeline">' + nodes.join('') + '</div>';
+  }
+  // One primary move, with the composer folded inside it. Two buttons of equal
+  // weight is what made the old foot read like a ticket queue.
+  function composerFootHtml(issue, forAdmin) {
+    var id = esc(issue.id);
+    var done = issueIsDone(issue);
+    var sendAttr = forAdmin ? 'data-areply="' + id + '"' : 'data-reply="' + id + '"';
+    var openLabel = forAdmin ? (done ? 'เขียนถึงผู้แจ้ง' : 'เขียนอัปเดต') : 'เขียนถึงกรรมการ';
+    var side = '';
+    if (forAdmin) {
+      side = done ?
+        '<button class="btn ghost small" type="button" data-astatus="in_progress" data-issue="' +
+          id + '">เปิดเรื่องอีกครั้ง</button>' :
+        '<button class="btn small done-action" type="button" data-astatus="resolved" data-issue="' +
+          id + '">✓ เสร็จแล้ว</button>';
+    }
+    return '<div class="tl-foot" data-stop="1">' +
+      '<div class="tl-actions">' +
+        '<button class="btn ghost small tl-main" type="button" data-compose>' +
+          openLabel + '</button>' + side +
+      '</div>' +
+      '<div class="reply-box">' +
+        '<textarea id="' + (forAdmin ? 'adminReplyInput' : 'replyInput') +
+          '" placeholder="' + (forAdmin ? 'เขียนถึงผู้แจ้ง…' : 'เขียนถึงกรรมการ…') + '"></textarea>' +
+        '<div class="reply-send">' +
+          '<button class="btn small" type="button" ' + sendAttr + '>ส่ง</button>' +
+          '<button class="linkish" type="button" data-compose-cancel>ยกเลิก</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  // Delegated from both views: the composer is the same fold either side.
+  function composeClick(e) {
+    var cancel = e.target.closest('[data-compose-cancel]');
+    if (cancel) {
+      var box = cancel.closest('.tl-foot');
+      if (box) {
+        var text = box.querySelector('textarea');
+        if (text) text.value = '';
+        box.classList.remove('composing');
+      }
+      return true;
+    }
+    var open = e.target.closest('[data-compose]');
+    if (!open) return false;
+    var foot = open.closest('.tl-foot');
+    if (!foot) return false;
+    foot.classList.add('composing');
+    var field = foot.querySelector('textarea');
+    if (field) field.focus();
+    return true;
   }
   function renderMine() {
     var unreadIssues = myIssues.filter(function (i) { return i.hasUnreadReply; });
@@ -1281,9 +1461,11 @@
       '</div>' : '') +
       issuesToRender.map(function (issue) {
       var open = issue.id === openIssueId;
+      // In the open thread the step bar already says where the report stands,
+      // so the status pill would be the same sentence twice.
       var pills = '<div class="t-top">' +
-        '<span class="pill st-' + esc(issue.status) + '">' +
-          esc(issue.statusLabel || residentStatusLabel(issue.status, issue.category)) + '</span>' +
+        (open ? '' : '<span class="pill st-' + esc(issue.status) + '">' +
+          esc(issue.statusLabel || residentStatusLabel(issue.status, issue.category)) + '</span>') +
         (issue.priority !== 'normal' ?
           '<span class="pill pri-' + esc(issue.priority) + '">' + esc(issue.priorityLabel) + '</span>' : '') +
         (issue.hasUnreadReply ? '<span class="pill unread">ตอบกลับใหม่</span>' : '') +
@@ -1316,14 +1498,10 @@
       }
       return '<article class="ticket resident-ticket issue-detail st-' + esc(issue.status) + '">' +
         head +
+        stepsHtml(issue, false) +
         '<div class="thread-detail">' +
-          '<div class="detail-text">' + esc(issue.detail) + '</div>' +
-          mediaHtml(issue.attachments, true) +
-          repliesHtml(issue.replies) +
-          '<div class="reply-box" data-stop="1">' +
-            '<textarea id="replyInput" placeholder="พิมพ์ข้อความเพิ่มเติมถึงนิติฯ"></textarea>' +
-            '<button class="btn small" type="button" data-reply="' + esc(issue.id) + '">ส่ง</button>' +
-          '</div>' +
+          timelineHtml(issue, false) +
+          composerFootHtml(issue, false) +
         '</div></article>';
     }).join('');
   }
@@ -1469,7 +1647,8 @@
     if (!issue) { closeIssueSheet(); return; }
 
     $('issueSheetHead').innerHTML = adminCardHead(issue, true) +
-      '<div class="tk-title">' + esc(issue.title) + '</div>';
+      '<div class="tk-title">' + esc(issue.title) + '</div>' +
+      stepsHtml(issue, true);
 
     var images = issue.attachments.length;
     $('issueSheetBody').innerHTML =
@@ -1477,29 +1656,18 @@
         '<span class="tk-tag">' + esc(issue.categoryLabel) + '</span>' +
         (images ? '<span class="tk-att">📎 ' + images + '</span>' : '') +
       '</div>' +
-        '<div class="thread-detail">' +
-          '<div class="detail-text">' + esc(issue.detail) + '</div>' +
-          (issue.contact ? '<div class="t-meta">ติดต่อกลับ: ' + esc(issue.contact) + '</div>' : '') +
-          mediaHtml(issue.attachments, true) +
-          repliesHtml(issue.replies) +
-        '</div>';
+      timelineHtml(issue, true);
 
     // Internal notes are gone on purpose: two textareas that differed only by
     // placeholder were one mis-click away from publishing a private note to the
     // resident. Stored notes stay in Firestore; adminNote still exists on the
     // server. The four-state workflow is gone too — nobody had time to keep it
     // truthful, and a stale status is worse than none.
-    $('issueSheetFoot').innerHTML =
-      '<div class="workflow-actions" data-stop="1">' +
-        '<button class="btn ghost small" type="button" data-astatus="in_progress" data-issue="' +
-          esc(issue.id) + '">กำลังดำเนินการ</button>' +
-        '<button class="btn small done-action" type="button" data-astatus="resolved" data-issue="' +
-          esc(issue.id) + '">ปิดเรื่อง</button>' +
-      '</div>' +
-      '<div class="reply-box" data-stop="1">' +
-        '<textarea id="adminReplyInput" placeholder="พิมพ์ตอบผู้แจ้ง…"></textarea>' +
-        '<button class="btn small" type="button" data-areply="' + esc(issue.id) + '">ตอบ</button>' +
-      '</div>';
+    //
+    // "กำลังดำเนินการ" is gone from the foot as well: adminReply already moves a
+    // needs_action report to in_progress, so replying is the only way that step
+    // was ever reached honestly. What is left is the next move and the close.
+    $('issueSheetFoot').innerHTML = composerFootHtml(issue, true);
   }
 
   function openIssueSheet(id) {
@@ -1672,6 +1840,7 @@
           .then(function () { send.disabled = false; });
         return;
       }
+      if (composeClick(e)) return;
       if (e.target.closest('[data-media-url]')) return;
       if (e.target.closest('[data-stop]')) return;
       var card = e.target.closest('[data-open]');
@@ -1779,6 +1948,7 @@
         });
         return;
       }
+      if (composeClick(e)) return;
       if (e.target.closest('[data-media-url]')) return;
       if (e.target.closest('[data-stop]')) return;
       var card = e.target.closest('[data-aopen]');
