@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LPR Log รายวัน · Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -408,7 +410,9 @@
 
     function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    var badgeMounted=false;
     function renderIdentity(s){
+      if(badgeMounted){ window.PattraBadge.refresh(); return; }
       if(!s){ elIdentity.innerHTML=''; return; }
       var name=s.residentName||'';
       var initial=((name||s.houseNo||'').match(/[\dA-Za-z฀-๿]/)||['P'])[0].toUpperCase();
@@ -422,6 +426,15 @@
         '<button class="profile-logout" id="profileLogout" type="button">ออกจากระบบ</button></div></details>';
       var p=document.getElementById('profileLogout');
       if(p) p.addEventListener('click',function(){ localStorage.removeItem(SESSION_KEY); renderIdentity(null); showLogin(); });
+    }
+    function mountResidentBadge(){
+      if(!window.PattraBadge) return false;
+      window.PattraBadge.mount('#headerIdentity',{
+        onLogin:showLogin,
+        onLogout:function(){ renderIdentity(null); showLogin(); }
+      });
+      badgeMounted=true;
+      return true;
     }
     function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+
       String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -755,8 +768,10 @@
       try{
         var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
           body:JSON.stringify({action:'dailyLog',houseNo:s.houseNo,pin:s.pin,reportDate:elDate.value})});
-        if(res.status===401||res.status===403){ localStorage.removeItem(SESSION_KEY);
-          showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return; }
+        if(res.status===401){ localStorage.removeItem(SESSION_KEY);
+          showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return; }
+        if(res.status===403){
+          elBody.innerHTML='<div class="note">บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้</div>'; return; }
         var data=await res.json();
         if(!res.ok||!data.ok) throw new Error(data&&data.error?data.error:('HTTP '+res.status));
         renderIdentity(s); renderDaily(data.report);
@@ -789,8 +804,10 @@
         var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
           body:JSON.stringify({action:'searchPlate',houseNo:s.houseNo,pin:s.pin,plate:query})});
         if(token!==searchToken) return;
-        if(res.status===401||res.status===403){ localStorage.removeItem(SESSION_KEY);
-          showLogin('สิทธิ์ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return; }
+        if(res.status===401){ localStorage.removeItem(SESSION_KEY);
+          showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return; }
+        if(res.status===403){
+          elBody.innerHTML='<div class="note">บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้</div>'; return; }
         var data=await res.json();
         if(!res.ok||!data.ok) throw new Error(data&&data.error?data.error:('HTTP '+res.status));
         renderIdentity(s); renderSearch(data.report);
@@ -824,6 +841,7 @@
       if(s>todayStr()) return; elDate.value=s; loadCurrent();
     }
 
+    document.addEventListener('DOMContentLoaded',mountResidentBadge);
     elDate.value=todayStr(); elDate.max=todayStr();
     elDate.addEventListener('change', function(){ if(elDate.value>todayStr()) elDate.value=todayStr(); loadCurrent(); });
     elPrev.addEventListener('click', function(){ shiftDay(-1); });
