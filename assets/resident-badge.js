@@ -72,6 +72,8 @@
   function menuHtml(session, options) {
     var house = encodeURIComponent(session.houseNo);
     var items = [
+      session.residentName ?
+        '<div class="pv-badge-menu-name">' + esc(session.residentName) + '</div>' : '',
       '<a href="/data/?house=' + house + '">👤 แก้ไขข้อมูลส่วนตัว</a>',
       '<a href="/vehicle/?house=' + house + '">🚗 ลงทะเบียนรถยนต์</a>',
       // /data/ owns the PIN dialog; every other page links into it.
@@ -111,7 +113,6 @@
           '<span class="pv-badge-avatar">' + esc(initial) + '</span>' +
           '<span class="pv-badge-text">' +
             '<span class="pv-badge-house">บ้าน ' + esc(session.houseNo) + '</span>' +
-            (name ? '<span class="pv-badge-name">' + esc(name) + '</span>' : '') +
           '</span>' +
           '<span class="pv-badge-chev" aria-hidden="true">▼</span>' +
         '</summary>' +
