@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Asset Insurance | Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -754,6 +756,7 @@
     }
     @media (max-width: 720px) {
       header { padding: 0 20px; }
+      .nav > :not(#headerIdentity) { display: none !important; }
       .logo-divider { display: none; }
       main { padding: 32px 18px 60px; }
       .upload-grid, .planner-grid { grid-template-columns: 1fr; }
@@ -773,6 +776,7 @@
       </div>
     </a>
     <nav class="nav">
+      <div id="headerIdentity"></div>
       <span class="access-role-badge hidden" id="accessRoleBadge"></span>
       <a class="btn gold" id="adminNavLink" href="/admin/">Admin</a>
       <button class="btn danger hidden" id="logoutBtn">ออกจากระบบ</button>
@@ -1713,6 +1717,12 @@
       applyAccessMode();
       loadDocs().catch(() => { location.href = '/'; });
     }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.PattraBadge) return;
+      window.PattraBadge.mount('#headerIdentity', {
+        onLogout: () => { location.href = '/'; }
+      });
+    });
     init();
   </script>
 </body>
