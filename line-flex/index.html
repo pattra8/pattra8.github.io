@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LINE Flex Routing · Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css" />
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -197,6 +199,7 @@
       .flow-grid{grid-template-columns:1fr}
     }
     @media (max-width: 560px){
+      .header-actions > :not(#headerIdentity){display:none}
       .stats-row{grid-template-columns:1fr 1fr}
       .send-row,.choice-row,.segmented{grid-template-columns:1fr}
       .flow-top{flex-direction:column;align-items:flex-start}
@@ -212,6 +215,7 @@
         <span class="brand-sub">LINE Flex Routing</span>
       </a>
       <div class="header-actions">
+        <div id="headerIdentity"></div>
         <a class="btn ghost" href="/">หน้าแรก</a>
         <a class="btn ghost" href="/admin/">Admin</a>
         <button class="btn primary" id="saveBtn" type="button">บันทึกทั้งหมด</button>
@@ -713,6 +717,13 @@
       el.classList.toggle("open", !open);
       const label = document.getElementById("dirToggleLabel");
       label.textContent = !open ? "ซ่อนรายการกลุ่ม" : `แสดงรายการกลุ่มทั้งหมด (${state.targets.length})`;
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!window.PattraBadge) return;
+      window.PattraBadge.mount("#headerIdentity", {
+        onLogout: () => { location.href = "/"; }
+      });
     });
 
     (async function init() {
