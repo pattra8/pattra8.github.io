@@ -154,11 +154,15 @@ body.edit-mode .map-container::after{
 
 @media (max-width: 768px){
   body{overflow:auto;}
-  .hdr{height:auto;padding:12px 14px;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .hdr{height:auto;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;}
   .logo{max-width:100%;}
   .logo-title{font-size:18px;}
   .logo-sub{font-size:9px;}
-  .hdr-btns{width:100%;justify-content:flex-end;flex-wrap:wrap;}
+  .hdr-btns{display:contents;}
+  #headerIdentity{grid-column:2;grid-row:1;justify-self:end;}
+  .live{grid-column:1;grid-row:2;justify-self:start;}
+  .sync-chip{grid-column:2;grid-row:2;justify-self:end;}
+  .hbtn,.hbtn-add{grid-column:1/-1;justify-self:end;}
   .hbtn,.hbtn-add,.live,.sync-chip{font-size:10px;}
   .main{overflow:auto;}
   .map-outer{padding:8px;justify-content:center;}
