@@ -854,8 +854,21 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 720px) {
-      header { padding: 0 18px; height: auto; min-height: 70px; gap: 12px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
-      .header-actions { gap: 8px; }
+      header {
+        padding: 12px 18px;
+        min-height: 70px;
+        height: auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px 12px;
+      }
+      .logo { grid-column: 1; grid-row: 1; min-width: 0; }
+      .header-actions { display: contents; }
+      #headerIdentity { position: absolute !important; top: 12px; right: 18px; }
+      .header-actions .header-btn { grid-row: 2; }
+      .header-actions .header-btn.secondary { grid-column: 1; justify-self: end; }
+      .header-actions .header-btn:not(.secondary) { grid-column: 2; justify-self: end; }
       .header-btn { padding: 8px 14px; font-size: 13px; }
       .logo-sub { display: none; }
       .logo-wordmark { font-size: 16px; }
