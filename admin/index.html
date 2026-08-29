@@ -651,6 +651,9 @@
       margin-left: auto;
       min-width: 0;
     }
+    .mobile-admin-menu-btn,
+    .mobile-export-menu,
+    .resident-card-list { display: none; }
 
     /* ─── TABLE ─── */
     .table-wrap {
@@ -1362,33 +1365,68 @@
         padding: 7px;
       }
       .preset-row { grid-template-columns: 1fr; }
-      .dashboard > header { padding: 14px 16px; }
-      .dashboard > header > div:last-child { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
-      .dashboard > header > div:first-child { max-width: calc(100% - 150px); }
-      .dashboard > header h1 { font-size: 17px; line-height: 1.25; }
-      .dashboard > header #headerIdentity { position: absolute !important; top: 12px; right: 16px; }
-      .admin-quick-links { width: 100%; }
-      .admin-link-btn { flex: 1 1 auto; }
-      .tabs { padding: 14px 16px 0; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
-      .toolbar { padding: 14px 16px; }
-      .table-wrap { margin: 0 16px 16px; }
+      .dashboard > header { padding: 10px 12px; gap: 8px; align-items: center; }
+      .dashboard > header > div:first-child { min-width: 0; flex: 1 1 auto; }
+      .dashboard > header h1 { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 0; line-height: 1.2; letter-spacing: 0; }
+      .dashboard > header h1::before { content: 'Admin'; font-size: 17px; font-weight: 700; color: var(--text); }
+      .dashboard > header h1::after { content: 'หมู่บ้านภัทราวิลล่า 8'; display: block; margin-top: 1px; color: var(--text-muted); font-size: 10.5px; font-weight: 500; }
+      .header-admin-actions { width: auto !important; flex: 0 0 auto; gap: 7px !important; justify-content: flex-end !important; }
+      .dashboard > header #headerIdentity { position: static !important; }
+      .header-admin-actions > .badge { display: none; }
+      .mobile-admin-menu-btn { display: inline-flex; min-height: 44px; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 11px; background: var(--card); color: var(--text-body); font: 700 12.5px/1 'IBM Plex Sans Thai', sans-serif; }
+      .admin-quick-links, .header-admin-actions > .logout-btn { display: none; }
+      .header-admin-actions.mobile-open .admin-quick-links { display: grid; grid-template-columns: 1fr 1fr; position: absolute; top: calc(100% + 6px); left: 12px; right: 12px; padding: 10px 10px 62px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: 0 18px 42px rgba(60,40,20,.18); z-index: 102; }
+      .header-admin-actions.mobile-open .admin-link-btn { min-height: 44px; }
+      .header-admin-actions.mobile-open > .logout-btn { display: inline-flex; position: absolute; top: calc(100% + 126px); z-index: 103; min-height: 42px; justify-content: center; background: var(--card); }
+      .header-admin-actions.mobile-open > .logout-btn[title] { left: 22px; width: 48px; }
+      .header-admin-actions.mobile-open > .logout-btn:not([title]) { left: 78px; right: 22px; }
+      .tabs { position: sticky; top: 65px; z-index: 90; padding: 6px 10px 0; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; background: rgba(249,243,233,.96); backdrop-filter: blur(8px); }
+      .tab-btn { min-height: 44px; padding: 8px 11px 9px; font-size: 12.5px; }
+      .toolbar { position: sticky; top: 116px; z-index: 80; display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; padding: 10px 12px 8px; border-bottom: 1px solid var(--border-soft); }
       .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
 
       /* table: hide non-essential columns (index, updated) */
       #adminTable .c-idx,
       #adminTable .c-upd { display: none; }
 
-      /* compact table on mobile */
-      .table-wrap { margin: 0 12px 16px; border-radius: 10px; }
-      thead th { padding: 9px 10px; font-size: 10.5px; }
-      tbody td { padding: 10px 10px; font-size: 12px; }
+      /* Residents become scan-friendly cards; the desktop table remains unchanged. */
+      #residentsTab .table-wrap { display: none; }
+      .resident-card-list { display: grid; gap: 10px; padding: 10px 12px 18px; }
+      .resident-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px 12px; box-shadow: 0 4px 16px rgba(60,40,20,.045); }
+      .resident-card-head { display: flex; align-items: flex-start; gap: 10px; }
+      .resident-card-main { min-width: 0; flex: 1; }
+      .resident-house { font: 700 16px/1.25 'IBM Plex Mono', monospace; color: var(--accent-deep); }
+      .resident-name { margin-top: 3px; font-size: 14px; font-weight: 650; line-height: 1.35; }
+      .resident-card .edit-btn { min-width: 68px; min-height: 42px; font-size: 13px; }
+      .resident-phone { display: inline-flex; align-items: center; min-height: 40px; margin-top: 5px; color: var(--text-body); font: 600 13px/1 'IBM Plex Mono', monospace; text-decoration: none; }
+      .resident-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+      .resident-summary-chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 8px; border-radius: 8px; background: var(--bg-soft); color: var(--text-soft); font-size: 11.5px; font-weight: 600; }
+      .resident-summary-chip.alert { background: var(--status-error-bg); color: var(--status-error); }
+      .resident-details { margin-top: 9px; border-top: 1px solid var(--border-soft); }
+      .resident-details summary { min-height: 40px; display: flex; align-items: center; justify-content: space-between; color: var(--accent-deep); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; }
+      .resident-details summary::-webkit-details-marker { display: none; }
+      .resident-details summary::after { content: '⌄'; font-size: 17px; }
+      .resident-details[open] summary::after { transform: rotate(180deg); }
+      .resident-detail-grid { display: grid; gap: 8px; padding: 0 0 6px; }
+      .resident-detail-row { display: grid; grid-template-columns: 92px 1fr; gap: 8px; font-size: 12px; }
+      .resident-detail-label { color: var(--text-muted); }
+      .resident-detail-value { min-width: 0; overflow-wrap: anywhere; color: var(--text-body); }
+      .toolbar input[type="text"] { grid-column: 1 / -1; min-width: unset; width: 100%; min-height: 44px; }
+      .toolbar > .toolbar-btn { display: none; }
+      .record-count { align-self: center; padding: 0; font-weight: 700; }
+      .toolbar-note { grid-column: 1 / -1; grid-row: 3; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 0; }
+      .toolbar-note::after { content: attr(data-mobile-note); font-size: 12px; }
+      .mobile-export-menu { display: block; position: relative; }
+      .mobile-export-menu > summary { display: flex; min-height: 40px; align-items: center; padding: 7px 11px; border: 1px solid var(--border); border-radius: 9px; background: var(--card); color: var(--text-body); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; }
+      .mobile-export-menu > summary::-webkit-details-marker { display: none; }
+      .mobile-export-actions { position: absolute; top: calc(100% + 5px); right: 0; display: grid; min-width: 156px; padding: 6px; border: 1px solid var(--border); border-radius: 11px; background: var(--card); box-shadow: var(--shadow-card); }
+      .mobile-export-actions button { min-height: 42px; border: 0; background: transparent; text-align: left; font: 600 12px 'IBM Plex Sans Thai', sans-serif; }
 
-      /* toolbar: full-width search */
-      .toolbar input[type="text"] { min-width: unset; width: 100%; }
-
-      .modal-body { grid-template-columns: 1fr; padding: 18px 22px; }
-      .modal-header { padding: 18px 22px 14px; }
-      .modal-footer { padding: 14px 22px; flex-direction: column; align-items: stretch; }
+      #editModal { padding: 0; align-items: flex-end; }
+      #editModal .modal { max-height: 94dvh; border-radius: 18px 18px 0 0; }
+      #editModal .modal-header { position: sticky; top: 0; z-index: 2; padding: 16px 18px 13px; background: var(--card); }
+      #editModal .modal-body { grid-template-columns: 1fr; padding: 16px 18px; }
+      #editModal .modal-footer { position: sticky; bottom: 0; z-index: 2; padding: 12px 18px max(12px, env(safe-area-inset-bottom)); flex-direction: column; align-items: stretch; background: var(--card); }
       .modal-actions { flex-direction: column; }
       .ghost-btn, .primary-btn { width: 100%; }
       .ann-dropzone {
@@ -1406,10 +1444,12 @@
     <div>
       <h1>Admin — หมู่บ้านภัทราวิลล่า 8</h1>
     </div>
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
+    <div class="header-admin-actions" id="headerAdminActions" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
       <div id="headerIdentity"></div>
       <span class="badge">ADMIN</span>
-      <nav class="admin-quick-links" aria-label="Admin quick links">
+      <button class="mobile-admin-menu-btn" id="mobileAdminMenuBtn" type="button"
+        aria-expanded="false" aria-controls="adminQuickLinks" onclick="toggleMobileAdminMenu(event)">เมนู <span aria-hidden="true">⌄</span></button>
+      <nav class="admin-quick-links" id="adminQuickLinks" aria-label="Admin quick links">
         <a class="admin-link-btn" href="/" target="_blank" rel="noopener">🏠 Home</a>
         <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 ข้อมูลลูกบ้าน</a>
         <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 ทะเบียนรถ</a>
@@ -1464,6 +1504,13 @@
     <button class="toolbar-btn" id="exportJsonBtn" onclick="exportJSON()">⬇ Export JSON</button>
     <button class="toolbar-btn" id="exportXlsxBtn" onclick="exportExcel()">⬇ Export Excel</button>
     <span class="record-count" id="recordCount"></span>
+    <details class="mobile-export-menu">
+      <summary>ส่งออก</summary>
+      <div class="mobile-export-actions">
+        <button type="button" onclick="exportJSON()">⬇ Export JSON</button>
+        <button type="button" onclick="exportExcel()">⬇ Export Excel</button>
+      </div>
+    </details>
     <div class="toolbar-note" id="toolbarNote">กำลังโหลดข้อมูล...</div>
   </div>
 
@@ -1486,6 +1533,7 @@
       <tbody id="adminBody"></tbody>
     </table>
   </div>
+  <div class="resident-card-list" id="residentCardList" aria-live="polite"></div>
 
   <footer>Admin Portal — ข้อมูลลับ ห้ามเผยแพร่</footer>
   </div><!-- end residentsTab -->
@@ -2512,6 +2560,10 @@
     const el = document.getElementById('toolbarNote');
     if (!el) return;
     el.textContent = message;
+    el.dataset.mobileNote = String(message || '')
+      .replace(/\s*·\s*\d+\s*รายการ\s*/g, ' · ')
+      .replace(/\s*·\s*$/, '')
+      .trim();
     el.className = `toolbar-note${state ? ` ${state}` : ''}`;
   }
 
@@ -4539,7 +4591,73 @@
         <td class="c-upd">${r.last_updated ? fmtDate(r.last_updated) : '—'}</td>
       </tr>`;
     }).join('');
+
+    const cardList = document.getElementById('residentCardList');
+    if (cardList) {
+      cardList.innerHTML = data.length ? data.map(r => {
+        const cars = normalizePlateArray(r.cars);
+        const motos = normalizePlateArray(r.motorcycles);
+        const lpr = lprStatus(r);
+        const dataIndex = allData.indexOf(r);
+        const phoneDigits = String(r.phone || '').replace(/\D/g, '');
+        const phoneHtml = r.phone
+          ? `<a class="resident-phone" href="tel:${escHtml(phoneDigits)}">☎ ${escHtml(formatPhone(r.phone))}</a>`
+          : '<span class="resident-phone no-val">ไม่มีเบอร์โทร</span>';
+        const plateLine = (items, type) => items.length
+          ? `<div class="veh">${items.map(p => `<span class="chip ${type}">${escHtml(p)}</span>`).join('')}</div>`
+          : '<span class="no-val">—</span>';
+        return `<article class="resident-card">
+          <div class="resident-card-head">
+            <div class="resident-card-main">
+              <div class="resident-house">บ้าน ${showVal(r.house_no)}</div>
+              <div class="resident-name">${showVal(shortenCompanyName(r.name))}</div>
+            </div>
+            <button class="edit-btn" type="button" onclick="openEditModal(${dataIndex})">แก้ไข</button>
+          </div>
+          ${phoneHtml}
+          <div class="resident-summary">
+            <span class="resident-summary-chip${lpr?.state === 'fail' ? ' alert' : ''}">🚗 ${cars.length} คัน${lpr?.state === 'fail' ? ' · LPR ผิดพลาด' : ''}</span>
+            <span class="resident-summary-chip">🏍 ${motos.length || 'ไม่มี'}</span>
+            <span class="resident-summary-chip">โควต้า ${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</span>
+          </div>
+          <details class="resident-details">
+            <summary>ดูรายละเอียด</summary>
+            <div class="resident-detail-grid">
+              <div class="resident-detail-row"><span class="resident-detail-label">รถยนต์</span><span class="resident-detail-value">${plateLine(cars, 'car')}</span></div>
+              <div class="resident-detail-row"><span class="resident-detail-label">มอเตอร์ไซค์</span><span class="resident-detail-value">${plateLine(motos, 'moto')}</span></div>
+              <div class="resident-detail-row"><span class="resident-detail-label">อีเมล</span><span class="resident-detail-value">${r.email ? escHtml(r.email) : '<span class="no-val">—</span>'}</span></div>
+              <div class="resident-detail-row"><span class="resident-detail-label">อัปเดต</span><span class="resident-detail-value">${r.last_updated ? fmtDate(r.last_updated) : '—'}</span></div>
+            </div>
+          </details>
+        </article>`;
+      }).join('') : '<div class="resident-card" style="text-align:center;color:var(--text-muted);">ไม่พบข้อมูลลูกบ้าน</div>';
+    }
   }
+
+  function toggleMobileAdminMenu(event) {
+    if (event) event.stopPropagation();
+    const actions = document.getElementById('headerAdminActions');
+    const button = document.getElementById('mobileAdminMenuBtn');
+    if (!actions || !button) return;
+    const open = actions.classList.toggle('mobile-open');
+    button.setAttribute('aria-expanded', String(open));
+  }
+
+  function closeMobileAdminMenu() {
+    const actions = document.getElementById('headerAdminActions');
+    const button = document.getElementById('mobileAdminMenuBtn');
+    if (!actions || !button) return;
+    actions.classList.remove('mobile-open');
+    button.setAttribute('aria-expanded', 'false');
+  }
+
+  document.addEventListener('click', event => {
+    const actions = document.getElementById('headerAdminActions');
+    if (actions && !actions.contains(event.target)) closeMobileAdminMenu();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeMobileAdminMenu();
+  });
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   function fmtDate(raw) {
