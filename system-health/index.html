@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f9f3e9">
   <title>System Health · Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css">
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -181,6 +183,7 @@
       .site-header { padding:0 16px; }
       .brand-sub { display:none; }
       .h-btn .wide { display:none; }
+      .header-actions > a.h-btn { display:none; }
       .hero { padding-top:22px; }
       .sec-head span { display:none; }
     }
@@ -198,6 +201,7 @@
     <div class="header-actions">
       <button class="h-btn" id="refreshBtn" type="button">↻ <span class="wide">ตรวจสอบใหม่</span></button>
       <a class="h-btn" href="/">← <span class="wide">กลับ</span></a>
+      <div id="headerIdentity"></div>
     </div>
   </header>
 
@@ -379,6 +383,12 @@
       } finally { button.textContent = "ยืนยัน Reboot"; }
     }
     document.getElementById("refreshBtn").addEventListener("click", () => loadSummary(true));
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!window.PattraBadge) return;
+      window.PattraBadge.mount("#headerIdentity", {
+        onLogout: () => { location.href = "/"; }
+      });
+    });
     document.getElementById("cancelReboot").addEventListener("click", closeReboot);
     document.getElementById("confirmInput").addEventListener("input", event => { document.getElementById("confirmReboot").disabled = event.target.value.trim() !== "REBOOT"; });
     document.getElementById("confirmReboot").addEventListener("click", rebootCamera);
