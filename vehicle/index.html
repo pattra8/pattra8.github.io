@@ -484,13 +484,15 @@
       font-weight: 500;
       color: var(--text);
       letter-spacing: 0.005em;
+      line-height: 1.2;
     }
     .vehicles-title-count {
       color: var(--text-soft);
       font-family: 'IBM Plex Sans Thai', sans-serif;
-      font-size: 15px;
-      font-weight: 400;
-      margin-left: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-left: 8px;
+      white-space: nowrap;
     }
     .vehicles-subnote {
       margin: -4px 4px 16px;
@@ -1237,9 +1239,33 @@
       .owner-bar { padding: 14px 16px; gap: 12px; flex-wrap: wrap; }
       .owner-actions { width: 100%; padding-top: 10px; border-top: 1px solid var(--border-soft); margin-top: 4px; }
 
-      .vehicles-header { flex-direction: column; gap: 14px; align-items: flex-start; }
-      .add-btn { width: 100%; justify-content: center; }
-      .vehicles-title { font-size: 22px; }
+      .vehicles-header {
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 6px;
+        padding: 0;
+      }
+      .vehicles-header .add-btn {
+        width: auto;
+        min-height: 40px;
+        padding: 8px 13px;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .vehicles-title {
+        min-width: 0;
+        font-size: 22px;
+      }
+      .vehicles-title-count {
+        display: block;
+        margin: 4px 0 0;
+        font-size: 12.5px;
+      }
+      .vehicles-subnote {
+        margin: 0 0 14px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
 
       .v-card { padding: 16px; gap: 14px; flex-wrap: wrap; }
       .plate { width: 80px; height: 50px; font-size: 13px; }
@@ -2010,12 +2036,17 @@
     );
     const carsAtQuota = cars.length >= carQuota;
 
+    const vehicleSummary = [
+      `รถยนต์ ${cars.length}/${carQuota}`,
+      motos.length ? `มอเตอร์ไซค์ ${motos.length}` : ''
+    ].filter(Boolean).join(' · ');
+
     const ownerHtml = `
       <div class="vehicles-header">
-        <div class="vehicles-title">ทะเบียนรถ<span class="vehicles-title-count">(รวม ${total} คัน · 🚗 รถยนต์ ${cars.length}/${carQuota} · 🏍️ มอเตอร์ไซค์ ${motos.length} คัน)</span></div>
+        <div class="vehicles-title">ทะเบียนรถ<span class="vehicles-title-count">${vehicleSummary}</span></div>
         <button class="add-btn" id="addBtn"><span class="plus">+</span> เพิ่มรถ</button>
       </div>
-      <div class="vehicles-subnote">โควต้านี้ใช้เฉพาะทะเบียนรถยนต์ที่ sync LPR ได้ และไม่เกี่ยวกับมอเตอร์ไซค์</div>
+      <div class="vehicles-subnote">โควตา LPR นับเฉพาะรถยนต์</div>
     `;
 
     let listHtml = '';
