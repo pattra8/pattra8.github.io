@@ -15,6 +15,16 @@
   text-align: left;
 }
 
+/* The host is the permanent account anchor in every Pattra header. Page-level
+   action buttons may wrap or collapse on phones; the resident account never
+   shrinks, disappears, or gets pushed away from the top-right corner. */
+#headerIdentity {
+  position: relative;
+  z-index: 410;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
 .pv-badge > summary {
   display: flex;
   align-items: center;
@@ -54,15 +64,6 @@
   font-weight: 700;
   color: var(--text, #2a2218);
   line-height: 1.2;
-}
-.pv-badge-name {
-  font-size: 11.5px;
-  color: var(--text-soft, #6b5d4a);
-  line-height: 1.25;
-  max-width: 140px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .pv-badge-chev {
   font-size: 10px;
@@ -107,6 +108,14 @@
   cursor: pointer;
   white-space: nowrap;
 }
+.pv-badge-menu-name {
+  padding: 10px 12px 8px;
+  color: var(--text, #2a2218);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
 .pv-badge-menu a:hover,
 .pv-badge-menu button:hover { background: var(--accent-pale, #f7e6cd); }
 
@@ -135,6 +144,8 @@
 .pv-badge-login:hover { background: var(--accent-pale, #f7e6cd); }
 
 @media (max-width: 640px) {
-  .pv-badge-name { display: none; }
-  .pv-badge-menu { min-width: 200px; }
+  .pv-badge-menu {
+    min-width: 200px;
+    max-width: calc(100vw - 24px);
+  }
 }
