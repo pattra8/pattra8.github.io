@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f7f0e3">
   <title>LINE Broadcast · Pattra Villa 8</title>
+  <link rel="stylesheet" href="/assets/resident-badge.css">
+  <script src="/assets/resident-badge.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -657,7 +659,9 @@
       })[character]);
     }
 
+    let badgeMounted = false;
     function renderHeaderIdentity(session) {
+      if (badgeMounted) { window.PattraBadge.refresh(); return; }
       const initial = String(session.residentName || session.houseNo || "P")
           .trim().charAt(0).toUpperCase();
       el("headerIdentity").innerHTML = `
@@ -670,6 +674,15 @@
           </span>
         </a>
       `;
+    }
+
+    function mountResidentBadge() {
+      if (!window.PattraBadge) return false;
+      window.PattraBadge.mount("#headerIdentity", {
+        onLogout: () => { location.href = "/"; }
+      });
+      badgeMounted = true;
+      return true;
     }
 
     function renderMedia() {
@@ -855,6 +868,7 @@
     el("clearBtn").addEventListener("click", clearDraft);
 
     updatePreview();
+    document.addEventListener("DOMContentLoaded", mountResidentBadge);
     init();
   </script>
 </body>
