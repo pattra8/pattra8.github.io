@@ -273,17 +273,28 @@
       height:min(780px, calc(100dvh - 24px)); max-height:calc(100dvh - 24px);
       box-shadow:0 20px 56px rgba(40,30,18,.27);
       display:flex; flex-direction:column; overflow:hidden; position:relative; }
-    .pbx-x { position:absolute; top:14px; right:14px; width:34px; height:34px;
-      border:none; border-radius:50%; background:var(--bg-soft); color:var(--text-soft);
-      font-size:15px; cursor:pointer; line-height:1; }
-    .pbx-x:hover { background:var(--neutral-bg); }
-    .pbx-head { display:flex; flex-direction:column; gap:3px; padding:18px 56px 14px 18px;
-      border-bottom:1px solid var(--border-soft); flex:none; }
-    .pbx-title-row { display:flex; align-items:baseline; flex-wrap:wrap; gap:7px 10px; }
-    .pbx-plate { font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:700;
-      color:var(--text); letter-spacing:0.02em; }
-    .pbx-house { color:var(--accent-text); font-size:13px; font-weight:700; }
-    .pbx-sub { font-size:13px; color:var(--text-muted); }
+    .pbx-x { position:absolute; top:13px; right:13px; width:32px; height:32px;
+      border:1px solid var(--border); border-radius:50%; background:var(--card);
+      color:var(--text-soft); font-size:14px; cursor:pointer; line-height:1;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 1px 2px rgba(60,40,20,.06); transition:background .15s, color .15s; z-index:2; }
+    .pbx-x:hover { background:var(--bg-soft); color:var(--text); }
+    .pbx-head { flex:none; padding:15px 56px 14px 18px;
+      background:linear-gradient(180deg,#fdf8ee 0%, var(--card) 100%);
+      border-bottom:1px solid var(--border-soft); }
+    .pbx-house { display:inline-flex; align-items:center; gap:5px;
+      background:var(--warn-bg); color:var(--accent-deep);
+      font-size:12.5px; font-weight:700; line-height:1;
+      padding:5px 11px; border-radius:999px; }
+    .pbx-house.ext { background:var(--neutral-bg); color:var(--text-soft); }
+    .pbx-label { display:block; margin:11px 0 5px; font-size:10.5px; font-weight:600;
+      letter-spacing:.14em; color:var(--text-muted); }
+    .pbx-title-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px 11px; }
+    .pbx-plate { font-family:'IBM Plex Mono', monospace; font-size:20px; font-weight:700;
+      color:var(--text); letter-spacing:0.08em; white-space:nowrap;
+      background:var(--card); border:1.5px solid var(--accent); border-radius:10px;
+      padding:5px 13px; box-shadow:0 1px 2px rgba(60,40,20,.06); }
+    .pbx-sub { font-size:13px; font-weight:500; color:var(--text-soft); }
     .pbx-body { overflow-y:auto; overscroll-behavior:contain; padding:14px 18px;
       scrollbar-gutter:stable; flex:1 1 auto; min-height:0; }
     .pbx-item { margin-bottom:18px; }
@@ -301,7 +312,8 @@
       .pbx { padding:0; align-items:flex-end; }
       .pbx-card { width:100%; height:calc(100dvh - 8px); max-width:none;
         max-height:calc(100dvh - 8px); border-radius:20px 20px 0 0; }
-      .pbx-head { padding-left:16px; }
+      .pbx-head { padding:14px 52px 13px 16px; }
+      .pbx-plate { font-size:18.5px; padding:5px 11px; }
       .pbx-body { padding:13px 16px; }
     }
 
@@ -733,11 +745,13 @@
       var v=(r&&r.vehicleVision)||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
       var cth=colorTh(v.color);
       var sub=[brand,cth].filter(Boolean).join(' · ');
-      var houseLabel=(r.houses&&r.houses.length) ? 'บ้าน '+r.houses.map(esc).join(', ') : 'บ้าน —';
-      var head='<div class="pbx-title-row"><span class="pbx-house">'+houseLabel+'</span>'+
-        '<span class="pbx-plate">ทะเบียน '+esc(displayPlate(r.plate))+'</span>';
-      head+='</div>';
-      if(sub) head+='<span class="pbx-sub">'+esc(sub)+'</span>';
+      var head=(r.houses&&r.houses.length)
+        ? '<span class="pbx-house">🏠 บ้าน '+r.houses.map(esc).join(', ')+'</span>'
+        : '<span class="pbx-house ext">🚗 รถภายนอก</span>';
+      head+='<span class="pbx-label">ทะเบียนรถ</span>'+
+        '<div class="pbx-title-row"><span class="pbx-plate">'+
+        esc(displayPlate(r.plate))+'</span>'+
+        (sub ? '<span class="pbx-sub">'+esc(sub)+'</span>' : '')+'</div>';
       elPbxHead.innerHTML=head;
       if(!caps.length){
         elPbxBody.innerHTML='<div class="pbx-empty">ไม่มีภาพสำหรับรายการนี้</div>';
