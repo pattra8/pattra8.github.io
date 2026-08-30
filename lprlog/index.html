@@ -270,7 +270,8 @@
       padding:12px; z-index:60; overflow:hidden; }
     .pbx.open { display:flex; }
     .pbx-card { background:var(--card); border-radius:20px; width:100%; max-width:460px;
-      max-height:calc(100dvh - 24px); box-shadow:0 20px 56px rgba(40,30,18,.27);
+      height:min(780px, calc(100dvh - 24px)); max-height:calc(100dvh - 24px);
+      box-shadow:0 20px 56px rgba(40,30,18,.27);
       display:flex; flex-direction:column; overflow:hidden; position:relative; }
     .pbx-x { position:absolute; top:14px; right:14px; width:34px; height:34px;
       border:none; border-radius:50%; background:var(--bg-soft); color:var(--text-soft);
@@ -278,11 +279,13 @@
     .pbx-x:hover { background:var(--neutral-bg); }
     .pbx-head { display:flex; flex-direction:column; gap:3px; padding:18px 56px 14px 18px;
       border-bottom:1px solid var(--border-soft); flex:none; }
+    .pbx-title-row { display:flex; align-items:baseline; flex-wrap:wrap; gap:7px 10px; }
     .pbx-plate { font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:700;
       color:var(--text); letter-spacing:0.02em; }
+    .pbx-house { color:var(--accent-text); font-size:13px; font-weight:700; }
     .pbx-sub { font-size:13px; color:var(--text-muted); }
     .pbx-body { overflow-y:auto; overscroll-behavior:contain; padding:14px 18px;
-      scrollbar-gutter:stable; }
+      scrollbar-gutter:stable; flex:1 1 auto; min-height:0; }
     .pbx-item { margin-bottom:18px; }
     .pbx-item:last-child { margin-bottom:0; }
     .pbx-cap { display:flex; align-items:baseline; gap:6px; font-size:13px; font-weight:600;
@@ -296,7 +299,8 @@
       border-top:1px solid var(--border-soft); padding:11px 16px 12px; }
     @media (max-width:480px) {
       .pbx { padding:0; align-items:flex-end; }
-      .pbx-card { max-width:none; max-height:calc(100dvh - 8px); border-radius:20px 20px 0 0; }
+      .pbx-card { width:100%; height:calc(100dvh - 8px); max-width:none;
+        max-height:calc(100dvh - 8px); border-radius:20px 20px 0 0; }
       .pbx-head { padding-left:16px; }
       .pbx-body { padding:13px 16px; }
     }
@@ -729,8 +733,9 @@
       var v=(r&&r.vehicleVision)||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
       var cth=colorTh(v.color);
       var sub=[brand,cth].filter(Boolean).join(' · ');
-      var head='<span class="pbx-plate">'+esc(displayPlate(r.plate))+'</span>';
-      if(r.houses&&r.houses.length) head+='<span class="pbx-sub">บ้าน '+r.houses.map(esc).join(', ')+'</span>';
+      var head='<div class="pbx-title-row"><span class="pbx-plate">'+esc(displayPlate(r.plate))+'</span>';
+      if(r.houses&&r.houses.length) head+='<span class="pbx-house">บ้าน '+r.houses.map(esc).join(', ')+'</span>';
+      head+='</div>';
       if(sub) head+='<span class="pbx-sub">'+esc(sub)+'</span>';
       elPbxHead.innerHTML=head;
       if(!caps.length){
