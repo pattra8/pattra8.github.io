@@ -1458,7 +1458,10 @@
       /* Residents become scan-friendly cards; the desktop table remains unchanged. */
       #residentsTab .table-wrap { display: none; }
       .resident-card-list { display: grid; gap: 10px; padding: 10px 12px 18px; }
-      .resident-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px 12px; box-shadow: 0 4px 16px rgba(60,40,20,.045); }
+      .resident-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px 12px; box-shadow: 0 4px 16px rgba(60,40,20,.045); cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .12s; }
+      .resident-card:active { transform: scale(.995); }
+      .resident-card:focus-visible { outline: 3px solid rgba(196,122,44,.25); outline-offset: 2px; }
+      .resident-card.expanded { border-color: #d8ba8e; box-shadow: 0 7px 22px rgba(60,40,20,.08); }
       .resident-card-head { display: flex; align-items: flex-start; gap: 10px; }
       .resident-card-main { min-width: 0; flex: 1; }
       .resident-house { font: 700 16px/1.25 'IBM Plex Mono', monospace; color: var(--accent-deep); }
@@ -4806,7 +4809,9 @@
         const plateLine = (items, type) => items.length
           ? `<div class="veh">${items.map(p => `<span class="chip ${type}">${escHtml(p)}</span>`).join('')}</div>`
           : '<span class="no-val">—</span>';
-        return `<article class="resident-card">
+        return `<article class="resident-card" tabindex="0" aria-expanded="false"
+          aria-label="บ้าน ${escHtml(r.house_no || '')} แตะเพื่อดูรายละเอียด"
+          onclick="toggleResidentCardDetails(event,this)" onkeydown="toggleResidentCardDetails(event,this)">
           <div class="resident-card-head">
             <div class="resident-card-main">
               <div class="resident-house">บ้าน ${showVal(r.house_no)}</div>
@@ -4818,12 +4823,12 @@
           <div class="resident-summary">
             <span class="resident-summary-chip${lpr?.state === 'fail' ? ' alert' : ''}">🚗 ${cars.length} คัน${lpr?.state === 'fail' ? ' · LPR ผิดพลาด' : ''}</span>
             <span class="resident-summary-chip">🏍 ${motos.length || 'ไม่มี'}</span>
-            <span class="resident-summary-chip">โควต้า ${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))}</span>
           </div>
-          <details class="resident-details">
+          <details class="resident-details" ontoggle="syncResidentCardExpanded(this)">
             <summary>ดูรายละเอียด</summary>
             <div class="resident-detail-grid">
               <div class="resident-detail-row"><span class="resident-detail-label">รถยนต์</span><span class="resident-detail-value">${plateLine(cars, 'car')}</span></div>
+              <div class="resident-detail-row"><span class="resident-detail-label">โควต้ารถยนต์</span><span class="resident-detail-value">${showVal(getCarQuota(r.house_no, r.car_quota ?? r.carQuota))} คัน</span></div>
               <div class="resident-detail-row"><span class="resident-detail-label">มอเตอร์ไซค์</span><span class="resident-detail-value">${plateLine(motos, 'moto')}</span></div>
               <div class="resident-detail-row"><span class="resident-detail-label">อีเมล</span><span class="resident-detail-value">${r.email ? escHtml(r.email) : '<span class="no-val">—</span>'}</span></div>
               <div class="resident-detail-row"><span class="resident-detail-label">อัปเดต</span><span class="resident-detail-value">${r.last_updated ? fmtDate(r.last_updated) : '—'}</span></div>
@@ -4832,6 +4837,24 @@
         </article>`;
       }).join('') : '<div class="resident-card" style="text-align:center;color:var(--text-muted);">ไม่พบข้อมูลลูกบ้าน</div>';
     }
+  }
+
+  function syncResidentCardExpanded(details) {
+    const card = details?.closest('.resident-card');
+    if (!card) return;
+    card.classList.toggle('expanded', details.open);
+    card.setAttribute('aria-expanded', String(details.open));
+  }
+
+  function toggleResidentCardDetails(event, card) {
+    if (!card) return;
+    const isKeyboard = event.type === 'keydown';
+    if (isKeyboard && event.key !== 'Enter' && event.key !== ' ') return;
+    if (event.target.closest('button, a, summary, input, select, textarea, label')) return;
+    if (isKeyboard) event.preventDefault();
+    const details = card.querySelector('.resident-details');
+    if (!details) return;
+    details.open = !details.open;
   }
 
   function toggleMobileAdminMenu(event) {
