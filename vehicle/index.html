@@ -1535,7 +1535,9 @@
       car_quota: parseCarQuota(r.car_quota),
       carQuota: parseCarQuota(r.carQuota),
       lpr_sync_pending: !!r.lpr_sync_pending,
-      last_updated: r.last_updated || null
+      last_updated: r.last_updated || null,
+      vehicle_updated_at: r.vehicle_updated_at && typeof r.vehicle_updated_at === 'object' ?
+        {...r.vehicle_updated_at} : {}
     };
   }
 
@@ -1574,6 +1576,17 @@
 
   function normalizeHouseForAuth(houseNo) {
     return String(houseNo || '').trim().replace(/\s+/g, '');
+  }
+
+  function vehicleTimestampKey(type, plate) {
+    return `${type}:${String(plate || '').normalize('NFKC')
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/[\s-]/g, '').trim().toUpperCase()}`;
+  }
+
+  function vehicleUpdatedAt(type, plate) {
+    const timestamps = currentRecord?.vehicle_updated_at || {};
+    return timestamps[vehicleTimestampKey(type, plate)] || currentRecord?.last_updated || null;
   }
 
   function getResidentUnlocks() {
@@ -2071,7 +2084,7 @@
                 <span class="v-type">รถยนต์</span>
                 <span class="status ${st.cls}">${st.label}</span>
               </div>
-              <div class="v-meta">${currentRecord.last_updated ? 'อัปเดตล่าสุด ' + esc(formatResidentDateTime(currentRecord.last_updated)) : 'ยังไม่ได้อัปเดต'}</div>
+              <div class="v-meta">${vehicleUpdatedAt('car', p) ? 'อัปเดตล่าสุด ' + esc(formatResidentDateTime(vehicleUpdatedAt('car', p))) : 'ยังไม่ได้อัปเดต'}</div>
             </div>
             <div class="v-actions">
               <button class="v-edit" data-action="edit" data-type="car" data-idx="${i}">แก้ไข</button>
@@ -2259,6 +2272,7 @@
     let newCars = [...currentRecord.cars];
     let newMotos = [...currentRecord.motorcycles];
     let plate = '';
+    let vehicleChange = null;
 
     if (action === 'add' || action === 'edit') {
       plate = document.getElementById('plateInput').value.trim();
@@ -2275,14 +2289,28 @@
             return;
           }
           newCars.push(plate);
-        } else newMotos.push(plate);
+          vehicleChange = { type: 'car', action: 'add', plate };
+        } else {
+          newMotos.push(plate);
+          vehicleChange = { type: 'moto', action: 'add', plate };
+        }
       } else {
-        if (editingType === 'car') newCars[editingIndex] = plate;
-        else newMotos[editingIndex] = plate;
+        if (editingType === 'car') {
+          vehicleChange = { type: 'car', action: 'edit', originalPlate: newCars[editingIndex], plate };
+          newCars[editingIndex] = plate;
+        } else {
+          vehicleChange = { type: 'moto', action: 'edit', originalPlate: newMotos[editingIndex], plate };
+          newMotos[editingIndex] = plate;
+        }
       }
     } else if (action === 'delete') {
-      if (editingType === 'car') newCars.splice(editingIndex, 1);
-      else newMotos.splice(editingIndex, 1);
+      if (editingType === 'car') {
+        vehicleChange = { type: 'car', action: 'delete', originalPlate: newCars[editingIndex] };
+        newCars.splice(editingIndex, 1);
+      } else {
+        vehicleChange = { type: 'moto', action: 'delete', originalPlate: newMotos[editingIndex] };
+        newMotos.splice(editingIndex, 1);
+      }
     }
 
     const btn = document.getElementById('submitBtn');
@@ -2300,7 +2328,8 @@
           vehicles: {
             cars: newCars,
             motorcycles: newMotos
-          }
+          },
+          vehicleChange
         })
       });
 
@@ -2321,6 +2350,7 @@
         currentRecord.motorcycles = newMotos;
         currentRecord.lpr_sync_pending = !!json.lprPending;
         currentRecord.last_updated = new Date().toISOString();
+        currentRecord.vehicle_updated_at = json.vehicleUpdatedAt || currentRecord.vehicle_updated_at || {};
       }
       renderResult();
 

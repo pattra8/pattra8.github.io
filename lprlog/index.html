@@ -264,30 +264,42 @@
     .search-camera { font-size:12.5px; color:var(--text-muted); }
     .search-empty { padding:24px 16px; text-align:center; color:var(--text-muted); font-size:13.5px; }
 
-    /* photo evidence lightbox */
-    .pbx { position:fixed; inset:0; background:rgba(40,30,18,0.55);
-      display:none; align-items:flex-start; justify-content:center;
-      padding:24px 14px; z-index:60; overflow-y:auto; }
+    /* photo evidence lightbox — fixed shell, independently scrolling evidence */
+    .pbx { position:fixed; inset:0; background:rgba(40,30,18,0.64);
+      backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center;
+      padding:12px; z-index:60; overflow:hidden; }
     .pbx.open { display:flex; }
-    .pbx-card { background:var(--card); border-radius:18px; width:100%; max-width:420px;
-      box-shadow:var(--shadow); padding:18px 18px 20px; position:relative; }
-    .pbx-x { position:absolute; top:12px; right:12px; width:32px; height:32px;
+    .pbx-card { background:var(--card); border-radius:20px; width:100%; max-width:460px;
+      max-height:calc(100dvh - 24px); box-shadow:0 20px 56px rgba(40,30,18,.27);
+      display:flex; flex-direction:column; overflow:hidden; position:relative; }
+    .pbx-x { position:absolute; top:14px; right:14px; width:34px; height:34px;
       border:none; border-radius:50%; background:var(--bg-soft); color:var(--text-soft);
       font-size:15px; cursor:pointer; line-height:1; }
     .pbx-x:hover { background:var(--neutral-bg); }
-    .pbx-head { display:flex; flex-direction:column; gap:3px; margin:2px 36px 14px 2px; }
+    .pbx-head { display:flex; flex-direction:column; gap:3px; padding:18px 56px 14px 18px;
+      border-bottom:1px solid var(--border-soft); flex:none; }
     .pbx-plate { font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:700;
       color:var(--text); letter-spacing:0.02em; }
     .pbx-sub { font-size:13px; color:var(--text-muted); }
-    .pbx-item { margin-bottom:14px; }
+    .pbx-body { overflow-y:auto; overscroll-behavior:contain; padding:14px 18px;
+      scrollbar-gutter:stable; }
+    .pbx-item { margin-bottom:18px; }
     .pbx-item:last-child { margin-bottom:0; }
-    .pbx-cap { font-size:13px; font-weight:600; margin-bottom:6px; }
+    .pbx-cap { display:flex; align-items:baseline; gap:6px; font-size:13px; font-weight:600;
+      margin:0 0 7px; }
     .pbx-cap .pbx-time { color:var(--text-muted); font-weight:400; font-size:12.5px; }
-    .pbx-img { display:block; width:100%; border-radius:12px; border:1px solid var(--border); }
+    .pbx-img { display:block; width:100%; border-radius:13px; border:1px solid var(--border); }
     .pbx-noimg { font-size:12.5px; color:var(--text-muted); background:var(--bg-soft);
       border-radius:12px; padding:20px; text-align:center; }
     .pbx-empty { font-size:13.5px; color:var(--text-muted); text-align:center; padding:24px 0; }
-    .pbx-foot { font-size:11.5px; color:var(--text-muted); text-align:center; margin-top:6px; }
+    .pbx-foot { flex:none; font-size:11.5px; color:var(--text-muted); text-align:center;
+      border-top:1px solid var(--border-soft); padding:11px 16px 12px; }
+    @media (max-width:480px) {
+      .pbx { padding:0; align-items:flex-end; }
+      .pbx-card { max-width:none; max-height:calc(100dvh - 8px); border-radius:20px 20px 0 0; }
+      .pbx-head { padding-left:16px; }
+      .pbx-body { padding:13px 16px; }
+    }
 
     /* login */
     .overlay { position:fixed; inset:0; background:rgba(40,30,18,0.45);
@@ -711,7 +723,9 @@
         elPbxBody=document.getElementById('pbxBody');
     function closePhotos(){ elPbx.classList.remove('open'); elPbxBody.innerHTML=''; }
     function openPhotos(r){
-      var caps=(r&&r.captures)||[];
+      var caps=((r&&r.captures)||[]).slice().sort(function(a,b){
+        return String(a.time||'99:99').localeCompare(String(b.time||'99:99'));
+      });
       var v=(r&&r.vehicleVision)||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
       var cth=colorTh(v.color);
       var sub=[brand,cth].filter(Boolean).join(' · ');
