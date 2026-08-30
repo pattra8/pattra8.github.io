@@ -733,8 +733,9 @@
       var v=(r&&r.vehicleVision)||{}; var brand=[v.make,v.model].filter(Boolean).join(' ');
       var cth=colorTh(v.color);
       var sub=[brand,cth].filter(Boolean).join(' · ');
-      var head='<div class="pbx-title-row"><span class="pbx-plate">'+esc(displayPlate(r.plate))+'</span>';
-      if(r.houses&&r.houses.length) head+='<span class="pbx-house">บ้าน '+r.houses.map(esc).join(', ')+'</span>';
+      var houseLabel=(r.houses&&r.houses.length) ? 'บ้าน '+r.houses.map(esc).join(', ') : 'บ้าน —';
+      var head='<div class="pbx-title-row"><span class="pbx-house">'+houseLabel+'</span>'+
+        '<span class="pbx-plate">ทะเบียน '+esc(displayPlate(r.plate))+'</span>';
       head+='</div>';
       if(sub) head+='<span class="pbx-sub">'+esc(sub)+'</span>';
       elPbxHead.innerHTML=head;
