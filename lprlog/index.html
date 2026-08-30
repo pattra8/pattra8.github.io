@@ -179,18 +179,23 @@
     .brand { color:var(--text-soft); font-weight:600; }
     .color-th { color:var(--text-muted); }
 
-    /* in/out block */
-    .io { text-align:right; white-space:nowrap; font-size:13.5px; line-height:1.2;
-      min-width:96px; font-weight:700; }
+    /* in/out timeline — chronological, with explicit direction labels */
+    .io { display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap;
+      gap:3px 8px; text-align:right; font-size:13px; line-height:1.25;
+      min-width:150px; font-weight:700; }
+    .io-event { display:inline-flex; align-items:baseline; gap:4px; white-space:nowrap; }
+    .io-label { font-size:11px; font-weight:600; color:var(--text-muted); }
     .io-in { color:var(--ok); font-weight:600; }
     .io-out { color:var(--err); font-weight:600; }
-    .io-arrow, .io .muted { color:var(--text-muted); font-weight:400; }
+    .io-sep, .io .muted { color:var(--text-muted); font-weight:400; }
     @media (max-width:390px) {
       .item { gap:8px; padding-left:12px; padding-right:12px; }
       .it-main { gap:8px; }
       .plate { min-width:74px; padding:0 8px; font-size:13px; }
       .it-sub { font-size:12.5px; }
-      .io { min-width:82px; font-size:13px; }
+      .io { min-width:108px; max-width:118px; gap:2px 6px; font-size:12.5px; }
+      .io-label { font-size:10.5px; }
+      .io-sep { display:none; }
     }
 
     .reason { font-size:13px; color:var(--err); font-weight:600; }
@@ -499,13 +504,18 @@
       return compact.replace(/^(.+?)(\d{1,4})$/, '$1 $2');
     }
 
-    /* in/out — compact single line */
+    /* First event in each direction, shown in actual time order. */
     function ioBlock(r){
-      var inT = r.entryTime ? '<span class="io-in">'+esc(r.entryTime)+'</span>' :
-        '<span class="muted">—</span>';
-      var outT = r.exitTime ? '<span class="io-out">'+esc(r.exitTime)+'</span>' :
-        '<span class="muted">—</span>';
-      return '<div class="io">'+inT+' <span class="io-arrow">→</span> '+outT+'</div>';
+      var events=[];
+      if(r.entryTime) events.push({time:String(r.entryTime),label:'เข้า',cls:'io-in'});
+      if(r.exitTime) events.push({time:String(r.exitTime),label:'ออก',cls:'io-out'});
+      events.sort(function(a,b){ return a.time.localeCompare(b.time); });
+      if(!events.length) return '<div class="io"><span class="muted">ไม่พบเวลา</span></div>';
+      return '<div class="io">'+events.map(function(event,index){
+        return (index?'<span class="io-sep">·</span>':'')+
+          '<span class="io-event '+event.cls+'"><span class="io-label">'+event.label+'</span> '+
+          esc(event.time)+'</span>';
+      }).join('')+'</div>';
     }
 
     /* photo-evidence registry: maps a row to a click id (rebuilt each render) */
