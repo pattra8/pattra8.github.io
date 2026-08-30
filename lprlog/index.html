@@ -263,6 +263,20 @@
     .search-dir.out { background:var(--err-bg); color:var(--err); }
     .search-camera { font-size:12.5px; color:var(--text-muted); }
     .search-empty { padding:24px 16px; text-align:center; color:var(--text-muted); font-size:13.5px; }
+    .search-vehicles { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+    .search-vehicle { display:inline-flex; align-items:center; gap:6px; padding:6px 9px;
+      border:1px solid var(--border-soft); border-radius:9px; background:var(--card);
+      font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; }
+    .search-vehicle small { font-family:'IBM Plex Sans Thai', sans-serif; font-size:10.5px;
+      font-weight:500; color:var(--text-muted); }
+    .house-search-event .it-main { flex:1; }
+    .house-search-detail { min-width:0; display:flex; flex-wrap:wrap; align-items:center;
+      gap:5px 8px; }
+    @media (max-width:390px) {
+      .house-search-event .plate { min-width:78px; }
+      .house-search-event { align-items:flex-start; }
+      .house-search-detail { gap:4px 6px; }
+    }
 
     /* photo evidence lightbox — fixed shell, independently scrolling evidence */
     .pbx { position:fixed; inset:0; background:rgba(40,30,18,0.64);
@@ -371,16 +385,16 @@
 
     <section class="searchbox">
       <div class="search-label">
-        <span>ค้นหาเลขทะเบียน</span>
+        <span>ค้นหาทะเบียน หรือบ้านเลขที่</span>
         <small>ค้นหาข้ามวันอัตโนมัติ</small>
       </div>
       <div class="search-row">
         <input id="plateSearch" type="text" inputmode="text" autocomplete="off"
-          placeholder="พิมพ์เลขทะเบียน เช่น 1กข1234" />
+          placeholder="เช่น 1กข1234 หรือ 38/8" />
         <button id="plateClear" class="search-clear" type="button" disabled>ล้าง</button>
       </div>
       <div id="searchHint" class="search-hint">
-        พิมพ์เลขทะเบียนให้ครบ แล้วระบบจะแสดงช่วงวันที่และเวลาเข้าออกของคันนั้นให้ทันที
+        ค้นหาทะเบียนหนึ่งคัน หรือบ้านเลขที่เพื่อดูรถทุกคันและการเข้าออกทั้งหมด
       </div>
     </section>
 
@@ -478,6 +492,10 @@
         .replace(/[\s-]/g, '')
         .trim()
         .toUpperCase();
+    }
+
+    function isHouseSearch(query){
+      return /^38\/\d{1,2}$/.test(String(query||''));
     }
 
     function formatBangkokDateLabel(epoch){
@@ -676,6 +694,31 @@
         '</div><span class="row-go">›</span></div>';
     }
 
+    function houseSearchEventRow(houseNo, event){
+      var row = {
+        plate: event.plate || '',
+        houses: event.houses || [houseNo],
+        vehicleVision: event.vehicleVision || null,
+        captures: [{
+          label: event.directionLabel || 'ผ่าน',
+          direction: event.direction || '',
+          time: event.time || '',
+          cameraId: event.cameraId || '',
+          imageUrl: event.imageUrl || '',
+        }],
+      };
+      var id=regRow(row);
+      var dirCls=event.direction==='entry'?'in':event.direction==='exit'?'out':'';
+      return '<div class="item tap search-event house-search-event" data-cap="'+id+'">'+
+        '<div class="it-main"><span class="plate">'+
+          esc(event.displayPlate || displayPlate(event.plate || ''))+'</span>'+
+          '<div class="house-search-detail">'+
+            '<span class="search-time">'+esc(event.time || '--:--')+'</span>'+
+            '<span class="search-dir '+dirCls+'">'+esc(event.directionLabel || 'ผ่าน')+'</span>'+
+            '<span class="search-camera">กล้อง '+esc(event.cameraId || '-')+'</span>'+
+          '</div></div><span class="row-go">›</span></div>';
+    }
+
     function renderSearch(r){
       lastSearchReport=r; currentMode='search';
       CAPS={}; capSeq=0;
@@ -719,6 +762,43 @@
         (groups || '<div class="search-empty">ไม่พบข้อมูลทะเบียนนี้ในช่วงที่เก็บไว้</div>')+
       '</div>';
       setSearchHint('ค้นหาครบแล้ว: พบ '+(s.totalEvents||0)+' ครั้งใน '+(s.totalDays||0)+' วัน', 'ok');
+    }
+
+    function renderHouseSearch(r){
+      lastSearchReport=r; currentMode='search'; CAPS={}; capSeq=0;
+      var s=r.summary||{}; var houseNo=s.houseNo||r.queryHouseNo||'';
+      elCap.innerHTML='บ้าน '+esc(houseNo)+
+        '<span class="win">รถทุกคัน · ประวัติเข้าออกทุกวันที่เก็บไว้</span>';
+      var range=s.firstLabel&&s.lastLabel?(s.firstLabel+' → '+s.lastLabel):'ไม่มีข้อมูล';
+      var vehicles=(s.vehicles||[]).map(function(vehicle){
+        return '<span class="search-vehicle">'+
+          esc(vehicle.displayPlate||displayPlate(vehicle.plate||''))+
+          '<small>'+esc(vehicle.eventCount||0)+' ครั้ง</small></span>';
+      }).join('');
+      var summary='<div class="search-summary">'+
+        '<div class="search-summary-top"><div><div class="search-summary-plate">บ้าน '+
+          esc(houseNo)+'</div><div class="search-summary-tag">รถที่ลงทะเบียน '+
+          esc(s.registeredCars||0)+' คัน · พบในกล้อง '+esc(s.activeCars||0)+' คัน</div></div>'+
+          '<div class="search-summary-tag">ช่วงรวม '+esc(range)+'</div></div>'+
+        '<div class="search-summary-stats">'+
+          '<div class="search-stat"><div class="lbl">พบทั้งหมด</div><div class="val">'+esc(s.totalEvents||0)+' ครั้ง</div></div>'+
+          '<div class="search-stat"><div class="lbl">พบต่างวัน</div><div class="val">'+esc(s.totalDays||0)+' วัน</div></div>'+
+          '<div class="search-stat"><div class="lbl">เข้า</div><div class="val">'+esc(s.entryEvents||0)+' ครั้ง</div></div>'+
+          '<div class="search-stat"><div class="lbl">ออก</div><div class="val">'+esc(s.exitEvents||0)+' ครั้ง</div></div></div>'+
+        (vehicles?'<div class="search-vehicles">'+vehicles+'</div>':'')+'</div>';
+      var groups=(r.dateGroups||[]).map(function(group){
+        var inner=(group.events||[]).map(function(event){
+          return houseSearchEventRow(houseNo,event);
+        }).join('');
+        return acc('house-'+group.reportDate,'',group.dateLabel,
+          group.eventCount+' ครั้ง · '+group.timeRange,
+          inner||'<div class="search-empty">ไม่พบรายการในวันนี้</div>',true);
+      }).join('');
+      elBody.innerHTML=summary+'<div class="search-groups">'+
+        (groups||'<div class="search-empty">ไม่พบรถของบ้านนี้ผ่านกล้องในช่วงที่เก็บไว้</div>')+
+        '</div>';
+      setSearchHint('บ้าน '+houseNo+': รถ '+(s.registeredCars||0)+' คัน · พบ '+
+        (s.totalEvents||0)+' ครั้งใน '+(s.totalDays||0)+' วัน','ok');
     }
 
     /* fix2 + fix5: accordion toggle + stat boxes navigate */
@@ -825,6 +905,7 @@
     async function loadSearch(){
       var s=getSession(); if(!s){ showLogin(); return; }
       var query=normalizePlateSearch(elSearch.value);
+      var houseSearch=isHouseSearch(query);
       if(!query){
         setSearchHint('พิมพ์เลขทะเบียนเพื่อค้นหาข้ามวัน', 'neutral');
         await loadDaily();
@@ -834,19 +915,22 @@
         searchToken++;
         currentMode='search';
         setNavState(true);
-        elBody.innerHTML='<div class="search-empty">พิมพ์เลขทะเบียนให้ครบอย่างน้อย 4 ตัวอักษรเพื่อเริ่มค้นหา</div>';
-        elCap.innerHTML='ค้นหาเลขทะเบียน<span class="win">กำลังรอให้พิมพ์ครบก่อนค้นหาข้ามวัน</span>';
-        setSearchHint('พิมพ์ทะเบียนให้ครบก่อน ระบบจะค้นหาข้ามวันอัตโนมัติ', 'neutral');
+        elBody.innerHTML='<div class="search-empty">พิมพ์ทะเบียนให้ครบ หรือบ้านเลขที่ เช่น 38/8</div>';
+        elCap.innerHTML='ค้นหา<span class="win">ค้นหาทะเบียนรถหรือบ้านเลขที่</span>';
+        setSearchHint('พิมพ์ทะเบียนให้ครบ หรือระบุบ้านเลขที่ เช่น 38/8', 'neutral');
         return;
       }
       var token=++searchToken;
       currentMode='search';
       setNavState(true);
       elBody.innerHTML='<div class="loading"><span class="spinner"></span>กำลังค้นหา…</div>';
-      setSearchHint('กำลังค้นหาเลขทะเบียน '+displayPlate(query)+' ข้ามวัน…', 'neutral');
+      setSearchHint(houseSearch?'กำลังค้นหารถทุกคันของบ้าน '+query+'…':
+        'กำลังค้นหาเลขทะเบียน '+displayPlate(query)+' ข้ามวัน…', 'neutral');
       try{
         var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
-          body:JSON.stringify({action:'searchPlate',houseNo:s.houseNo,pin:s.pin,plate:query})});
+          body:JSON.stringify(houseSearch?
+            {action:'searchHouse',houseNo:s.houseNo,pin:s.pin,queryHouseNo:query}:
+            {action:'searchPlate',houseNo:s.houseNo,pin:s.pin,plate:query})});
         if(token!==searchToken) return;
         if(res.status===401){ localStorage.removeItem(SESSION_KEY);
           showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'); return; }
@@ -854,7 +938,8 @@
           elBody.innerHTML='<div class="note">บัญชีนี้ไม่มีสิทธิ์ดูข้อมูลส่วนนี้</div>'; return; }
         var data=await res.json();
         if(!res.ok||!data.ok) throw new Error(data&&data.error?data.error:('HTTP '+res.status));
-        renderIdentity(s); renderSearch(data.report);
+        renderIdentity(s);
+        if(houseSearch) renderHouseSearch(data.report); else renderSearch(data.report);
       }catch(err){ elBody.innerHTML='<div class="note">โหลดข้อมูลไม่สำเร็จ<br><small>'+esc(err.message)+'</small></div>'; }
     }
 
