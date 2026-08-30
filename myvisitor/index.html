@@ -108,6 +108,22 @@
     background:var(--card); border:1px solid var(--border); border-radius:12px;
     padding:12px; margin-bottom:14px;
   }
+  .cat-chips {
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px;
+    scrollbar-width:none;
+  }
+  .cat-chips::-webkit-scrollbar { display:none; }
+  .cat-chip {
+    flex:none; display:flex; align-items:center; gap:6px; border:1px solid var(--border);
+    background:var(--bg-soft); color:var(--text-soft); border-radius:999px;
+    padding:7px 13px; font-family:'IBM Plex Sans Thai'; font-size:13px; font-weight:600;
+    cursor:pointer; white-space:nowrap;
+  }
+  .cat-chip .n { color:var(--text-muted); font-weight:500; }
+  .cat-chip.active {
+    background:var(--accent); border-color:var(--accent); color:#fff;
+  }
+  .cat-chip.active .n { color:rgba(255,255,255,0.85); }
   .filters-row {
     display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end;
   }
@@ -248,10 +264,13 @@
     </div>
 
     <div class="filters-panel">
+      <div class="cat-chips" id="categoryChips"></div>
       <div class="filters-row">
         <div class="filter-field">
           <label for="dateRangeSelect">ช่วงเวลา</label>
           <select id="dateRangeSelect">
+            <option value="today">วันนี้</option>
+            <option value="7d" selected>ย้อนหลัง 7 วัน</option>
             <option value="30d">ย้อนหลัง 30 วัน</option>
             <option value="365d">ย้อนหลัง 1 ปี</option>
             <option value="all">ทั้งหมดที่โหลดมา</option>
@@ -447,6 +466,7 @@
   var elApp = document.getElementById('app');
   var allRecords = [];
   var hasMoreRecords = false;
+  var activeCategory = 'all';
   var loadedLimit = 150;
 
   function residentDisplayName(s) {
@@ -630,6 +650,11 @@
   function getDateRangeBounds() {
     var mode = document.getElementById('dateRangeSelect').value;
     var now = Date.now();
+    if (mode === 'today') {
+      var dayStart = parseDateInput(dayKeyFromMs(now), false);
+      return {fromMs: dayStart, toMs: null};
+    }
+    if (mode === '7d') return {fromMs: now - (7 * 24 * 60 * 60 * 1000), toMs: null};
     if (mode === '30d') return {fromMs: now - (30 * 24 * 60 * 60 * 1000), toMs: null};
     if (mode === '365d') return {fromMs: now - (365 * 24 * 60 * 60 * 1000), toMs: null};
     if (mode === 'custom') {
@@ -660,6 +685,30 @@
     el.classList.add('show');
   }
 
+  function renderCategoryChips() {
+    var counts = {};
+    allRecords.forEach(function(r) {
+      var c = String(r.purposeCategory || 'unknown');
+      counts[c] = (counts[c] || 0) + 1;
+    });
+    var cats = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+    var html = '<div class="cat-chip' + (activeCategory === 'all' ? ' active' : '') + '" data-cat="all">ทั้งหมด <span class="n">' + allRecords.length + '</span></div>';
+    cats.forEach(function(c) {
+      var info = categoryInfo(c);
+      html += '<div class="cat-chip' + (activeCategory === c ? ' active' : '') + '" data-cat="' + esc(c) + '">' +
+        info.icon + ' ' + esc(info.label.replace(/\s*\(.*\)$/, '')) + ' <span class="n">' + counts[c] + '</span></div>';
+    });
+    document.getElementById('categoryChips').innerHTML = html;
+  }
+
+  document.getElementById('categoryChips').addEventListener('click', function(e) {
+    var chip = e.target.closest('[data-cat]');
+    if (!chip) return;
+    activeCategory = chip.getAttribute('data-cat');
+    renderCategoryChips();
+    renderList();
+  });
+
   function renderList() {
     var q = document.getElementById('searchInput').value.trim().toLowerCase();
     var statusFilter = document.getElementById('statusFilter').value;
@@ -670,6 +719,7 @@
       if (range.toMs != null && (!ms || ms > range.toMs)) return false;
       if (statusFilter === 'complete' && r.status !== 'complete') return false;
       if (statusFilter === 'pending' && r.status === 'complete') return false;
+      if (activeCategory !== 'all' && String(r.purposeCategory || 'unknown') !== activeCategory) return false;
       if (!q) return true;
       var o = r.ocr || {}, vc = r.vehicleCapture || {};
       var hay = [personName(o), vc.plateText, r.purposeText, categoryInfo(r.purposeCategory).label]
@@ -749,6 +799,7 @@
       showApp();
       allRecords = r.data.records || [];
       hasMoreRecords = !!r.data.hasMore;
+      renderCategoryChips();
       renderList();
     }).catch(function() {
       document.getElementById('loadingState').style.display = 'none';
