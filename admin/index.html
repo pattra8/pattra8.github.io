@@ -653,7 +653,11 @@
     }
     .mobile-admin-menu-btn,
     .mobile-export-menu,
-    .resident-card-list { display: none; }
+    .resident-card-list,
+    .mobile-section-picker,
+    .mobile-section-sheet,
+    .mobile-house-filter,
+    .mobile-house-nav { display: none; }
 
     /* ─── TABLE ─── */
     .table-wrap {
@@ -1380,9 +1384,71 @@
       .header-admin-actions.mobile-open > .logout-btn { display: inline-flex; position: absolute; top: calc(100% + 126px); z-index: 103; min-height: 42px; justify-content: center; background: var(--card); }
       .header-admin-actions.mobile-open > .logout-btn[title] { left: 22px; width: 48px; }
       .header-admin-actions.mobile-open > .logout-btn:not([title]) { left: 78px; right: 22px; }
-      .tabs { position: sticky; top: 65px; z-index: 90; padding: 6px 10px 0; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; background: rgba(249,243,233,.96); backdrop-filter: blur(8px); }
-      .tab-btn { min-height: 44px; padding: 8px 11px 9px; font-size: 12.5px; }
-      .toolbar { position: sticky; top: 116px; z-index: 80; display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; padding: 10px 12px 8px; border-bottom: 1px solid var(--border-soft); }
+      .tabs { display: none; }
+      .mobile-section-picker {
+        position: sticky;
+        top: 65px;
+        z-index: 90;
+        display: flex;
+        padding: 8px 12px;
+        background: rgba(249,243,233,.96);
+        border-bottom: 1px solid var(--border-soft);
+        backdrop-filter: blur(8px);
+      }
+      .mobile-section-button {
+        width: 100%;
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 13px;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--text);
+        font: 700 13.5px/1.2 'IBM Plex Sans Thai', sans-serif;
+        box-shadow: 0 2px 8px rgba(60,40,20,.04);
+      }
+      .mobile-section-sheet {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        align-items: flex-end;
+        justify-content: center;
+        background: rgba(30,24,20,.56);
+        backdrop-filter: blur(4px);
+      }
+      .mobile-section-sheet.open { display: flex; }
+      .mobile-section-panel {
+        width: 100%;
+        max-height: 82dvh;
+        overflow-y: auto;
+        padding: 10px 14px max(18px, env(safe-area-inset-bottom));
+        border-radius: 20px 20px 0 0;
+        background: var(--bg);
+        box-shadow: 0 -18px 50px rgba(30,24,20,.22);
+      }
+      .mobile-section-handle { width: 38px; height: 4px; margin: 0 auto 12px; border-radius: 99px; background: var(--border); }
+      .mobile-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+      .mobile-section-head strong { font-size: 16px; }
+      .mobile-section-close { width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--bg-soft); color: var(--text-soft); font-size: 18px; }
+      .mobile-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .mobile-section-item {
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 11px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--text-body);
+        font: 650 12.5px/1.25 'IBM Plex Sans Thai', sans-serif;
+        text-align: left;
+      }
+      .mobile-section-item.active { border-color: var(--accent); background: var(--accent-pale); color: var(--accent-deep); }
+      .toolbar { position: sticky; top: 127px; z-index: 80; display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; padding: 10px 12px 8px; border-bottom: 1px solid var(--border-soft); }
       .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
 
       /* table: hide non-essential columns (index, updated) */
@@ -1412,15 +1478,53 @@
       .resident-detail-label { color: var(--text-muted); }
       .resident-detail-value { min-width: 0; overflow-wrap: anywhere; color: var(--text-body); }
       .toolbar input[type="text"] { grid-column: 1 / -1; min-width: unset; width: 100%; min-height: 44px; }
+      .toolbar #adminSearch { grid-row: 2; }
+      .mobile-house-filter {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 7px;
+      }
+      .mobile-house-filter input {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        padding: 9px 12px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--card);
+        color: var(--text);
+        font: 650 14px 'IBM Plex Sans Thai', sans-serif;
+        outline: none;
+      }
+      .mobile-house-filter input:focus { border-color: var(--accent); }
+      .mobile-house-filter datalist { display: none; }
+      .mobile-house-clear { min-width: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text-soft); font-size: 16px; }
       .toolbar > .toolbar-btn { display: none; }
-      .record-count { align-self: center; padding: 0; font-weight: 700; }
-      .toolbar-note { grid-column: 1 / -1; grid-row: 3; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 0; }
+      .record-count { grid-row: 3; align-self: center; padding: 0; font-weight: 700; }
+      .toolbar-note { grid-column: 1 / -1; grid-row: 4; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 0; }
       .toolbar-note::after { content: attr(data-mobile-note); font-size: 12px; }
       .mobile-export-menu { display: block; position: relative; }
+      .mobile-export-menu { grid-row: 3; }
       .mobile-export-menu > summary { display: flex; min-height: 40px; align-items: center; padding: 7px 11px; border: 1px solid var(--border); border-radius: 9px; background: var(--card); color: var(--text-body); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; }
       .mobile-export-menu > summary::-webkit-details-marker { display: none; }
       .mobile-export-actions { position: absolute; top: calc(100% + 5px); right: 0; display: grid; min-width: 156px; padding: 6px; border: 1px solid var(--border); border-radius: 11px; background: var(--card); box-shadow: var(--shadow-card); }
       .mobile-export-actions button { min-height: 42px; border: 0; background: transparent; text-align: left; font: 600 12px 'IBM Plex Sans Thai', sans-serif; }
+      .mobile-house-nav {
+        display: none;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 7px;
+        padding: 0 12px 8px;
+        background: var(--bg);
+      }
+      .mobile-house-nav.active { display: grid; }
+      .mobile-house-nav button { min-height: 40px; border: 1px solid var(--border); border-radius: 9px; background: var(--card); color: var(--text-body); font: 650 12px 'IBM Plex Sans Thai', sans-serif; }
+      .mobile-house-nav button:last-child { text-align: right; }
+      .mobile-house-current { color: var(--accent-deep); font: 700 12px 'IBM Plex Mono', monospace; white-space: nowrap; }
 
       #editModal { padding: 0; align-items: flex-end; }
       #editModal .modal { max-height: 94dvh; border-radius: 18px 18px 0 0; }
@@ -1460,6 +1564,14 @@
     </div>
   </header>
 
+  <div class="mobile-section-picker">
+    <button class="mobile-section-button" id="mobileSectionButton" type="button"
+      aria-expanded="false" aria-controls="mobileSectionSheet" onclick="openMobileSectionSheet()">
+      <span id="mobileSectionLabel">📋 ข้อมูลลูกบ้าน</span>
+      <span>เปลี่ยนเมนู ⌄</span>
+    </button>
+  </div>
+
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">
@@ -1497,9 +1609,39 @@
     </button>
   </div>
 
+  <div class="mobile-section-sheet" id="mobileSectionSheet" aria-hidden="true"
+    onclick="if(event.target===this) closeMobileSectionSheet()">
+    <div class="mobile-section-panel" role="dialog" aria-modal="true" aria-labelledby="mobileSectionTitle">
+      <div class="mobile-section-handle"></div>
+      <div class="mobile-section-head">
+        <strong id="mobileSectionTitle">เลือกส่วนงาน Admin</strong>
+        <button class="mobile-section-close" type="button" aria-label="ปิด" onclick="closeMobileSectionSheet()">×</button>
+      </div>
+      <div class="mobile-section-grid">
+        <button class="mobile-section-item active" id="mobileSectionResidents" data-admin-tab="residents" onclick="chooseMobileSection('residents')">📋 ข้อมูลลูกบ้าน</button>
+        <button class="mobile-section-item" id="mobileSectionPins" data-admin-tab="pins" onclick="chooseMobileSection('pins')">🔑 PIN ลูกบ้าน</button>
+        <button class="mobile-section-item" id="mobileSectionVote" data-admin-tab="vote" onclick="chooseMobileSection('vote')">🗳 โหวต</button>
+        <button class="mobile-section-item" id="mobileSectionSurvey" data-admin-tab="survey" onclick="chooseMobileSection('survey')">📊 ไลฟ์สไตล์</button>
+        <button class="mobile-section-item" id="mobileSectionAnnounce" data-admin-tab="announce" onclick="chooseMobileSection('announce')">📢 ประกาศ</button>
+        <button class="mobile-section-item" id="mobileSectionPickup" data-admin-tab="pickup" onclick="chooseMobileSection('pickup')">🗑 ทิ้งของใหญ่</button>
+        <button class="mobile-section-item" id="mobileSectionAccess" data-admin-tab="access" onclick="chooseMobileSection('access')">🛡 สิทธิ์ผู้ดูแล</button>
+        <button class="mobile-section-item" id="mobileSectionIssues" onclick="window.open('/report/','_blank');closeMobileSectionSheet()">📣 เรื่องจากลูกบ้าน ↗</button>
+        <button class="mobile-section-item" id="mobileSectionLog" data-admin-tab="log" onclick="chooseMobileSection('log')">🧾 Activity Log</button>
+        <button class="mobile-section-item" id="mobileSectionUsage" data-admin-tab="usage" onclick="chooseMobileSection('usage')">📶 การใช้งานบ้าน</button>
+        <button class="mobile-section-item" id="mobileSectionStorage" data-admin-tab="storage" onclick="chooseMobileSection('storage')">💾 ขนาดข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Tab: Residents -->
   <div id="residentsTab">
   <div class="toolbar">
+    <div class="mobile-house-filter">
+      <input type="text" id="mobileHouseFilter" list="mobileHouseOptions" inputmode="numeric"
+        autocomplete="off" placeholder="🏠 เลือกบ้าน เช่น 8 หรือ 38/8" oninput="filterAdmin()" />
+      <datalist id="mobileHouseOptions"></datalist>
+      <button class="mobile-house-clear" type="button" aria-label="ล้างตัวกรองบ้าน" onclick="clearHouseFilter()">×</button>
+    </div>
     <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
     <button class="toolbar-btn" id="exportJsonBtn" onclick="exportJSON()">⬇ Export JSON</button>
     <button class="toolbar-btn" id="exportXlsxBtn" onclick="exportExcel()">⬇ Export Excel</button>
@@ -1512,6 +1654,11 @@
       </div>
     </details>
     <div class="toolbar-note" id="toolbarNote">กำลังโหลดข้อมูล...</div>
+  </div>
+  <div class="mobile-house-nav" id="mobileHouseNav">
+    <button type="button" onclick="stepHouseFilter(-1)">‹ บ้านก่อนหน้า</button>
+    <span class="mobile-house-current" id="mobileHouseCurrent"></span>
+    <button type="button" onclick="stepHouseFilter(1)">บ้านถัดไป ›</button>
   </div>
 
   <div class="table-wrap">
@@ -2449,6 +2596,18 @@
   let adminDataRequest = null;
   let pendingLoadScheduled = false;
   let xlsxLoadPromise = null;
+  const MOBILE_SECTION_LABELS = {
+    residents: '📋 ข้อมูลลูกบ้าน',
+    pins: '🔑 PIN ลูกบ้าน',
+    vote: '🗳 โหวต',
+    survey: '📊 ไลฟ์สไตล์',
+    announce: '📢 ประกาศ',
+    pickup: '🗑 ทิ้งของใหญ่',
+    access: '🛡 สิทธิ์ผู้ดูแล',
+    log: '🧾 Activity Log',
+    usage: '📶 การใช้งานบ้าน',
+    storage: '💾 ขนาดข้อมูล'
+  };
 
   function adminSessionHouse() {
     return getAdminAuth().adminHouseNo || '';
@@ -2478,6 +2637,7 @@
   function applyAdminResidents(residents, note) {
     allData = Array.isArray(residents) ? residents : [];
     filteredData = [...allData];
+    syncMobileHouseOptions();
     renderAdmin(filteredData);
     setToolbarNote(note, 'success');
   }
@@ -2916,10 +3076,15 @@
     };
     Object.entries(permissionByTab).forEach(([name, permission]) => {
       const button = document.getElementById(`tab${name}`);
-      if (button) button.style.display = canAdmin(permission) ? '' : 'none';
+      const mobileButton = document.getElementById(`mobileSection${name}`);
+      const allowed = canAdmin(permission);
+      if (button) button.style.display = allowed ? '' : 'none';
+      if (mobileButton) mobileButton.style.display = allowed ? '' : 'none';
     });
     const canManageAccess = access.houseNo === '38/8';
     document.getElementById('tabAccess').style.display =
+      canManageAccess ? '' : 'none';
+    document.getElementById('mobileSectionAccess').style.display =
       canManageAccess ? '' : 'none';
     if (canAdmin('admin.residents')) {
       loadAdminData().finally(schedulePendingLoad);
@@ -2972,13 +3137,49 @@
         document.getElementById('accessDrawer')?.classList.contains('open')) {
       requestCloseAccessDrawer();
     }
+    if (event.key === 'Escape') closeMobileSectionSheet();
   });
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
+  function openMobileSectionSheet() {
+    const sheet = document.getElementById('mobileSectionSheet');
+    const button = document.getElementById('mobileSectionButton');
+    if (!sheet || !button) return;
+    sheet.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
+    button.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileSectionSheet() {
+    const sheet = document.getElementById('mobileSectionSheet');
+    const button = document.getElementById('mobileSectionButton');
+    if (!sheet || !button) return;
+    sheet.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+    button.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  function chooseMobileSection(tab) {
+    switchTab(tab);
+    closeMobileSectionSheet();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  function updateMobileSectionState(tab) {
+    const label = document.getElementById('mobileSectionLabel');
+    if (label) label.textContent = MOBILE_SECTION_LABELS[tab] || 'เลือกส่วนงาน';
+    document.querySelectorAll('.mobile-section-item[data-admin-tab]').forEach(button => {
+      button.classList.toggle('active', button.dataset.adminTab === tab);
+    });
+  }
+
   function switchTab(tab) {
     if (tab === 'pending') tab = 'residents';
     if (!canOpenAdminTab(tab)) return;
     currentTab = tab;
+    updateMobileSectionState(tab);
     document.getElementById('residentsTab').style.display  = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pinsTab').style.display       = tab === 'pins'      ? 'block' : 'none';
     document.getElementById('voteTab').style.display       = tab === 'vote'      ? 'block' : 'none';
@@ -4771,12 +4972,67 @@
   }
 
   // ── Filter residents ──────────────────────────────────────────────────────
+  function sortedHouseNumbers() {
+    return [...new Set(allData.map(r => normalizeHouseNo(r.house_no)).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'th', {numeric: true}));
+  }
+
+  function syncMobileHouseOptions() {
+    const list = document.getElementById('mobileHouseOptions');
+    if (!list) return;
+    list.innerHTML = sortedHouseNumbers()
+      .map(houseNo => `<option value="${escHtml(houseNo)}"></option>`)
+      .join('');
+  }
+
+  function houseMatchesFilter(houseNo, query) {
+    const house = normalizeHouseNo(houseNo).toLowerCase();
+    const q = normalizeHouseNo(query).toLowerCase();
+    if (!q) return true;
+    if (q.includes('/')) return house === q;
+    return house.split('/').pop() === q.replace(/^38\/?/, '');
+  }
+
+  function updateMobileHouseNav() {
+    const nav = document.getElementById('mobileHouseNav');
+    const current = document.getElementById('mobileHouseCurrent');
+    const input = document.getElementById('mobileHouseFilter');
+    if (!nav || !current || !input) return;
+    const houses = sortedHouseNumbers();
+    const exact = houses.find(houseNo => houseMatchesFilter(houseNo, input.value));
+    nav.classList.toggle('active', Boolean(input.value.trim() && exact));
+    current.textContent = exact ? `บ้าน ${exact}` : '';
+  }
+
+  function clearHouseFilter() {
+    const input = document.getElementById('mobileHouseFilter');
+    if (!input) return;
+    input.value = '';
+    filterAdmin();
+    input.focus();
+  }
+
+  function stepHouseFilter(direction) {
+    const input = document.getElementById('mobileHouseFilter');
+    const houses = sortedHouseNumbers();
+    if (!input || !houses.length) return;
+    let index = houses.findIndex(houseNo => houseMatchesFilter(houseNo, input.value));
+    if (index < 0) index = direction > 0 ? -1 : 0;
+    index = (index + direction + houses.length) % houses.length;
+    input.value = houses[index];
+    filterAdmin();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
   function filterAdmin() {
     const q = document.getElementById('adminSearch').value.toLowerCase().trim();
-    filteredData = q
-      ? allData.filter(r => JSON.stringify(r).toLowerCase().includes(q))
-      : [...allData];
+    const houseQuery = document.getElementById('mobileHouseFilter')?.value.trim() || '';
+    filteredData = allData.filter(r =>
+      houseMatchesFilter(r.house_no, houseQuery) &&
+      (!q || JSON.stringify(r).toLowerCase().includes(q))
+    );
     renderAdmin(filteredData);
+    updateMobileHouseNav();
   }
 
   // ── Edit modal ────────────────────────────────────────────────────────────
