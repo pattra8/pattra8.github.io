@@ -1477,7 +1477,7 @@
       .resident-detail-row { display: grid; grid-template-columns: 92px 1fr; gap: 8px; font-size: 12px; }
       .resident-detail-label { color: var(--text-muted); }
       .resident-detail-value { min-width: 0; overflow-wrap: anywhere; color: var(--text-body); }
-      .toolbar input[type="text"] { grid-column: 1 / -1; min-width: unset; width: 100%; min-height: 44px; }
+      .toolbar input[type="text"] { grid-column: 1 / -1; min-width: unset; width: 100%; min-height: 44px; font-size: 16px; }
       .toolbar #adminSearch { grid-row: 2; }
       .mobile-house-filter {
         grid-column: 1 / -1;
@@ -1486,7 +1486,7 @@
         grid-template-columns: 1fr auto;
         gap: 7px;
       }
-      .mobile-house-filter input {
+      .mobile-house-filter select {
         grid-column: auto !important;
         grid-row: auto !important;
         width: 100%;
@@ -1497,11 +1497,10 @@
         border-radius: 10px;
         background: var(--card);
         color: var(--text);
-        font: 650 14px 'IBM Plex Sans Thai', sans-serif;
+        font: 650 16px 'IBM Plex Sans Thai', sans-serif;
         outline: none;
       }
-      .mobile-house-filter input:focus { border-color: var(--accent); }
-      .mobile-house-filter datalist { display: none; }
+      .mobile-house-filter select:focus { border-color: var(--accent); }
       .mobile-house-clear { min-width: 44px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text-soft); font-size: 16px; }
       .toolbar > .toolbar-btn { display: none; }
       .record-count { grid-row: 3; align-self: center; padding: 0; font-weight: 700; }
@@ -1637,9 +1636,9 @@
   <div id="residentsTab">
   <div class="toolbar">
     <div class="mobile-house-filter">
-      <input type="text" id="mobileHouseFilter" list="mobileHouseOptions" inputmode="numeric"
-        autocomplete="off" placeholder="🏠 เลือกบ้าน เช่น 8 หรือ 38/8" oninput="filterAdmin()" />
-      <datalist id="mobileHouseOptions"></datalist>
+      <select id="mobileHouseFilter" aria-label="เลือกบ้านเลขที่" onchange="filterAdmin()">
+        <option value="">🏠 ทุกบ้าน</option>
+      </select>
       <button class="mobile-house-clear" type="button" aria-label="ล้างตัวกรองบ้าน" onclick="clearHouseFilter()">×</button>
     </div>
     <input type="text" id="adminSearch" placeholder="🔍 ค้นหาบ้านเลขที่, ชื่อ, โซน..." oninput="filterAdmin()" />
@@ -4978,11 +4977,15 @@
   }
 
   function syncMobileHouseOptions() {
-    const list = document.getElementById('mobileHouseOptions');
-    if (!list) return;
-    list.innerHTML = sortedHouseNumbers()
-      .map(houseNo => `<option value="${escHtml(houseNo)}"></option>`)
+    const select = document.getElementById('mobileHouseFilter');
+    if (!select) return;
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">🏠 ทุกบ้าน</option>' + sortedHouseNumbers()
+      .map(houseNo => `<option value="${escHtml(houseNo)}">บ้าน ${escHtml(houseNo)}</option>`)
       .join('');
+    if ([...select.options].some(option => option.value === currentValue)) {
+      select.value = currentValue;
+    }
   }
 
   function houseMatchesFilter(houseNo, query) {
