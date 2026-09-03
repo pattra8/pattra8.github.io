@@ -59,7 +59,36 @@
   }
 
   h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
-  .sub { font-size:13px; color:var(--text-soft); margin:0 0 18px; }
+  .sub { font-size:13px; color:var(--text-soft); margin:0 0 16px; }
+  .privacy-card {
+    position:relative; overflow:hidden; display:grid; grid-template-columns:43px 1fr;
+    gap:12px; background:#e7f0e8; border:1px solid #bdd1c2;
+    border-radius:16px; padding:15px 16px 14px; margin-bottom:16px;
+  }
+  .privacy-card::after {
+    content:'38'; position:absolute; right:-5px; bottom:-30px;
+    font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:88px;
+    color:rgba(49,93,69,.055); pointer-events:none;
+  }
+  .privacy-icon {
+    width:43px; height:43px; border-radius:13px; background:#315d45; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 5px 12px rgba(49,93,69,.18);
+  }
+  .privacy-icon svg { width:22px; height:22px; }
+  .privacy-eyebrow {
+    margin:0 0 2px; color:#315d45; font-size:10.5px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase;
+  }
+  .privacy-title { margin:0; color:#254936; font-size:15.5px; line-height:1.35; }
+  .privacy-copy { margin:4px 0 0; color:#4d6857; font-size:12.5px; line-height:1.5; }
+
+  @media (max-width:420px) {
+    .privacy-card { grid-template-columns:38px 1fr; gap:10px; padding:14px 13px; }
+    .privacy-icon { width:38px; height:38px; border-radius:11px; }
+    .privacy-title { font-size:14.5px; }
+    .privacy-copy { font-size:12px; }
+  }
 
   #loginOverlay {
     position:fixed; inset:0; background:rgba(42,34,24,.45);
@@ -229,7 +258,7 @@
 <div id="loginOverlay">
   <div class="login-card">
     <h2>เข้าสู่ระบบลูกบ้าน</h2>
-    <p>กรอกบ้านเลขที่และ PIN 6 หลัก เพื่อดูประวัติผู้มาติดต่อบ้านของคุณ</p>
+    <p>กรอกบ้านเลขที่และ PIN 6 หลัก เมื่อเข้าสู่ระบบ คุณจะเห็นเฉพาะข้อมูลของบ้านเลขที่นี้</p>
     <div class="house-row">
       <span class="house-prefix mono">38/</span>
       <input type="text" id="houseSuffix" inputmode="numeric" placeholder="เลขที่บ้าน เช่น 12">
@@ -256,7 +285,21 @@
     </div>
 
     <h1>🪪 My Visitor</h1>
-    <p class="sub">ประวัติผู้มาติดต่อบ้านคุณ เช่น แขกมาเยี่ยม, รับ-ส่งโดยสาร, รับ-ส่งพัสดุ, ส่งอาหาร, รวมถึงช่างต่าง ๆ ที่เข้ามาที่บ้านคุณ</p>
+    <p class="sub">ประวัติแขก ผู้ส่งสินค้า และผู้ให้บริการที่เข้ามาติดต่อบ้านคุณ</p>
+
+    <section class="privacy-card" aria-label="ข้อมูลส่วนตัวของบ้าน">
+      <div class="privacy-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 3 5 6v5c0 4.7 2.7 8 7 10 4.3-2 7-5.3 7-10V6l-7-3Z"/>
+          <path d="m9.2 12 1.8 1.8 4-4"/>
+        </svg>
+      </div>
+      <div>
+        <p class="privacy-eyebrow">ข้อมูลส่วนตัวของบ้าน</p>
+        <h2 class="privacy-title">เฉพาะบ้าน <span id="privacyHouse">38/—</span> ของคุณ</h2>
+        <p class="privacy-copy">รายการในหน้านี้เป็นข้อมูลเฉพาะของบ้านคุณ บ้านอื่นไม่สามารถดูข้อมูลชุดนี้ได้</p>
+      </div>
+    </section>
 
     <div class="search-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -305,7 +348,6 @@
     <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
 
     <div class="footer-note">
-      ข้อมูลนี้แสดงเฉพาะประวัติผู้มาติดต่อ "บ้านคุณ" เท่านั้น<br>
       เก็บภาพ 90 วัน · เก็บข้อมูลทะเบียน/OCR 365 วัน ตามนโยบายความเป็นส่วนตัว
     </div>
   </div>
@@ -475,8 +517,9 @@
 
   var badgeMounted = false;
   function renderResidentBanner() {
-    if (badgeMounted) { window.PattraBadge.refresh(); return; }
     var s = getSession();
+    document.getElementById('privacyHouse').textContent = s ? String(s.houseNo || '38/—') : '38/—';
+    if (badgeMounted) { window.PattraBadge.refresh(); return; }
     var banner = document.getElementById('residentBanner');
     if (!s) {
       banner.style.display = 'none';
