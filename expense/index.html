@@ -298,19 +298,21 @@
   }
   .search-suggestions.open { display:block; }
   .search-suggestion {
-    width:100%; border:none; background:transparent; padding:10px 12px;
+    width:100%; border:none; background:transparent; padding:8px 12px;
     display:grid; grid-template-columns:auto minmax(0,1fr) auto;
-    gap:10px; align-items:start; text-align:left; font-family:inherit;
+    gap:8px; align-items:start; text-align:left; font-family:inherit;
     cursor:pointer; color:var(--text-hi);
   }
   .search-suggestion:hover, .search-suggestion.active { background:var(--accent-bg); }
   .suggestion-icon { color:var(--text-lo); font-size:13px; line-height:1.45; }
   .suggestion-main { min-width:0; }
   .suggestion-title {
+    display:block;
     font-size:13px; font-weight:700; line-height:1.35;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .suggestion-sub {
+    display:block;
     margin-top:2px; font-size:11.5px; color:var(--text-lo); line-height:1.35;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
@@ -318,6 +320,11 @@
     font-size:10.5px; font-weight:700; color:var(--accent-dk);
     background:var(--accent-bg); border-radius:99px; padding:2px 7px;
     white-space:nowrap; border:1px solid rgba(79,110,247,0.16);
+  }
+  .suggestion-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+  .suggestion-amount {
+    font-family:var(--font-num); font-size:13px; font-weight:700;
+    line-height:1.35; white-space:nowrap; font-variant-numeric:tabular-nums;
   }
   .search-suggestion mark {
     background:#fef3c7; color:var(--text-hi); border-radius:4px; padding:0 2px;
@@ -1939,6 +1946,7 @@ function buildSearchSuggestions(query, sourceItems = expenses) {
         title,
         sub: titleMatch ? (expense.detail ? cleanSuggestionText(expense.detail) : costCategoryLabel(expense)) : value,
         source: titleMatch ? 'หัวข้อ' : 'รายละเอียด',
+        amount: fmtExpenseAmount(expense),
         score,
       };
     })
@@ -1980,7 +1988,10 @@ function renderSearchSuggestions(scope = 'all') {
         <span class="suggestion-title">${highlightSearchMatch(item.value, query)}</span>
         <span class="suggestion-sub">${highlightSearchMatch(item.title === item.value ? item.sub : item.title, query)}</span>
       </span>
-      <span class="suggestion-source">${item.source}</span>
+      <span class="suggestion-meta">
+        <span class="suggestion-amount">${escapeHtml(item.amount)}</span>
+        <span class="suggestion-source">${item.source}</span>
+      </span>
     </button>
   `).join('');
   box.classList.add('open');
