@@ -396,11 +396,15 @@
     });
   }
   function categoryInfo(s) { return CATEGORY[s] || CATEGORY.unknown; }
-  function statusLabel(s) {
-    if (s === 'complete') return 'ครบถ้วน';
-    if (s === 'pending_image') return 'ขาดรูปบัตร / รูปรถ';
-    if (s === 'pending_text') return 'รอข้อมูลเพิ่มเติม';
-    return 'กำลังประมวลผล';
+  function statusLabel(r) {
+    if (r.status === 'complete') return 'ครบถ้วน';
+    var images = r.images || [];
+    if (images.some(function(img) { return img.analysisPending || img.kind === 'pending'; })) return 'กำลังอ่านข้อมูลจากรูป';
+    if (images.some(function(img) { return img.analysisFailed || (!img.analysis && img.kind === 'other'); })) return r.ocrRetryAt ? 'รออ่านรูปใหม่อัตโนมัติ' : 'อ่านข้อมูลจากรูปไม่สำเร็จ';
+    if (r.status === 'partial') return 'ข้อมูลยังไม่ครบ';
+    if (r.status === 'pending_image') return images.length ? 'ข้อมูลจากรูปยังไม่ครบ' : 'รอรูปบัตร / รูปรถ';
+    if (r.status === 'pending_text') return 'รอข้อมูลเพิ่มเติม';
+    return 'รอตรวจสอบข้อมูล';
   }
   function purposeDisplay(r) {
     var c = String(r.purposeCategory || 'unknown');
@@ -626,7 +630,7 @@
   });
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePreview(); });
 
-  function imageKindLabel(k) { return k === 'document' ? 'บัตรประชาชน / ใบขับขี่' : k === 'vehicle' ? 'รูปรถ' : 'รูปภาพ'; }
+  function imageKindLabel(k) { return k === 'document_vehicle' ? 'บัตรและทะเบียนรถ' : k === 'document' ? 'บัตรประชาชน / ใบขับขี่' : k === 'vehicle' ? 'รูปรถ' : 'รูปภาพ'; }
 
   function renderGallery(images) {
     if (!images || !images.length) return '';
@@ -654,7 +658,7 @@
         '<div class="card-main">' +
           '<div class="card-top">' +
             '<span class="card-time mono">' + esc(fmtTime(r.createdAt)) + '</span>' +
-            '<span class="badge ' + (isComplete ? 'complete' : 'pending') + '"><span class="dot"></span>' + esc(statusLabel(r.status)) + '</span>' +
+            '<span class="badge ' + (isComplete ? 'complete' : 'pending') + '"><span class="dot"></span>' + esc(statusLabel(r)) + '</span>' +
           '</div>' +
           '<div class="card-cat">' + esc(cat.label) + '</div>' +
           '<div class="card-purpose">' + esc(purposeDisplay(r)) + '</div>' +
