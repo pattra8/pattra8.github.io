@@ -260,13 +260,26 @@
   }
   function feeLabel(t) { return t === 'parking' ? 'ค่าจอดรถ' : 'ค่าส่วนกลาง'; }
   function feeIcon(t) { return t === 'parking' ? '🅿️' : '🏠'; }
+  function monthLabel(period) {
+    var parts = String(period || '').split('-');
+    var m = parseInt(parts[1], 10);
+    return (MONTHS_TH[m - 1] || period) + ' ' + (parts[0] || '');
+  }
+  // One transfer can cover several parking months on a single receipt, so the
+  // label names the whole span rather than just the month it starts on.
   function periodLabel(r) {
     if (r.feeType === 'common') {
       return r.period === 'H1' ? 'ครึ่งปีแรก (ม.ค.–มิ.ย.)' : 'ครึ่งปีหลัง (ก.ค.–ธ.ค.)';
     }
-    var parts = String(r.period || '').split('-');
-    var m = parseInt(parts[1], 10);
-    return (MONTHS_TH[m - 1] || r.period) + ' ' + (parts[0] || '');
+    if (r.periods && r.periods.length > 1) {
+      return monthLabel(r.periods[0]) + ' – ' + monthLabel(r.periods[r.periods.length - 1]) +
+        ' (' + r.periods.length + ' เดือน)';
+    }
+    return monthLabel(r.period);
+  }
+  // A multi-month receipt already carries its years in the span label.
+  function spansYears(r) {
+    return !!(r.periods && r.periods.length > 1);
   }
   function money(n) {
     return Number(n || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -404,7 +417,8 @@
       ? '<div class="rc-fee">' + esc(periodLabel(r)) + '</div>' +
         (r.year ? '<div class="rc-period">ปี ' + esc(r.year) + '</div>' : '')
       : '<div class="rc-fee">' + feeIcon(r.feeType) + ' ' + esc(feeLabel(r.feeType)) + '</div>' +
-        '<div class="rc-period">' + esc(periodLabel(r)) + (r.year ? ' · ปี ' + esc(r.year) : '') + '</div>';
+        '<div class="rc-period">' + esc(periodLabel(r)) +
+          (r.year && !spansYears(r) ? ' · ปี ' + esc(r.year) : '') + '</div>';
     return '<div class="card">' +
       '<div class="card-body">' +
         '<div class="card-top">' +
