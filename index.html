@@ -390,6 +390,11 @@
     .service-card.resident-only-card { display: none; }
     .service-card.resident-only-card.show { display: flex; }
 
+    /* Parking is only billed to houses that rent a slot, so its card stays
+       hidden until the live parking layout confirms this house rents one. */
+    .service-card.renter-only-card { display: none; }
+    .service-card.renter-only-card.show { display: flex; }
+
     /* ── gated sections (committee / operations) ── */
     /* Each section reveals itself only when it holds a card the viewer may
        open — see revealGatedSections() — so a resident's page simply ends
@@ -1552,6 +1557,16 @@
       </span>
     </a>
 
+    <a href="/myparking/" class="service-card renter-only-card" data-renter-card>
+      <div class="service-icon">💳</div>
+      <div class="service-title">ค่าจอดรถของฉัน</div>
+      <p class="service-desc">แจ้งชำระค่าจอดรถของบ้านคุณ แนบสลิปใบเดียว ระบบอ่านยอดแล้วนับเดือนให้เอง</p>
+      <span class="service-cta">
+        My Parking
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </a>
+
     <a href="/myreceipt/" class="service-card resident-only-card" data-resident-card>
       <div class="service-icon">🧾</div>
       <div class="service-title">ใบเสร็จของฉัน</div>
@@ -2240,7 +2255,7 @@ window.addEventListener('storage', e => {
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, doc, getDoc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC43LJfENSYm-myZ66mURGc4FPtSfji7-Y",
@@ -2253,6 +2268,34 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// ── "ค่าจอดรถของฉัน" card ──
+// Only houses that actually rent a slot get billed for parking, so the card
+// stays hidden until the live layout at /parking confirms this house rents
+// one. Same source of truth the payment page uses: `parking/layout`, whose
+// slot ids carry the real house number after the slash ("/45" → 38/45).
+// A read failure leaves the card hidden rather than promising a bill that
+// does not exist; the session itself is never touched here.
+(async function revealParkingCard() {
+  const cards = document.querySelectorAll('[data-renter-card]');
+  if (!cards.length) return;
+  const session = typeof getResidentSession === 'function' ? getResidentSession() : null;
+  const houseNo = parseInt(String(session?.houseNo || '').split('/').pop(), 10);
+  if (!Number.isFinite(houseNo)) return;
+  try {
+    const snap = await getDoc(doc(db, 'parking', 'layout'));
+    const slots = snap.exists() ? snap.data()?.slots : null;
+    if (!Array.isArray(slots)) return;
+    const rents = slots.some(slot => {
+      const m = String(slot?.id || '').trim().match(/^\/(\d+)$/);
+      return m && parseInt(m[1], 10) === houseNo;
+    });
+    if (rents) cards.forEach(card => card.classList.add('show'));
+  } catch {
+    /* offline or rules block the read — leave the card hidden */
+  }
+})();
+
 const pageSize = 5;
 let announcements = [];
 let currentPage = 1;
