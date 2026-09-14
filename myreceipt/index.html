@@ -318,7 +318,7 @@
   function thaiDate(ms) {
     if (!ms) return '';
     try {
-      return new Date(ms).toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+      return new Date(ms).toLocaleDateString('th-TH-u-ca-gregory', {day:'numeric', month:'long', year:'numeric'});
     } catch (e) { return ''; }
   }
 
@@ -461,8 +461,27 @@
       oldRef.remove();
       sheet.appendChild(reference);
     }
+    var brand = doc.querySelector('.brand');
+    if (brand) brand.innerHTML = "<div class=\"receipt-logo\"><img src=\"https://pattra8.com/myreceipt/assets/pattra-villa-logo.jpg\" alt=\"Pattra Villa\" width=\"480\" height=\"480\"></div>";
+    var period = doc.querySelector('.hero .per');
+    if (period) {
+      var label = period.previousElementSibling;
+      if (label && label.textContent.trim() === 'สำหรับงวด') label.remove();
+      period.className = 'period-inline';
+      period.insertBefore(doc.createTextNode('งวด '), period.firstChild);
+    }
+    // Preserve the date printed on issued receipts; convert only its calendar year.
+    doc.querySelectorAll('.krow').forEach(function(row) {
+      var key = row.querySelector('.k');
+      var value = row.querySelector('.v');
+      if (key && value && key.textContent.trim() === 'วันที่') {
+        value.textContent = value.textContent.replace(/\b(25\d{2})\b/g, function(year) {
+          return String(Number(year) - 543);
+        });
+      }
+    });
     var style = doc.createElement('style');
-    style.textContent = "\n  /* Receipt hierarchy: plain Thai heading, distinct fee type, quiet reference. */\n  .doctitle .ttl{font-family:\"IBM Plex Sans Thai\",Tahoma,sans-serif;font-size:18px;font-weight:500;letter-spacing:normal;line-height:1.65;white-space:normal;padding:0 10px;color:#6b5d4a}\n  .doctitle .ttlfee{font-family:\"IBM Plex Sans Thai\",Tahoma,sans-serif;font-size:32px;font-weight:700;letter-spacing:normal;line-height:1.5;color:#a45f1c;margin-top:2px;white-space:nowrap}\n  .hero .h{font-size:36px;line-height:1.3}\n  .paid{margin-right:0}\n  .receipt-reference{padding:0 24px 18px;text-align:right;font-size:10px;line-height:1.6;color:#786e61;overflow-wrap:anywhere}\n  .receipt-parking .bar{background:#397568}\n  .receipt-parking .ttlfee,.receipt-parking .amtline .v{color:#2f6b5d}\n  .receipt-parking .amtline{background:#f0f7f4;border-color:#d4e5dd}\n  @media(max-width:420px){.brand{padding:22px 16px 0}.wm{font-size:32px}.wmsub{font-size:13px}.doctitle .ttlfee{font-size:28px}.hero{padding:16px}.amtline{margin:0 16px;padding:14px 12px}.amtline .k{font-size:12px}.amtline .v{font-size:24px}.klist{margin:16px 16px 0}.krow td{font-size:13px}.foot{margin:14px 16px 20px}.foot .note{font-size:10px}.sign .sig{font-size:15px}}\n\n  /* Compact receipt spacing, retaining readable Thai text. */\n  .brand{padding:18px 24px 0}\n  .wm{font-size:32px}\n  .wmsub{font-size:13px;margin-top:4px}\n  .brand + div{padding-top:10px!important}\n  .doctitle .ttl{font-size:16px;line-height:1.5}\n  .doctitle .ttlfee{font-size:28px;line-height:1.4;margin-top:0}\n  .docmeta{margin-top:7px}\n  .paid{padding:3px 11px;font-size:11.5px}\n  .hero{padding:10px 24px 12px}\n  .hero .l,.hero .h{display:inline-block;vertical-align:baseline}\n  .hero .l{font-size:13px;margin-right:8px}\n  .hero .h{font-size:28px;line-height:1.3;margin:0 0 4px}\n  .hero .p{font-size:13px;line-height:1.5}\n  .hero .per{font-size:17px;line-height:1.5;margin:0}\n  .amtline{padding:11px 16px}\n  .amtline .v{font-size:26px}\n  .words{margin-top:6px;font-size:12.5px}\n  .klist{margin-top:10px}\n  .krow td{padding:7px 0;font-size:13px}\n  .foot{margin-top:10px;margin-bottom:12px;padding-top:10px}\n  .sign .sig{font-size:17px}\n  .receipt-reference{padding-bottom:12px}\n  @media(max-width:420px){.brand{padding:16px 16px 0}.wm{font-size:29px}.hero{padding:9px 16px 10px}.amtline{padding:10px 12px}.amtline .v{font-size:24px}.klist{margin-top:8px}.foot{margin-top:8px;margin-bottom:10px}.sign .sig{font-size:15px}}\n";
+    style.textContent = "\n  /* Receipt hierarchy: plain Thai heading, distinct fee type, quiet reference. */\n  .doctitle .ttl{font-family:\"IBM Plex Sans Thai\",Tahoma,sans-serif;font-size:18px;font-weight:500;letter-spacing:normal;line-height:1.65;white-space:normal;padding:0 10px;color:#6b5d4a}\n  .doctitle .ttlfee{font-family:\"IBM Plex Sans Thai\",Tahoma,sans-serif;font-size:32px;font-weight:700;letter-spacing:normal;line-height:1.5;color:#a45f1c;margin-top:2px;white-space:nowrap}\n  .hero .h{font-size:36px;line-height:1.3}\n  .paid{margin-right:0}\n  .receipt-reference{padding:0 24px 18px;text-align:right;font-size:10px;line-height:1.6;color:#786e61;overflow-wrap:anywhere}\n  .receipt-parking .bar{background:#397568}\n  .receipt-parking .ttlfee,.receipt-parking .amtline .v{color:#2f6b5d}\n  .receipt-parking .amtline{background:#f0f7f4;border-color:#d4e5dd}\n  @media(max-width:420px){.brand{padding:22px 16px 0}.wm{font-size:32px}.wmsub{font-size:13px}.doctitle .ttlfee{font-size:28px}.hero{padding:16px}.amtline{margin:0 16px;padding:14px 12px}.amtline .k{font-size:12px}.amtline .v{font-size:24px}.klist{margin:16px 16px 0}.krow td{font-size:13px}.foot{margin:14px 16px 20px}.foot .note{font-size:10px}.sign .sig{font-size:15px}}\n\n  /* Compact receipt spacing, retaining readable Thai text. */\n  .brand{padding:18px 24px 0}\n  .wm{font-size:32px}\n  .wmsub{font-size:13px;margin-top:4px}\n  .brand + div{padding-top:10px!important}\n  .doctitle .ttl{font-size:16px;line-height:1.5}\n  .doctitle .ttlfee{font-size:28px;line-height:1.4;margin-top:0}\n  .docmeta{margin-top:7px}\n  .paid{padding:3px 11px;font-size:11.5px}\n  .hero{padding:10px 24px 12px}\n  .hero .l,.hero .h{display:inline-block;vertical-align:baseline}\n  .hero .l{font-size:13px;margin-right:8px}\n  .hero .h{font-size:28px;line-height:1.3;margin:0 0 4px}\n  .hero .p{font-size:13px;line-height:1.5}\n  .hero .per{font-size:17px;line-height:1.5;margin:0}\n  .amtline{padding:11px 16px}\n  .amtline .v{font-size:26px}\n  .words{margin-top:6px;font-size:12.5px}\n  .klist{margin-top:10px}\n  .krow td{padding:7px 0;font-size:13px}\n  .foot{margin-top:10px;margin-bottom:12px;padding-top:10px}\n  .sign .sig{font-size:17px}\n  .receipt-reference{padding-bottom:12px}\n  @media(max-width:420px){.brand{padding:16px 16px 0}.wm{font-size:29px}.hero{padding:9px 16px 10px}.amtline{padding:10px 12px}.amtline .v{font-size:24px}.klist{margin-top:8px}.foot{margin-top:8px;margin-bottom:10px}.sign .sig{font-size:15px}}\n\n  .receipt-logo{position:relative;width:290px;max-width:100%;height:44px;overflow:hidden;margin:0 auto}\n  .receipt-logo img{position:absolute;width:480px;max-width:none;height:480px;left:50%;top:-184px;transform:translateX(-50%)}\n  .hero .period-inline{font-size:14px;line-height:1.6;color:#6b5d4a}\n  .hero .period-inline b{font-size:16px;color:#2a2218;font-weight:600}\n";
     doc.head.appendChild(style);
     return '<!doctype html>' + doc.documentElement.outerHTML;
   }
