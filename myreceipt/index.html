@@ -188,15 +188,15 @@
   /* Receipt viewer overlay */
   #docOverlay {
     position:fixed; inset:0; background:rgba(21,18,15,.78); display:none;
-    flex-direction:column; z-index:80;
+    flex-direction:column; z-index:500;
   }
   #docOverlay.open { display:flex; }
   .doc-head {
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     padding:10px 14px; background:#231d17; color:#fff; flex:none;
   }
-  .doc-title { font-size:13px; font-weight:600; color:#f5ead9; font-family:'IBM Plex Mono', monospace; }
-  .doc-head-actions { display:flex; align-items:center; gap:8px; }
+  .doc-title { font-size:13px; font-weight:600; color:#f5ead9; font-family:inherit; min-width:0; }
+  .doc-head-actions { display:flex; align-items:center; gap:8px; flex:none; }
   .doc-btn {
     border:0; border-radius:9px; padding:8px 13px; font-size:13px; font-weight:600;
     font-family:inherit; cursor:pointer; background:var(--accent); color:#fff;
@@ -204,6 +204,8 @@
   }
   .doc-btn:active { background:var(--accent-deep); }
   .doc-close { background:transparent; color:#fff; font-size:22px; line-height:1; padding:2px 8px; }
+  .doc-head { padding-top:max(10px, env(safe-area-inset-top)); flex-wrap:wrap; }
+  .doc-close { min-width:44px; min-height:44px; }
   #docFrame { flex:1; width:100%; border:0; background:#efe7d8; }
 
   .footer-note {
