@@ -449,6 +449,31 @@
       vertical-align: 2px;
     }
     .inbox-count[hidden] { display: none; }
+
+    /* ── committee notification count (top-right of a card) ── */
+    .card-corner {
+      position: absolute;
+      top: 16px; right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-corner .tag { position: static; top: auto; right: auto; }
+    .noti-count {
+      min-width: 22px;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: #c0392b;
+      color: #fff;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      line-height: 1.5;
+      box-shadow: 0 1px 4px rgba(192,57,43,0.35);
+    }
+    .noti-count[hidden] { display: none; }
     .service-card.inbox-card.show { border-color: var(--gold-light); }
 
 
@@ -1361,6 +1386,7 @@
         font-size: 8px;
         padding: 3px 8px;
       }
+      .card-corner { top: 14px; right: 14px; gap: 6px; }
       .logo-sub { display: none; }
 
       /* announce headline list — mobile */
@@ -1648,7 +1674,10 @@
 
       <a href="/commonfee/" class="service-card admin-only-card" data-admin-card
         data-access-permission="expense.view">
-        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="card-corner">
+          <span class="noti-count" id="commonNotiCount" hidden></span>
+          <div class="tag">เฉพาะกรรมการ</div>
+        </div>
         <div class="service-icon">💳</div>
         <div class="service-title">ตรวจค่าส่วนกลาง</div>
         <p class="service-desc">ตรวจสลิปและออกใบเสร็จค่าส่วนกลาง ดูบ้านที่ยังไม่พบสลิป และแผนผ่อนชำระ</p>
@@ -1660,7 +1689,10 @@
 
       <a href="/parkingadmin/" class="service-card admin-only-card" data-admin-card
         data-access-permission="expense.view">
-        <div class="tag">เฉพาะกรรมการ</div>
+        <div class="card-corner">
+          <span class="noti-count" id="parkingNotiCount" hidden></span>
+          <div class="tag">เฉพาะกรรมการ</div>
+        </div>
         <div class="service-icon">🅿️</div>
         <div class="service-title">ตรวจค่าจอดรถ</div>
         <p class="service-desc">ตรวจสลิปและออกใบเสร็จค่าจอดรถ ลากเข้าทีละหลายใบ ระบบอ่านยอดให้ พร้อมตารางรายเดือนรายบ้าน</p>
@@ -1981,11 +2013,64 @@ function applyAdminAccess(access) {
   });
   revealGatedSections();
   renderIssueInboxCount(access);
+  renderPayNotiCounts(access);
   const btn = document.getElementById('adminHomeBtn');
   if (btn) {
     btn.textContent = 'Admin';
     btn.style.display = access?.active &&
       access.permissions?.['admin.portal'] ? '' : 'none';
+  }
+}
+
+// ── Slips waiting for the committee (common fee + parking) ──
+// Counts only — adminPayCounts returns numbers, never slip or payer data.
+const PAY_API_URL =
+  'https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/pattraPay';
+let payCountsLoaded = false;
+
+async function renderPayNotiCounts(access) {
+  const parking = document.getElementById('parkingNotiCount');
+  const common = document.getElementById('commonNotiCount');
+  if (!parking && !common) return;
+  const paint = (el, n, label) => {
+    if (!el) return;
+    if (!(n > 0)) { el.hidden = true; return; }
+    el.textContent = '+' + n;
+    el.title = label;
+    el.hidden = false;
+  };
+  if (!access?.active || !access.permissions?.['expense.view']) {
+    paint(parking, 0); paint(common, 0);
+    payCountsLoaded = false;
+    return;
+  }
+  if (payCountsLoaded) return;
+  const session = getResidentSession();
+  if (!session?.houseNo || !session?.pin) return;
+  payCountsLoaded = true;
+  try {
+    const response = await fetch(PAY_API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'adminPayCounts',
+        houseNo: session.houseNo,
+        pin: session.pin
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) { paint(parking, 0); paint(common, 0); return; }
+    const p = data.parking || {};
+    const c = data.common || {};
+    const parkingBits = [];
+    if (p.slips > 0) parkingBits.push(p.slips + ' สลิปรอตรวจ');
+    if (p.messages > 0) parkingBits.push(p.messages + ' ข้อความจากลูกบ้าน');
+    paint(parking, Number(p.total || 0), parkingBits.join(' · '));
+    paint(common, Number(c.total || 0), (c.slips || 0) + ' สลิปรอตรวจ');
+  } catch {
+    // A badge is a nicety; a failed count must never break the landing page.
+    paint(parking, 0); paint(common, 0);
+    payCountsLoaded = false;
   }
 }
 
