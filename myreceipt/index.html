@@ -200,6 +200,13 @@
   .mail-note.ok { color:var(--ok); }
   .mail-note.err { color:var(--err); }
 
+  .rc-name { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; margin-top:10px; font-size:12.5px; color:var(--text-soft); }
+  .rc-name b { color:var(--text); font-weight:600; }
+  .rc-name .edit { background:none; border:0; padding:0; font:inherit; color:var(--accent-text); cursor:pointer; }
+  .rc-name .edit:hover { text-decoration:underline; }
+  .name-row { display:flex; gap:7px; margin-top:8px; }
+  .name-row input { flex:1; font-family:inherit; font-size:13.5px; font-weight:500; }
+
   .empty-state, .loading-state {
     text-align:center; padding:44px 20px; color:var(--text-muted); font-size:13.5px; line-height:1.6;
   }
@@ -232,6 +239,22 @@
   .doc-close { background:transparent; color:#fff; font-size:22px; line-height:1; padding:2px 8px; }
   .doc-head { padding-top:max(10px, env(safe-area-inset-top)); flex-wrap:wrap; }
   .doc-close { min-width:44px; min-height:44px; }
+  .doc-btn-ghost { background:rgba(255,255,255,.12); color:#f5ead9; }
+  .doc-btn-ghost:active { background:rgba(255,255,255,.2); }
+  .doc-mailbar {
+    flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px;
+    padding:11px 14px; background:#2d251d; color:#f0e5d4; font-size:13px;
+  }
+  .doc-mailbar[hidden] { display:none; }
+  .doc-mailbar b { color:#fff; word-break:break-all; }
+  .doc-mailbar input {
+    flex:1; min-width:180px; font-family:inherit; font-size:13.5px; font-weight:500;
+    background:#fff; border:1px solid #4a3f33; border-radius:9px; padding:8px 10px; color:var(--text);
+  }
+  .doc-mailbar .mail-send { padding:8px 14px; }
+  .doc-mailbar .mail-alt { margin:0; color:#e0b878; }
+  .doc-mailbar .ok { color:#a9c98d; }
+  .doc-mailbar .err { color:#f0a58e; }
   #docFrame { flex:1; width:100%; border:0; background:#efe7d8; }
 
   .footer-note {
@@ -302,9 +325,14 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         บันทึก PDF / พิมพ์
       </button>
+      <button class="doc-btn doc-btn-ghost" id="docMail">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+        ส่งเข้าอีเมล
+      </button>
       <button class="doc-close" id="docClose" aria-label="ปิด">&times;</button>
     </div>
   </div>
+  <div class="doc-mailbar" id="docMailbar" hidden></div>
   <iframe id="docFrame" title="ใบเสร็จรับเงิน"></iframe>
 </div>
 
@@ -536,6 +564,7 @@
           '<span class="rc-amount-label">จำนวนเงิน</span>' +
           '<span class="rc-amount mono">฿' + money(r.amount) + '</span>' +
         '</div>' +
+        '<div class="rc-name" id="name-' + esc(r.id) + '">' + nameLine(r) + '</div>' +
         '<div class="rc-meta">' +
           (dateStr ? '<span>ออกใบเสร็จ ' + esc(dateStr) + '</span>' : '') +
           (r.receiptNo ? '<span class="rc-ref mono">เลขที่ ' + esc(r.receiptNo) + '</span>' : '') +
@@ -678,6 +707,7 @@
       }
       showApp();
       DEFAULT_EMAIL = r.data.defaultEmail || '';
+      MY_HOUSE = r.data.houseNo || '';
       renderReceipts(r.data.receipts || []);
     }).catch(function() {
       document.getElementById('loadingState').style.display = 'none';
@@ -685,10 +715,65 @@
     });
   }
 
+  // ---- The name the receipt is issued in ----
+  // Residents file these for expense claims, so they can correct the name
+  // themselves. Every change is logged for the committee.
+  function nameLine(r) {
+    return 'ใบเสร็จในนาม <b>' + esc(r.payerName || (MY_HOUSE ? 'บ้าน 38/' + MY_HOUSE : 'ยังไม่ได้ระบุ')) + '</b>' +
+      '<button class="edit" data-rename="' + esc(r.id) + '">แก้ไข</button>';
+  }
+
+  function nameEditor(id, opts) {
+    var box = document.getElementById('name-' + id);
+    var rec = ALL_RECEIPTS.find(function(item) { return item.id === id; });
+    if (!box || !rec) return;
+    opts = opts || {};
+    if (opts.view) { box.innerHTML = nameLine(rec); return; }
+    box.innerHTML = '<span>ใบเสร็จออกในนาม</span>' +
+      '<div class="name-row" style="width:100%">' +
+        '<input type="text" id="nameinput-' + id + '" maxlength="120" value="' + esc(opts.value != null ? opts.value : (rec.payerName || '')) + '" placeholder="ชื่อ-นามสกุล หรือชื่อบริษัท">' +
+        '<button class="mail-send" data-rename-save="' + id + '">บันทึก</button>' +
+      '</div>' +
+      '<button class="edit" data-rename-cancel="' + id + '">ยกเลิก</button>' +
+      (opts.note ? '<div class="mail-note ' + opts.note.kind + '" style="width:100%">' + esc(opts.note.text) + '</div>' : '');
+  }
+
+  function saveReceiptName(id, btn) {
+    var s = getSession();
+    if (!s) { showLogin(); return; }
+    var input = document.getElementById('nameinput-' + id);
+    var name = input ? input.value.trim() : '';
+    if (!name) { nameEditor(id, {note: {kind: 'err', text: 'กรุณากรอกชื่อ'}}); return; }
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก…';
+    fetch(PAY_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({action: 'myReceiptRename', houseNo: s.houseNo, pin: s.pin, id: id, name: name})
+    }).then(function(res) {
+      if (res.status === 401) {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      return res.json().catch(function() { return {}; });
+    }).then(function(data) {
+      if (!data) return;
+      if (!data.ok) { nameEditor(id, {value: name, note: {kind: 'err', text: data.error || 'บันทึกไม่สำเร็จ'}}); return; }
+      var rec = ALL_RECEIPTS.find(function(item) { return item.id === id; });
+      if (rec) rec.payerName = data.payerName || name;
+      nameEditor(id, {view: true});
+    }).catch(function() {
+      nameEditor(id, {value: name, note: {kind: 'err', text: 'เชื่อมต่อไม่สำเร็จ'}});
+    });
+  }
+
   // ---- Email one receipt ----
   // The address on file is the default; typing another one is the exception,
   // so the panel opens with the known address and one confirm button.
   var DEFAULT_EMAIL = '';
+  var MY_HOUSE = '';
 
   function mailPanel(id, opts) {
     var box = document.getElementById('mailbox-' + id);
@@ -757,6 +842,76 @@
     });
   }
 
+  // ---- Email from inside the open receipt ----
+  // Same rule as the card: the address on file is the default, another one
+  // is the exception.
+  var CURRENT_DOC_ID = '';
+
+  function docMailPanel(opts) {
+    var bar = document.getElementById('docMailbar');
+    if (!bar) return;
+    opts = opts || {};
+    if (opts.done) {
+      bar.innerHTML = '<span class="ok">ส่งใบเสร็จไปที่ ' + esc(opts.done) + ' แล้ว ✓</span>';
+      bar.hidden = false;
+      return;
+    }
+    var custom = opts.custom || !DEFAULT_EMAIL;
+    var note = opts.note ? '<span class="' + opts.note.kind + '">' + esc(opts.note.text) + '</span>' : '';
+    bar.innerHTML = custom
+      ? '<span>ส่งใบเสร็จไปที่</span>' +
+        '<input type="email" id="mailinput-doc" inputmode="email" placeholder="you@email.com" value="' + esc(opts.value || '') + '">' +
+        '<button class="mail-send" id="docMailSend">ส่ง</button>' +
+        (DEFAULT_EMAIL ? '<button class="mail-alt" id="docMailDefault">↩ ใช้อีเมลในระบบ</button>' : '') + note
+      : '<span>ส่งไปที่ <b>' + esc(DEFAULT_EMAIL) + '</b></span>' +
+        '<button class="mail-send" id="docMailSend">ส่งใบเสร็จ</button>' +
+        '<button class="mail-alt" id="docMailCustom">ส่งไปอีเมลอื่น</button>' + note;
+    bar.hidden = false;
+  }
+
+  function sendDocEmail(btn) {
+    var s = getSession();
+    if (!s || !CURRENT_DOC_ID) { return; }
+    var input = document.getElementById('mailinput-doc');
+    var email = input ? input.value.trim() : '';
+    if (input && !email) { docMailPanel({custom: true, note: {kind: 'err', text: 'กรุณากรอกอีเมล'}}); return; }
+    btn.disabled = true;
+    btn.textContent = 'กำลังส่ง…';
+    fetch(PAY_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      cache: 'no-store',
+      body: JSON.stringify({action: 'myReceiptEmail', houseNo: s.houseNo, pin: s.pin, id: CURRENT_DOC_ID, email: email})
+    }).then(function(res) {
+      if (res.status === 401) {
+        localStorage.removeItem(SESSION_KEY);
+        showLogin('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        return null;
+      }
+      return res.json().catch(function() { return {}; });
+    }).then(function(data) {
+      if (!data) return;
+      if (!data.ok) {
+        docMailPanel({custom: !!email, value: email, note: {kind: 'err', text: data.error || 'ส่งไม่สำเร็จ'}});
+        return;
+      }
+      docMailPanel({done: data.to || email || DEFAULT_EMAIL});
+    }).catch(function() {
+      docMailPanel({custom: !!email, value: email, note: {kind: 'err', text: 'เชื่อมต่อไม่สำเร็จ'}});
+    });
+  }
+
+  document.getElementById('docMail').addEventListener('click', function() {
+    var bar = document.getElementById('docMailbar');
+    if (!bar.hidden) { bar.hidden = true; bar.innerHTML = ''; return; }
+    docMailPanel();
+  });
+  document.getElementById('docMailbar').addEventListener('click', function(e) {
+    if (e.target.closest('#docMailSend')) sendDocEmail(e.target.closest('#docMailSend'));
+    else if (e.target.closest('#docMailCustom')) docMailPanel({custom: true});
+    else if (e.target.closest('#docMailDefault')) docMailPanel({custom: false});
+  });
+
   // ---- Receipt viewer ----
   var elDocOverlay = document.getElementById('docOverlay');
   var elDocFrame = document.getElementById('docFrame');
@@ -795,8 +950,17 @@
       }
       document.getElementById('docTitle').textContent = 'ใบเสร็จรับเงิน';
       var record = ALL_RECEIPTS.find(function(item) { return item.id === id; });
+      CURRENT_DOC_ID = id;
+      var bar = document.getElementById('docMailbar');
+      bar.hidden = true; bar.innerHTML = '';
       elDocFrame.setAttribute('srcdoc', presentReceipt(r.data.receiptHtml, record));
       elDocOverlay.classList.add('open');
+      // fix2: the viewer is a step in history, so the browser's Back button
+      // returns to the receipt list instead of leaving the page.
+      if (!overlayPushed) {
+        history.pushState({docOverlay: true}, '');
+        overlayPushed = true;
+      }
     }).catch(function() {
       cardBtn.disabled = false;
       cardBtn.innerHTML = label;
@@ -804,12 +968,27 @@
     });
   }
 
-  function closeReceipt() {
+  var overlayPushed = false;
+
+  function closeReceipt(fromPopState) {
     elDocOverlay.classList.remove('open');
     elDocFrame.removeAttribute('srcdoc');
+    CURRENT_DOC_ID = '';
+    var bar = document.getElementById('docMailbar');
+    if (bar) { bar.hidden = true; bar.innerHTML = ''; }
+    if (overlayPushed) {
+      overlayPushed = false;
+      // Closing with the × should also unwind the history step, so Back does
+      // not have to be pressed twice to leave the page.
+      if (!fromPopState) history.back();
+    }
   }
 
-  document.getElementById('docClose').addEventListener('click', closeReceipt);
+  window.addEventListener('popstate', function() {
+    if (elDocOverlay.classList.contains('open')) closeReceipt(true);
+  });
+
+  document.getElementById('docClose').addEventListener('click', function() { closeReceipt(); });
   document.getElementById('docPrint').addEventListener('click', function() {
     try {
       elDocFrame.contentWindow.focus();
@@ -836,6 +1015,12 @@
     if (custom) mailPanel(custom.getAttribute('data-custom'), {custom: true});
     var useDefault = e.target.closest('[data-default]');
     if (useDefault) mailPanel(useDefault.getAttribute('data-default'), {custom: false});
+    var rename = e.target.closest('[data-rename]');
+    if (rename) nameEditor(rename.getAttribute('data-rename'));
+    var renameSave = e.target.closest('[data-rename-save]');
+    if (renameSave) saveReceiptName(renameSave.getAttribute('data-rename-save'), renameSave);
+    var renameCancel = e.target.closest('[data-rename-cancel]');
+    if (renameCancel) nameEditor(renameCancel.getAttribute('data-rename-cancel'), {view: true});
     document.querySelectorAll('.profile-menu[open]').forEach(function(menu) {
       if (!menu.contains(e.target)) menu.open = false;
     });
