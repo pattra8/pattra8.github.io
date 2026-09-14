@@ -99,17 +99,51 @@
   .login-err { color:var(--err); font-size:12.5px; margin-top:10px; display:none; }
   .login-err.show { display:block; }
 
+  /* Fee-type identity. Parking bills monthly and piles up; the common fee
+     arrives twice a year. Colour + emoji keep the two apart at a glance. */
+  .fee-parking { --fee:#2f6f9e; --fee-bg:#e6eff7; }
+  .fee-common  { --fee:#9a5c1f; --fee-bg:#f7e6cd; }
+
+  .rc-tabs {
+    display:flex; gap:4px; margin:0 0 16px; padding:4px;
+    background:var(--bg-soft); border:1px solid var(--border); border-radius:14px;
+  }
+  .rc-tab {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    border:0; border-radius:11px; padding:9px 6px; background:transparent;
+    color:var(--text-soft); font:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; white-space:nowrap;
+  }
+  .rc-tab .n {
+    font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700;
+    border-radius:999px; padding:1px 6px; background:var(--border-soft); color:var(--text-muted);
+  }
+  .rc-tab[aria-selected="true"] {
+    background:var(--card); color:var(--fee, var(--accent-text));
+    box-shadow:0 1px 2px rgba(60,40,20,.07);
+  }
+  .rc-tab[aria-selected="true"] .n { background:var(--fee-bg, var(--bg-soft)); color:var(--fee, var(--accent-text)); }
+
+  .rc-chip {
+    display:inline-flex; align-items:center; gap:5px; border-radius:999px;
+    padding:2px 9px; font-size:11.5px; font-weight:700;
+    background:var(--fee-bg); color:var(--fee);
+  }
+
   .rc-section {
     display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700;
-    color:var(--accent-deep); margin:22px 2px 11px;
+    color:var(--accent-deep); margin:20px 2px 10px;
   }
   .rc-section:first-child { margin-top:2px; }
   .rc-section .count { font-weight:600; font-size:12px; color:var(--text-muted); }
+  .rc-section .sum { margin-left:auto; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:12px; color:var(--text-muted); }
 
   .card {
     background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius);
     box-shadow:var(--shadow); overflow:hidden; margin-bottom:10px;
   }
+  .card.fee-parking, .card.fee-common { border-left:4px solid var(--fee); }
+  .card.fee-parking .rc-amount, .card.fee-common .rc-amount { color:var(--fee); }
   .card-body { padding:14px; }
   .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
   .rc-eyebrow { font-size:11.5px; font-weight:700; color:var(--accent-text); }
@@ -220,6 +254,7 @@
     <h1>🧾 ใบเสร็จของฉัน</h1>
     <p class="sub">ใบเสร็จรับเงินค่าส่วนกลางและค่าจอดรถของบ้านคุณ กดดูหรือบันทึกเป็น PDF ได้ทุกใบ แม้ไม่ได้รับอีเมลหรือไม่มีอีเมล</p>
 
+    <div id="tabsRoot"></div>
     <div id="listRoot"></div>
     <div class="empty-state" id="emptyState" style="display:none;"></div>
     <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
@@ -276,10 +311,6 @@
         ' (' + r.periods.length + ' เดือน)';
     }
     return monthLabel(r.period);
-  }
-  // A multi-month receipt already carries its years in the span label.
-  function spansYears(r) {
-    return !!(r.periods && r.periods.length > 1);
   }
   function money(n) {
     return Number(n || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -406,28 +437,26 @@
       });
   }
 
-  function receiptCard(r, grouped) {
+  function feeClass(t) { return t === 'parking' ? 'fee-parking' : 'fee-common'; }
+
+  function receiptCard(r) {
     var emailed = r.emailed
       ? '<span class="em"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" style="display:none"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>ส่งอีเมลแล้ว</span>'
       : '';
     var dateStr = thaiDate(r.verifiedAt);
-    // When grouped under a fee-type header, lead with the period (fee type is
-    // already in the section header). Standalone cards keep the fee label.
-    var titleSub = grouped
-      ? '<div class="rc-fee">' + esc(periodLabel(r)) + '</div>' +
-        (r.year ? '<div class="rc-period">ปี ' + esc(r.year) + '</div>' : '')
-      : '<div class="rc-fee">' + feeIcon(r.feeType) + ' ' + esc(feeLabel(r.feeType)) + '</div>' +
-        '<div class="rc-period">' + esc(periodLabel(r)) +
-          (r.year && !spansYears(r) ? ' · ปี ' + esc(r.year) : '') + '</div>';
-    return '<div class="card">' +
+    var showYear = r.year && String(periodLabel(r)).indexOf(String(r.year)) === -1;
+    // The chip carries the fee type, so the title is free to be the thing a
+    // resident actually looks for: which period this receipt covers.
+    return '<div class="card ' + feeClass(r.feeType) + '">' +
       '<div class="card-body">' +
         '<div class="card-top">' +
-          '<div>' +
-            '<div class="rc-eyebrow">ใบเสร็จรับเงิน</div>' +
-            titleSub +
-          '</div>' +
+          '<span class="rc-chip">' + feeIcon(r.feeType) + ' ' + esc(feeLabel(r.feeType)) + '</span>' +
           '<span class="badge complete"><span class="dot"></span>ชำระแล้ว</span>' +
         '</div>' +
+        '<div class="rc-fee">' + esc(periodLabel(r)) + '</div>' +
+        // The year only earns a line when the period label lacks it: parking
+        // reads "สิงหาคม 2026" already, the common fee reads "ครึ่งปีหลัง".
+        (showYear ? '<div class="rc-period">ปี ' + esc(r.year) + '</div>' : '') +
         '<div class="rc-amount-row">' +
           '<span class="rc-amount-label">จำนวนเงิน</span>' +
           '<span class="rc-amount mono">฿' + money(r.amount) + '</span>' +
@@ -447,40 +476,94 @@
     '</div>';
   }
 
-  function renderReceipts(receipts) {
+  // ---- Tabs ----
+  // A renting house collects a parking receipt every month but only two
+  // common-fee receipts a year, so one long mixed list buries the rarer one.
+  var ALL_RECEIPTS = [];
+  var ACTIVE_TAB = 'all';
+  var TAB_META = {
+    all:     {label:'ทั้งหมด', icon:'',    cls:''},
+    parking: {label:'ค่าจอดรถ', icon:'🅿️', cls:'fee-parking'},
+    common:  {label:'ค่าส่วนกลาง', icon:'🏠', cls:'fee-common'}
+  };
+
+  function tabCount(type) {
+    if (type === 'all') return ALL_RECEIPTS.length;
+    return ALL_RECEIPTS.filter(function(r) {
+      return (r.feeType === 'parking' ? 'parking' : 'common') === type;
+    }).length;
+  }
+
+  function renderTabs() {
+    var root = document.getElementById('tabsRoot');
+    // Only one kind of receipt? Then there is nothing to switch between.
+    if (!tabCount('parking') || !tabCount('common')) { root.innerHTML = ''; return; }
+    root.innerHTML = '<div class="rc-tabs" role="tablist">' +
+      ['all', 'parking', 'common'].map(function(t) {
+        var m = TAB_META[t];
+        return '<button class="rc-tab ' + m.cls + '" role="tab" data-tab="' + t + '"' +
+          ' aria-selected="' + (ACTIVE_TAB === t ? 'true' : 'false') + '">' +
+          (m.icon ? m.icon + ' ' : '') + esc(m.label) +
+          '<span class="n">' + tabCount(t) + '</span></button>';
+      }).join('') +
+    '</div>';
+  }
+
+  function renderList() {
     var root = document.getElementById('listRoot');
+    var rows = ALL_RECEIPTS.filter(function(r) {
+      if (ACTIVE_TAB === 'all') return true;
+      return (r.feeType === 'parking' ? 'parking' : 'common') === ACTIVE_TAB;
+    }).sort(function(a, b) { return (b.verifiedAt || 0) - (a.verifiedAt || 0); });
+
+    if (!rows.length) { root.innerHTML = '<div class="empty-state">ยังไม่มีใบเสร็จในหมวดนี้</div>'; return; }
+
+    // Parking runs monthly, so a year heading with its total keeps a long
+    // list readable. The other tabs are short enough to list flat.
+    if (ACTIVE_TAB === 'parking') {
+      var years = [];
+      var byYear = {};
+      rows.forEach(function(r) {
+        var y = String(r.year || (r.period || '').slice(0, 4) || '');
+        if (!byYear[y]) { byYear[y] = []; years.push(y); }
+        byYear[y].push(r);
+      });
+      root.innerHTML = years.map(function(y) {
+        var list = byYear[y];
+        var sum = list.reduce(function(t, r) { return t + (Number(r.amount) || 0); }, 0);
+        return '<div class="rc-section fee-parking">ปี ' + esc(y) +
+            ' <span class="count">' + list.length + ' ใบ</span>' +
+            '<span class="sum">฿' + money(sum) + '</span>' +
+          '</div>' + list.map(receiptCard).join('');
+      }).join('');
+      return;
+    }
+    root.innerHTML = rows.map(receiptCard).join('');
+  }
+
+  function renderReceipts(receipts) {
     var empty = document.getElementById('emptyState');
-    if (!receipts.length) {
-      root.innerHTML = '';
+    ALL_RECEIPTS = receipts || [];
+    if (!ALL_RECEIPTS.length) {
+      document.getElementById('tabsRoot').innerHTML = '';
+      document.getElementById('listRoot').innerHTML = '';
       empty.style.display = 'block';
       empty.innerHTML = '<span class="big">🧾</span>ยังไม่มีใบเสร็จของบ้านคุณ<br>' +
         '<small>เมื่อกรรมการตรวจสลิปและออกใบเสร็จแล้ว ใบเสร็จจะมาปรากฏที่นี่</small>';
       return;
     }
     empty.style.display = 'none';
-    // Group by fee type so a house with both common + parking receipts reads
-    // cleanly. Section headers only appear when more than one type exists —
-    // common-fee-only houses (the majority) still see a plain list.
-    var groups = [
-      {type:'common',  label:'ค่าส่วนกลาง', icon:'🏠', items:[]},
-      {type:'parking', label:'ค่าจอดรถ',    icon:'🅿️', items:[]}
-    ];
-    receipts.forEach(function(r) {
-      (r.feeType === 'parking' ? groups[1] : groups[0]).items.push(r);
-    });
-    var used = groups.filter(function(g) { return g.items.length; });
-    var showHeaders = used.length > 1;
-    var html = '';
-    used.forEach(function(g) {
-      g.items.sort(function(a, b) { return (b.verifiedAt || 0) - (a.verifiedAt || 0); });
-      if (showHeaders) {
-        html += '<div class="rc-section">' + g.icon + ' ' + esc(g.label) +
-          ' <span class="count">' + g.items.length + ' ใบ</span></div>';
-      }
-      html += g.items.map(function(r) { return receiptCard(r, showHeaders); }).join('');
-    });
-    root.innerHTML = html;
+    renderTabs();
+    renderList();
   }
+
+  document.getElementById('tabsRoot').addEventListener('click', function(ev) {
+    var btn = ev.target.closest ? ev.target.closest('[data-tab]') : null;
+    if (!btn) return;
+    ACTIVE_TAB = btn.getAttribute('data-tab');
+    renderTabs();
+    renderList();
+  });
 
   function loadReceipts() {
     var s = getSession();
