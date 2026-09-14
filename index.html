@@ -399,6 +399,30 @@
     /* Each section reveals itself only when it holds a card the viewer may
        open — see revealGatedSections() — so a resident's page simply ends
        after their own services. */
+    /* A restricted area is marked once, on the section — not repeated as a
+       tag on every card inside it. */
+    .section-lock {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 14px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      border: 1px solid rgba(184,151,90,0.45);
+      background: var(--gold-pale);
+      color: var(--gold-light);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      vertical-align: 7px;
+    }
+    .committee-band {
+      background: linear-gradient(180deg, rgba(247,240,226,0.8), rgba(249,243,233,0.25));
+      border: 1px solid rgba(184,151,90,0.22);
+      border-radius: 26px;
+      padding: 32px 28px 36px;
+    }
+
     .gated-section { margin-top: 8px; }
     .gated-section[hidden] { display: none; }
     .gated-section .section-eyebrow { margin-top: 4px; }
@@ -1343,6 +1367,8 @@
       .main { padding: 24px 16px 56px; }
       .section-eyebrow { margin-bottom: 6px; }
       .section-title { margin-bottom: 18px; font-size: 24px; line-height: 1.14; }
+      .committee-band { padding: 22px 14px 26px; border-radius: 18px; }
+      .section-lock { margin-left: 10px; font-size: 11px; padding: 3px 9px; vertical-align: 5px; }
       .section-row { align-items: flex-start; flex-direction: column; margin-bottom: 24px; }
       .services-grid {
         grid-template-columns: 1fr;
@@ -1650,9 +1676,9 @@
   <!-- ═══ SECTION 2 · COMMITTEE ═══ -->
   <!-- The whole section is hidden until applyAdminAccess() finds at least one
        card the viewer may open, so residents never see a locked shelf. -->
-  <section class="gated-section" id="committeeSection" hidden>
+  <section class="gated-section committee-band" id="committeeSection" hidden>
     <div class="section-eyebrow">Committee</div>
-    <div class="section-title">สำหรับกรรมการ</div>
+    <div class="section-title">สำหรับกรรมการ<span class="section-lock">🔒 เฉพาะกรรมการ</span></div>
 
     <div class="services-grid">
 
@@ -1660,7 +1686,6 @@
            inside /report/'s own header. -->
       <a href="/report/?view=admin" class="service-card admin-only-card inbox-card"
         data-admin-card data-access-permission="admin.issues" id="issueInboxCard">
-        <div class="tag">เฉพาะกรรมการ</div>
         <div class="service-icon">📮</div>
         <div class="service-title">
           กล่องรับเรื่อง<span class="inbox-count" id="issueInboxCount" hidden></span>
@@ -1676,7 +1701,6 @@
         data-access-permission="expense.view">
         <div class="card-corner">
           <span class="noti-count" id="commonNotiCount" hidden></span>
-          <div class="tag">เฉพาะกรรมการ</div>
         </div>
         <div class="service-icon">💳</div>
         <div class="service-title">ตรวจค่าส่วนกลาง</div>
@@ -1691,7 +1715,6 @@
         data-access-permission="expense.view">
         <div class="card-corner">
           <span class="noti-count" id="parkingNotiCount" hidden></span>
-          <div class="tag">เฉพาะกรรมการ</div>
         </div>
         <div class="service-icon">🅿️</div>
         <div class="service-title">ตรวจค่าจอดรถ</div>
@@ -1704,7 +1727,6 @@
 
       <a href="/expense/" class="service-card admin-only-card" data-admin-card
         data-access-permission="expense.view">
-        <div class="tag">เฉพาะกรรมการ</div>
         <div class="service-icon">🧾</div>
         <div class="service-title">Expense</div>
         <p class="service-desc">บันทึกและติดตามรายจ่ายนิติบุคคล สรุปยอดรายเดือนและรายปี</p>
@@ -1716,7 +1738,6 @@
 
       <a href="/lprlog/" class="service-card admin-only-card" data-admin-card
         data-access-permission="admin.audit">
-        <div class="tag">เฉพาะกรรมการ</div>
         <div class="service-icon">🚘</div>
         <div class="service-title">LPR Log</div>
         <p class="service-desc">บันทึกรถเข้า-ออกรายวัน แยกลูกบ้าน · รถภายนอก (ป้าย ยี่ห้อ สี) · สแกนไม่พบ</p>
@@ -1728,7 +1749,6 @@
 
       <a href="/visitors/" class="service-card admin-only-card" data-admin-card
         data-access-permission="admin.audit">
-        <div class="tag">เฉพาะกรรมการ</div>
         <div class="service-icon">🪪</div>
         <div class="service-title">Visitor Log</div>
         <p class="service-desc">ตรวจสอบผู้มาติดต่อผ่าน LINE หน้าป้อม รูปภาพ ทะเบียนรถ และประวัติการเข้า-ออก</p>
@@ -1740,7 +1760,6 @@
 
       <a href="/insurance/" class="service-card admin-only-card" data-admin-card
         data-access-permission="insurance.view">
-        <div class="tag">เฉพาะกรรมการ</div>
         <div class="service-icon">🛡️</div>
         <div class="service-title">Asset Insurance</div>
         <p class="service-desc">จัดเก็บเอกสารประกัน และไฟล์เคลมของทรัพย์สินส่วนกลาง</p>
@@ -1752,7 +1771,6 @@
 
       <a href="/blueprints/" class="service-card admin-only-card" data-admin-card
         data-access-permission="blueprints.view">
-        <div class="tag">เฉพาะกรรมการ</div>
         <div class="service-icon">📐</div>
         <div class="service-title">Blueprints</div>
         <p class="service-desc">เก็บแบบก่อสร้าง แปลนระบบ และเอกสารอ้างอิงสำหรับซ่อมบำรุงหรือรีโนเวท</p>
