@@ -1597,14 +1597,11 @@
     <button class="tab-btn" id="tabAccess" onclick="switchTab('access')" style="display:none">
       🛡 สิทธิ์ผู้ดูแล
     </button>
-    <button class="tab-btn" id="tabIssues" onclick="window.open('/report/', '_blank')">
-      📣 เรื่องจากลูกบ้าน ↗
-    </button>
     <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
       🧾 Activity Log
     </button>
     <button class="tab-btn" id="tabUsage" onclick="switchTab('usage')">
-      📶 การใช้งานบ้าน
+      📶 Home Usage
     </button>
     <button class="tab-btn" id="tabStorage" onclick="switchTab('storage')">
       💾 ขนาดข้อมูล
@@ -1627,9 +1624,8 @@
         <button class="mobile-section-item" id="mobileSectionAnnounce" data-admin-tab="announce" onclick="chooseMobileSection('announce')">📢 ประกาศ</button>
         <button class="mobile-section-item" id="mobileSectionPickup" data-admin-tab="pickup" onclick="chooseMobileSection('pickup')">🗑 ทิ้งของใหญ่</button>
         <button class="mobile-section-item" id="mobileSectionAccess" data-admin-tab="access" onclick="chooseMobileSection('access')">🛡 สิทธิ์ผู้ดูแล</button>
-        <button class="mobile-section-item" id="mobileSectionIssues" onclick="window.open('/report/','_blank');closeMobileSectionSheet()">📣 เรื่องจากลูกบ้าน ↗</button>
         <button class="mobile-section-item" id="mobileSectionLog" data-admin-tab="log" onclick="chooseMobileSection('log')">🧾 Activity Log</button>
-        <button class="mobile-section-item" id="mobileSectionUsage" data-admin-tab="usage" onclick="chooseMobileSection('usage')">📶 การใช้งานบ้าน</button>
+        <button class="mobile-section-item" id="mobileSectionUsage" data-admin-tab="usage" onclick="chooseMobileSection('usage')">📶 Home Usage</button>
         <button class="mobile-section-item" id="mobileSectionStorage" data-admin-tab="storage" onclick="chooseMobileSection('storage')">💾 ขนาดข้อมูล</button>
       </div>
     </div>
@@ -1957,7 +1953,7 @@
     <div style="max-width:1100px;margin:28px auto;padding:0 20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <div>
-          <h2 style="margin:0 0 4px;font-size:1.3rem;">📶 การใช้งานบ้าน</h2>
+          <h2 style="margin:0 0 4px;font-size:1.3rem;">📶 Home Usage</h2>
           <p style="margin:0;color:var(--text-muted);font-size:.88rem;">สรุปว่าบ้านไหนเข้าใช้งานระบบบ้าง — never / today / last seen / ความถี่ / ใช้การ์ดไหนบ้างจากหน้าแรก (ข้อมูลของฉัน, ทะเบียนรถ, ผู้มาติดต่อของฉัน/ทั้งหมู่บ้าน, ค่าจอดรถ, ใบเสร็จ, สถานะที่จอดรถ, แจ้งปัญหา) — ไม่ลงรายละเอียดราย transaction</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -2607,7 +2603,7 @@
     pickup: '🗑 ทิ้งของใหญ่',
     access: '🛡 สิทธิ์ผู้ดูแล',
     log: '🧾 Activity Log',
-    usage: '📶 การใช้งานบ้าน',
+    usage: '📶 Home Usage',
     storage: '💾 ขนาดข้อมูล'
   };
 
