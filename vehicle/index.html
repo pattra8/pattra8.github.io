@@ -1513,7 +1513,7 @@
       method: 'POST',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ houseNo, pin })
+      body: JSON.stringify({ houseNo, pin, feature: 'vehicle' })
     });
     const json = await res.json();
     if (!res.ok || !json.ok) {
