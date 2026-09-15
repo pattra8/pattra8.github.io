@@ -3203,6 +3203,10 @@
       document.querySelectorAll('.nav-group[open]').forEach(group => { group.open = false; });
     }
   });
+  document.addEventListener('pointerdown', event => {
+    if (event.target.closest('.nav-group')) return;
+    document.querySelectorAll('.nav-group[open]').forEach(group => { group.open = false; });
+  });
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
   function openMobileSectionSheet() {
