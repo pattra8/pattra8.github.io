@@ -1448,6 +1448,19 @@ function storeResidentSession(houseNo, pin, residentName) {
 }
 function clearResidentSession() { localStorage.removeItem(RESIDENT_SESSION_KEY); }
 
+// The slot map itself is public (no login needed), so only a resident who
+// happens to already be signed in shows up in the admin usage log — this
+// never prompts a login just to log a view.
+function pingParkingLayoutView() {
+  const s = getResidentSession();
+  if (!s) return;
+  fetch('https://asia-southeast1-pattra8-54c3f.cloudfunctions.net/residentPinAuth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'pingFeatureView', houseNo: s.houseNo, pin: s.pin, feature: 'parking' })
+  }).catch(() => {});
+}
+
 function escH(s) {
   return String(s || '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -1555,6 +1568,7 @@ async function handleLoginSubmit() {
 // ── Resident SSO init ──
 renderHeaderIdentity(getResidentSession());
 syncEditAccess();
+pingParkingLayoutView();
 document.getElementById('loginOverlay').addEventListener('click', e => {
   if (e.target.id === 'loginOverlay') closeLoginModal();
 });
