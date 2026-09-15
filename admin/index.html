@@ -69,20 +69,20 @@
       backdrop-filter: saturate(140%) blur(8px);
       -webkit-backdrop-filter: saturate(140%) blur(8px);
       border-bottom: 1px solid var(--border-soft);
-      padding: 14px 22px;
+      padding: 10px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 100;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
       width: 100%;
     }
     .dashboard > header h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 20px;
+      font-size: 17px;
       font-weight: 600;
       color: var(--text);
       letter-spacing: 0.02em;
@@ -103,9 +103,9 @@
       background: transparent;
       border: 1.5px solid var(--border);
       color: var(--text-body);
-      border-radius: 9px;
-      padding: 8px 14px;
-      font-size: 12.5px;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       font-family: inherit;
@@ -133,9 +133,9 @@
       background: var(--card);
       border: 1.5px solid var(--border);
       color: var(--text-body);
-      border-radius: 9px;
-      padding: 8px 12px;
-      font-size: 12.5px;
+      border-radius: 8px;
+      padding: 6px 11px;
+      font-size: 12px;
       font-weight: 700;
       line-height: 1.2;
       text-decoration: none;
@@ -166,8 +166,8 @@
     /* ─── TABS ─── */
     .tabs {
       display: flex;
-      gap: 4px;
-      padding: 14px 22px 0;
+      gap: 5px;
+      padding: 8px 18px;
       border-bottom: 1px solid var(--border-soft);
       background: var(--bg);
       flex-wrap: nowrap;
@@ -178,26 +178,26 @@
     .tabs::-webkit-scrollbar { display: none; }
     .tab-btn {
       background: transparent;
-      border: none;
-      padding: 10px 14px 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 6px 12px;
       white-space: nowrap;
-      font-size: 13.5px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--text-soft);
       cursor: pointer;
       font-family: inherit;
-      border-bottom: 2.5px solid transparent;
-      margin-bottom: -1px;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: color 0.15s, border-color 0.15s;
+      gap: 5px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
       flex: 0 0 auto;
     }
-    .tab-btn:hover { color: var(--text); }
+    .tab-btn:hover { background: var(--bg-soft); color: var(--text); }
     .tab-btn.active {
-      color: var(--accent-deep);
-      border-bottom-color: var(--accent);
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }
     .tab-badge {
       background: #d64545;
@@ -209,6 +209,7 @@
       min-width: 18px;
       text-align: center;
     }
+    .tab-btn.active .tab-badge { background: rgba(255,255,255,.28); }
 
     /* ─── AUTHORIZATION MATRIX ─── */
     .access-shell {
@@ -671,10 +672,10 @@
 
     @media (min-width: 1101px) {
       .dashboard > header {
-        padding: 12px 18px;
+        padding: 10px 18px;
       }
       .tabs {
-        padding: 12px 18px 0;
+        padding: 8px 18px;
       }
       .toolbar {
         padding: 14px 18px;
