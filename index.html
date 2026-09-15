@@ -416,22 +416,20 @@
       white-space: nowrap;
       vertical-align: 7px;
     }
-    /* A dark ground is the signal: the committee tools are a back office, not
-       more resident cards. Cream-on-cream was invisible. */
+    /* A soft cream panel groups committee tools within the light theme. */
     .committee-band {
-      background:
-        radial-gradient(120% 100% at 12% 0%, #3a2f22 0%, #2a2218 58%, #221b13 100%);
-      border: 1px solid rgba(196,122,44,0.35);
+      background: var(--bg2);
+      border: 1px solid var(--border);
       border-radius: 26px;
       padding: 34px 28px 38px;
-      box-shadow: inset 0 1px 0 rgba(247,230,205,0.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
     }
-    .committee-band .section-eyebrow { color: var(--gold-light); }
-    .committee-band .section-title { color: #f7efe2; }
+    .committee-band .section-eyebrow { color: var(--gold); }
+    .committee-band .section-title { color: var(--text); }
     .committee-band .section-lock {
-      border-color: rgba(212,145,63,0.55);
-      background: rgba(212,145,63,0.16);
-      color: #e8cf9d;
+      border-color: #dfc69f;
+      background: var(--gold-pale);
+      color: var(--taupe-mid);
     }
 
     .gated-section { margin-top: 8px; }
