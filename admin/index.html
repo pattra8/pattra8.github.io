@@ -1954,6 +1954,7 @@
         </div>
       </div>
 
+      <div id="usageLoginSummary" aria-live="polite" style="margin-bottom:14px;padding:14px 16px;background:#fff;border:1px solid var(--border);border-radius:12px;line-height:1.8;"></div>
       <div id="usageStats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:18px;"></div>
 
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
@@ -3514,18 +3515,22 @@
     const limit = parseInt(document.getElementById('usageLimitInput').value) || 500;
     contentEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">⏳ กำลังโหลด...</div>';
     btn.disabled = true;
+    document.getElementById('usageLoginSummary').textContent = '';
+    document.getElementById('usageStats').innerHTML = '';
+    noteEl.textContent = '';
     try {
-      // House list — reuse already-loaded residents if available, else fetch fresh.
-      let residents = allData;
-      if (!residents || !residents.length) {
-        const rRes = await fetch(RESIDENT_AUTH_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'adminResidents', ...getAdminAuth() })
-        });
-        const rJson = await rRes.json().catch(() => ({}));
-        residents = rJson.ok && Array.isArray(rJson.residents) ? rJson.residents : [];
+      // Fetch fresh durable login/activity evidence on every refresh.
+      const rRes = await fetch(RESIDENT_AUTH_URL, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'adminResidents', ...getAdminAuth() })
+      });
+      const rJson = await rRes.json();
+      if (!rRes.ok || !rJson.ok || !Array.isArray(rJson.residents)) {
+        throw new Error(rJson.error || 'โหลดทะเบียนบ้านไม่สำเร็จ');
       }
+      const residents = rJson.residents;
 
       const [logRes, featureRes] = await Promise.all([
         fetch(RESIDENT_AUTH_URL, {
@@ -3544,17 +3549,15 @@
       const logJson = await logRes.json();
       if (!logJson.ok) throw new Error(logJson.error || 'load failed');
       const logs = (logJson.logs || []).filter(l =>
-        l.action === 'pin_verify' && l.success !== false
+        l.action === 'pin_verify' && l.success === true
       );
       const featureJson = await featureRes.json().catch(() => ({}));
       const featureUsage = featureJson.ok && Array.isArray(featureJson.usage) ? featureJson.usage : [];
 
       usageRows = buildUsageRows(residents, logs, featureUsage);
 
-      const oldestTs = logs.length ? Math.min(...logs.map(l => tsToMs(l.ts))) : null;
-      noteEl.textContent = logs.length
-        ? `อ้างอิงจาก log การ verify PIN ล่าสุด ${logs.length} รายการ (ย้อนหลังถึง ${fmtUsageDate(oldestTs)}) — หากบ้านไม่มีการใช้งานเก่ากว่านี้ อาจไม่ถูกนับ`
-        : 'ไม่พบ log การ verify PIN ในช่วงที่ดึงข้อมูล';
+      noteEl.textContent = 'สถานะ login อ้างอิงการยืนยัน PIN สำเร็จ หรือการใช้งานด้วย session ที่ยืนยันตัวตนแล้ว • Never = ยังไม่พบหลักฐานในข้อมูลที่มี ไม่ยืนยันว่าไม่เคยเข้ามาในอดีต • จำนวนครั้ง/ความถี่เป็นการใช้งาน ไม่ใช่จำนวน login' +
+        (featureJson.ok ? '' : ' • โหลดข้อมูลการใช้บริการไม่สำเร็จ');
 
       renderUsageStats(usageRows);
       renderUsageTable();
@@ -3567,7 +3570,9 @@
 
   function tsToMs(ts) {
     if (!ts) return null;
-    return ts._seconds ? ts._seconds * 1000 : new Date(ts).getTime();
+    const seconds = ts._seconds ?? ts.seconds;
+    const ms = seconds != null ? Number(seconds) * 1000 : new Date(ts).getTime();
+    return Number.isFinite(ms) && ms > 0 ? ms : null;
   }
 
   function fmtUsageDate(ms) {
@@ -3622,12 +3627,11 @@
   function buildUsageRows(residents, logs, featureUsage) {
     const featureByHouse = buildFeatureMap(featureUsage || []);
     const now = Date.now();
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const todayMs = startOfToday.getTime();
+    const todayMs = Math.floor((now + 7 * 3600000) / 86400000) * 86400000 - 7 * 3600000;
 
     const byHouse = new Map();
     logs.forEach(l => {
+      if (l.action !== 'pin_verify' || l.success !== true) return;
       const houseNo = l.houseNo;
       if (!houseNo) return;
       const ms = tsToMs(l.ts);
@@ -3646,7 +3650,7 @@
     // the audit list, it is not truncated when other system events are busy.
     residents.forEach(r => {
       const houseNo = r.house_no;
-      const ms = tsToMs(r.lastActivity || r.lastLogin);
+      const ms = Math.max(tsToMs(r.lastActivity) || 0, tsToMs(r.lastLogin) || 0);
       if (!houseNo || !ms) return;
       let entry = byHouse.get(houseNo);
       const activityCount = Number(r.activityCount || 0);
@@ -3670,17 +3674,29 @@
     });
 
     const houseNos = new Set(residents.map(r => r.house_no).filter(Boolean));
-    byHouse.forEach((_, houseNo) => houseNos.add(houseNo));
-    featureByHouse.forEach((_, houseNo) => houseNos.add(houseNo));
+    // Count registered houses only; historical logs must not expand the denominator.
+    const loginByHouse = new Map();
+    residents.forEach(r => {
+      const ms = tsToMs(r.lastLogin);
+      if (ms) loginByHouse.set(r.house_no, Math.max(ms, loginByHouse.get(r.house_no) || 0));
+    });
+    logs.forEach(l => {
+      const ms = tsToMs(l.ts);
+      if (l.action === 'pin_verify' && l.success === true && ms) {
+        loginByHouse.set(l.houseNo, Math.max(ms, loginByHouse.get(l.houseNo) || 0));
+      }
+    });
     const nameByHouse = new Map(residents.map(r => [r.house_no, r.name || '']));
 
     return [...houseNos].sort().map(houseNo => {
       const entry = byHouse.get(houseNo);
       const features = featureByHouse.get(houseNo) || new Map();
+      const lastLogin = loginByHouse.get(houseNo) || null;
+      const hasLoggedIn = Boolean(lastLogin || entry);
       if (!entry) {
         return {
           houseNo, name: nameByHouse.get(houseNo) || '',
-          lastSeen: null, count: 0, daysSince: null, status: 'never', freqPerWeek: 0, features
+          lastLogin, hasLoggedIn, lastSeen: null, count: 0, daysSince: null, status: 'never', freqPerWeek: 0, features
         };
       }
       const daysSince = Math.floor((now - entry.lastSeen) / 86400000);
@@ -3691,12 +3707,12 @@
       else if (daysSince <= 7) status = 'week';
       else if (daysSince <= 30) status = 'month';
       else status = 'inactive';
-      return { houseNo, name: nameByHouse.get(houseNo) || '', lastSeen: entry.lastSeen, count: entry.count, daysSince, status, freqPerWeek, features };
+      return { houseNo, name: nameByHouse.get(houseNo) || '', lastLogin, hasLoggedIn, lastSeen: entry.lastSeen, count: entry.count, daysSince, status, freqPerWeek, features };
     });
   }
 
   const USAGE_STATUS_LABEL = {
-    never: ['⚪ ไม่เคยใช้', '#6b7280', '#f3f4f6'],
+    never: ['⚪ ยังไม่พบการใช้งาน', '#6b7280', '#f3f4f6'],
     today: ['🟢 ใช้วันนี้', '#166534', '#dcfce7'],
     week: ['🔵 ใช้ใน 7 วัน', '#1e40af', '#dbeafe'],
     month: ['🟠 ใช้ใน 30 วัน', '#a16207', '#fef3c7'],
@@ -3706,13 +3722,16 @@
   function renderUsageStats(rows) {
     const counts = { all: rows.length, never: 0, today: 0, week: 0, month: 0, inactive: 0 };
     rows.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    const loggedIn = rows.filter(r => r.hasLoggedIn).length;
+    document.getElementById('usageLoginSummary').innerHTML = `<strong>เข้าใช้งานแล้ว ${loggedIn} / ${rows.length} หลัง</strong> (${rows.length ? Math.round(loggedIn / rows.length * 100) : 0}%) · ยังไม่พบ login (Never) ${rows.length - loggedIn} หลัง`;
     const cards = [
       ['all', 'ทั้งหมด', counts.all],
+      ['loggedIn', 'เคย login', loggedIn],
+      ['neverLogin', 'ยังไม่พบ login (Never)', rows.length - loggedIn],
       ['today', '🟢 วันนี้', counts.today],
       ['week', '🔵 ใน 7 วัน', counts.week],
       ['month', '🟠 ใน 30 วัน', counts.month],
       ['inactive', '🔴 เงียบ >30 วัน', counts.inactive],
-      ['never', '⚪ ไม่เคยใช้', counts.never],
     ];
     document.getElementById('usageStats').innerHTML = cards.map(([filter, label, num]) => `
       <div class="stat-card is-filter ${usageFilter === filter ? 'is-active' : ''}" onclick="setUsageFilter('${filter}')">
@@ -3730,7 +3749,9 @@
   function renderUsageTable() {
     const el = document.getElementById('usageContent');
     const q = (document.getElementById('usageSearchInput').value || '').trim().toLowerCase();
-    let rows = usageFilter === 'all' ? usageRows : usageRows.filter(r => r.status === usageFilter);
+    let rows = usageRows.filter(r => usageFilter === 'all' ||
+      (usageFilter === 'loggedIn' ? r.hasLoggedIn :
+        usageFilter === 'neverLogin' ? !r.hasLoggedIn : r.status === usageFilter));
     if (q) {
       rows = rows.filter(r => r.houseNo.toLowerCase().includes(q) || (r.name || '').toLowerCase().includes(q));
     }
@@ -3756,6 +3777,7 @@
       return `<tr>
         <td><strong>${escHtml(r.houseNo)}</strong></td>
         <td style="font-size:.85rem;color:var(--text-soft)">${escHtml(r.name || '—')}</td>
+        <td style="font-size:.8rem;white-space:nowrap;"><strong>${r.hasLoggedIn ? '✓ เคย login' : 'ยังไม่พบ login'}</strong><br><span style="color:var(--text-muted);">${r.lastLogin ? fmtUsageDateTime(r.lastLogin) : r.hasLoggedIn ? 'พบการใช้ session • ไม่มีเวลา login' : 'Never'}</span></td>
         <td><span style="font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px;color:${color};background:${bg};white-space:nowrap;">${label}</span></td>
         <td style="font-size:.82rem;white-space:nowrap;">${fmtUsageDateTime(r.lastSeen)}</td>
         <td style="font-size:.82rem;color:var(--text-muted);">${r.daysSince === null ? '—' : `${r.daysSince} วันก่อน`}</td>
@@ -3772,7 +3794,8 @@
             <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
               <th style="padding:10px 14px;text-align:left;font-weight:600;">บ้าน</th>
               <th style="padding:10px 14px;text-align:left;font-weight:600;">ชื่อ</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600;">สถานะ</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">Login ล่าสุด</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">สถานะการใช้งาน</th>
               <th style="padding:10px 14px;text-align:left;font-weight:600;">Last seen</th>
               <th style="padding:10px 14px;text-align:left;font-weight:600;">ผ่านมาแล้ว</th>
               <th style="padding:10px 14px;text-align:center;font-weight:600;">จำนวนครั้ง</th>
