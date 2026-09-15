@@ -65,7 +65,7 @@
   }
 
   h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
-  .sub { font-size:13px; color:var(--text-soft); margin:0 0 18px; line-height:1.5; }
+  .sub { font-size:13.5px; color:var(--text-soft); margin:0 0 18px; line-height:1.55; }
 
   #loginOverlay {
     position:fixed; inset:0; background:rgba(42,34,24,.45);
@@ -126,41 +126,41 @@
 
   .rc-chip {
     display:inline-flex; align-items:center; gap:5px; border-radius:999px;
-    padding:2px 9px; font-size:11.5px; font-weight:700;
+    padding:3px 10px; font-size:12.5px; font-weight:700;
     background:var(--fee-bg); color:var(--fee);
   }
 
   .rc-section {
-    display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700;
-    color:var(--accent-deep); margin:20px 2px 10px;
+    display:flex; align-items:center; gap:7px; font-size:14px; font-weight:700;
+    color:var(--accent-deep); margin:22px 2px 11px;
   }
   .rc-section:first-child { margin-top:2px; }
-  .rc-section .count { font-weight:600; font-size:12px; color:var(--text-muted); }
-  .rc-section .sum { margin-left:auto; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:12px; color:var(--text-muted); }
+  .rc-section .count { font-weight:600; font-size:12.5px; color:var(--text-muted); }
+  .rc-section .sum { margin-left:auto; font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:12.5px; color:var(--text-muted); }
 
   .card {
     background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius);
-    box-shadow:var(--shadow); overflow:hidden; margin-bottom:10px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:12px;
   }
   .card.fee-parking, .card.fee-common { border-left:4px solid var(--fee); }
   .card.fee-parking .rc-amount, .card.fee-common .rc-amount { color:var(--fee); }
-  .card-body { padding:14px; }
+  .card-body { padding:16px; }
   .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
   .rc-eyebrow { font-size:11.5px; font-weight:700; color:var(--accent-text); }
-  .rc-fee { font-size:15.5px; font-weight:600; color:var(--text); margin-top:6px; }
-  .rc-period { font-size:12.5px; color:var(--text-soft); margin-top:3px; line-height:1.4; }
+  .rc-fee { font-size:17.5px; font-weight:700; color:var(--text); margin-top:9px; line-height:1.35; }
+  .rc-period { font-size:13.5px; color:var(--text-soft); margin-top:4px; line-height:1.45; }
   .rc-ref { color:var(--text-muted); }
 
-  .badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:2px 9px; font-size:11px; font-weight:700; white-space:nowrap; flex:none; }
+  .badge { display:inline-flex; align-items:center; gap:5px; border-radius:999px; padding:3px 10px; font-size:12px; font-weight:700; white-space:nowrap; flex:none; }
   .badge .dot { width:6px; height:6px; border-radius:50%; }
   .badge.complete { color:var(--ok); background:var(--ok-bg); }
   .badge.complete .dot { background:var(--ok); }
 
-  .rc-amount-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:14px; padding-top:13px; border-top:1px solid var(--border-soft); }
-  .rc-amount-label { font-size:12px; color:var(--text-muted); }
-  .rc-amount { font-family:'IBM Plex Mono'; font-weight:700; font-size:22px; color:var(--accent-text); white-space:nowrap; }
+  .rc-amount-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:16px; padding-top:15px; border-top:1px solid var(--border-soft); }
+  .rc-amount-label { font-size:13px; color:var(--text-muted); }
+  .rc-amount { font-family:'IBM Plex Mono'; font-weight:700; font-size:25px; color:var(--accent-text); white-space:nowrap; }
 
-  .rc-meta { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:11px; font-size:12px; color:var(--text-soft); }
+  .rc-meta { display:flex; flex-wrap:wrap; gap:7px 16px; margin-top:13px; font-size:13px; color:var(--text-soft); }
   .rc-meta .em { display:inline-flex; align-items:center; gap:4px; color:var(--ok); }
 
   .rc-actions { margin-top:14px; }
@@ -178,7 +178,7 @@
   .btn-mail {
     width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px;
     background:var(--card); color:var(--text-soft); border:1px solid var(--border);
-    border-radius:12px; padding:10px 12px; font-size:13.5px; font-weight:600;
+    border-radius:12px; padding:10px 12px; font-size:14px; font-weight:600;
     font-family:inherit; cursor:pointer;
   }
   .btn-mail:active { background:var(--bg-soft); }
@@ -200,10 +200,16 @@
   .mail-note.ok { color:var(--ok); }
   .mail-note.err { color:var(--err); }
 
-  .rc-name { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; margin-top:10px; font-size:12.5px; color:var(--text-soft); }
+  .rc-name { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin-top:12px; font-size:13.5px; color:var(--text-soft); }
   .rc-name b { color:var(--text); font-weight:600; }
-  .rc-name .edit { background:none; border:0; padding:0; font:inherit; color:var(--accent-text); cursor:pointer; }
-  .rc-name .edit:hover { text-decoration:underline; }
+  .rc-name .edit {
+    display:inline-flex; align-items:center; gap:4px;
+    background:var(--bg-soft); border:1px solid var(--border); border-radius:999px;
+    padding:4px 10px 4px 8px; font:inherit; font-size:12px; font-weight:600;
+    color:var(--accent-text); cursor:pointer;
+  }
+  .rc-name .edit svg { flex:none; }
+  .rc-name .edit:hover, .rc-name .edit:active { background:var(--border-soft); }
   .name-row { display:flex; gap:7px; margin-top:8px; }
   .name-row input { flex:1; font-family:inherit; font-size:13.5px; font-weight:500; }
 
@@ -720,7 +726,10 @@
   // themselves. Every change is logged for the committee.
   function nameLine(r) {
     return 'ใบเสร็จในนาม <b>' + esc(r.payerName || (MY_HOUSE ? 'บ้าน 38/' + MY_HOUSE : 'ยังไม่ได้ระบุ')) + '</b>' +
-      '<button class="edit" data-rename="' + esc(r.id) + '">แก้ไข</button>';
+      '<button class="edit" data-rename="' + esc(r.id) + '">' +
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        'แก้ไข' +
+      '</button>';
   }
 
   function nameEditor(id, opts) {
