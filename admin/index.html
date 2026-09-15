@@ -3562,7 +3562,7 @@
 
       usageRows = buildUsageRows(residents, logs, featureUsage);
 
-      noteEl.textContent = 'สถานะ login อ้างอิงการยืนยัน PIN สำเร็จ หรือการใช้งานด้วย session ที่ยืนยันตัวตนแล้วของบัญชีบ้าน (แยกไม่ได้ว่าเป็นลูกบ้านหรือผู้ดูแลทดสอบ) • Never = ยังไม่พบหลักฐานในข้อมูลที่มี ไม่ยืนยันว่าไม่เคยเข้ามาในอดีต • จำนวนครั้ง/ความถี่เป็นการใช้งาน ไม่ใช่จำนวน login' +
+      noteEl.textContent = 'ใช้งานล่าสุด = เวลาล่าสุดที่บัญชีบ้านเข้าใช้ระบบ รวมการเข้าใช้ด้วย session ที่ยังอยู่ • สถานะคำนวณจากเวลาใช้งานล่าสุด • จำนวนครั้ง/ความถี่เป็นจำนวนการใช้งาน' +
         (featureJson.ok ? '' : ' • โหลดข้อมูลการใช้บริการไม่สำเร็จ');
 
       renderUsageStats(usageRows);
@@ -3728,16 +3728,15 @@
   function renderUsageStats(rows) {
     const counts = { all: rows.length, never: 0, today: 0, week: 0, month: 0, inactive: 0 };
     rows.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
-    const loggedIn = rows.filter(r => r.hasLoggedIn).length;
-    document.getElementById('usageLoginSummary').innerHTML = `<strong>เข้าใช้งานแล้ว ${loggedIn} / ${rows.length} หลัง</strong> (${rows.length ? Math.round(loggedIn / rows.length * 100) : 0}%) · ยังไม่พบ login (Never) ${rows.length - loggedIn} หลัง`;
+    const active = rows.filter(r => r.lastSeen).length;
+    document.getElementById('usageLoginSummary').innerHTML = `<strong>พบการใช้งาน ${active} / ${rows.length} หลัง</strong> (${rows.length ? Math.round(active / rows.length * 100) : 0}%) · ยังไม่พบการใช้งาน ${rows.length - active} หลัง`;
     const cards = [
       ['all', 'ทั้งหมด', counts.all],
-      ['loggedIn', 'เคย login', loggedIn],
-      ['neverLogin', 'ยังไม่พบ login (Never)', rows.length - loggedIn],
       ['today', '🟢 วันนี้', counts.today],
       ['week', '🔵 ใน 7 วัน', counts.week],
       ['month', '🟠 ใน 30 วัน', counts.month],
       ['inactive', '🔴 เงียบ >30 วัน', counts.inactive],
+      ['never', '⚪ ยังไม่พบการใช้งาน', counts.never],
     ];
     document.getElementById('usageStats').innerHTML = cards.map(([filter, label, num]) => `
       <div class="stat-card is-filter ${usageFilter === filter ? 'is-active' : ''}" onclick="setUsageFilter('${filter}')">
@@ -3755,9 +3754,7 @@
   function renderUsageTable() {
     const el = document.getElementById('usageContent');
     const q = (document.getElementById('usageSearchInput').value || '').trim().toLowerCase();
-    let rows = usageRows.filter(r => usageFilter === 'all' ||
-      (usageFilter === 'loggedIn' ? r.hasLoggedIn :
-        usageFilter === 'neverLogin' ? !r.hasLoggedIn : r.status === usageFilter));
+    let rows = usageRows.filter(r => usageFilter === 'all' || r.status === usageFilter);
     if (q) {
       rows = rows.filter(r => r.houseNo.toLowerCase().includes(q) || (r.name || '').toLowerCase().includes(q));
     }
@@ -3783,9 +3780,8 @@
       return `<tr>
         <td><strong>${escHtml(r.houseNo)}</strong></td>
         <td style="font-size:.85rem;color:var(--text-soft)">${escHtml(r.name || '—')}</td>
-        <td style="font-size:.8rem;white-space:nowrap;"><strong>${r.hasLoggedIn ? '✓ เคย login' : 'ยังไม่พบ login'}</strong><br><span style="color:var(--text-muted);">${r.lastLogin ? fmtUsageDateTime(r.lastLogin) : r.hasLoggedIn ? 'พบการใช้ session • ไม่มีเวลา login' : 'Never'}</span></td>
-        <td><span style="font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px;color:${color};background:${bg};white-space:nowrap;">${label}</span></td>
         <td style="font-size:.82rem;white-space:nowrap;">${fmtUsageDateTime(r.lastSeen)}</td>
+        <td><span style="font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px;color:${color};background:${bg};white-space:nowrap;">${label}</span></td>
         <td style="font-size:.82rem;color:var(--text-muted);">${r.daysSince === null ? '—' : `${r.daysSince} วันก่อน`}</td>
         <td style="font-size:.82rem;text-align:center;">${r.count || 0}</td>
         <td style="font-size:.82rem;text-align:center;">${r.count ? r.freqPerWeek : '—'}</td>
@@ -3800,9 +3796,8 @@
             <tr style="background:var(--bg);border-bottom:2px solid var(--border);">
               <th style="padding:10px 14px;text-align:left;font-weight:600;">บ้าน</th>
               <th style="padding:10px 14px;text-align:left;font-weight:600;">ชื่อ</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600;">Login ล่าสุด</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600;">สถานะการใช้งาน</th>
-              <th style="padding:10px 14px;text-align:left;font-weight:600;">Last seen</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">ใช้งานล่าสุด</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:600;">สถานะ</th>
               <th style="padding:10px 14px;text-align:left;font-weight:600;">ผ่านมาแล้ว</th>
               <th style="padding:10px 14px;text-align:center;font-weight:600;">จำนวนครั้ง</th>
               <th style="padding:10px 14px;text-align:center;font-weight:600;">ความถี่/สัปดาห์</th>
