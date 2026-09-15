@@ -181,16 +181,78 @@
     /* ─── TABS ─── */
     .tabs {
       display: flex;
-      gap: 5px;
+      align-items: center;
+      gap: 8px;
       padding: 8px 18px;
       border-bottom: 1px solid var(--border-soft);
       background: var(--bg);
       flex-wrap: nowrap;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
+      overflow: visible;
     }
-    .tabs::-webkit-scrollbar { display: none; }
+    .nav-group { position: relative; flex: 0 0 auto; }
+    .nav-group > summary {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: var(--text-soft);
+      font-size: 12.5px;
+      font-weight: 650;
+      white-space: nowrap;
+      cursor: pointer;
+      list-style: none;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .nav-group > summary::-webkit-details-marker { display: none; }
+    .nav-group > summary::after { content: '⌄'; font-size: 14px; transition: transform .15s; }
+    .nav-group[open] > summary::after { transform: rotate(180deg); }
+    .nav-group > summary:hover { background: var(--bg-soft); color: var(--text); }
+    .nav-group.active > summary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .nav-group-menu {
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 0;
+      z-index: 220;
+      min-width: 210px;
+      display: grid;
+      gap: 3px;
+      padding: 7px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--card);
+      box-shadow: 0 14px 36px rgba(60,40,20,.16);
+    }
+    .nav-group-menu .tab-btn {
+      width: 100%;
+      min-height: 38px;
+      justify-content: flex-start;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .nav-token-btn {
+      min-width: 86px;
+      min-height: 38px;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-soft);
+      font: 650 12.5px 'IBM Plex Sans Thai', sans-serif;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .nav-token-btn:hover { border-color: var(--accent); background: var(--accent-pale); color: var(--accent-deep); }
     .tab-btn {
       background: transparent;
       border: 1px solid transparent;
@@ -1453,6 +1515,7 @@
         text-align: left;
       }
       .mobile-section-item.active { border-color: var(--accent); background: var(--accent-pale); color: var(--accent-deep); }
+      .mobile-section-item.mobile-token-action { grid-column: 1 / -1; justify-content: center; }
       .toolbar { position: sticky; top: 127px; z-index: 80; display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; padding: 10px 12px 8px; border-bottom: 1px solid var(--border-soft); }
       .pending-wrap { padding: 6px 16px 24px; grid-template-columns: 1fr; }
 
@@ -1560,7 +1623,6 @@
     </a>
     <div class="header-actions">
       <div id="headerIdentity"></div>
-      <button class="logout-btn icon-only" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
     </div>
   </header>
 
@@ -1574,36 +1636,37 @@
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">
-      📋 ข้อมูลลูกบ้าน
-    </button>
-    <button class="tab-btn" id="tabPins" onclick="switchTab('pins')">
-      🔑 PIN ลูกบ้าน
-    </button>
-    <button class="tab-btn" id="tabVote" onclick="switchTab('vote')">
-      🗳 โหวต
-    </button>
-    <button class="tab-btn" id="tabSurvey" onclick="switchTab('survey')">
-      📊 ไลฟ์สไตล์
-    </button>
-    <button class="tab-btn" id="tabAnnounce" onclick="switchTab('announce')">
-      📢 ประกาศ
-    </button>
-    <button class="tab-btn" id="tabPickup" onclick="switchTab('pickup')">
-      🗑 ทิ้งของใหญ่
-    </button>
-    <button class="tab-btn" id="tabAccess" onclick="switchTab('access')" style="display:none">
-      🛡 สิทธิ์ผู้ดูแล
-    </button>
-    <button class="tab-btn" id="tabLog" onclick="switchTab('log')">
-      🧾 Activity Log
-    </button>
-    <button class="tab-btn" id="tabUsage" onclick="switchTab('usage')">
-      📶 Home Usage
-    </button>
-    <button class="tab-btn" id="tabStorage" onclick="switchTab('storage')">
-      💾 ขนาดข้อมูล
-    </button>
+    <details class="nav-group active" data-tabs="residents pins survey" ontoggle="closeOtherDesktopNavGroups(this)">
+      <summary>👥 ลูกบ้าน</summary>
+      <div class="nav-group-menu">
+        <button class="tab-btn active" id="tabResidents" onclick="switchTab('residents')">📋 ข้อมูลลูกบ้าน</button>
+        <button class="tab-btn" id="tabPins" onclick="switchTab('pins')">🔑 PIN ลูกบ้าน</button>
+        <button class="tab-btn" id="tabSurvey" onclick="switchTab('survey')">📊 ไลฟ์สไตล์</button>
+      </div>
+    </details>
+    <details class="nav-group" data-tabs="vote announce pickup" ontoggle="closeOtherDesktopNavGroups(this)">
+      <summary>📢 งานชุมชน</summary>
+      <div class="nav-group-menu">
+        <button class="tab-btn" id="tabVote" onclick="switchTab('vote')">🗳 โหวต</button>
+        <button class="tab-btn" id="tabAnnounce" onclick="switchTab('announce')">📢 ประกาศ</button>
+        <button class="tab-btn" id="tabPickup" onclick="switchTab('pickup')">🗑 ทิ้งของใหญ่</button>
+      </div>
+    </details>
+    <details class="nav-group" data-tabs="usage log" ontoggle="closeOtherDesktopNavGroups(this)">
+      <summary>📊 การใช้งาน</summary>
+      <div class="nav-group-menu">
+        <button class="tab-btn" id="tabUsage" onclick="switchTab('usage')">📶 Home Usage</button>
+        <button class="tab-btn" id="tabLog" onclick="switchTab('log')">🧾 Activity Log</button>
+      </div>
+    </details>
+    <details class="nav-group" data-tabs="access storage" ontoggle="closeOtherDesktopNavGroups(this)">
+      <summary>⚙️ ระบบ</summary>
+      <div class="nav-group-menu">
+        <button class="tab-btn" id="tabAccess" onclick="switchTab('access')" style="display:none">🛡 สิทธิ์ผู้ดูแล</button>
+        <button class="tab-btn" id="tabStorage" onclick="switchTab('storage')">💾 ขนาดข้อมูล</button>
+      </div>
+    </details>
+    <button class="nav-token-btn" type="button" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑 Token</button>
   </div>
 
   <div class="mobile-section-sheet" id="mobileSectionSheet" aria-hidden="true"
@@ -1625,6 +1688,7 @@
         <button class="mobile-section-item" id="mobileSectionLog" data-admin-tab="log" onclick="chooseMobileSection('log')">🧾 Activity Log</button>
         <button class="mobile-section-item" id="mobileSectionUsage" data-admin-tab="usage" onclick="chooseMobileSection('usage')">📶 Home Usage</button>
         <button class="mobile-section-item" id="mobileSectionStorage" data-admin-tab="storage" onclick="chooseMobileSection('storage')">💾 ขนาดข้อมูล</button>
+        <button class="mobile-section-item mobile-token-action" type="button" onclick="closeMobileSectionSheet(); promptUpdateToken()">🔑 เปลี่ยน GitHub Token</button>
       </div>
     </div>
   </div>
@@ -3135,6 +3199,9 @@
       requestCloseAccessDrawer();
     }
     if (event.key === 'Escape') closeMobileSectionSheet();
+    if (event.key === 'Escape') {
+      document.querySelectorAll('.nav-group[open]').forEach(group => { group.open = false; });
+    }
   });
 
   // ── Tabs ─────────────────────────────────────────────────────────────────
@@ -3172,11 +3239,27 @@
     });
   }
 
+  function closeOtherDesktopNavGroups(current) {
+    if (!current || !current.open) return;
+    document.querySelectorAll('.nav-group[open]').forEach(group => {
+      if (group !== current) group.open = false;
+    });
+  }
+
+  function updateDesktopNavState(tab) {
+    document.querySelectorAll('.nav-group').forEach(group => {
+      const groupTabs = (group.dataset.tabs || '').split(/\s+/).filter(Boolean);
+      group.classList.toggle('active', groupTabs.includes(tab));
+      group.open = false;
+    });
+  }
+
   function switchTab(tab) {
     if (tab === 'pending') tab = 'residents';
     if (!canOpenAdminTab(tab)) return;
     currentTab = tab;
     updateMobileSectionState(tab);
+    updateDesktopNavState(tab);
     document.getElementById('residentsTab').style.display  = tab === 'residents' ? 'block' : 'none';
     document.getElementById('pinsTab').style.display       = tab === 'pins'      ? 'block' : 'none';
     document.getElementById('voteTab').style.display       = tab === 'vote'      ? 'block' : 'none';
