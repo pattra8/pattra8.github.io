@@ -80,12 +80,26 @@
       flex-wrap: wrap;
       width: 100%;
     }
-    .dashboard > header h1 {
+    .logo-wordmark {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 17px;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 18px;
       color: var(--text);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
+    }
+    .logo-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .badge {
@@ -117,13 +131,10 @@
       background: var(--accent);
       color: #fff;
     }
-    .admin-quick-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      min-width: 0;
-      flex: 1 1 auto;
+    .logout-btn.icon-only {
+      padding: 6px 9px;
+      font-size: 14px;
+      line-height: 1;
     }
     .admin-link-btn {
       display: inline-flex;
@@ -652,7 +663,6 @@
       margin-left: auto;
       min-width: 0;
     }
-    .mobile-admin-menu-btn,
     .mobile-export-menu,
     .resident-card-list,
     .mobile-section-picker,
@@ -1371,20 +1381,10 @@
       }
       .preset-row { grid-template-columns: 1fr; }
       .dashboard > header { padding: 10px 12px; gap: 8px; align-items: center; }
-      .dashboard > header > div:first-child { min-width: 0; flex: 1 1 auto; }
-      .dashboard > header h1 { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 0; line-height: 1.2; letter-spacing: 0; }
-      .dashboard > header h1::before { content: 'Admin'; font-size: 17px; font-weight: 700; color: var(--text); }
-      .dashboard > header h1::after { content: 'หมู่บ้านภัทราวิลล่า 8'; display: block; margin-top: 1px; color: var(--text-muted); font-size: 10.5px; font-weight: 500; }
-      .header-admin-actions { width: auto !important; flex: 0 0 auto; gap: 7px !important; justify-content: flex-end !important; }
+      .logo { min-width: 0; flex: 1 1 auto; }
+      .logo-wordmark { font-size: 15px; }
+      .logo-sub { display: none; }
       .dashboard > header #headerIdentity { position: static !important; }
-      .header-admin-actions > .badge { display: none; }
-      .mobile-admin-menu-btn { display: inline-flex; min-height: 44px; align-items: center; gap: 6px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 11px; background: var(--card); color: var(--text-body); font: 700 12.5px/1 'IBM Plex Sans Thai', sans-serif; }
-      .admin-quick-links, .header-admin-actions > .logout-btn { display: none; }
-      .header-admin-actions.mobile-open .admin-quick-links { display: grid; grid-template-columns: 1fr 1fr; position: absolute; top: calc(100% + 6px); left: 12px; right: 12px; padding: 10px 10px 62px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: 0 18px 42px rgba(60,40,20,.18); z-index: 102; }
-      .header-admin-actions.mobile-open .admin-link-btn { min-height: 44px; }
-      .header-admin-actions.mobile-open > .logout-btn { display: inline-flex; position: absolute; top: calc(100% + 126px); z-index: 103; min-height: 42px; justify-content: center; background: var(--card); }
-      .header-admin-actions.mobile-open > .logout-btn[title] { left: 22px; width: 48px; }
-      .header-admin-actions.mobile-open > .logout-btn:not([title]) { left: 78px; right: 22px; }
       .tabs { display: none; }
       .mobile-section-picker {
         position: sticky;
@@ -1548,22 +1548,13 @@
 <!-- Admin Dashboard -->
 <div class="dashboard" id="dashboard">
   <header>
-    <div>
-      <h1>Admin — หมู่บ้านภัทราวิลล่า 8</h1>
+    <div class="logo">
+      <div class="logo-wordmark">Pattra Villa 8</div>
+      <div class="logo-sub">Admin</div>
     </div>
-    <div class="header-admin-actions" id="headerAdminActions" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
+    <div class="header-actions">
       <div id="headerIdentity"></div>
-      <span class="badge">ADMIN</span>
-      <button class="mobile-admin-menu-btn" id="mobileAdminMenuBtn" type="button"
-        aria-expanded="false" aria-controls="adminQuickLinks" onclick="toggleMobileAdminMenu(event)">เมนู <span aria-hidden="true">⌄</span></button>
-      <nav class="admin-quick-links" id="adminQuickLinks" aria-label="Admin quick links">
-        <a class="admin-link-btn" href="/" target="_blank" rel="noopener">🏠 Home</a>
-        <a class="admin-link-btn" href="/data/" target="_blank" rel="noopener">📋 ข้อมูลลูกบ้าน</a>
-        <a class="admin-link-btn" href="/vehicle/" target="_blank" rel="noopener">🚗 ทะเบียนรถ</a>
-        <a class="admin-link-btn" href="/vote/" target="_blank" rel="noopener">🗳 หน้าโหวต</a>
-      </nav>
-      <button class="logout-btn" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
-      <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+      <button class="logout-btn icon-only" onclick="promptUpdateToken()" title="เปลี่ยน GitHub Token">🔑</button>
     </div>
   </header>
 
@@ -4909,31 +4900,6 @@
     if (!details) return;
     details.open = !details.open;
   }
-
-  function toggleMobileAdminMenu(event) {
-    if (event) event.stopPropagation();
-    const actions = document.getElementById('headerAdminActions');
-    const button = document.getElementById('mobileAdminMenuBtn');
-    if (!actions || !button) return;
-    const open = actions.classList.toggle('mobile-open');
-    button.setAttribute('aria-expanded', String(open));
-  }
-
-  function closeMobileAdminMenu() {
-    const actions = document.getElementById('headerAdminActions');
-    const button = document.getElementById('mobileAdminMenuBtn');
-    if (!actions || !button) return;
-    actions.classList.remove('mobile-open');
-    button.setAttribute('aria-expanded', 'false');
-  }
-
-  document.addEventListener('click', event => {
-    const actions = document.getElementById('headerAdminActions');
-    if (actions && !actions.contains(event.target)) closeMobileAdminMenu();
-  });
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') closeMobileAdminMenu();
-  });
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   function fmtDate(raw) {
