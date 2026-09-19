@@ -7,6 +7,8 @@
   <title>LINE Broadcast · Pattra Villa 8</title>
   <link rel="stylesheet" href="/assets/resident-badge.css">
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css">
+  <script src="/assets/resident-auth.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -802,9 +804,12 @@
     }
 
     async function init() {
+      // No session: hand them to the estate's front door with ?next=, so
+      // signing in returns them here instead of stranding them on /.
       const session = getSession();
       if (!session) {
-        location.replace("/");
+        if (window.PattraAuth) window.PattraAuth.gotoLogin('/line-broadcast/');
+        else location.href = '/?next=%2Fline-broadcast%2F';
         return;
       }
       state.session = session;
