@@ -1555,6 +1555,8 @@
   </style>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css" />
+  <script src="/assets/resident-auth.js" defer></script>
 </head>
 <body>
 
@@ -2269,7 +2271,29 @@ function updateServiceLinks(houseNo) {
   });
 }
 
+// Everything the page has to repaint once a resident signs in, wherever the
+// sign-in happened — the shared sheet, or the fallback modal below.
+function afterResidentSignIn(session) {
+  if (!session) return;
+  renderHeaderIdentity(getResidentSession());
+  updateServiceLinks(session.houseNo);
+  renderAdminCards();
+}
+
+// This page is the estate's front door: a sub-page that needs a session and
+// has none sends the resident here with ?next=, and PattraAuth.returnTo()
+// carries them back the moment they are in. The modal below stays as the
+// fallback for a visit where /assets/resident-auth.js did not load.
 function showLoginModal() {
+  if (window.PattraAuth) {
+    window.PattraAuth.open({
+      onDone: function (session) {
+        afterResidentSignIn(session);
+        window.PattraAuth.returnTo();
+      }
+    });
+    return;
+  }
   document.getElementById('loginSuffix').value = '';
   document.getElementById('loginPin').value = '';
   document.getElementById('loginError').classList.remove('show');
@@ -2321,10 +2345,9 @@ async function handleLoginSubmit() {
     }
     const residentName = (data.resident && data.resident.name) || '';
     storeResidentSession('38/' + suffix, pin, residentName);
-    renderHeaderIdentity(getResidentSession());
-    updateServiceLinks('38/' + suffix);
-    renderAdminCards();
+    afterResidentSignIn(getResidentSession());
     closeLoginModal();
+    if (window.PattraAuth) window.PattraAuth.returnTo();
   } catch (e) {
     errEl.textContent = 'เกิดข้อผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ';
     errEl.classList.add('show');
@@ -2338,6 +2361,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!mountResidentBadge()) renderHeaderIdentity(session);
   renderAdminCards();
   if (session) updateServiceLinks(session.houseNo);
+
+  // Arriving from a sub-page that needed a session (…/?next=/vehicle/): open
+  // the sheet straight away so the resident is not left hunting for the
+  // button they never meant to press. Already signed in — usually a stale tab
+  // or the back button — just complete the trip.
+  const wantsNext = new URLSearchParams(location.search).has('next');
+  if (wantsNext) {
+    if (session) { if (window.PattraAuth) window.PattraAuth.returnTo(); }
+    else setTimeout(showLoginModal, 0);
+  }
 
   document.getElementById('loginOverlay').addEventListener('click', e => {
     if (e.target.id === 'loginOverlay') closeLoginModal();
