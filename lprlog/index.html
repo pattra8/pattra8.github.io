@@ -6,6 +6,8 @@
   <title>LPR Log รายวัน · Pattra Villa 8</title>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css" />
+  <script src="/assets/resident-auth.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -528,9 +530,26 @@
       if(!s||Number(s.expiresAt)<=Date.now()) return null; return s; }catch(e){return null;} }
     function storeSession(h,p){ localStorage.setItem(SESSION_KEY, JSON.stringify({
       houseNo:h, pin:p, expiresAt:Date.now()+TTL })); }
-    function showLogin(msg){ elOverlay.classList.add('open'); renderIdentity(null);
-      if(msg){ elMErr.textContent=msg; elMErr.classList.add('show'); }
-      setTimeout(function(){ elSuffix.focus(); }, 80); }
+    /* One login surface for the whole site. A committee tool does not
+       advertise itself to a signed-out visitor — no feature list here, just
+       the same sheet every other page uses. The modal below stays as the
+       fallback for a visit where /assets/resident-auth.js did not load. */
+    function showLogin(msg){
+      renderIdentity(null);
+      if(!window.PattraAuth){
+        elOverlay.classList.add('open');
+        if(msg){ elMErr.textContent=msg; elMErr.classList.add('show'); }
+        setTimeout(function(){ elSuffix.focus(); }, 80);
+        return;
+      }
+      window.PattraAuth.require({
+        service:'LPR Log (เฉพาะกรรมการ)',
+        reason: msg || 'บันทึกรถเข้า-ออกรายวันเปิดให้เฉพาะกรรมการที่มีสิทธิ์ กรุณายืนยันเลขบ้านกับ PIN'
+      }).then(function(session){
+        if(!session) return;
+        loadCurrent();
+      });
+    }
     function hideLogin(){ elOverlay.classList.remove('open'); elMErr.classList.remove('show'); }
 
     /* fix1: friendly date + coverage window caption */
