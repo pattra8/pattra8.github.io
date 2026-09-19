@@ -24,9 +24,6 @@ body{font-family:"Sarabun",sans-serif;background:linear-gradient(180deg,var(--bg
 .logo:hover{opacity:.78;}
 .logo-wordmark{font-family:'Gambetta','Cormorant Garamond',serif;font-weight:700;font-size:19px;color:var(--taupe);letter-spacing:.2em;}
 .logo-sub{font-family:'IBM Plex Sans Thai',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:1px;}
-.live{background:rgba(184,151,90,0.1);border:1px solid rgba(184,151,90,0.4);color:var(--gold);padding:7px 12px;border-radius:999px;font-size:10px;display:flex;align-items:center;gap:6px;letter-spacing:.14em;text-transform:uppercase;}
-.dot{width:6px;height:6px;background:#ef4444;border-radius:50%;animation:blink 1.4s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .hdr-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
 .hbtn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:8px 16px;border-radius:8px;font-size:11px;cursor:pointer;transition:all .2s;font-family:"Sarabun",sans-serif;letter-spacing:.08em;text-transform:uppercase;}
 .hbtn:hover{background:var(--gold);color:#fff;}
@@ -34,7 +31,6 @@ body{font-family:"Sarabun",sans-serif;background:linear-gradient(180deg,var(--bg
 .hbtn.active{background:var(--gold);border-color:var(--gold);color:#fff;}
 .hbtn.admin-key{border-color:var(--border);color:var(--taupe-mid);background:#fff;}
 .hdr.admin-on .hbtn.admin-key{border-color:var(--gold);color:#fff;background:var(--gold);}
-.sync-chip{background:#fff;border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:999px;font-size:10px;white-space:nowrap;letter-spacing:.08em;}
 /* Admin tools live behind one collapsible button, not a row of chips */
 .tools{position:relative;display:none;}
 .hdr.admin-on .tools{display:block;}
@@ -59,6 +55,7 @@ body{font-family:"Sarabun",sans-serif;background:linear-gradient(180deg,var(--bg
 .map-frame{position:relative;width:calc(var(--map-w) * 1px);aspect-ratio:var(--map-w) / var(--map-h);flex-shrink:0;}
 .map-container{position:absolute;top:0;left:0;width:calc(var(--map-w) * 1px);height:calc(var(--map-h) * 1px);border-radius:18px;overflow:hidden;box-shadow:0 18px 44px rgba(61,53,48,0.18);border:1px solid rgba(255,255,255,0.75);transform-origin:top left;}
 .map-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.map-sync{position:absolute;bottom:10px;left:10px;z-index:40;background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:5px 11px;font-size:10px;color:var(--muted);white-space:nowrap;letter-spacing:.06em;box-shadow:0 6px 18px rgba(61,53,48,0.12);pointer-events:none;}
 .map-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(250,247,242,0.92);backdrop-filter:blur(8px);border:1px solid rgba(184,151,90,0.28);border-radius:14px;padding:10px 20px;font-family:"Cormorant Garamond",serif;font-size:17px;font-weight:500;color:var(--taupe);white-space:nowrap;z-index:5;pointer-events:none;box-shadow:0 8px 24px rgba(61,53,48,0.14);letter-spacing:.03em;}
 .map-badge .badge-num{font-family:"Sarabun",sans-serif;font-weight:600;font-size:15px;letter-spacing:.01em;}
 .edit-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(184,151,90,0.92);color:#fff;padding:6px 16px;border-radius:999px;font-size:10px;font-weight:600;font-family:"Sarabun",sans-serif;z-index:20;display:none;white-space:nowrap;pointer-events:none;letter-spacing:.06em;}
@@ -180,13 +177,12 @@ body.edit-mode .map-container::after{
   .pill-avatar{width:24px;height:24px;font-size:.72rem;}
   .pill-house{font-size:.74rem;}
   .pill-name{font-size:.66rem;}
-  .live{flex:0 0 auto;padding:5px 9px;gap:5px;}
-  .sync-chip{flex:0 0 auto;padding:5px 9px;}
   .tools{flex:0 0 auto;margin-left:auto;}
   .tools-toggle{padding:5px 11px;border-radius:999px;letter-spacing:.04em;}
   .tools-menu{min-width:172px;}
   .tools-menu .hbtn,.tools-menu .hbtn-add{font-size:11px;padding:10px 11px;}
-  .hbtn,.hbtn-add,.live,.sync-chip{font-size:9.5px;}
+  .hbtn,.hbtn-add{font-size:9.5px;}
+  .map-sync{bottom:8px;left:8px;padding:4px 9px;font-size:9px;}
   .main{overflow:auto;}
   .map-outer{padding:8px;justify-content:center;}
   .map-frame{width:min(calc(100vw - 16px), calc(var(--map-w) * 1px));}
@@ -196,8 +192,6 @@ body.edit-mode .map-container::after{
   .hdr{padding:8px 10px;gap:5px;}
   .logo-wordmark{font-size:14.5px;}
   .tools-toggle{padding:5px 9px;font-size:9px;}
-  .live,.sync-chip{padding:4px 8px;font-size:9px;}
-  .live{letter-spacing:.08em;}
 }
 /* ── Resident SSO identity + login modal — matches Pattra Center ── */
 .header-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:8px 20px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:.08em;text-transform:uppercase;}
@@ -241,8 +235,6 @@ body.edit-mode .map-container::after{
   </a>
   <div class="hdr-btns">
     <div id="headerIdentity"></div>
-    <div class="live"><div class="dot"></div> LIVE</div>
-    <div class="sync-chip" id="syncLabel">Updated --:--</div>
     <div class="tools" id="tools">
       <button class="hbtn tools-toggle" id="toolsBtn" onclick="toggleTools()" aria-expanded="false" aria-controls="toolsMenu">⚙ เครื่องมือ <span class="caret">▾</span></button>
       <div class="tools-menu" id="toolsMenu">
@@ -261,6 +253,7 @@ body.edit-mode .map-container::after{
 <div class="main">
 <div class="map-outer">
   <div class="map-frame" id="mapFrame">
+    <div class="map-sync" id="syncLabel">Updated --:--</div>
   <div class="map-container" id="mapContainer">
     <img class="map-bg" src="bg.jpg" alt="Villa aerial"/>
     <div class="map-badge" id="mapBadge">UPDATE สถานะที่จอดรถ</div>
