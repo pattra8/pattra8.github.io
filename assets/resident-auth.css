@@ -1,0 +1,230 @@
+/* ── Pattra Villa 8 · แผ่นยืนยันตัวตนลูกบ้าน (shared) ───────────────────────
+   Published to https://pattra8.com/assets/resident-auth.css, loaded beside
+   resident-auth.js. This is the only login surface on the site — do not fork
+   it into a page's own <style>.
+
+   Classes are `pv-auth-` prefixed so they never collide with the login-overlay
+   / login-modal / login-gate rules pages carried before. Colours fall back to
+   the estate palette when a page does not define the custom properties.
+
+   Shape: a bottom sheet on phones (thumb reaches the fields and the button),
+   a centred dialog from 620px up — the same breakpoint the rest of the site
+   uses.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pv-auth {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif;
+}
+.pv-auth[hidden] { display: none; }
+
+/* The page behind must not scroll under the sheet on iOS. */
+body.pv-auth-open { overflow: hidden; }
+
+.pv-auth-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(43, 33, 24, 0.52);
+  animation: pv-auth-fade 0.18s ease-out;
+}
+
+.pv-auth-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  box-sizing: border-box;
+  background: var(--card, #fff);
+  border-radius: 22px 22px 0 0;
+  padding: 10px 22px 26px;
+  box-shadow: 0 -8px 30px rgba(43, 33, 24, 0.22);
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: pv-auth-rise 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.pv-auth-grip {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 14px;
+  border-radius: 999px;
+  background: var(--line, #e6d9c3);
+}
+
+/* "กำลังจะเข้า <บริการ>" — the context strip that tells a resident which card
+   they tapped, so the sheet never feels like it arrived from nowhere. */
+.pv-auth-service {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg2, #f2e8d8);
+  font-size: 12.5px;
+  color: var(--muted, #7a6a58);
+}
+.pv-auth-service strong { color: var(--text, #2b2118); font-weight: 700; }
+.pv-auth-service[hidden] { display: none; }
+
+.pv-auth-title {
+  margin: 0 0 6px;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text, #2b2118);
+}
+
+.pv-auth-reason {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted, #7a6a58);
+}
+
+.pv-auth-form { display: flex; flex-direction: column; }
+
+.pv-auth-label {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #7a6a58);
+}
+
+.pv-auth-house {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--line, #e6d9c3);
+  border-radius: 12px;
+  background: var(--card, #fff);
+  overflow: hidden;
+}
+.pv-auth-house:focus-within { border-color: var(--accent, #c47a2c); }
+
+/* The 38/ prefix is fixed for the whole estate, so it is furniture, not a
+   field — nobody should be able to type over it or delete it. */
+.pv-auth-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid var(--line, #e6d9c3);
+  background: var(--bg2, #f2e8d8);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--muted, #7a6a58);
+}
+
+.pv-auth-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 14px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text, #2b2118);
+}
+.pv-auth-input::placeholder { color: #b9a88f; font-weight: 400; }
+
+.pv-auth-hint {
+  margin: 6px 0 14px;
+  font-size: 11.5px;
+  color: var(--muted, #7a6a58);
+}
+
+.pv-auth-pin {
+  border: 1.5px solid var(--line, #e6d9c3);
+  border-radius: 12px;
+  letter-spacing: 0.35em;
+  background: var(--card, #fff);
+}
+.pv-auth-pin:focus { border-color: var(--accent, #c47a2c); }
+
+.pv-auth-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fbece9;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #8f3323;
+}
+.pv-auth-error[hidden] { display: none; }
+
+.pv-auth-submit {
+  margin-top: 16px;
+  padding: 15px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent, #c47a2c);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pv-auth-submit:hover { background: var(--accent-text, #9a5c1f); }
+.pv-auth-submit:disabled { opacity: 0.65; cursor: default; }
+
+.pv-auth-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.pv-auth-link {
+  padding: 10px 2px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-text, #9a5c1f);
+  text-decoration: none;
+  cursor: pointer;
+}
+.pv-auth-link:hover { color: #7a4715; }
+.pv-auth-link[hidden] { display: none; }
+
+/* A visible focus ring matters most here: this is the one dialog on the site
+   a resident may reach by keyboard from any page. */
+.pv-auth-sheet :focus-visible {
+  outline: 2px solid var(--accent, #c47a2c);
+  outline-offset: 2px;
+}
+
+@media (min-width: 620px) {
+  .pv-auth { align-items: center; }
+  .pv-auth-sheet {
+    border-radius: 18px;
+    padding: 24px 26px 26px;
+    box-shadow: 0 18px 50px rgba(43, 33, 24, 0.28);
+    animation: pv-auth-pop 0.18s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .pv-auth-grip { display: none; }
+}
+
+@keyframes pv-auth-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pv-auth-rise {
+  from { transform: translateY(26px); opacity: 0.4; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes pv-auth-pop {
+  from { transform: scale(0.97); opacity: 0.4; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-auth-scrim, .pv-auth-sheet { animation: none; }
+}
