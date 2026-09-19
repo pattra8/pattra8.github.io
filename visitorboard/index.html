@@ -6,6 +6,8 @@
 <title>ภาพรวม Visitor หมู่บ้าน · Pattra Villa 8</title>
 <link rel="stylesheet" href="/assets/resident-badge.css">
 <script src="/assets/resident-badge.js" defer></script>
+<link rel="stylesheet" href="/assets/resident-auth.css">
+<script src="/assets/resident-auth.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -190,6 +192,45 @@
   }
 
   #app { display:none; }
+
+  /* ── GUEST PANEL (B+C) ──
+     A signed-out resident opens the page, reads what it is for, and decides.
+     Every word here lives in this file: nothing is fetched until
+     PattraAuth.require() has resolved, so the panel can never leak a figure,
+     a name or a house number. */
+  #guestPanel { display:none; }
+  #app.guest #guestPanel { display:block; }
+  /* Keep the header, the title and the standfirst; hide the working page. */
+  #app.guest .wrap > *:not(.site-header):not(h1):not(.sub):not(#guestPanel) { display:none !important; }
+  .guest-lead {
+    font-size:12px; font-weight:700; color:var(--accent-text,#9a5c1f);
+    letter-spacing:.03em; margin:22px 0 12px;
+  }
+  .guest-feature {
+    display:flex; gap:12px; align-items:flex-start;
+    background:#fff; border:1px solid var(--line,#e6d9c3);
+    border-radius:14px; padding:14px 15px; margin-bottom:10px;
+  }
+  .guest-feature svg { flex-shrink:0; margin-top:2px; color:var(--accent,#c47a2c); }
+  .guest-feature b { display:block; font-size:14.5px; margin-bottom:4px; }
+  .guest-feature span { font-size:12.5px; color:var(--text-muted,#7a6a58); line-height:1.55; }
+  .guest-note {
+    display:flex; gap:11px; align-items:flex-start;
+    background:var(--bg2,#f2e8d8); border:1px solid var(--line,#e6d9c3);
+    border-radius:14px; padding:14px 15px; margin-top:16px;
+    font-size:12.5px; color:var(--text-muted,#7a6a58); line-height:1.6;
+  }
+  .guest-note svg { flex-shrink:0; margin-top:2px; color:var(--accent-text,#9a5c1f); }
+  .guest-cta {
+    display:block; width:100%; margin-top:20px; padding:15px; min-height:48px;
+    font-family:inherit; font-size:16px; font-weight:700; color:#fff;
+    background:var(--accent,#c47a2c); border:0; border-radius:12px; cursor:pointer;
+  }
+  .guest-cta:hover { background:var(--accent-text,#9a5c1f); }
+  .guest-cta-sub {
+    margin-top:9px; font-size:11.5px; color:var(--text-muted,#7a6a58); text-align:center;
+  }
+
 </style>
 </head>
 <body>
@@ -225,6 +266,43 @@
 
     <h1>🔎 ภาพรวม Visitor หมู่บ้าน</h1>
     <p class="sub">สรุปรถเข้า-ออกทั้งหมู่บ้านรายวัน ตรวจสอบรถที่ผ่านเข้า-ออก เพื่อความอุ่นใจของลูกบ้านทุกคน</p>
+
+    <!-- Shown until the resident signs in. Describes the page, holds no data. -->
+    <div id="guestPanel">
+      <div class="guest-lead">หน้านี้ทำอะไรได้บ้าง</div>
+
+      <div class="guest-feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M3 21h18"/></svg>
+        <div>
+          <b>สรุปรถเข้า-ออกรายวัน</b>
+          <span>จำนวนรถที่ผ่านประตูทั้งหมู่บ้านในแต่ละวัน แยกรถลูกบ้านกับรถภายนอก</span>
+        </div>
+      </div>
+
+      <div class="guest-feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+        <div>
+          <b>ย้อนดูได้ทีละวัน</b>
+          <span>เลื่อนดูวันก่อนหน้าเพื่อตรวจสอบช่วงเวลาที่สนใจ</span>
+        </div>
+      </div>
+
+      <div class="guest-feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.7 2.7 8 7 10 4.3-2 7-5.3 7-10V6l-7-3Z"/></svg>
+        <div>
+          <b>เปิดให้เฉพาะลูกบ้าน</b>
+          <span>คนนอกโครงการเปิดดูข้อมูลชุดนี้ไม่ได้</span>
+        </div>
+      </div>
+
+      <div class="guest-note">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <div>หน้านี้ยัง<b>ไม่แสดงข้อมูลใด ๆ</b> ตัวเลขและรายการรถจะขึ้นหลังยืนยันว่าเป็นลูกบ้านแล้วเท่านั้น</div>
+      </div>
+
+      <button type="button" class="guest-cta" id="guestCta">ดูภาพรวมของหมู่บ้าน</button>
+      <div class="guest-cta-sub">ใส่เลขบ้าน + PIN ครั้งเดียว ใช้ได้ทุกบริการ 30 วัน</div>
+    </div>
 
     <div id="trustBanner"></div>
 
@@ -383,7 +461,7 @@
   function mountResidentBadge() {
     if (!window.PattraBadge) return false;
     window.PattraBadge.mount('#headerIdentity', {
-      onLogin: showLogin,
+      onLogin: function() { askToSignIn(); },
       onLogout: function() {
         document.getElementById('visitorList').innerHTML = '';
         showLogin();
@@ -393,17 +471,48 @@
     return true;
   }
 
-  function showLogin(msg) {
-    elApp.style.display = 'none';
-    elLoginOverlay.classList.add('open');
+  // ── B+C ──
+  // The page is no longer gated: it opens, says what it does, and asks for a
+  // PIN only when the resident presses the button. showLogin() therefore means
+  // "drop back to the guest view"; the sheet is opened separately.
+  function showGuest(msg) {
+    elApp.style.display = 'block';
+    elApp.classList.add('guest');
+    var loading = document.getElementById('loadingState');
+    if (loading) loading.style.display = 'none';
     renderResidentBanner();
-    var err = document.getElementById('loginErr');
-    if (msg) { err.textContent = msg; err.classList.add('show'); }
-    else { err.classList.remove('show'); }
+    if (msg) askToSignIn(msg);
   }
+
+  // Opens the one shared sheet, and falls back to this page's own overlay when
+  // /assets/resident-auth.js did not load.
+  function askToSignIn(msg) {
+    if (!window.PattraAuth) {
+      elApp.style.display = 'none';
+      elLoginOverlay.classList.add('open');
+      var err = document.getElementById('loginErr');
+      if (err) {
+        if (msg) { err.textContent = msg; err.classList.add('show'); }
+        else { err.classList.remove('show'); }
+      }
+      return;
+    }
+    window.PattraAuth.require({
+      service: 'ภาพรวม Visitor หมู่บ้าน',
+      reason: msg || 'ข้อมูลรถเข้า-ออกหมู่บ้านเปิดให้เฉพาะลูกบ้าน เราจึงต้องถามเลขบ้านกับ PIN ก่อน'
+    }).then(function (session) {
+      if (!session) return;          // "ไว้ก่อน" — the guest view stays put
+      showApp();
+      loadReport();
+    });
+  }
+
+  function showLogin(msg) { showGuest(msg); }
+
   function showApp() {
     elLoginOverlay.classList.remove('open');
     elApp.style.display = 'block';
+    elApp.classList.remove('guest');
     renderResidentBanner();
   }
 
@@ -579,7 +688,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', mountResidentBadge);
-  loadReport();
+  // Boot: reuse the pattra8.com session if present. With no session the
+  // page still opens — on the guest view — and waits to be asked.
+  if (getSession()) { loadReport(); } else { showGuest(); }
+  document.getElementById('guestCta').addEventListener('click', function () {
+    askToSignIn();
+  });
 </script>
 
 </body>
