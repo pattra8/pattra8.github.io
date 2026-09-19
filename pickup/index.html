@@ -6,6 +6,8 @@
   <title>แจ้งทิ้งของใหญ่ — Pattra Villa 8</title>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css" />
+  <script src="/assets/resident-auth.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -452,7 +454,8 @@
     }
     .login-gate h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
     .login-gate p  { font-size: 13.5px; color: var(--text-soft); margin-bottom: 20px; }
-    .login-gate-btn {
+    .login-gate-lock { font-size:12px; color:var(--text-muted,#7a6a58); margin-top:10px; }
+  .login-gate-btn {
       background: var(--accent); color: #fff;
       border: none; border-radius: 10px;
       padding: 12px 28px; font-size: 14px; font-weight: 600;
@@ -717,10 +720,14 @@
 <main class="page-wrap">
 
   <!-- Login gate — shown when not logged in -->
+  <!-- Shown until the resident signs in. Says what the page is for; carries
+       no data, because nothing is fetched before PattraAuth.require() resolves. -->
   <div id="loginGate" class="login-gate" style="display:none">
-    <h2>เข้าสู่ระบบก่อนแจ้ง</h2>
-    <p>กรุณาล็อกอินด้วยบ้านเลขที่และ PIN ของคุณ<br>เพื่อส่งคำขอและดูประวัติ</p>
-    <button class="login-gate-btn" onclick="showLoginModal()">เข้าสู่ระบบ</button>
+    <h2>แจ้งทิ้งของใหญ่</h2>
+    <p>นัดให้แม่บ้านมาเก็บของใหญ่หน้าบ้านคุณในรอบเก็บถัดไป<br>
+       ส่งคำขอได้เอง ดูสถานะและประวัติย้อนหลังของบ้านคุณได้</p>
+    <p class="login-gate-lock">ต้องยืนยันว่าเป็นบ้านของคุณก่อน จึงจะส่งคำขอหรือดูประวัติได้</p>
+    <button class="login-gate-btn" onclick="showLoginModal()">แจ้งทิ้งของ</button>
   </div>
 
   <!-- Form section — shown when logged in -->
@@ -1553,7 +1560,16 @@ function hideMsg() {
 }
 
 // ── Login modal ───────────────────────────────────────────────────────────────
+// One login surface for the whole site. The modal below stays as the fallback
+// for a visit where /assets/resident-auth.js did not load.
 function showLoginModal() {
+  if (window.PattraAuth) {
+    window.PattraAuth.require({
+      service: 'แจ้งทิ้งของใหญ่',
+      reason: 'คำขอและประวัติผูกกับบ้านของคุณ เราจึงต้องถามเลขบ้านกับ PIN ก่อน'
+    }).then(session => { if (session) renderPage(); });
+    return;
+  }
   document.getElementById('loginSuffix').value = '';
   document.getElementById('loginPin').value = '';
   document.getElementById('loginError').classList.remove('show');
