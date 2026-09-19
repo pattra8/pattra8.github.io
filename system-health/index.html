@@ -7,6 +7,8 @@
   <title>System Health · Pattra Villa 8</title>
   <link rel="stylesheet" href="/assets/resident-badge.css">
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css">
+  <script src="/assets/resident-auth.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -386,6 +388,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       if (!window.PattraBadge) return;
       window.PattraBadge.mount("#headerIdentity", {
+        onLogin: () => { askToSignIn(); },
         onLogout: () => { location.href = "/"; }
       });
     });
@@ -402,10 +405,30 @@
       document.getElementById("dashboard").classList.remove("hidden");
       await loadSummary(true);
     });
+    // This screen used to write houseNo + pin straight into the site-wide
+    // session key without ever checking them, so a typo poisoned every other
+    // tool until something returned 401. The shared sheet verifies against
+    // getResidentData before it stores anything; the form below is kept only
+    // as the fallback for a visit where /assets/resident-auth.js did not load.
+    function askToSignIn(message) {
+      if (!window.PattraAuth) {
+        document.getElementById("loginScreen").classList.add("open");
+        return;
+      }
+      window.PattraAuth.require({
+        service: "System Health (เฉพาะกรรมการ)",
+        reason: message || "สถานะกล้องและระบบหลังบ้านเปิดให้เฉพาะกรรมการที่มีสิทธิ์ กรุณายืนยันเลขบ้านกับ PIN"
+      }).then(result => {
+        if (!result) return;
+        document.getElementById("dashboard").classList.remove("hidden");
+        loadSummary(true);
+      });
+    }
+
     if (session()) {
       document.getElementById("dashboard").classList.remove("hidden");
       loadSummary(false);
-    } else document.getElementById("loginScreen").classList.add("open");
+    } else askToSignIn();
     refreshTimer = setInterval(() => { if (!document.hidden && session()) loadSummary(false); }, 30000);
   </script>
 </body>
