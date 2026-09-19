@@ -35,6 +35,19 @@ body{font-family:"Sarabun",sans-serif;background:linear-gradient(180deg,var(--bg
 .hbtn.admin-key{border-color:var(--border);color:var(--taupe-mid);background:#fff;}
 .hdr.admin-on .hbtn.admin-key{border-color:var(--gold);color:#fff;background:var(--gold);}
 .sync-chip{background:#fff;border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:999px;font-size:10px;white-space:nowrap;letter-spacing:.08em;}
+/* Admin tools live behind one collapsible button, not a row of chips */
+.tools{position:relative;display:none;}
+.hdr.admin-on .tools{display:block;}
+.tools-toggle{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.tools-toggle .caret{transition:transform .18s;font-size:9px;line-height:1;}
+.tools.open .tools-toggle{background:var(--gold);color:#fff;}
+.tools.open .tools-toggle .caret{transform:rotate(180deg);}
+.tools-menu{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:186px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:7px;
+  flex-direction:column;gap:5px;z-index:200;box-shadow:0 18px 44px rgba(61,53,48,0.18);}
+.tools.open .tools-menu{display:flex;}
+.tools-menu .hbtn,.tools-menu .hbtn-add{width:100%;text-align:left;justify-content:flex-start;
+  border-radius:9px;padding:9px 11px;letter-spacing:.04em;}
 /* Add slot btn — only visible when admin */
 .hbtn-add{background:var(--taupe);border:1px solid var(--taupe);color:white;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:"Sarabun",sans-serif;display:none;align-items:center;gap:5px;transition:all .2s;letter-spacing:.08em;text-transform:uppercase;}
 .hbtn-add:hover{background:var(--gold);border-color:var(--gold);}
@@ -169,7 +182,10 @@ body.edit-mode .map-container::after{
   .pill-name{font-size:.66rem;}
   .live{flex:0 0 auto;padding:5px 9px;gap:5px;}
   .sync-chip{flex:0 0 auto;padding:5px 9px;}
-  .hbtn,.hbtn-add{flex:0 0 auto;padding:5px 10px;border-radius:999px;letter-spacing:.04em;}
+  .tools{flex:0 0 auto;margin-left:auto;}
+  .tools-toggle{padding:5px 11px;border-radius:999px;letter-spacing:.04em;}
+  .tools-menu{min-width:172px;}
+  .tools-menu .hbtn,.tools-menu .hbtn-add{font-size:11px;padding:10px 11px;}
   .hbtn,.hbtn-add,.live,.sync-chip{font-size:9.5px;}
   .main{overflow:auto;}
   .map-outer{padding:8px;justify-content:center;}
@@ -179,7 +195,7 @@ body.edit-mode .map-container::after{
 @media (max-width: 420px){
   .hdr{padding:8px 10px;gap:5px;}
   .logo-wordmark{font-size:14.5px;}
-  .hbtn,.hbtn-add{padding:5px 9px;font-size:9px;}
+  .tools-toggle{padding:5px 9px;font-size:9px;}
   .live,.sync-chip{padding:4px 8px;font-size:9px;}
   .live{letter-spacing:.08em;}
 }
@@ -227,12 +243,17 @@ body.edit-mode .map-container::after{
     <div id="headerIdentity"></div>
     <div class="live"><div class="dot"></div> LIVE</div>
     <div class="sync-chip" id="syncLabel">Updated --:--</div>
-    <button class="hbtn" id="editBtn"  onclick="toggleEdit()" style="display:none">✏️ แก้ตำแหน่ง</button>
-    <button class="hbtn" id="alignBtn" onclick="autoAlignAll()" style="display:none">📐 Auto Align</button>
-    <button class="hbtn" id="saveBtn"  onclick="savePositions()" style="display:none">💾 บันทึก</button>
-    <button class="hbtn" id="resetBtn" onclick="resetPositions()" style="display:none">↺ Reset</button>
-    <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()" style="display:none">⬇ Backup</button>
-    <button class="hbtn-add" id="addBtn" onclick="openAddModal()">＋ เพิ่มช่องจอด</button>
+    <div class="tools" id="tools">
+      <button class="hbtn tools-toggle" id="toolsBtn" onclick="toggleTools()" aria-expanded="false" aria-controls="toolsMenu">⚙ เครื่องมือ <span class="caret">▾</span></button>
+      <div class="tools-menu" id="toolsMenu">
+        <button class="hbtn" id="editBtn"  onclick="toggleEdit()" style="display:none">✏️ แก้ตำแหน่ง</button>
+        <button class="hbtn" id="alignBtn" onclick="autoAlignAll()" style="display:none">📐 Auto Align</button>
+        <button class="hbtn" id="saveBtn"  onclick="savePositions()" style="display:none">💾 บันทึก</button>
+        <button class="hbtn" id="resetBtn" onclick="resetPositions()" style="display:none">↺ Reset</button>
+        <button class="hbtn" id="backupBtn" onclick="exportLayoutBackup()" style="display:none">⬇ Backup</button>
+        <button class="hbtn-add" id="addBtn" onclick="openAddModal()">＋ เพิ่มช่องจอด</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -810,6 +831,7 @@ function unlockEditing(roleLabel) {
 
 function lockEditing() {
   if (editMode) setEditMode(false, { restore: false });
+  setToolsOpen(false);
   isAdmin = false;
   document.getElementById('hdr').classList.remove('admin-on');
   document.getElementById('editBtn').style.display = 'none';
@@ -818,6 +840,26 @@ function lockEditing() {
   document.getElementById('resetBtn').style.display = 'none';
   document.getElementById('backupBtn').style.display = 'none';
 }
+
+// ── ADMIN TOOLS MENU ──
+function setToolsOpen(open) {
+  const wrap = document.getElementById('tools');
+  wrap.classList.toggle('open', open);
+  document.getElementById('toolsBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function toggleTools() {
+  setToolsOpen(!document.getElementById('tools').classList.contains('open'));
+}
+// Any tool inside the menu finishes the job, so the menu closes behind it.
+document.getElementById('toolsMenu').addEventListener('click', e => {
+  if (e.target.closest('button')) setToolsOpen(false);
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#tools')) setToolsOpen(false);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') setToolsOpen(false);
+});
 
 // ── EDIT MODE ──
 function setEditMode(next, options = {}) {
@@ -1621,6 +1663,7 @@ window.addEventListener('storage', e => {
 });
 
 Object.assign(window, {
+  toggleTools,
   showLoginModal,
   closeLoginModal,
   logoutResident,
