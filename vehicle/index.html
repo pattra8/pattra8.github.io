@@ -1281,6 +1281,8 @@
   </style>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css">
+  <script src="/assets/resident-auth.js" defer></script>
 </head>
 <body>
 
@@ -1877,6 +1879,23 @@
       return true;
     }
     if (isResidentUnlocked(houseNo) && getPinSession(houseNo)) return true;
+
+    // Nobody is signed in anywhere on the site: ask with the one shared sheet
+    // the rest of pattra8.com uses, so this page stops being the odd one out
+    // with a bare "ใส่ PIN บ้าน …" box. The per-house dialog below still
+    // handles the rest — a resident opening a house other than their own, and
+    // the PIN reset flow, which the shared sheet does not do.
+    if (window.PattraAuth && !window.PattraAuth.getSession()) {
+      const session = await window.PattraAuth.require({
+        service: 'ทะเบียนรถ',
+        reason: 'ทะเบียนรถผูกกับบ้านของคุณ เราจึงต้องถามเลขบ้านกับ PIN ก่อนเปิดให้แก้ไข'
+      });
+      if (!session) return false;
+      if (normalizeHouseForAuth(session.houseNo) === houseNo) {
+        setResidentUnlock(houseNo);
+        return true;
+      }
+    }
     return requestResidentPin(record);
   }
 
