@@ -6,6 +6,8 @@
   <title>Master Blueprints | Pattra Villa 8</title>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css" />
+  <script src="/assets/resident-auth.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -1765,7 +1767,10 @@
       $('logoutBtn').addEventListener('click', () => { location.href = '/'; });
       const resident = getResidentSession();
       if (!resident?.houseNo || !resident?.pin) {
-        location.href = '/'; return;
+        // Hand them to the front door with ?next=, so signing in brings
+        // them straight back here instead of stranding them on /.
+        if (window.PattraAuth) window.PattraAuth.gotoLogin('/blueprints/');
+        else location.href = '/?next=%2Fblueprints%2F'; return;
       }
       applyAccessMode();
       loadDocs().catch(() => { location.href = '/'; });
@@ -1773,6 +1778,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.PattraBadge) return;
       window.PattraBadge.mount('#headerIdentity', {
+        onLogin: () => {
+          if (window.PattraAuth) window.PattraAuth.gotoLogin('/blueprints/');
+          else location.href = '/?next=%2Fblueprints%2F';
+        },
         onLogout: () => { location.href = '/'; }
       });
     });
