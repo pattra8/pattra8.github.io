@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/resident-badge.css">
 <script src="/assets/resident-badge.js" defer></script>
+<link rel="stylesheet" href="/assets/resident-auth.css">
+<script src="/assets/resident-auth.js" defer></script>
 <style>
     /* Gambetta Bold — header wordmark (embedded) */
     @font-face{font-family:'Gambetta';font-style:normal;font-weight:700;src:url(data:font/otf;base64,T1RUTwAMAIAAAwBAQ0ZGIJxIaPYAAADUAAAEHUdERUYAFAAGAAAH2AAAABxHUE9TghCbtwAAB/QAAAEIR1NVQhZ9KIUAAAj8AAAAME9TLzJXt1YKAAAFeAAAAGBjbWFwAaECagAAB0QAAAB0aGVhZB9W6L8AAAT0AAAANmhoZWEKJQVdAAAFVAAAACRobXR4D/YA3wAABSwAAAAobWF4cAAKUAAAAADMAAAABm5hbWUbdzTLAAAF2AAAAWpwb3N0/58AMgAAB7gAAAAgAABQAAAKAAABAAQCAAEBAQ5HYW1iZXR0YS1Cb2xkAAEBASf4GwD4HAH4HQwA+B4C+B8D+BQEXvu1HAZd+jQF92gPoPqcEvd7EQAFAQEEN3SBiTEuMUdhbWJldHRhIGlzIGEgdHJhZGVtYXJrIG9mIHRoZSBJbmRpYW4gVHlwZSBGb3VuZHJ5LkNvcHlyaWdodCAyMDE3LTIwMjEgSW5kaWFuIFR5cGUgRm91bmRyeS4gQWxsIHJpZ2h0cyByZXNlcnZlZC5HYW1iZXR0YSBCb2xkR2FtYmV0dGEAAAAAMQA3AEIASgBNAFMAVQAZAAEACgIAAQAEAG4AygEzAZsB7gJaApQDBgMJ/K0O7/fnsRVikXyOgp0Ig5uLqcIa9wanB/dG9y/Q9yX3H/sJuvtLH/u1ZQazhZ2HlH0IlXuMb08a++8HT4pugnseg3x6iGWFCGUHjtuajLwbxJqKiNsfQvkOFbkG49BWKjtbPfsLfYCMjIAfDvcl99oWswb3cPiyrN2Rk8mVGbEHiWNsiWQbZG+NjWMfZQevhqqIbBp+hXaAcB77D/vN+wL3sAV8tIGnnhqqqI+ykR6xB4ljeYkgGzxijY1jH2UH0ICKhbj7BAgOTLj4CBWhbAWerLictRvNl2BbjR+BiQX7WV9jOUsaRL5qwcC1q7y3HooHUIq/dsQbqrCRmbAfrAdOe6LCjB+P90UF841Mzy0bOUFYXFof9wX7fRW5r7XUmh6J+xMFenp8f3QbdmyVth8O+3L3NPinFbmvr7m5Z69dXWdnXV2vZ7kf1vtVFbqLsJCtHnGYVHlRfkSEGWgHqIaaiJR/CJR+jHVgGvscB0+KboJ7HoN8eohvhQhqB47RkIzGG8aQiojRH6wHbJF8joKdCIObi6nCGg77evd3+OEVuouwkK0ecZhWeU9+RIQZaAeohpqIlH8IlH6MdWAa/BcHT4pugnseg3x6iG+FCGoHjtGQjMYbxpCKiNEfrAdskXyOgp0Ig5uLqcIaDvsF93/36BW4i6+PrB5tm1d5UX9GhBloB6iGmoiUfwiUfox1YBr7HgdPim6Cex6DfHqIb4UIageO0ZCMxhvGkIqI7x+sB06RfI6CnQiDm4upwhr3EQekrsWW0Rug9xoFjn1/jIQbUGFgNFkfDvtC92aBFbvEnKTBH32zBYV9eYd0G1FypuAf93X3J8gH+yeFBfcVZAdsPlFVSX8IYr/7pQc5vVXgHg7E+Ln3SBXoRL88sh7MrMW20RrdN8/7D/sP+wFH+wVHuk/TXx5EZz9SNho241X3H/cm9w3L9xIe+1P3YBU4sUa4yhq4srPP169ZSVd0Z2ZtHoiMiYyJjAj7Wft7Fb2lurqyHuVe7Gw5GktMa0g8WLvRHg777w6Blfk8ml6V+1yVBvt1lQf5ZRT4txUAAAAAAQAAAAEAQktGxcFfDzz1AAMD6AAAAADcOC7kAAAAAN3Wdjf/0/7fBl0DoAABAAYAAgAAAAAAAAAKAAAChwAmArQABQHkABQBRQAeAT0AFgGyAB4BdQAXAlwANwDIAAAAAQAAA6L+3gBQBsv/0/+pBl0AAQAAAAAAAAAAAAAAAAAAAAoABAIIArwABQAAAooCWAAAAEsCigJYAAABXgAyASwAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAASVRGTwCgACAAdAOi/t4AUAOiASIAAAABAAAAAAHMAcwAAAAgAAMAAAAHAFoAAwABBAkAAAB6AAAAAwABBAkAAQAQAHoAAwABBAkAAgAIAIoAAwABBAkAAwAwAJIAAwABBAkABAAaAMIAAwABBAkABQAaANwAAwABBAkABgAaAPYAQwBvAHAAeQByAGkAZwBoAHQAIAAyADAAMQA3AC0AMgAwADIAMQAgAEkAbgBkAGkAYQBuACAAVAB5AHAAZQAgAEYAbwB1AG4AZAByAHkALgAgAEEAbABsACAAcgBpAGcAaAB0AHMAIAByAGUAcwBlAHIAdgBlAGQALgBHAGEAbQBiAGUAdAB0AGEAQgBvAGwAZAAxAC4AMAAwADEAOwBJAFQARgBPADsARwBhAG0AYgBlAHQAdABhAC0AQgBvAGwAZABHAGEAbQBiAGUAdAB0AGEAIABCAG8AbABkAFYAZQByAHMAaQBvAG4AIAAxAC4AMAAwADEARwBhAG0AYgBlAHQAdABhAC0AQgBvAGwAZAAAAAAAAgAAAAMAAAAUAAMAAQAAABQABABgAAAAFAAQAAMABAAgADgAUABWAGEAaQBsAHIAdP//AAAAIAA4AFAAVgBhAGkAbAByAHT////p/9D/sf+s/6L/m/+Z/5T/kwABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAP+cADIAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAADAAAAAAAAAABAAMABQABAAAAAQABAAEAAQAAAAoAKgA4AANERkxUABRncmVrABRsYXRuABQABAAAAAD//wABAAAAAWtlcm4ACAAAAAEAAAABAAQAAgAIAAEACAACAJAABAAAAJoAsAAIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAD/7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP+c/7AAAP+6/84AAAAAAAD/4gAAAAAAAAAA/+z/7AACAAEAAQAIAAAAAQABAAgABwAGAAAABAABAAMAAgAFAAEAAgAHAAcAAQAFAAMAAgAEAAYAAQAAAAoALAAuAANERkxUABRncmVrAB5sYXRuAB4ABAAAAAD//wAAAAAAAAAAAAA=) format('opentype');}
@@ -1233,7 +1235,11 @@ async function authenticateExpenseAccess() {
   if (!resident?.houseNo || !resident?.pin) {
     if (auth) await signOut(auth).catch(() => {});
     localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
-    location.replace('https://pattra8.com/');
+    // This page used to drop the visitor on the home page with no explanation
+    // and no way back. Hand them to the estate's front door with ?next=, so
+    // signing in returns them here (option B).
+    if (window.PattraAuth) window.PattraAuth.gotoLogin('/expense/');
+    else location.replace('https://pattra8.com/?next=%2Fexpense%2F');
     throw new Error('Expense access denied');
   }
   await setPersistence(auth, browserLocalPersistence);
@@ -1260,12 +1266,48 @@ async function performServerExpenseAuth(resident) {
       !['superadmin', 'committee'].includes(data.role)) {
     await signOut(auth).catch(() => {});
     localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
-    location.replace('https://pattra8.com/');
+    // A signed-in resident who is simply not on the committee is not signed
+    // out of anything — the shared session stays, and they are told why this
+    // page is closed instead of being bounced to the home page in silence.
+    if (response.status === 401) {
+      if (window.PattraAuth) window.PattraAuth.gotoLogin('/expense/');
+      else location.replace('https://pattra8.com/?next=%2Fexpense%2F');
+    } else {
+      showExpenseAccessDenied();
+    }
     throw new Error(data.error || 'Expense access denied');
   }
   await signInWithCustomToken(auth, data.customToken);
   rememberExpenseAccess(resident, data.role);
   applyAccessRole(data.role);
+}
+
+// Shown in place of the page when the account is signed in but not on the
+// committee. Never clears pattra_resident_session_v1 — that key is the whole
+// site's session, and a 403 here says nothing about the resident's other tools.
+function showExpenseAccessDenied() {
+  const overlay = document.getElementById('dataLoadingOverlay');
+  if (overlay) overlay.style.display = 'none';
+  const panel = document.createElement('div');
+  panel.setAttribute('role', 'alert');
+  panel.style.cssText =
+    'position:fixed;inset:0;z-index:950;display:flex;align-items:center;' +
+    'justify-content:center;padding:24px;background:#f9f3e9;';
+  panel.innerHTML =
+    '<div style="max-width:420px;background:#fff;border:1px solid #e6d9c3;' +
+    'border-radius:18px;padding:26px;text-align:center;">' +
+      '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#9a5c1f" ' +
+      'stroke-width="1.7" stroke-linecap="round" aria-hidden="true">' +
+      '<rect x="4" y="10" width="16" height="10" rx="2"></rect>' +
+      '<path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>' +
+      '<h2 style="margin:14px 0 8px;font-size:20px;">เฉพาะกรรมการ</h2>' +
+      '<p style="margin:0 0 20px;font-size:13.5px;line-height:1.65;color:#7a6a58;">' +
+      'บัญชีนี้เข้าสู่ระบบอยู่แล้ว แต่ยังไม่มีสิทธิ์ดูรายรับ-รายจ่ายของโครงการ ' +
+      'หากคิดว่าเป็นความผิดพลาด กรุณาติดต่อนิติบุคคล</p>' +
+      '<a href="/" style="display:inline-block;padding:13px 22px;border-radius:12px;' +
+      'background:#c47a2c;color:#fff;font-weight:700;text-decoration:none;">กลับหน้าแรก</a>' +
+    '</div>';
+  document.body.appendChild(panel);
 }
 
 async function returnToCenter(event) {
@@ -1279,6 +1321,10 @@ async function returnToCenter(event) {
 function mountResidentBadge() {
   if (!window.PattraBadge) return false;
   window.PattraBadge.mount('#headerIdentity', {
+    onLogin: function () {
+      if (window.PattraAuth) window.PattraAuth.gotoLogin('/expense/');
+      else location.href = '/?next=%2Fexpense%2F';
+    },
     onLogout: function () {
       localStorage.removeItem(EXPENSE_ACCESS_CACHE_KEY);
       location.href = '/';
