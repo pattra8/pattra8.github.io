@@ -156,20 +156,32 @@ body.edit-mode .map-container::after{
 
 @media (max-width: 768px){
   body{overflow:auto;}
-  .hdr{height:auto;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;}
-  .logo{max-width:100%;}
-  .logo-title{font-size:18px;}
-  .logo-sub{font-size:9px;}
+  /* One wrapping row of chips instead of one button per line */
+  .hdr{height:auto;padding:9px 12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:6px;}
+  .logo{flex:1 1 auto;min-width:0;gap:10px;}
+  .logo-wordmark{font-size:16px;letter-spacing:.14em;}
+  .logo-sub{font-size:8px;letter-spacing:.14em;}
   .hdr-btns{display:contents;}
-  #headerIdentity{grid-column:2;grid-row:1;justify-self:end;}
-  .live{grid-column:1;grid-row:2;justify-self:start;}
-  .sync-chip{grid-column:2;grid-row:2;justify-self:end;}
-  .hbtn,.hbtn-add{grid-column:1/-1;justify-self:end;}
-  .hbtn,.hbtn-add,.live,.sync-chip{font-size:10px;}
+  #headerIdentity{flex:0 0 auto;margin-left:auto;}
+  .identity-pill{padding:3px 11px 3px 4px;gap:6px;}
+  .pill-avatar{width:24px;height:24px;font-size:.72rem;}
+  .pill-house{font-size:.74rem;}
+  .pill-name{font-size:.66rem;}
+  .live{flex:0 0 auto;padding:5px 9px;gap:5px;}
+  .sync-chip{flex:0 0 auto;padding:5px 9px;}
+  .hbtn,.hbtn-add{flex:0 0 auto;padding:5px 10px;border-radius:999px;letter-spacing:.04em;}
+  .hbtn,.hbtn-add,.live,.sync-chip{font-size:9.5px;}
   .main{overflow:auto;}
   .map-outer{padding:8px;justify-content:center;}
   .map-frame{width:min(calc(100vw - 16px), calc(var(--map-w) * 1px));}
   .map-badge{font-size:14px;padding:8px 16px;max-width:calc(100% - 24px);text-align:center;line-height:1.25;}
+}
+@media (max-width: 420px){
+  .hdr{padding:8px 10px;gap:5px;}
+  .logo-wordmark{font-size:14.5px;}
+  .hbtn,.hbtn-add{padding:5px 9px;font-size:9px;}
+  .live,.sync-chip{padding:4px 8px;font-size:9px;}
+  .live{letter-spacing:.08em;}
 }
 /* ── Resident SSO identity + login modal — matches Pattra Center ── */
 .header-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:8px 20px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:.08em;text-transform:uppercase;}

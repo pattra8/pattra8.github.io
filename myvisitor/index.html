@@ -33,7 +33,7 @@
   .site-header {
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     background:var(--bg); border-bottom:1px solid var(--border);
-    padding:14px 0; margin-bottom:16px;
+    padding:11px 0; margin-bottom:12px;
   }
   .home-link { color:var(--accent-text); text-decoration:none; font-size:14px; font-weight:600; }
   .resident-banner {
@@ -58,14 +58,38 @@
     .resident-avatar { width:26px; height:26px; font-size:11px; }
     .resident-house { font-size:11.5px; }
     .resident-name { font-size:10.5px; }
+
+    /* Keep the intro + filters short so the list starts above the fold */
+    .site-header { padding:9px 0; margin-bottom:10px; }
+    h1 { font-size:18px; }
+    .sub { font-size:12px; margin-bottom:10px; line-height:1.35; }
+    .privacy-card { padding:11px 12px; margin-bottom:10px; gap:10px; grid-template-columns:34px 1fr; }
+    .privacy-card::after { font-size:66px; bottom:-22px; }
+    .privacy-icon { width:34px; height:34px; border-radius:10px; }
+    .privacy-icon svg { width:18px; height:18px; }
+    /* The title already says whose data this is — the eyebrow repeats it */
+    .privacy-eyebrow { display:none; }
+    .privacy-title { font-size:14px; }
+    .privacy-copy { font-size:11.5px; line-height:1.4; margin-top:3px; }
+    .search-box { padding:8px 11px; margin-bottom:8px; border-radius:11px; }
+    .search-box input { font-size:13.5px; }
+    .filters-panel { padding:9px; margin-bottom:10px; }
+    .cat-chip { padding:6px 11px; font-size:12px; gap:5px; }
+    .filters-row { gap:8px; }
+    .filter-field label, .custom-date label { font-size:10.5px; margin-bottom:4px; }
+    .filter-field select, .custom-date input[type=date] { font-size:13px; padding:8px 10px; }
+    .filter-meta { font-size:11px; margin-top:7px; line-height:1.35; }
+    .filter-warning { font-size:11px; padding:6px 9px; margin-top:5px; line-height:1.35; }
+    .custom-date-grid { gap:8px; margin-top:8px; }
+    .date-heading { font-size:15.5px; margin:16px 4px 9px; }
   }
 
-  h1 { font-size:20px; margin:0 0 4px; color:var(--text); }
-  .sub { font-size:13px; color:var(--text-soft); margin:0 0 16px; }
+  h1 { font-size:20px; margin:0 0 3px; color:var(--text); }
+  .sub { font-size:13px; color:var(--text-soft); margin:0 0 12px; }
   .privacy-card {
     position:relative; overflow:hidden; display:grid; grid-template-columns:43px 1fr;
     gap:12px; background:#e7f0e8; border:1px solid #bdd1c2;
-    border-radius:16px; padding:15px 16px 14px; margin-bottom:16px;
+    border-radius:16px; padding:13px 14px 12px; margin-bottom:12px;
   }
   .privacy-card::after {
     content:'38'; position:absolute; right:-5px; bottom:-30px;
@@ -86,10 +110,13 @@
   .privacy-copy { margin:4px 0 0; color:#4d6857; font-size:12.5px; line-height:1.5; }
 
   @media (max-width:420px) {
-    .privacy-card { grid-template-columns:38px 1fr; gap:10px; padding:14px 13px; }
-    .privacy-icon { width:38px; height:38px; border-radius:11px; }
-    .privacy-title { font-size:14.5px; }
-    .privacy-copy { font-size:12px; }
+    .privacy-card { grid-template-columns:32px 1fr; gap:9px; padding:10px 11px; }
+    .privacy-icon { width:32px; height:32px; border-radius:9px; }
+    .privacy-icon svg { width:17px; height:17px; }
+    .privacy-title { font-size:13.5px; }
+    .privacy-copy { font-size:11px; }
+    h1 { font-size:17px; }
+    .sub { font-size:11.5px; }
   }
 
   #loginOverlay {
@@ -126,7 +153,7 @@
 
   .search-box {
     display:flex; align-items:center; gap:8px; background:var(--card);
-    border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-bottom:16px;
+    border:1px solid var(--border); border-radius:12px; padding:9px 12px; margin-bottom:10px;
   }
   .search-box svg { flex:none; color:var(--text-muted); }
   .search-box input {
@@ -137,10 +164,10 @@
 
   .filters-panel {
     background:var(--card); border:1px solid var(--border); border-radius:12px;
-    padding:12px; margin-bottom:14px;
+    padding:10px; margin-bottom:12px;
   }
   .cat-chips {
-    display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px;
+    display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:9px;
     scrollbar-width:none;
   }
   .cat-chips::-webkit-scrollbar { display:none; }
