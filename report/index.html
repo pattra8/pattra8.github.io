@@ -664,6 +664,8 @@
   </style>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css">
+  <script src="/assets/resident-auth.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -992,13 +994,34 @@
   }
 
   /* ── login ───────────────────────────────────────────────────────── */
+  // One login surface for the whole site. The guest form stays on screen
+  // underneath: a resident who backs out of the sheet can still send a report
+  // without signing in. The overlay below is the fallback for a visit where
+  // /assets/resident-auth.js did not load.
   function showLogin(message) {
     $('bootState').hidden = true;
     if (!session) showGuestForm();
-    $('loginOverlay').classList.add('open');
     canAdmin = false;
-    if (message) { $('loginErr').textContent = message; $('loginErr').classList.add('show'); }
-    setTimeout(function () { $('loginSuffix').focus(); }, 80);
+    if (!window.PattraAuth) {
+      $('loginOverlay').classList.add('open');
+      if (message) { $('loginErr').textContent = message; $('loginErr').classList.add('show'); }
+      setTimeout(function () { $('loginSuffix').focus(); }, 80);
+      return;
+    }
+    window.PattraAuth.require({
+      service: 'เรื่องของฉัน',
+      reason: message || 'ดูและติดตามเรื่องที่บ้านคุณแจ้งไว้ ต้องยืนยันเลขบ้านกับ PIN ก่อน'
+    }).then(function (result) {
+      if (!result) { pendingSubmitAfterLogin = false; return; }
+      var shouldSubmit = pendingSubmitAfterLogin;
+      pendingSubmitAfterLogin = false;
+      session = getSession();
+      hideLogin(); renderIdentity(); boot();
+      if (shouldSubmit) {
+        showReportForm(false);
+        setTimeout(submitReport, 0);
+      }
+    });
   }
   function hideLogin() {
     $('loginOverlay').classList.remove('open');
