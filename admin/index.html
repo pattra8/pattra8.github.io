@@ -6,6 +6,8 @@
   <title>Admin — หมู่บ้านภัทราวิลล่า 8</title>
   <link rel="stylesheet" href="/assets/resident-badge.css" />
   <script src="/assets/resident-badge.js" defer></script>
+  <link rel="stylesheet" href="/assets/resident-auth.css">
+  <script src="/assets/resident-auth.js" defer></script>
   <!-- release: car-quota-admin-2026-07-05 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -6149,9 +6151,13 @@
   const hasPortal = (a) => Boolean(a?.active && a?.permissions?.['admin.portal']);
 
   (async function() {
+    // No session: hand them to the estate's front door with ?next=, so
+    // signing in returns them here instead of stranding them on /.
     const s = JSON.parse(localStorage.getItem(RESIDENT_SESSION_KEY) || 'null');
     if (!s || Number(s.expiresAt) <= Date.now() || !s.houseNo || !s.pin) {
-      location.href = '/'; return;
+      if (window.PattraAuth) window.PattraAuth.gotoLogin('/admin/');
+      else location.href = '/?next=%2Fadmin%2F';
+      return;
     }
     const live = (async () => {
       const response = await fetch(ADMIN_ACCESS_URL, {
