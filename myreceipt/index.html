@@ -6,6 +6,8 @@
 <title>ใบเสร็จของฉัน · Pattra Villa 8</title>
 <link rel="stylesheet" href="/assets/resident-badge.css">
 <script src="/assets/resident-badge.js" defer></script>
+<link rel="stylesheet" href="/assets/resident-auth.css">
+<script src="/assets/resident-auth.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -268,6 +270,42 @@
   }
 
   #app { display:none; }
+
+  /* ── GUEST PANEL ──
+     A signed-out resident opens the page, reads what it is for, and decides.
+     Everything here is written into this file — the panel never carries a
+     figure, a name or a house number, because nothing is fetched until
+     PattraAuth.require() has resolved. */
+  #guestPanel { display:none; }
+  #guestPanel.show { display:block; }
+  .guest-lead {
+    font-size:12px; font-weight:700; color:var(--accent-text,#9a5c1f);
+    letter-spacing:.03em; margin:22px 0 12px;
+  }
+  .guest-feature {
+    display:flex; gap:12px; align-items:flex-start;
+    background:#fff; border:1px solid var(--line,#e6d9c3);
+    border-radius:14px; padding:14px 15px; margin-bottom:10px;
+  }
+  .guest-feature svg { flex-shrink:0; margin-top:2px; color:var(--accent,#c47a2c); }
+  .guest-feature b { display:block; font-size:14.5px; margin-bottom:4px; }
+  .guest-feature span { font-size:12.5px; color:var(--text-muted,#7a6a58); line-height:1.55; }
+  .guest-note {
+    display:flex; gap:11px; align-items:flex-start;
+    background:var(--bg2,#f2e8d8); border:1px solid var(--line,#e6d9c3);
+    border-radius:14px; padding:14px 15px; margin-top:16px;
+    font-size:12.5px; color:var(--text-muted,#7a6a58); line-height:1.6;
+  }
+  .guest-note svg { flex-shrink:0; margin-top:2px; color:var(--accent-text,#9a5c1f); }
+  .guest-cta {
+    display:block; width:100%; margin-top:20px; padding:15px; min-height:48px;
+    font-family:inherit; font-size:16px; font-weight:700; color:#fff;
+    background:var(--accent,#c47a2c); border:0; border-radius:12px; cursor:pointer;
+  }
+  .guest-cta:hover { background:var(--accent-text,#9a5c1f); }
+  .guest-cta-sub {
+    margin-top:9px; font-size:11.5px; color:var(--text-muted,#7a6a58); text-align:center;
+  }
 </style>
 </head>
 <body>
@@ -311,10 +349,49 @@
     <h1>🧾 ใบเสร็จของฉัน</h1>
     <p class="sub">ใบเสร็จรับเงินค่าส่วนกลางและค่าจอดรถของบ้านคุณ กดดูหรือบันทึกเป็น PDF ได้ทุกใบ แม้ไม่ได้รับอีเมลหรือไม่มีอีเมล</p>
 
-    <div id="tabsRoot"></div>
-    <div id="listRoot"></div>
-    <div class="empty-state" id="emptyState" style="display:none;"></div>
-    <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
+    <!-- Shown until the resident signs in. Describes the page, holds no data. -->
+    <div id="guestPanel">
+      <div class="guest-lead">หน้านี้ทำอะไรได้บ้าง</div>
+
+      <div class="guest-feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>
+        <div>
+          <b>ดาวน์โหลดใบเสร็จย้อนหลัง</b>
+          <span>บันทึกเป็น PDF เก็บไว้ในมือถือ หรือส่งเข้าอีเมลได้เอง ไม่ต้องขอที่สำนักงาน</span>
+        </div>
+      </div>
+
+      <div class="guest-feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M3 21h18"/></svg>
+        <div>
+          <b>แยกค่าส่วนกลางกับค่าจอดรถ</b>
+          <span>ดูได้ว่าแต่ละงวดจ่ายอะไรไปแล้วบ้าง เรียงตามเดือน</span>
+        </div>
+      </div>
+
+      <div class="guest-feature">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <div>
+          <b>ใบเสร็จเก่าไม่หาย</b>
+          <span>เก็บไว้ตั้งแต่เริ่มใช้ระบบ เปิดดูเมื่อไรก็ได้</span>
+        </div>
+      </div>
+
+      <div class="guest-note">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <div>หน้านี้ยัง<b>ไม่แสดงข้อมูลของบ้านใดทั้งสิ้น</b> ทั้งยอดเงิน ชื่อ และเลขบ้าน จะขึ้นหลังยืนยันตัวตนแล้วเท่านั้น</div>
+      </div>
+
+      <button type="button" class="guest-cta" id="guestCta">ดูใบเสร็จของบ้านฉัน</button>
+      <div class="guest-cta-sub">ใส่เลขบ้าน + PIN ครั้งเดียว ใช้ได้ทุกบริการ 30 วัน</div>
+    </div>
+
+    <div id="memberView">
+      <div id="tabsRoot"></div>
+      <div id="listRoot"></div>
+      <div class="empty-state" id="emptyState" style="display:none;"></div>
+      <div class="loading-state" id="loadingState"><span class="spinner"></span>กำลังโหลด…</div>
+    </div>
 
     <div class="footer-note">
       แสดงเฉพาะใบเสร็จของ "บ้านคุณ" เท่านั้น<br>
@@ -426,7 +503,7 @@
   function mountResidentBadge() {
     if (!window.PattraBadge) return false;
     window.PattraBadge.mount('#headerIdentity', {
-      onLogin: showLogin,
+      onLogin: function() { askToSignIn(); },
       onLogout: function() {
         document.getElementById('listRoot').innerHTML = '';
         showLogin();
@@ -436,18 +513,48 @@
     return true;
   }
 
-  function showLogin(msg) {
-    elApp.style.display = 'none';
-    elLoginOverlay.classList.add('open');
+  // ── B+C ──
+  // The page itself is never gated: it opens, says what it does, and asks for
+  // a PIN only when the resident presses the button. showLogin() therefore
+  // means "drop back to the guest view", and the sheet is opened separately.
+  function showGuest(msg) {
+    elApp.style.display = 'block';
+    document.getElementById('guestPanel').classList.add('show');
+    document.getElementById('memberView').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'none';
     renderResidentBanner();
-    var err = document.getElementById('loginErr');
-    if (msg) { err.textContent = msg; err.classList.add('show'); }
-    else { err.classList.remove('show'); }
-    setTimeout(function(){ document.getElementById('houseSuffix').focus(); }, 80);
+    if (msg) askToSignIn(msg);
   }
+
+  // Opens the one shared sheet. Falls back to this page's own overlay when
+  // /assets/resident-auth.js did not load.
+  function askToSignIn(msg) {
+    if (!window.PattraAuth) {
+      elApp.style.display = 'none';
+      elLoginOverlay.classList.add('open');
+      var err = document.getElementById('loginErr');
+      if (msg) { err.textContent = msg; err.classList.add('show'); }
+      else { err.classList.remove('show'); }
+      setTimeout(function(){ document.getElementById('houseSuffix').focus(); }, 80);
+      return;
+    }
+    window.PattraAuth.require({
+      service: 'ใบเสร็จของฉัน',
+      reason: msg || 'ใบเสร็จมีชื่อและยอดชำระของแต่ละบ้าน เราจึงต้องถามเลขบ้านกับ PIN ก่อนเปิดให้ดู'
+    }).then(function (session) {
+      if (!session) return;            // "ไว้ก่อน" — the guest view stays put
+      showApp();
+      loadReceipts();
+    });
+  }
+
+  function showLogin(msg) { showGuest(msg); }
+
   function showApp() {
     elLoginOverlay.classList.remove('open');
     elApp.style.display = 'block';
+    document.getElementById('guestPanel').classList.remove('show');
+    document.getElementById('memberView').style.display = 'block';
     renderResidentBanner();
   }
 
@@ -1037,11 +1144,16 @@
 
   document.addEventListener('DOMContentLoaded', mountResidentBadge);
 
-  // Boot: reuse pattra8.com session if present, else prompt login.
+  // Boot: reuse the pattra8.com session if present. With no session the page
+  // still opens — on the guest view — and waits to be asked.
   (function boot() {
     if (getSession()) { showApp(); loadReceipts(); }
-    else { showLogin(); }
+    else { showGuest(); }
   })();
+
+  document.getElementById('guestCta').addEventListener('click', function () {
+    askToSignIn();
+  });
 </script>
 
 </body>
