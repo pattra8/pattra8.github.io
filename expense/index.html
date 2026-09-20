@@ -391,13 +391,15 @@
   .expense-title  { font-size:15px; font-weight:600; color:var(--text-hi); line-height:1.4; }
   .expense-meta   { font-size:12px; color:var(--text-lo); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   .expense-date   { white-space:nowrap; }
+  .expense-date .date-ic { font-style:normal; margin-right:4px; }
   /* Neutral on purpose — colour on a card means expense type, nothing else. */
   .expense-category-badge {
-    display:inline-flex; align-items:center; gap:3px;
+    display:inline-flex; align-items:center; gap:4px;
     background:var(--surface2); color:var(--text-mid);
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
     flex-shrink:0; white-space:nowrap;
   }
+  .expense-category-badge .cat-ic { font-style:normal; font-size:11px; line-height:1; }
   .expense-side { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
   .expense-amount { font-family:var(--font-num); font-size:19px; font-weight:800; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; letter-spacing:-.025em; line-height:1.05; }
   .expense-amount.refund { color:var(--refund); }
@@ -440,24 +442,53 @@
   .card-menu button.menu-danger:hover { background:var(--rose-bg); }
 
   @media(max-width:580px) {
+    /* Mobile card = two lines. Title + amount, then one uninterrupted meta line.
+       Everything the rail, the amount or the detail sheet already says is dropped. */
     .expense-card {
       display:grid;
       grid-template-columns:minmax(0,1fr) auto auto;
       grid-template-areas:"info side menu";
       column-gap:8px; align-items:start;
+      padding:12px 12px 12px 16px;
     }
     .expense-card > .drag-handle { display:none; }
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-side { grid-area:side; }
-    .expense-card > .card-menu-wrap { grid-area:menu; }
-    .expense-card .expense-amount { font-size:19.5px; }
-    .expense-side .status-badge { padding:2px 7px; font-size:10px; opacity:.84; }
-    .expense-card .expense-meta { padding-right:92px; }
-    .expense-card .expense-date {
-      position:absolute; right:16px; bottom:13px;
-      padding-left:7px; background:var(--surface);
-      font-size:11.5px; color:var(--text-lo);
+    .expense-card > .card-menu-wrap { grid-area:menu; margin:-2px -4px 0 0; }
+    .expense-card .expense-title { font-size:14.5px; line-height:1.35; }
+    .expense-card .expense-title-row { margin-bottom:2px; }
+    .expense-card .expense-amount { font-size:18px; }
+    /* One line, separated by middots, clipped instead of wrapped. */
+    .expense-card .expense-meta {
+      padding-right:0; gap:0; flex-wrap:nowrap; overflow:hidden;
+      white-space:nowrap; font-size:11.5px; line-height:1.5;
     }
+    .expense-card .expense-meta > * + *::before {
+      content:'·'; margin:0 5px; color:var(--text-lo); opacity:.55; font-weight:400;
+    }
+    .expense-card .expense-type-inline { font-size:11.5px; font-weight:600; }
+    /* Category loses its pill and its emoji — the word carries it. */
+    .expense-card .expense-category-badge {
+      background:none; padding:0; border-radius:0; font-size:11.5px; font-weight:500;
+      color:var(--text-lo); min-width:0; overflow:hidden; text-overflow:ellipsis; flex-shrink:1;
+    }
+    .expense-card .expense-category-badge .cat-ic { display:none; }
+    .expense-card .expense-category-badge .cat-tx { overflow:hidden; text-overflow:ellipsis; }
+    .expense-card .expense-date {
+      position:static; padding:0; background:none;
+      font-size:11.5px; color:var(--text-lo); flex-shrink:0;
+    }
+    .expense-card .expense-date .date-ic { display:none; }
+    .expense-card .expense-note-inline { display:none; }
+    /* "จ่ายแล้ว" on nine cards out of ten is noise; only the exception gets a badge. */
+    .expense-side .status-badge.paid { display:none; }
+    .expense-side .status-badge.pending { padding:2px 7px; font-size:10px; }
+    .expense-card .expense-slips { gap:4px; margin-top:7px; }
+    .expense-card .slip-thumb,
+    .expense-card .slip-count,
+    .expense-card .file-thumb { width:38px; height:38px; border-radius:6px; }
+    .expense-card .file-thumb { font-size:7.5px; padding:2px; }
+    .expense-card .file-thumb strong { font-size:8.5px; }
   }
 
 
@@ -1496,6 +1527,21 @@ function costCategoryLabel(e) {
   const emoji = COST_CATEGORY_EMOJI[cat] || '✨';
   return `${emoji} ${cat}`;
 }
+// Card chip: emoji is decorative, so it sits in its own element and drops out on mobile.
+function costCategoryChip(e) {
+  const cat = costCategoryValue(e);
+  const emoji = COST_CATEGORY_EMOJI[cat] || '✨';
+  return `<i class="cat-ic">${emoji}</i><span class="cat-tx">${escapeHtml(cat)}</span>`;
+}
+// Card date: the year is noise inside a month-filtered list unless it is a past year.
+function fmtDateCard(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return '—';
+  const y = dt.getFullYear();
+  const short = `${dt.getDate()} ${MONTH_SH[dt.getMonth()]}`;
+  return y === new Date().getFullYear() ? short : `${short} ${y}`;
+}
 function getExpenseDateMs(expense) {
   const value = expense?.date ? new Date(expense.date).getTime() : 0;
   return Number.isFinite(value) ? value : 0;
@@ -2462,8 +2508,8 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
       </div>
       <div class="expense-meta">
         <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
-        <span class="expense-category-badge">${costCategoryLabel(e)}</span>
-        <span class="expense-date">📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
+        <span class="expense-category-badge">${costCategoryChip(e)}</span>
+        <span class="expense-date"><i class="date-ic">📅</i>${fmtDateCard(e.date)}</span>${e.note?`<span class="expense-note-inline">· ${escapeHtml(e.note)}</span>`:''}
       </div>
       ${slipsHtml}
     </div>
@@ -2962,7 +3008,7 @@ function openDetail(id) {
     <div class="detail-head" style="--rail:${typeRailColor(e.type)}">
       <div class="detail-head-meta">
         <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
-        <span class="expense-category-badge">${costCategoryLabel(e)}</span>
+        <span class="expense-category-badge">${costCategoryChip(e)}</span>
       </div>
       <div class="detail-head-title">${escapeHtml(e.title)}</div>
     </div>
