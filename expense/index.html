@@ -390,6 +390,7 @@
   .expense-title-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:3px; }
   .expense-title  { font-size:15px; font-weight:600; color:var(--text-hi); line-height:1.4; }
   .expense-meta   { font-size:12px; color:var(--text-lo); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .expense-date   { white-space:nowrap; }
   /* Neutral on purpose — colour on a card means expense type, nothing else. */
   .expense-category-badge {
     display:inline-flex; align-items:center; gap:3px;
@@ -448,6 +449,12 @@
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-amount { grid-area:amount; }
     .expense-card > .card-menu-wrap { grid-area:menu; }
+    .expense-card .expense-meta { padding-right:92px; }
+    .expense-card .expense-date {
+      position:absolute; right:16px; bottom:13px;
+      padding-left:7px; background:var(--surface);
+      font-size:11.5px; color:var(--text-lo);
+    }
   }
 
 
@@ -2453,7 +2460,7 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
       <div class="expense-meta">
         <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
         <span class="expense-category-badge">${costCategoryLabel(e)}</span>
-        <span>${sd}</span><span>📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
+        <span>${sd}</span><span class="expense-date">📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
       </div>
       ${slipsHtml}
     </div>
