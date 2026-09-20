@@ -441,56 +441,125 @@
   .card-menu button.menu-danger { color:var(--rose); }
   .card-menu button.menu-danger:hover { background:var(--rose-bg); }
 
+  /* Mobile view-model wrappers. Inert above 580px so the desktop list is unchanged:
+     the day wrappers collapse and the mobile-only chrome stays hidden. */
+  .day-sheet, .day-block, .day-items { display:contents; }
+  .day-date, .list-zone, .triage-card, .expense-evidence { display:none; }
+
   @media(max-width:580px) {
-    /* Mobile card = two lines. Title + amount, then one uninterrupted meta line.
-       Everything the rail, the amount or the detail sheet already says is dropped. */
-    .expense-card {
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto;
-      grid-template-areas:"info side menu";
-      column-gap:8px; align-items:start;
-      padding:12px 12px 12px 16px;
+    /* ── Mobile: triage zone + chronological day sheet ──────────────────────
+       The list stops being a stack of floating cards and becomes one sheet:
+       date lives once in a left gutter, rows are separated by hairlines, and
+       everything the gutter or the zone header already says is dropped. */
+    .expense-list { gap:0; }
+
+    /* zone headers */
+    .list-zone {
+      display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+      padding:0 4px 9px; margin-top:22px;
     }
+    .list-zone:first-child { margin-top:0; }
+    .list-zone .lz-l { font-size:10.5px; font-weight:700; letter-spacing:.1em; color:var(--text-lo); }
+    .list-zone.due .lz-l { color:var(--rose); }
+    .list-zone .lz-r {
+      font-family:var(--font-num); font-size:11.5px; font-weight:600; color:var(--text-lo);
+      font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+    }
+
+    /* unpaid items get a real card with the action in reach */
+    .triage-card {
+      display:block; background:var(--surface);
+      border:1px solid var(--rose); border-left:4px solid var(--rose);
+      border-radius:14px; padding:14px 15px; box-shadow:var(--shadow-md); cursor:pointer;
+    }
+    .triage-card + .triage-card { margin-top:8px; }
+    .tc-top { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:start; }
+    .tc-t { font-size:15.5px; font-weight:600; line-height:1.42; letter-spacing:-.005em; color:var(--text-hi); }
+    .tc-a {
+      font-family:var(--font-num); font-size:20px; font-weight:700; color:var(--rose);
+      letter-spacing:-.03em; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right;
+    }
+    .tc-m { font-size:11.5px; color:var(--text-lo); margin-top:7px; line-height:1.5; }
+    .tc-btns { display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:13px; }
+    .tc-btn {
+      height:42px; border-radius:11px; border:1px solid var(--rose); background:var(--rose); color:#fff;
+      font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .tc-btn.ghost { background:transparent; color:var(--rose); padding:0 16px; }
+
+    /* the day sheet */
+    .day-sheet {
+      display:block; background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden; box-shadow:var(--shadow-sm);
+    }
+    .day-block { display:grid; grid-template-columns:54px minmax(0,1fr); align-items:stretch; }
+    .day-block + .day-block { border-top:1px solid var(--border2); }
+    .day-sheet.has-triage .day-block[data-pending-only] { display:none; }
+    .day-date {
+      display:block; padding:14px 0 0 14px; font-size:11px; font-weight:700; color:var(--text-mid);
+      line-height:1.35; font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+    }
+    .day-date span { display:block; font-weight:500; color:var(--text-lo); font-size:10px; margin-top:1px; }
+    .day-items { display:block; min-width:0; border-left:1px solid var(--border); }
+
+    /* rows: the card sheds all of its own chrome inside the sheet */
+    .expense-card {
+      display:grid; grid-template-columns:minmax(0,1fr) auto auto;
+      grid-template-areas:"info side menu"; column-gap:12px; align-items:baseline;
+      background:none; border:0; border-radius:0; box-shadow:none;
+      padding:13px 13px 14px 14px; min-height:56px; transform:none;
+    }
+    .expense-card::before { display:none; }
+    .expense-card:hover { box-shadow:none; transform:none; border-color:transparent; }
+    .expense-card + .expense-card { border-top:1px solid var(--border); }
+    .day-sheet.has-triage .expense-card.status-pending { display:none; }
     .expense-card > .drag-handle { display:none; }
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-side { grid-area:side; }
-    .expense-card > .card-menu-wrap { grid-area:menu; margin:-2px -4px 0 0; }
-    .expense-card .expense-title { font-size:14.5px; line-height:1.35; }
-    .expense-card .expense-title-row { margin-bottom:2px; }
-    .expense-card .expense-amount { font-size:18px; }
-    /* One line, separated by middots, clipped instead of wrapped. */
+    .expense-card > .card-menu-wrap { grid-area:menu; align-self:start; margin:-3px -6px 0 -2px; }
+    .expense-card .expense-title-row { margin-bottom:0; }
+    .expense-card .expense-title {
+      font-size:14.5px; font-weight:600; line-height:1.42; letter-spacing:-.005em;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    /* one uninterrupted meta line, middot-separated, clipped instead of wrapped */
     .expense-card .expense-meta {
-      padding-right:0; gap:0; flex-wrap:nowrap; overflow:hidden;
-      white-space:nowrap; font-size:11.5px; line-height:1.5;
+      padding-right:0; gap:0; flex-wrap:nowrap; overflow:hidden; white-space:nowrap;
+      margin-top:4px; font-size:11px; line-height:1.5; color:var(--text-lo);
     }
     .expense-card .expense-meta > * + *::before {
-      content:'·'; margin:0 5px; color:var(--text-lo); opacity:.55; font-weight:400;
+      content:'·'; margin:0 6px; color:var(--text-lo); opacity:.4; font-weight:400;
     }
-    .expense-card .expense-type-inline { font-size:11.5px; font-weight:600; }
-    /* Category loses its pill and its emoji — the word carries it. */
+    .expense-card .expense-type-inline {
+      font-size:11px; font-weight:600; white-space:nowrap; flex:0 0 auto;
+    }
+    /* the colour rail becomes a single dot — one colour system per row, not five */
+    .expense-card .expense-info > .expense-meta::before {
+      content:''; display:inline-block; width:5px; height:5px; border-radius:50%;
+      background:var(--rail,var(--text-lo)); margin-right:6px; flex:0 0 auto;
+    }
+    /* category loses its pill and its emoji — the word carries it */
     .expense-card .expense-category-badge {
-      background:none; padding:0; border-radius:0; font-size:11.5px; font-weight:500;
+      background:none; padding:0; border-radius:0; font-size:11px; font-weight:500;
       color:var(--text-lo); min-width:0; overflow:hidden; text-overflow:ellipsis; flex-shrink:1;
     }
     .expense-card .expense-category-badge .cat-ic { display:none; }
     .expense-card .expense-category-badge .cat-tx { overflow:hidden; text-overflow:ellipsis; }
-    .expense-card .expense-date {
-      position:static; padding:0; background:none;
-      font-size:11.5px; color:var(--text-lo); flex-shrink:0;
-    }
-    .expense-card .expense-date .date-ic { display:none; }
+    /* the date now lives in the gutter, and evidence count replaces the status pill */
+    .expense-card .expense-date { display:none; }
     .expense-card .expense-note-inline { display:none; }
-    /* "จ่ายแล้ว" on nine cards out of ten is noise; only the exception gets a badge. */
-    .expense-side .status-badge.paid { display:none; }
-    .expense-side .status-badge.pending { padding:2px 7px; font-size:10px; }
-    .expense-card .expense-slips { gap:4px; margin-top:7px; }
-    .expense-card .slip-thumb,
-    .expense-card .slip-count,
-    .expense-card .file-thumb { width:38px; height:38px; border-radius:6px; }
-    .expense-card .file-thumb { font-size:7.5px; padding:2px; }
-    .expense-card .file-thumb strong { font-size:8.5px; }
+    .expense-card .expense-evidence {
+      display:inline-flex; align-items:center; gap:3px; flex:0 0 auto; white-space:nowrap; font-size:11px;
+    }
+    .expense-card .expense-evidence b { color:var(--ok); font-weight:800; font-size:10px; }
+    .expense-card .expense-slips { display:none; }
+    .expense-side { flex-direction:row; align-items:baseline; gap:0; }
+    .expense-side .status-badge { display:none; }
+    .expense-card .expense-amount {
+      font-size:16px; font-weight:600; letter-spacing:-.025em; line-height:1.3;
+    }
   }
-
 
   /* ── STATUS DOT ── */
   .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; vertical-align:middle; }
@@ -1793,7 +1862,7 @@ function renderMonthTxn() {
   // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
   const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
-    ? me.map(e=>expenseCardHtml(e,false,reorderable)).join('')
+    ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus})
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
@@ -2245,7 +2314,7 @@ function renderExpenses() {
   // Drag-reorder only makes sense on the full, unfiltered, unsearched admin list.
   const reorderable = isAdmin && !q && !activeExpensesFacility && !activeAnnualType && !activeExpensesStatus;
   document.getElementById('expenseList').innerHTML=list.length
-    ?list.map(e=>expenseCardHtml(e,true,reorderable)).join('')
+    ?expenseListHtml(list,true,reorderable,{triage:!activeExpensesStatus})
     :'<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">ไม่พบรายการ</div></div>';
 }
 
@@ -2495,13 +2564,78 @@ function attachmentsHtml(items, detail = false) {
   return `<div class="expense-slips">${tiles}${overflow}</div>`;
 }
 
+function attachmentCount(e) {
+  return (e?.slips || []).map(normalizeAttachment).filter(Boolean).length;
+}
+function weekdayShort(d) {
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return '';
+  return dt.toLocaleDateString('th-TH-u-ca-gregory', { weekday: 'long' }).replace(/^วัน/, '');
+}
+// ── Mobile view model ────────────────────────────────────────────────────────
+// Phones get a different shape for the same cards: unpaid items are lifted into an
+// action zone at the top, and the rest is grouped into day blocks with the date
+// printed once in a left gutter instead of repeated on every card.
+// Desktop is untouched — every wrapper below is display:contents above 580px, so the
+// cards stay direct children of .expense-list exactly as before.
+function listZoneHtml(label, total, variant='') {
+  return `<div class="list-zone ${variant}"><span class="lz-l">${escapeHtml(label)}</span>` +
+    `<span class="lz-r">${fmt(Math.abs(total))}</span></div>`;
+}
+function triageCardHtml(e) {
+  const files = attachmentCount(e);
+  const meta = [typeLabelPlain(e.type), costCategoryValue(e), `ลงวันที่ ${fmtDateCard(e.date)}`,
+    files ? `หลักฐาน ${files} ใบ` : 'ยังไม่มีไฟล์แนบ'].join(' · ');
+  const btns = isAdmin
+    ? `<div class="tc-btns" onclick="event.stopPropagation()">` +
+      `<button class="tc-btn" onclick="openEditModal('${e.id}')">อัปเดตสถานะ</button>` +
+      `<button class="tc-btn ghost" onclick="openDetail('${e.id}')">ดูสลิป</button></div>`
+    : '';
+  return `<div class="triage-card" onclick="openDetail('${e.id}')">
+    <div class="tc-top"><div class="tc-t">${escapeHtml(e.title)}</div>
+      <div class="tc-a">${fmtExpenseAmount(e)}</div></div>
+    <div class="tc-m">${escapeHtml(meta)}</div>${btns}</div>`;
+}
+function expenseListHtml(list, showAdmin, reorderable, opts = {}) {
+  const cards = (e) => expenseCardHtml(e, showAdmin, reorderable);
+  const pending = opts.triage === false ? [] : list.filter((e) => e.status !== 'paid');
+  let head = '';
+  if (pending.length) {
+    head += listZoneHtml(`ต้องจัดการ · ${pending.length} รายการ`, sumNetExpenses(pending), 'due');
+    head += pending.map(triageCardHtml).join('');
+  }
+  const rest = list.filter((e) => e.status === 'paid');
+  if (rest.length) {
+    head += listZoneHtml(pending.length ? `จ่ายแล้ว · ${rest.length} รายการ` : `${rest.length} รายการ`,
+      sumNetExpenses(rest));
+  }
+  // Day blocks cover the whole list so the desktop order is preserved; a block whose
+  // items are all unpaid is hidden on mobile, where they already sit in the zone above.
+  let blocks = '', day = null, buf = [];
+  const flush = () => {
+    if (!buf.length) return;
+    const allPending = buf.every((e) => e.status !== 'paid');
+    blocks += `<div class="day-block"${allPending ? ' data-pending-only="1"' : ''}>` +
+      `<div class="day-date">${escapeHtml(fmtDateCard(day))}<span>${escapeHtml(weekdayShort(day))}</span></div>` +
+      `<div class="day-items">${buf.map(cards).join('')}</div></div>`;
+    buf = [];
+  };
+  list.forEach((e) => {
+    const key = e.date || '';
+    if (key !== day) { flush(); day = key; }
+    buf.push(e);
+  });
+  flush();
+  return head + `<div class="day-sheet${pending.length ? ' has-triage' : ''}">${blocks}</div>`;
+}
+
 function expenseCardHtml(e,showAdmin,reorderable=false) {
   const slipsHtml = attachmentsHtml(e.slips,false);
   const adminHtml = isAdmin
     ?`<div class="card-menu-wrap" onclick="event.stopPropagation()"><button class="card-kebab" title="แก้ไข / ลบ" onclick="toggleCardMenu(this)">⋯</button><div class="card-menu"><button onclick="closeCardMenus();openEditModal('${e.id}')">✏️ แก้ไข</button><button class="menu-danger" onclick="closeCardMenus();deleteExpense('${e.id}')">🗑 ลบ</button></div></div>`:'';
   const sd = `<span class="status-badge ${e.status === 'paid' ? 'paid' : 'pending'}"><span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}</span>`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
-  return `<div class="expense-card" data-id="${e.id}" style="--rail:${typeRailColor(e.type)}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
+  return `<div class="expense-card${e.status === 'paid' ? '' : ' status-pending'}" data-id="${e.id}" style="--rail:${typeRailColor(e.type)}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
     ${handleHtml}<div class="expense-info">
       <div class="expense-title-row">
         <span class="expense-title">${escapeHtml(e.title)}</span>
@@ -2509,7 +2643,7 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
       <div class="expense-meta">
         <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
         <span class="expense-category-badge">${costCategoryChip(e)}</span>
-        <span class="expense-date"><i class="date-ic">📅</i>${fmtDateCard(e.date)}</span>${e.note?`<span class="expense-note-inline">· ${escapeHtml(e.note)}</span>`:''}
+        <span class="expense-date"><i class="date-ic">📅</i>${fmtDateCard(e.date)}</span><span class="expense-evidence">${attachmentCount(e)?`<b>✓</b>${attachmentCount(e)} ใบ`:'ไม่มีไฟล์แนบ'}</span>${e.note?`<span class="expense-note-inline">· ${escapeHtml(e.note)}</span>`:''}
       </div>
       ${slipsHtml}
     </div>
