@@ -522,6 +522,14 @@
   .data-loading.hidden { opacity:0; pointer-events:none; visibility:hidden; }
   .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:22px; padding-top:16px; border-top:1px solid var(--border); }
 
+  .form-label-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:5px; }
+  .form-label-row .form-label { margin-bottom:0; }
+  .refund-shortcut {
+    appearance:none; border:0; padding:0; background:transparent; color:var(--text-lo);
+    font:inherit; font-size:11px; font-weight:600; cursor:pointer;
+  }
+  .refund-shortcut:hover, .refund-shortcut.is-active { color:var(--refund); }
+
   /* ── TYPE TOGGLE ── */
   .type-toggle { display:grid; grid-template-columns:repeat(auto-fit,minmax(88px,1fr)); gap:6px; }
   .type-btn {
@@ -567,6 +575,15 @@
   .title-hero .form-input {
     min-height:52px; font-size:17px; font-weight:600; padding:12px 14px;
   }
+  .optional-fields { margin-top:2px; }
+  .optional-fields > summary {
+    cursor:pointer; color:var(--text-mid); font-size:12px; font-weight:600;
+    list-style:none; user-select:none;
+  }
+  .optional-fields > summary::-webkit-details-marker { display:none; }
+  .optional-fields > summary::before { content:'⌄'; display:inline-block; margin-right:7px; transition:transform .18s; }
+  .optional-fields[open] > summary::before { transform:rotate(180deg); }
+  .optional-fields-body { padding-top:14px; }
 
   /* ── UPLOAD ── */
   .upload-zone {
@@ -728,8 +745,33 @@
   .cap-set-btn.visible { display:inline-block; }
 
   @media(max-width:580px) {
-    .form-row { grid-template-columns:1fr; }
-    .category-btn { height:30px; font-size:12px; }
+    .modal-overlay { align-items:flex-end; padding:0; }
+    .modal {
+      max-height:calc(100dvh - 12px); padding:18px 20px 16px;
+      border-radius:var(--r-xl) var(--r-xl) 0 0;
+    }
+    .modal-head { margin-bottom:16px; }
+    .modal-title { font-size:17px; }
+    .modal-close { width:36px; height:36px; font-size:19px; }
+    .form-group { margin-bottom:10px; }
+    .form-label, .form-label-row { margin-bottom:4px; }
+    .form-input, .form-select { min-height:44px; padding:8px 11px; font-size:14px; }
+    .form-row { grid-template-columns:1fr 1fr; gap:8px; }
+    .type-toggle { grid-template-columns:1fr 1fr; gap:6px; }
+    .type-btn { min-height:38px; padding:7px 5px; font-size:12px; }
+    .category-picker { display:none; }
+    .category-select {
+      position:static; opacity:1; pointer-events:auto; width:100%; height:44px;
+    }
+    .title-hero { margin-top:0; }
+    .title-hero .form-label { font-size:11px; font-weight:600; color:var(--text-mid); text-transform:uppercase; letter-spacing:.4px; }
+    .title-hero .form-input { min-height:44px; font-size:14px; font-weight:400; padding:8px 11px; }
+    .form-textarea { min-height:68px; }
+    .upload-zone { padding:14px 10px; }
+    .upload-icon { font-size:20px; margin-bottom:3px; }
+    .upload-text { font-size:12px; line-height:1.45; }
+    .modal-actions { position:sticky; bottom:-16px; margin-top:16px; padding:12px 0 2px; background:var(--surface); }
+    .modal-actions .btn { min-height:42px; }
     .stats-grid { grid-template-columns:1fr 1fr; }
     #statCards .stat-card:last-child:nth-child(odd) {
       grid-column:1 / -1;
@@ -874,18 +916,21 @@
       <button class="modal-close" type="button" onclick="closeModal('expenseModal')" aria-label="ปิด">×</button>
     </div>
     <div class="form-group">
-      <label class="form-label">ประเภทรายการ</label>
+      <div class="form-label-row">
+        <label class="form-label">ประเภทรายการ</label>
+        <button class="refund-shortcut" type="button" id="refundShortcut" onclick="setType('refund')">↩️ บันทึกคืนเงิน</button>
+      </div>
       <div class="type-toggle">
         <button class="type-btn" onclick="setType('recurring')"   id="typeBtnRecurring">🔄 ประจำ</button>
         <button class="type-btn" onclick="setType('investment')"  id="typeBtnInvestment">📈 ลงทุน</button>
         <button class="type-btn" onclick="setType('maintenance')" id="typeBtnMaintenance">🔧 ซ่อมบำรุง</button>
         <button class="type-btn" onclick="setType('general')"     id="typeBtnGeneral">🟤 ทั่วไป</button>
-        <button class="type-btn" onclick="setType('refund')"      id="typeBtnRefund">↩️ คืนเงิน</button>
+        <button class="type-btn" onclick="setType('refund')"      id="typeBtnRefund" hidden>↩️ คืนเงิน</button>
       </div>
     </div>
     <div class="form-group">
       <label class="form-label">หมวดค่าใช้จ่าย</label>
-      <select class="form-select category-select" id="fCostCategory" tabindex="-1" aria-hidden="true">
+      <select class="form-select category-select" id="fCostCategory" onchange="setCostCategory(this.value)">
         <option value="ส่วนกลาง">ส่วนกลาง</option>
         <option value="สโมสร">สโมสร</option>
         <option value="ฟิตเนส">ฟิตเนส</option>
@@ -936,34 +981,39 @@
         <option value="pending">รอดำเนินการ ⏳</option>
       </select>
     </div>
-    <div class="form-group">
-      <label class="form-label">รายละเอียด</label>
-      <textarea class="form-textarea" id="fDetail" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">หมายเหตุ</label>
-      <input class="form-input" id="fNote" placeholder="หมายเหตุ...">
-    </div>
-    <div class="form-group">
-      <label class="form-label" id="fAttachmentLabel">แนบสลิป / รูปภาพ</label>
-      <div class="upload-zone" id="uploadZone"
-           onclick="document.getElementById('fileInput').click()"
-           ondragover="handleDragOver(event)" ondrop="handleDrop(event)"
-           ondragleave="this.classList.remove('drag')">
-        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" onchange="handleFiles(event)">
-        <div class="upload-icon">📎</div>
-        <div class="upload-text">คลิกหรือลากไฟล์มาวางที่นี่<br><small>รองรับรูป, PDF, Word, Excel, CSV หลายไฟล์พร้อมกัน</small></div>
-      </div>
-      <div class="upload-preview" id="uploadPreview"></div>
-      <div class="save-progress" id="saveProgress">
-        <div class="save-progress-head">
-          <div class="save-progress-title" id="saveProgressTitle">กำลังบันทึกข้อมูล...</div>
-          <div class="save-progress-pct" id="saveProgressPct">0%</div>
+    <details class="optional-fields">
+      <summary>รายละเอียด / หมายเหตุ / แนบสลิป (ไม่บังคับ)</summary>
+      <div class="optional-fields-body">
+        <div class="form-group">
+          <label class="form-label">รายละเอียด</label>
+          <textarea class="form-textarea" id="fDetail" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
         </div>
-        <div class="save-progress-bar"><div class="save-progress-fill" id="saveProgressFill"></div></div>
-        <div class="save-progress-text" id="saveProgressText">กำลังเตรียมข้อมูล...</div>
+        <div class="form-group">
+          <label class="form-label">หมายเหตุ</label>
+          <input class="form-input" id="fNote" placeholder="หมายเหตุ...">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="fAttachmentLabel">แนบสลิป / รูปภาพ</label>
+          <div class="upload-zone" id="uploadZone"
+               onclick="document.getElementById('fileInput').click()"
+               ondragover="handleDragOver(event)" ondrop="handleDrop(event)"
+               ondragleave="this.classList.remove('drag')">
+            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" onchange="handleFiles(event)">
+            <div class="upload-icon">📎</div>
+            <div class="upload-text">คลิกหรือลากไฟล์มาวางที่นี่<br><small>รองรับรูป, PDF, Word, Excel, CSV หลายไฟล์พร้อมกัน</small></div>
+          </div>
+          <div class="upload-preview" id="uploadPreview"></div>
+          <div class="save-progress" id="saveProgress">
+            <div class="save-progress-head">
+              <div class="save-progress-title" id="saveProgressTitle">กำลังบันทึกข้อมูล...</div>
+              <div class="save-progress-pct" id="saveProgressPct">0%</div>
+            </div>
+            <div class="save-progress-bar"><div class="save-progress-fill" id="saveProgressFill"></div></div>
+            <div class="save-progress-text" id="saveProgressText">กำลังเตรียมข้อมูล...</div>
+          </div>
+        </div>
       </div>
-    </div>
+    </details>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="expenseCancelBtn" onclick="closeModal('expenseModal')">ยกเลิก</button>
       <button class="btn btn-primary" id="expenseSaveBtn" onclick="saveExpense()">บันทึก</button>
@@ -2421,6 +2471,7 @@ function openAddModal() {
   ['fTitle','fDetail','fNote'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
   setCostCategory('ส่วนกลาง');
+  document.querySelector('.optional-fields').open=false;
   document.getElementById('uploadPreview').innerHTML='';
   setOcrHint('');
   setExpenseSaveState(false);
@@ -2438,6 +2489,7 @@ function openEditModal(id) {
   document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=e.detail||'';
   document.getElementById('fNote').value=e.note||''; document.getElementById('fStatus').value=e.status||'paid';
   setCostCategory(costCategoryValue(e));
+  document.querySelector('.optional-fields').open=Boolean(e.detail || e.note || currentSlips.length);
   setOcrHint('');
   setExpenseSaveState(false);
   setType(e.type||'recurring'); renderPreview(); showExpenseModal();
@@ -2477,6 +2529,13 @@ function setType(t) {
   ['recurring','investment','maintenance','general','refund'].forEach(tp=>{
     document.getElementById('typeBtn'+tp.charAt(0).toUpperCase()+tp.slice(1)).className='type-btn'+(tp===t?' active-'+tp:'');
   });
+  const refundShortcut = document.getElementById('refundShortcut');
+  if (refundShortcut) {
+    const active = t === 'refund';
+    refundShortcut.classList.toggle('is-active', active);
+    refundShortcut.setAttribute('aria-pressed', active ? 'true' : 'false');
+    refundShortcut.textContent = active ? '↩️ กำลังบันทึกคืนเงิน' : '↩️ บันทึกคืนเงิน';
+  }
   syncExpenseTypeFormCopy();
 }
 function syncExpenseTypeFormCopy() {
