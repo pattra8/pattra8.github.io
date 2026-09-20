@@ -75,7 +75,7 @@
     display:flex; align-items:center; justify-content:center;
     font-weight:700; color:#fff; font-size:13px; flex-shrink:0;
   }
-  .header-title { font-family:'Gambetta', var(--font-display); font-size:19px; font-weight:700; color:var(--text-hi); line-height:1.1; letter-spacing:.2em; }
+  .header-title { font-family:'Gambetta', var(--font-display); font-size:19px; font-weight:700; color:var(--text-hi); line-height:1.1; letter-spacing:.2em; white-space:nowrap; }
   .header-sub   { font-family:'IBM Plex Sans Thai',sans-serif; font-size:10px; color:var(--text-mid); letter-spacing:.18em; text-transform:uppercase; margin-top:1px; }
   .header-right { display:flex; align-items:center; gap:10px; }
   .badge-admin  {
@@ -783,12 +783,23 @@
     .compact-upload .upload-text small { display:none; }
     .modal-actions { position:sticky; bottom:-20px; margin-top:14px; padding:10px 0 0; background:var(--surface); }
     .modal-actions .btn { min-height:42px; }
+    header { height:60px; gap:8px; }
+    .header-brand { min-width:0; }
+    .header-title { font-size:16px; letter-spacing:.09em; }
+    .header-sub { font-size:8px; letter-spacing:.11em; white-space:nowrap; }
+    .header-right { gap:6px; min-width:0; }
+    .badge-admin { padding:3px 7px; font-size:10px; white-space:nowrap; }
+    .page-tabs { width:100%; margin-bottom:14px; }
+    .page-tab { flex:1; padding:7px 10px; }
+    #pageDashboard { display:flex; flex-direction:column; }
+    #monthHeroCard { order:1; }
+    #pageDashboard > .section-header { order:2; margin-bottom:10px; }
+    #pageDashboard > .transaction-toolbar { order:3; margin-bottom:10px; }
+    #recentList { order:4; }
+    #monthSummarySection { order:5; margin-top:18px; }
+    #dashboardFacilitiesCard { order:6; }
+    .month-hero { margin-bottom:12px; }
     .stats-grid { grid-template-columns:1fr 1fr; }
-    #statCards .stat-card:last-child:nth-child(odd) {
-      grid-column:1 / -1;
-      width:calc((100% - 12px) / 2);
-      justify-self:center;
-    }
     .section-title { font-size:17px; }
     .summary-section .section-title { font-size:15px; }
     .stat-card { padding:15px; }
@@ -1536,7 +1547,6 @@ function renderDashboard() {
   const inv = monthly.filter(e=>e.type==='investment').reduce((s,e)=>s+Number(e.amount||0),0);
   const mnt = monthly.filter(e=>e.type==='maintenance').reduce((s,e)=>s+Number(e.amount||0),0);
   const gen = monthly.filter(e=>e.type==='general').reduce((s,e)=>s+Number(e.amount||0),0);
-  const refund = monthly.filter(e=>e.type==='refund').reduce((s,e)=>s+Math.abs(Number(e.amount||0)),0);
   document.getElementById('statCards').innerHTML = `
     <div class="stat-card${activeDashboardType === 'recurring' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('recurring')">
       <div class="stat-icon" style="background:var(--ok-bg)">🔄</div>
@@ -1557,11 +1567,6 @@ function renderDashboard() {
       <div class="stat-icon" style="background:var(--rose-bg)">🔧</div>
       <div class="stat-label">ค่าซ่อมบำรุง</div>
       <div class="stat-value">${fmt(mnt)}</div>
-    </div>
-    <div class="stat-card${activeDashboardType === 'refund' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('refund')">
-      <div class="stat-icon" style="background:var(--refund-bg)">↩️</div>
-      <div class="stat-label">คืนเงิน</div>
-      <div class="stat-value${refund > 0 ? ' is-positive' : ''}">+${fmt(refund)}</div>
     </div>`;
 
   renderDashboardFacilities();

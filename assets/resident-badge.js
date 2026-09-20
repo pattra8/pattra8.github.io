@@ -112,7 +112,7 @@
         '<summary aria-label="เปิดเมนูบัญชีของบ้าน ' + esc(session.houseNo) + '">' +
           '<span class="pv-badge-avatar">' + esc(initial) + '</span>' +
           '<span class="pv-badge-text">' +
-            '<span class="pv-badge-house">บ้าน ' + esc(session.houseNo) + '</span>' +
+            '<span class="pv-badge-house">' + esc(session.houseNo) + '</span>' +
           '</span>' +
           '<span class="pv-badge-chev" aria-hidden="true">▼</span>' +
         '</summary>' +
