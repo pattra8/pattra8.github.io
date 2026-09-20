@@ -398,7 +398,8 @@
     padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:600;
     flex-shrink:0; white-space:nowrap;
   }
-  .expense-amount { font-family:var(--font-num); font-size:15.5px; font-weight:700; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
+  .expense-side { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+  .expense-amount { font-family:var(--font-num); font-size:19px; font-weight:800; color:var(--text-hi); white-space:nowrap; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; letter-spacing:-.025em; line-height:1.05; }
   .expense-amount.refund { color:var(--refund); }
   .expense-slips  { display:flex; gap:5px; margin-top:9px; flex-wrap:wrap; align-items:flex-start; }
   .slip-thumb     { width:48px; height:48px; border-radius:7px; object-fit:cover; border:1.5px solid var(--border); cursor:pointer; }
@@ -442,13 +443,15 @@
     .expense-card {
       display:grid;
       grid-template-columns:minmax(0,1fr) auto auto;
-      grid-template-areas:"info amount menu";
+      grid-template-areas:"info side menu";
       column-gap:8px; align-items:start;
     }
     .expense-card > .drag-handle { display:none; }
     .expense-card > .expense-info { grid-area:info; }
-    .expense-card > .expense-amount { grid-area:amount; }
+    .expense-card > .expense-side { grid-area:side; }
     .expense-card > .card-menu-wrap { grid-area:menu; }
+    .expense-card .expense-amount { font-size:19.5px; }
+    .expense-side .status-badge { padding:2px 7px; font-size:10px; opacity:.84; }
     .expense-card .expense-meta { padding-right:92px; }
     .expense-card .expense-date {
       position:absolute; right:16px; bottom:13px;
@@ -2460,11 +2463,14 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
       <div class="expense-meta">
         <span class="expense-type-inline">${typeLabelPlain(e.type)}</span>
         <span class="expense-category-badge">${costCategoryLabel(e)}</span>
-        <span>${sd}</span><span class="expense-date">📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
+        <span class="expense-date">📅 ${fmtDate(e.date)}</span>${e.note?`<span>· ${escapeHtml(e.note)}</span>`:''}
       </div>
       ${slipsHtml}
     </div>
-    <div class="expense-amount${isRefundExpense(e) ? ' refund' : ''}">${fmtExpenseAmount(e)}</div>
+    <div class="expense-side">
+      <div class="expense-amount${isRefundExpense(e) ? ' refund' : ''}">${fmtExpenseAmount(e)}</div>
+      ${sd}
+    </div>
     ${adminHtml}
   </div>`;
 }
