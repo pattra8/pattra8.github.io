@@ -758,7 +758,7 @@
     .form-group { margin-bottom:10px; }
     .form-label, .form-label-row { margin-bottom:4px; }
     .form-input, .form-select { min-width:0; min-height:42px; padding:8px 11px; font-size:14px; }
-    .form-row { grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr); gap:8px; }
+    .form-row { grid-template-columns:1fr; gap:0; }
     .form-row > .form-group { min-width:0; }
     input[type="date"] { min-width:0; padding-inline:8px; font-size:13px; letter-spacing:-.02em; }
     .type-toggle { grid-template-columns:1fr 1fr; gap:6px; }
@@ -774,6 +774,13 @@
     .upload-zone { padding:14px 10px; }
     .upload-icon { font-size:20px; margin-bottom:3px; }
     .upload-text { font-size:12px; line-height:1.45; }
+    .compact-upload {
+      min-height:52px; padding:8px 12px; display:flex; align-items:center;
+      justify-content:center; gap:8px;
+    }
+    .compact-upload .upload-icon { margin:0; font-size:18px; }
+    .compact-upload .upload-text { font-size:12px; }
+    .compact-upload .upload-text small { display:none; }
     .modal-actions { position:sticky; bottom:-20px; margin-top:14px; padding:10px 0 0; background:var(--surface); }
     .modal-actions .btn { min-height:42px; }
     .stats-grid { grid-template-columns:1fr 1fr; }
@@ -985,8 +992,28 @@
         <option value="pending">รอดำเนินการ ⏳</option>
       </select>
     </div>
+    <div class="form-group">
+      <label class="form-label" id="fAttachmentLabel">แนบสลิป / รูปภาพ</label>
+      <div class="upload-zone compact-upload" id="uploadZone"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="handleDragOver(event)" ondrop="handleDrop(event)"
+           ondragleave="this.classList.remove('drag')">
+        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" onchange="handleFiles(event)">
+        <div class="upload-icon">📎</div>
+        <div class="upload-text">แตะเพื่อแนบสลิป / รูปภาพ<br><small>รองรับรูป, PDF, Word, Excel, CSV หลายไฟล์พร้อมกัน</small></div>
+      </div>
+      <div class="upload-preview" id="uploadPreview"></div>
+      <div class="save-progress" id="saveProgress">
+        <div class="save-progress-head">
+          <div class="save-progress-title" id="saveProgressTitle">กำลังบันทึกข้อมูล...</div>
+          <div class="save-progress-pct" id="saveProgressPct">0%</div>
+        </div>
+        <div class="save-progress-bar"><div class="save-progress-fill" id="saveProgressFill"></div></div>
+        <div class="save-progress-text" id="saveProgressText">กำลังเตรียมข้อมูล...</div>
+      </div>
+    </div>
     <details class="optional-fields">
-      <summary>รายละเอียด / หมายเหตุ / แนบสลิป (ไม่บังคับ)</summary>
+      <summary>รายละเอียด / หมายเหตุ (ไม่บังคับ)</summary>
       <div class="optional-fields-body">
         <div class="form-group">
           <label class="form-label">รายละเอียด</label>
@@ -995,26 +1022,6 @@
         <div class="form-group">
           <label class="form-label">หมายเหตุ</label>
           <input class="form-input" id="fNote" placeholder="หมายเหตุ...">
-        </div>
-        <div class="form-group">
-          <label class="form-label" id="fAttachmentLabel">แนบสลิป / รูปภาพ</label>
-          <div class="upload-zone" id="uploadZone"
-               onclick="document.getElementById('fileInput').click()"
-               ondragover="handleDragOver(event)" ondrop="handleDrop(event)"
-               ondragleave="this.classList.remove('drag')">
-            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" onchange="handleFiles(event)">
-            <div class="upload-icon">📎</div>
-            <div class="upload-text">คลิกหรือลากไฟล์มาวางที่นี่<br><small>รองรับรูป, PDF, Word, Excel, CSV หลายไฟล์พร้อมกัน</small></div>
-          </div>
-          <div class="upload-preview" id="uploadPreview"></div>
-          <div class="save-progress" id="saveProgress">
-            <div class="save-progress-head">
-              <div class="save-progress-title" id="saveProgressTitle">กำลังบันทึกข้อมูล...</div>
-              <div class="save-progress-pct" id="saveProgressPct">0%</div>
-            </div>
-            <div class="save-progress-bar"><div class="save-progress-fill" id="saveProgressFill"></div></div>
-            <div class="save-progress-text" id="saveProgressText">กำลังเตรียมข้อมูล...</div>
-          </div>
         </div>
       </div>
     </details>
