@@ -1228,7 +1228,7 @@
     .identity-pill {
       display: flex; align-items: center; gap: 8px;
       background: var(--gold-pale); border: 1px solid var(--gold-light);
-      border-radius: 99px; padding: 4px 14px 4px 6px;
+      border-radius: 99px; padding: 6px 14px;
       cursor: pointer; transition: background 0.2s; white-space: nowrap;
     }
     .identity-pill:hover { background: var(--bg3); }
@@ -1250,12 +1250,6 @@
     }
     .profile-dropdown a:hover, .profile-dropdown button:hover { background: var(--gold-pale); }
     .profile-dropdown .profile-logout { color: #a33b32; border-top: 1px solid var(--bg3); border-radius: 0 0 9px 9px; margin-top: 4px; }
-    .pill-avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--gold); color: #fff; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .8rem; font-weight: 800;
-    }
     .pill-house { font-size: .8rem; font-weight: 700; color: var(--taupe); line-height: 1.2; }
     .pill-name  { font-size: .72rem; color: var(--muted); line-height: 1.2; }
 
@@ -1366,8 +1360,7 @@
       .logo-wordmark { font-size: 16px; }
       .header-actions { gap: 6px; }
       .header-btn { padding: 7px 10px; font-size: 10px; }
-      .identity-pill { gap: 7px; padding: 4px 10px 4px 5px; }
-      .pill-avatar { width: 24px; height: 24px; font-size: 0.74rem; }
+      .identity-pill { gap: 7px; padding: 5px 10px; }
       .pill-house { font-size: 0.72rem; }
       .pill-name { font-size: 0.66rem; }
       .hero { padding: 18px 16px 20px; }
@@ -2227,12 +2220,10 @@ function renderHeaderIdentity(session) {
       `<button class="header-btn" onclick="showLoginModal()">เข้าสู่ระบบ</button>`;
     return;
   }
-  const initial = (session.residentName || session.houseNo).charAt(0).toUpperCase();
   const houseQuery = encodeURIComponent(session.houseNo);
   el.innerHTML = `
     <details class="profile-menu">
     <summary class="identity-pill" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชีของบ้าน ${escH(session.houseNo)}">
-      <div class="pill-avatar">${escH(initial)}</div>
       <div>
         <div class="pill-house">บ้าน ${escH(session.houseNo)}</div>
         ${session.residentName
