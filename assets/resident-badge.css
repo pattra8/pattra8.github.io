@@ -28,8 +28,8 @@
 .pv-badge > summary {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 4px 12px 4px 5px;
+  gap: 6px;
+  padding: 7px 12px;
   border: 1.5px solid var(--accent-soft, #e8b577);
   border-radius: 999px;
   background: var(--accent-pale, #f7e6cd);
@@ -43,20 +43,6 @@
 .pv-badge > summary::marker { content: ''; }
 .pv-badge > summary:hover,
 .pv-badge[open] > summary { background: #fff; }
-
-.pv-badge-avatar {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--accent, #c47a2c);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 800;
-}
 
 .pv-badge-text { min-width: 0; }
 .pv-badge-house {
@@ -108,14 +94,6 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.pv-badge-menu-name {
-  padding: 10px 12px 8px;
-  color: var(--text, #2a2218);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
 .pv-badge-menu a:hover,
 .pv-badge-menu button:hover { background: var(--accent-pale, #f7e6cd); }
 
@@ -147,11 +125,6 @@
   .pv-badge > summary {
     gap: 6px;
     padding: 3px 8px 3px 4px;
-  }
-  .pv-badge-avatar {
-    width: 26px;
-    height: 26px;
-    font-size: 12px;
   }
   .pv-badge-house { font-size: 12.5px; }
   .pv-badge-menu {
