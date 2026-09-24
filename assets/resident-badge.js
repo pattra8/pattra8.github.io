@@ -72,8 +72,6 @@
   function menuHtml(session, options) {
     var house = encodeURIComponent(session.houseNo);
     var items = [
-      session.residentName ?
-        '<div class="pv-badge-menu-name">' + esc(session.residentName) + '</div>' : '',
       '<a href="/data/?house=' + house + '">👤 แก้ไขข้อมูลส่วนตัว</a>',
       '<a href="/vehicle/?house=' + house + '">🚗 ลงทะเบียนรถยนต์</a>',
       // /data/ owns the PIN dialog; every other page links into it.
@@ -103,14 +101,9 @@
       return null;
     }
 
-    var name = session.residentName || '';
-    var initial = (String(name || session.houseNo).match(/[\dA-Za-z฀-๿]/) ||
-      ['P'])[0].toUpperCase();
-
     host.innerHTML =
       '<details class="pv-badge" data-align="' + (options.align === 'left' ? 'left' : 'right') + '">' +
         '<summary aria-label="เปิดเมนูบัญชีของบ้าน ' + esc(session.houseNo) + '">' +
-          '<span class="pv-badge-avatar">' + esc(initial) + '</span>' +
           '<span class="pv-badge-text">' +
             '<span class="pv-badge-house">' + esc(session.houseNo) + '</span>' +
           '</span>' +
