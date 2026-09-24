@@ -40,12 +40,6 @@
     display:flex; align-items:center; gap:8px; background:transparent;
     border:0; padding:0; margin:0; box-shadow:none; max-width:min(62vw,280px); cursor:pointer;
   }
-  .resident-avatar {
-    width:28px; height:28px; border-radius:50%; flex:none;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--bg-soft); color:var(--accent-text); font-family:'IBM Plex Mono', monospace;
-    font-weight:700; font-size:12px; border:1px solid var(--border);
-  }
   .resident-meta { min-width:0; }
   .resident-house { font-size:12px; font-weight:700; color:var(--text-soft); line-height:1.15; }
   .resident-name {
@@ -61,7 +55,6 @@
   .profile-dropdown .profile-logout { color:#a33b32; border-top:1px solid var(--border); border-radius:0 0 9px 9px; margin-top:4px; }
   @media (max-width:560px) {
     .resident-banner { max-width:56vw; }
-    .resident-avatar { width:26px; height:26px; font-size:11px; }
     .resident-house { font-size:11.5px; }
     .resident-name { font-size:10.5px; }
   }
@@ -332,7 +325,6 @@
       <a href="/" class="home-link">← หน้าแรก</a>
       <div id="headerIdentity"><details class="profile-menu" id="profileMenu" style="display:none;">
       <summary class="resident-banner" id="residentBanner" title="เปิดเมนูบัญชี" aria-label="เปิดเมนูบัญชี">
-        <div class="resident-avatar" id="residentAvatar">38</div>
         <div class="resident-meta">
           <div class="resident-house" id="residentHouse">บ้าน 38/—</div>
           <div class="resident-name" id="residentName">—</div>
@@ -490,8 +482,6 @@
     if (!s) { menu.style.display = 'none'; return; }
     var houseNo = String(s.houseNo || '38/—');
     var name = residentDisplayName(s);
-    var initial = (name.match(/[ก-๙A-Za-z0-9]/) || houseNo.match(/[0-9A-Za-z]/) || ['P'])[0];
-    document.getElementById('residentAvatar').textContent = String(initial).toUpperCase();
     document.getElementById('residentHouse').textContent = 'บ้าน ' + houseNo;
     document.getElementById('residentName').textContent = name;
     var houseQuery = encodeURIComponent(houseNo);
