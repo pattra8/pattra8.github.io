@@ -706,7 +706,9 @@
   .upload-icon { font-size:24px; margin-bottom:6px; }
   .upload-text { font-size:13px; color:var(--text-lo); }
   .upload-preview { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .preview-item { position:relative; width:68px; height:68px; }
+  .preview-item { position:relative; width:120px; }
+  .preview-item .preview-box { width:120px; height:120px; }
+  .preview-cap { margin-top:4px; font-size:11px; color:var(--text-lo); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .preview-img  { width:100%; height:100%; border-radius:8px; object-fit:cover; border:1.5px solid var(--border); cursor:zoom-in; }
   .preview-file {
     width:100%; height:100%; border-radius:8px; border:1.5px solid var(--border);
@@ -2507,7 +2509,7 @@ function normalizeAttachment(item) {
     return {
       ...item,
       kind: item.kind || attachmentKind(item.type, item.name),
-      previewUrl: item.previewUrl || (item.type && item.type.startsWith('image/') ? URL.createObjectURL(item.file) : ''),
+      previewUrl: item.previewUrl || URL.createObjectURL(item.file),
     };
   }
   return {
@@ -3127,7 +3129,7 @@ function renderPreview(){
     const body = att.kind === 'image' && attachmentSource(att)
       ? `<img class="preview-img" src="${attachmentSource(att)}" title="แตะเพื่อดูรูปใหญ่" onclick="previewSlip(${i})">`
       : `<div class="preview-file" title="แตะเพื่อเปิดไฟล์" onclick="previewSlip(${i})"><strong>${attachmentBadge(att.kind)}</strong><span>${escapeHtml(att.name)}</span></div>`;
-    return `<div class="preview-item">${body}<button class="preview-remove" onclick="event.stopPropagation();removeSlip(${i})">✕</button></div>`;
+    return `<div class="preview-item"><div class="preview-box">${body}</div><div class="preview-cap">🔍 แตะเพื่อดู · ${escapeHtml(att.name)}</div><button class="preview-remove" onclick="event.stopPropagation();removeSlip(${i})">✕</button></div>`;
   }).join('');
 }
 function previewSlip(i){ openAttachment(currentSlips, i); }
