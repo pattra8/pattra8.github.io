@@ -887,12 +887,12 @@
     .upload-icon { font-size:20px; margin-bottom:3px; }
     .upload-text { font-size:12px; line-height:1.45; }
     .compact-upload {
-      min-height:52px; padding:8px 12px; display:flex; align-items:center;
+      min-height:52px; padding:10px 12px; display:flex; align-items:center;
       justify-content:center; gap:8px;
     }
     .compact-upload .upload-icon { margin:0; font-size:18px; }
     .compact-upload .upload-text { font-size:12px; }
-    .compact-upload .upload-text small { display:none; }
+    .compact-upload .upload-text small { display:block; font-size:11px; }
     .modal-actions { position:sticky; bottom:-20px; margin-top:14px; padding:10px 0 0; background:var(--surface); }
     .modal-actions .btn { min-height:42px; }
     header { height:60px; gap:8px; }
@@ -1136,15 +1136,11 @@
       </div>
     </div>
     <details class="optional-fields">
-      <summary>รายละเอียด / หมายเหตุ (ไม่บังคับ)</summary>
+      <summary>รายละเอียด (ไม่บังคับ)</summary>
       <div class="optional-fields-body">
         <div class="form-group">
           <label class="form-label">รายละเอียด</label>
-          <textarea class="form-textarea" id="fDetail" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">หมายเหตุ</label>
-          <input class="form-input" id="fNote" placeholder="หมายเหตุ...">
+          <textarea class="form-textarea" id="fDetail" placeholder="รายละเอียด / หมายเหตุเพิ่มเติม..."></textarea>
         </div>
       </div>
     </details>
@@ -2679,7 +2675,7 @@ function openAddModal() {
   if (isSavingExpense) return;
   editingId=null; currentSlips=[]; resetOcrSession();
   document.getElementById('modalTitle').textContent='เพิ่มรายจ่ายใหม่';
-  ['fTitle','fDetail','fNote'].forEach(id=>document.getElementById(id).value='');
+  ['fTitle','fDetail'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
   setCostCategory('ส่วนกลาง');
   document.querySelector('.optional-fields').open=false;
@@ -2697,8 +2693,8 @@ function openEditModal(id) {
   editingId=id; currentSlips=[...(e.slips||[])]; resetOcrSession();
   document.getElementById('modalTitle').textContent='แก้ไขรายจ่าย';
   document.getElementById('fTitle').value=e.title||''; document.getElementById('fAmount').value=e.amount||'';
-  document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=e.detail||'';
-  document.getElementById('fNote').value=e.note||''; document.getElementById('fStatus').value=e.status||'paid';
+  document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=[e.detail,e.note].filter(Boolean).join('\n');
+  document.getElementById('fStatus').value=e.status||'paid';
   setCostCategory(costCategoryValue(e));
   document.querySelector('.optional-fields').open=Boolean(e.detail || e.note || currentSlips.length);
   setOcrHint('');
@@ -2721,7 +2717,7 @@ function getExpenseFormState() {
     date: document.getElementById('fDate').value,
     status: document.getElementById('fStatus').value,
     detail: document.getElementById('fDetail').value,
-    note: document.getElementById('fNote').value,
+    note: '',
     slips: slipSig,
   };
 }
@@ -2953,7 +2949,7 @@ async function saveExpense() {
     setExpenseSaveProgress(92, editingId ? 'กำลังอัปเดตรายจ่าย...' : 'กำลังบันทึกรายจ่าย...', 'กำลังบันทึกข้อมูลรายการ...');
     const entry={title,type:currentType,amount:Math.abs(parseFloat(amount)),date,
       costCategory:document.getElementById('fCostCategory').value,
-      detail:document.getElementById('fDetail').value.trim(),note:document.getElementById('fNote').value.trim(),
+      detail:document.getElementById('fDetail').value.trim(),note:'',
       status:document.getElementById('fStatus').value,
       slips};
     if (usingFirestore) {
