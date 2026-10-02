@@ -1135,15 +1135,10 @@
         <div class="save-progress-text" id="saveProgressText">กำลังเตรียมข้อมูล...</div>
       </div>
     </div>
-    <details class="optional-fields">
-      <summary>รายละเอียด (ไม่บังคับ)</summary>
-      <div class="optional-fields-body">
-        <div class="form-group">
-          <label class="form-label">รายละเอียด</label>
-          <textarea class="form-textarea" id="fDetail" placeholder="รายละเอียด / หมายเหตุเพิ่มเติม..."></textarea>
-        </div>
-      </div>
-    </details>
+    <div class="form-group">
+      <label class="form-label">รายละเอียด / หมายเหตุ <span style="font-weight:400;color:var(--text-lo)">(ไม่บังคับ)</span></label>
+      <textarea class="form-textarea" id="fDetail" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="expenseCancelBtn" onclick="closeModal('expenseModal')">ยกเลิก</button>
       <button class="btn btn-primary" id="expenseSaveBtn" onclick="saveExpense()">บันทึก</button>
@@ -2678,7 +2673,6 @@ function openAddModal() {
   ['fTitle','fDetail'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
   setCostCategory('ส่วนกลาง');
-  document.querySelector('.optional-fields').open=false;
   document.getElementById('uploadPreview').innerHTML='';
   setOcrHint('');
   setExpenseSaveState(false);
@@ -2696,7 +2690,6 @@ function openEditModal(id) {
   document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=[e.detail,e.note].filter(Boolean).join('\n');
   document.getElementById('fStatus').value=e.status||'paid';
   setCostCategory(costCategoryValue(e));
-  document.querySelector('.optional-fields').open=Boolean(e.detail || e.note || currentSlips.length);
   setOcrHint('');
   setExpenseSaveState(false);
   setType(e.type||'recurring'); renderPreview(); showExpenseModal();
