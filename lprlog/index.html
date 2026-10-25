@@ -387,11 +387,11 @@
       </div>
       <div class="search-row">
         <input id="plateSearch" type="text" inputmode="text" autocomplete="off"
-          placeholder="เช่น 1กข1234 หรือ 38/8" />
+          placeholder="บางส่วนของทะเบียน เช่น กข, 441 หรือ 38/8" />
         <button id="plateClear" class="search-clear" type="button" disabled>ล้าง</button>
       </div>
       <div id="searchHint" class="search-hint">
-        ค้นหาทะเบียนหนึ่งคัน หรือบ้านเลขที่เพื่อดูรถทุกคันและการเข้าออกทั้งหมด
+        พิมพ์ส่วนไหนของทะเบียนก็ได้ หรือบ้านเลขที่ เช่น 38/8
       </div>
     </section>
 
@@ -683,8 +683,8 @@
 
     function searchEventRow(group, event){
       var row = {
-        plate: group.displayPlate || displayPlate(group.plate || ''),
-        houses: group.houses || [],
+        plate: event.plate ? displayPlate(event.plate) : group.displayPlate || displayPlate(group.plate || ''),
+        houses: event.houses || group.houses || [],
         vehicleVision: group.vehicleVision || null,
         captures: [{
           label: event.directionLabel || 'ผ่าน',
@@ -701,6 +701,7 @@
         '<div class="it-main">'+
           '<span class="search-time">'+esc(event.time || '--:--')+'</span>'+
           '<div class="it-sub search-meta">'+
+            (event.plate ? '<strong>'+esc(displayPlate(event.plate))+'</strong>' : '')+
             '<span class="search-dir '+dirCls+'">'+esc(event.directionLabel || 'ผ่าน')+'</span>'+
             '<span class="search-camera">กล้อง '+esc(event.cameraId || '-')+'</span>'+
           '</div>'+
@@ -741,7 +742,9 @@
       var profileName = [profile.make, profile.model].filter(Boolean).join(' ');
       var profileColor = colorTh(profile.color);
       var metaBits = [];
-      if(s.resident){
+      if((s.matchedPlates||[]).length > 1){
+        metaBits.push('พบ '+s.matchedPlates.length+' ทะเบียน');
+      } else if(s.resident){
         metaBits.push('อยู่ในทะเบียนบ้าน '+(s.houses||[]).join(', '));
       } else {
         metaBits.push('ไม่ใช่ทะเบียนลูกบ้าน');
@@ -922,15 +925,6 @@
       if(!query){
         setSearchHint('พิมพ์เลขทะเบียนเพื่อค้นหาข้ามวัน', 'neutral');
         await loadDaily();
-        return;
-      }
-      if(query.length < 4){
-        searchToken++;
-        currentMode='search';
-        setNavState(true);
-        elBody.innerHTML='<div class="search-empty">พิมพ์ทะเบียนให้ครบ หรือบ้านเลขที่ เช่น 38/8</div>';
-        elCap.innerHTML='ค้นหา<span class="win">ค้นหาทะเบียนรถหรือบ้านเลขที่</span>';
-        setSearchHint('พิมพ์ทะเบียนให้ครบ หรือระบุบ้านเลขที่ เช่น 38/8', 'neutral');
         return;
       }
       var token=++searchToken;
