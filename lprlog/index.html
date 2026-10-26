@@ -250,6 +250,7 @@
       border:1px solid var(--border-soft); font-family:'IBM Plex Mono', monospace;
       font-size:13px; font-weight:700; color:var(--text);
     }
+    .search-time.night { background:#303746; border-color:#414b5e; color:#f5f0e5; }
     .search-meta { display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center; }
     .search-dir {
       display:inline-flex; align-items:center; justify-content:center; min-width:54px;
@@ -681,6 +682,22 @@
       elSearchHint.textContent = text;
     }
 
+    function chronologicalEvents(events){
+      return (events||[]).slice().sort(function(a,b){
+        return String(a.time||'99:99').localeCompare(String(b.time||'99:99'));
+      });
+    }
+
+    function searchTimeBadge(time){
+      var match=/^(\d{1,2}):(\d{2})$/.exec(String(time||''));
+      var minutes=match ? Number(match[1])*60+Number(match[2]) : null;
+      var valid=match && Number(match[1])<24 && Number(match[2])<60;
+      var night=valid && (minutes<360 || minutes>=1080);
+      return '<span class="search-time'+(night?' night':'')+'"'+
+        (valid?' title="'+(night?'กลางคืน':'กลางวัน')+'"':'')+'>'+
+        (valid?(night?'🌃 ':'☀️ '):'')+esc(time||'--:--')+'</span>';
+    }
+
     function searchEventRow(group, event){
       var row = {
         plate: event.plate ? displayPlate(event.plate) : group.displayPlate || displayPlate(group.plate || ''),
@@ -699,7 +716,7 @@
         event.direction === 'exit' ? 'out' : '';
       return '<div class="item tap search-event" data-cap="'+id+'">'+
         '<div class="it-main">'+
-          '<span class="search-time">'+esc(event.time || '--:--')+'</span>'+
+          searchTimeBadge(event.time)+
           '<div class="it-sub search-meta">'+
             (event.plate ? '<strong>'+esc(displayPlate(event.plate))+'</strong>' : '')+
             '<span class="search-dir '+dirCls+'">'+esc(event.directionLabel || 'ผ่าน')+'</span>'+
@@ -727,7 +744,7 @@
         '<div class="it-main"><span class="plate">'+
           esc(event.displayPlate || displayPlate(event.plate || ''))+'</span>'+
           '<div class="house-search-detail">'+
-            '<span class="search-time">'+esc(event.time || '--:--')+'</span>'+
+            searchTimeBadge(event.time)+
             '<span class="search-dir '+dirCls+'">'+esc(event.directionLabel || 'ผ่าน')+'</span>'+
             '<span class="search-camera">กล้อง '+esc(event.cameraId || '-')+'</span>'+
           '</div></div><span class="row-go">›</span></div>';
@@ -768,7 +785,7 @@
         '</div>'+
       '</div>';
       var groups = (r.dateGroups||[]).map(function(group){
-        var inner = (group.events||[]).map(function(event){
+        var inner = chronologicalEvents(group.events).map(function(event){
           return searchEventRow(s, event);
         }).join('');
         return acc('search-'+group.reportDate, '', group.dateLabel, group.eventCount+' ครั้ง · '+group.timeRange,
@@ -803,7 +820,7 @@
           '<div class="search-stat"><div class="lbl">ออก</div><div class="val">'+esc(s.exitEvents||0)+' ครั้ง</div></div></div>'+
         (vehicles?'<div class="search-vehicles">'+vehicles+'</div>':'')+'</div>';
       var groups=(r.dateGroups||[]).map(function(group){
-        var inner=(group.events||[]).map(function(event){
+        var inner=chronologicalEvents(group.events).map(function(event){
           return houseSearchEventRow(houseNo,event);
         }).join('');
         return acc('house-'+group.reportDate,'',group.dateLabel,
