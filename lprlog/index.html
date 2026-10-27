@@ -383,16 +383,16 @@
 
     <section class="searchbox">
       <div class="search-label">
-        <span>ค้นหาทะเบียน หรือบ้านเลขที่</span>
+        <span>ค้นหาทะเบียน ชื่อรถ หรือบ้านเลขที่</span>
         <small>ค้นหาข้ามวันอัตโนมัติ</small>
       </div>
       <div class="search-row">
         <input id="plateSearch" type="text" inputmode="text" autocomplete="off"
-          placeholder="บางส่วนของทะเบียน เช่น กข, 441 หรือ 38/8" />
+          placeholder="ทะเบียน ชื่อรถ เช่น รถขยะ หรือ 38/8" />
         <button id="plateClear" class="search-clear" type="button" disabled>ล้าง</button>
       </div>
       <div id="searchHint" class="search-hint">
-        พิมพ์ส่วนไหนของทะเบียนก็ได้ หรือบ้านเลขที่ เช่น 38/8
+        พิมพ์บางส่วนของทะเบียน ชื่อรถ หรือบ้านเลขที่ เช่น 38/8
       </div>
     </section>
 
@@ -949,7 +949,7 @@
       setNavState(true);
       elBody.innerHTML='<div class="loading"><span class="spinner"></span>กำลังค้นหา…</div>';
       setSearchHint(houseSearch?'กำลังค้นหารถทุกคันของบ้าน '+query+'…':
-        'กำลังค้นหาเลขทะเบียน '+displayPlate(query)+' ข้ามวัน…', 'neutral');
+        'กำลังค้นหา '+displayPlate(query)+' ข้ามวัน…', 'neutral');
       try{
         var res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
           body:JSON.stringify(houseSearch?
