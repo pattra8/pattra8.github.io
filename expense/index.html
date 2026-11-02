@@ -999,7 +999,7 @@
     <div class="transaction-toolbar">
       <div class="search-wrap" id="monthSearchWrap">
         <span class="search-icon">⌕</span>
-        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่ายทุกเดือน..." autocomplete="off">
+        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่าย / จำนวนเงินทุกเดือน..." autocomplete="off">
         <button type="button" class="search-clear" id="monthSearchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="monthSearchSuggestions"></div>
       </div>
@@ -1028,7 +1028,7 @@
     <div class="filters">
       <div class="search-wrap" id="expenseSearchWrap">
         <span class="search-icon">⌕</span>
-        <input type="text" class="filter-search" id="filterSearch" placeholder="ค้นหาชื่อหัวข้อ / รายละเอียด..." autocomplete="off">
+        <input type="text" class="filter-search" id="filterSearch" placeholder="ค้นหาหัวข้อ / รายละเอียด / จำนวนเงิน..." autocomplete="off">
         <button type="button" class="search-clear" id="searchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="searchSuggestions"></div>
       </div>
@@ -1526,7 +1526,7 @@ function showPage(p) {
   if (p==='dashboard') renderDashboard();
 }
 
-function fmt(n) { return '฿'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmt(n) { return '฿'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function isRefundExpense(expense) { return expense?.type === 'refund'; }
 function expenseNetAmount(expense) {
   const amount = Math.abs(Number(expense?.amount || 0));
@@ -1537,7 +1537,7 @@ function sumNetExpenses(items) {
 }
 function fmtNet(n) {
   const value = Number(n || 0);
-  return `${value < 0 ? '-' : ''}฿${Math.abs(value).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}`;
+  return `${value < 0 ? '-' : ''}฿${Math.abs(value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 }
 function fmtExpenseAmount(expense) {
   const value = Math.abs(Number(expense?.amount || 0));
@@ -1545,7 +1545,7 @@ function fmtExpenseAmount(expense) {
 }
 function heroAmountHtml(value) {
   const amount = Number(value || 0);
-  return `${amount < 0 ? '-' : ''}<span>฿</span>${Math.abs(amount).toLocaleString('en-US')}`;
+  return `${amount < 0 ? '-' : ''}<span>฿</span>${Math.abs(amount).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 }
 function fmtDate(d) {
   if (!d) return '—';
@@ -2103,21 +2103,29 @@ function getExpenseSearchQuery(scope = 'all') {
   return normalizeSearchText(searchEls(scope).input?.value || '');
 }
 
+function expenseSearchAmountText(expense) {
+  const amount = Math.abs(Number(expense?.amount || 0)).toFixed(2);
+  const formatted = fmtExpenseAmount(expense);
+  return normalizeSearchText(`${amount} ฿${amount} ${formatted}`);
+}
+
 function expenseSearchScore(expense, query) {
   const q = normalizeSearchText(query);
   if (!q) return 0;
   const title = normalizeSearchText(expense.title);
   const detail = normalizeSearchText(expense.detail);
   const tokens = searchTokens(q);
-  const combined = `${title} ${detail}`;
+  const amount = expenseSearchAmountText(expense);
+  const combined = `${title} ${detail} ${amount}`;
   const tokenMatches = tokens.filter(token => combined.includes(token)).length;
-  if (!title.includes(q) && !detail.includes(q) && tokenMatches < tokens.length) return 0;
+  if (!title.includes(q) && !detail.includes(q) && !amount.includes(q) && tokenMatches < tokens.length) return 0;
 
   let score = 1;
   if (title === q) score += 1200;
   if (title.startsWith(q)) score += 950;
   if (title.includes(q)) score += 760;
   score += tokens.filter(token => title.includes(token)).length * 120;
+  if (amount.includes(q)) score += 400;
   if (detail.includes(q)) score += 280;
   score += tokens.filter(token => detail.includes(token)).length * 34;
   return score;
@@ -2167,15 +2175,16 @@ function buildSearchSuggestions(query, sourceItems = expenses) {
       const title = String(expense.title || '');
       const titleMatch = normalizeSearchText(title).includes(q)
         || searchTokens(q).some(token => normalizeSearchText(title).includes(token));
-      const value = titleMatch ? title : detailSuggestionText(expense, q);
+      const amountMatch = expenseSearchAmountText(expense).includes(q);
+      const value = titleMatch || amountMatch ? title : detailSuggestionText(expense, q);
       const key = normalizeSearchText(value);
       if (!key || seen.has(key)) return null;
       seen.add(key);
       return {
         value,
         title,
-        sub: titleMatch ? (expense.detail ? cleanSuggestionText(expense.detail) : costCategoryLabel(expense)) : value,
-        source: titleMatch ? 'หัวข้อ' : 'รายละเอียด',
+        sub: titleMatch || amountMatch ? (expense.detail ? cleanSuggestionText(expense.detail) : costCategoryLabel(expense)) : value,
+        source: titleMatch ? 'หัวข้อ' : amountMatch ? 'จำนวนเงิน' : 'รายละเอียด',
         amount: fmtExpenseAmount(expense),
         score,
       };
