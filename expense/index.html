@@ -111,10 +111,6 @@
   .section-title  { font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif; font-size:18px; font-weight:600; color:var(--text-hi); line-height:1.35; letter-spacing:0; }
   .section-title .title-month { font-family:var(--font-num); font-weight:600; font-size:0.92em; }
   .section-sub    { font-size:12px; color:var(--text-lo); margin-top:2px; }
-  .summary-section .section-title { font-size:16px; color:var(--text-lo); }
-  .summary-head   { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
-  .summary-section.collapsed .stats-grid    { display:none; }
-  .summary-section.collapsed .section-header { margin-bottom:0; }
 
   /* ── BUTTONS ── */
   .btn {
@@ -222,27 +218,6 @@
     .annual-legend-item { grid-template-columns:auto minmax(0, 1fr); }
     .annual-legend-pct, .annual-legend-amt { justify-self:start; }
   }
-
-  /* ── STAT CARDS ── */
-  .stats-grid {
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:12px; margin-bottom:22px;
-  }
-  .stat-card {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--r-lg); padding:18px;
-    transition:box-shadow .18s, transform .18s;
-    cursor:pointer;
-  }
-  .stat-card:hover { box-shadow:var(--shadow-md); transform:translateY(-1px); }
-  .stat-card.active { border-color:var(--accent); box-shadow:0 0 0 1px rgba(79,110,247,.08), var(--shadow-md); }
-  .stat-icon { width:36px; height:36px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:17px; margin-bottom:12px; }
-  .stat-label { font-size:13px; color:var(--text-mid); font-weight:600; line-height:1.35; margin-bottom:7px; }
-  .stat-value { font-family:var(--font-num); font-size:18px; font-weight:600; color:var(--text-lo); line-height:1.1; letter-spacing:-.005em; }
-  .stat-card.accent { background:var(--accent); border-color:var(--accent); }
-  .stat-card.accent .stat-icon  { background:rgba(255,255,255,.18); }
-  .stat-card.accent .stat-label { color:rgba(255,255,255,.6); }
-  .stat-card.accent .stat-value { color:#fff; }
 
   /* ── CAP CARD ── */
   .cap-card {
@@ -784,16 +759,14 @@
   .facilities-card.collapsed .facilities-list,
   .facilities-card.collapsed .facilities-empty { display: none; }
   .facilities-head-main { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  /* Shared by every collapsible section (facilities card, monthly summary). */
+  /* Facilities collapse indicator. */
   .collapse-caret {
     flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     color: var(--text-lo); font-size: 11px; transition: transform .2s, color .15s;
   }
-  .facilities-head:hover .collapse-caret,
-  .summary-head:hover .collapse-caret { color: var(--accent); background: var(--accent-bg); }
-  .facilities-card.collapsed .collapse-caret,
-  .summary-section.collapsed .collapse-caret { transform: rotate(-90deg); }
+  .facilities-head:hover .collapse-caret { color: var(--accent); background: var(--accent-bg); }
+  .facilities-card.collapsed .collapse-caret { transform: rotate(-90deg); }
   .facilities-head-text { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
   .facilities-title { font-size: 15px; font-weight: 600; color: var(--text-hi); }
   .facilities-sub   { font-size: 12px; color: var(--text-lo); }
@@ -908,16 +881,8 @@
     #pageDashboard > .section-header { order:2; margin-bottom:10px; }
     #pageDashboard > .transaction-toolbar { order:3; margin-bottom:10px; }
     #recentList { order:4; }
-    #monthSummarySection { order:5; margin-top:18px; }
-    #dashboardFacilitiesCard { order:6; }
     .month-hero { margin-bottom:12px; }
-    .stats-grid { grid-template-columns:1fr 1fr; }
     .section-title { font-size:17px; }
-    .summary-section .section-title { font-size:15px; }
-    .stat-card { padding:15px; }
-    .stat-icon { width:34px; height:34px; font-size:16px; margin-bottom:10px; }
-    .stat-label { font-size:12.5px; margin-bottom:6px; }
-    .stat-value { font-size:17px; }
     .cap-card { padding:16px 18px; margin-bottom:18px; }
     .cap-header { margin-bottom:10px; }
     .cap-title { font-size:14px; }
@@ -978,19 +943,6 @@
   <!-- DASHBOARD -->
   <div id="pageDashboard">
     <div id="monthHeroCard"></div>
-
-    <div id="monthSummarySection" class="summary-section">
-      <div class="section-header" style="margin-top:8px">
-        <div class="summary-head" role="button" tabindex="0" aria-expanded="true"
-             aria-controls="statCards" onclick="toggleSummaryCollapse()"
-             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSummaryCollapse();}">
-          <span class="collapse-caret" aria-hidden="true">▼</span>
-          <div class="section-title">สรุปรายเดือน</div>
-        </div>
-      </div>
-      <div class="stats-grid" id="statCards"></div>
-    </div>
-    <div id="dashboardFacilitiesCard"></div>
 
     <div class="section-header">
       <div class="section-title" id="txnSectionTitle">รายจ่ายเดือน —</div>
@@ -1638,57 +1590,8 @@ function compareExpensesManual(a, b) {
   return compareExpensesDesc(a, b);
 }
 
-const SUMMARY_COLLAPSE_KEY = 'pattra_expense_summary_collapsed_v1';
-let summaryCollapsed = localStorage.getItem(SUMMARY_COLLAPSE_KEY) === '1';
-
-function applySummaryCollapse() {
-  const section = document.getElementById('monthSummarySection');
-  if (!section) return;
-  section.classList.toggle('collapsed', summaryCollapsed);
-  const head = section.querySelector('.summary-head');
-  if (head) head.setAttribute('aria-expanded', String(!summaryCollapsed));
-}
-
-function toggleSummaryCollapse() {
-  summaryCollapsed = !summaryCollapsed;
-  try {
-    localStorage.setItem(SUMMARY_COLLAPSE_KEY, summaryCollapsed ? '1' : '0');
-  } catch (err) { /* private mode — collapse still works for this session */ }
-  applySummaryCollapse();
-}
-
 function renderDashboard() {
-  const {yr,mi} = getMonthFilter();
-  applySummaryCollapse();
-  const monthly = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
-  const rec = monthly.filter(e=>e.type==='recurring').reduce((s,e)=>s+Number(e.amount||0),0);
-  const inv = monthly.filter(e=>e.type==='investment').reduce((s,e)=>s+Number(e.amount||0),0);
-  const mnt = monthly.filter(e=>e.type==='maintenance').reduce((s,e)=>s+Number(e.amount||0),0);
-  const gen = monthly.filter(e=>e.type==='general').reduce((s,e)=>s+Number(e.amount||0),0);
-  document.getElementById('statCards').innerHTML = `
-    <div class="stat-card${activeDashboardType === 'recurring' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('recurring')">
-      <div class="stat-icon" style="background:var(--ok-bg)">🔄</div>
-      <div class="stat-label">ค่าใช้จ่ายประจำ</div>
-      <div class="stat-value">${fmt(rec)}</div>
-    </div>
-    <div class="stat-card${activeDashboardType === 'general' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('general')">
-      <div class="stat-icon" style="background:var(--violet-bg)">🟤</div>
-      <div class="stat-label">ค่าใช้จ่ายทั่วไป</div>
-      <div class="stat-value">${fmt(gen)}</div>
-    </div>
-    <div class="stat-card${activeDashboardType === 'investment' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('investment')">
-      <div class="stat-icon" style="background:var(--amber-bg)">📈</div>
-      <div class="stat-label">ค่าใช้จ่ายลงทุน</div>
-      <div class="stat-value">${fmt(inv)}</div>
-    </div>
-    <div class="stat-card${activeDashboardType === 'maintenance' ? ' active' : ''}" onclick="toggleDashboardTypeFilter('maintenance')">
-      <div class="stat-icon" style="background:var(--rose-bg)">🔧</div>
-      <div class="stat-label">ค่าซ่อมบำรุง</div>
-      <div class="stat-value">${fmt(mnt)}</div>
-    </div>`;
-
-  renderDashboardFacilities();
-  renderMonthHero(); renderMonthTxn();
+  renderMonthTxn();
 }
 function renderAnnualBreakdown() {
   const year = new Date().getFullYear();
@@ -1813,9 +1716,7 @@ function renderMonthHero() {
 }
 
 function dashboardExpenseMatchesActiveFilters(expense) {
-  return (!activeDashboardType || expense.type===activeDashboardType)
-    && (!activeDashboardFacility || costCategoryValue(expense)===activeDashboardFacility)
-    && (!activeDashboardStatus || expense.status===activeDashboardStatus);
+  return !activeDashboardStatus || expense.status === activeDashboardStatus;
 }
 
 function getDashboardSearchItems() {
@@ -1843,8 +1744,6 @@ function renderMonthTxn() {
     .filter(e => expenseMatchesSearch(e, q))
     .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
   const filterLabels = [
-    activeDashboardType ? expenseTypeText(activeDashboardType) : '',
-    activeDashboardFacility || '',
     activeDashboardStatus ? expenseStatusText(activeDashboardStatus, 'general') : '',
   ].filter(Boolean);
   syncSearchUi('month');
@@ -1852,8 +1751,8 @@ function renderMonthTxn() {
   document.getElementById('txnSectionTitle').innerHTML = q
     ? `ผลการค้นหา <span class="title-month">${escapeHtml(searchAllMonths ? 'ทุกเดือน' : MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`
     : `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
-  // Drag-reorder only when admin is viewing a clean month slice (no search / type / facility filter).
-  const reorderable = isAdmin && !q && !activeDashboardType && !activeDashboardFacility && !activeDashboardStatus;
+  // Drag-reorder only when admin is viewing a clean month slice (no search or status filter).
+  const reorderable = isAdmin && !q && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
     ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus})
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
@@ -1868,7 +1767,7 @@ const FACILITIES = [
 ];
 
 const FACILITIES_COLLAPSE_KEY = 'pattra_expense_facilities_collapsed_v1';
-let facilitiesCollapsed = { dashboard: false, expenses: false };
+let facilitiesCollapsed = { expenses: false };
 try {
   Object.assign(facilitiesCollapsed, JSON.parse(localStorage.getItem(FACILITIES_COLLAPSE_KEY) || '{}'));
 } catch (err) { /* corrupt value — keep the expanded default */ }
@@ -1897,8 +1796,7 @@ function toggleFacilitiesCollapse(scope) {
   try {
     localStorage.setItem(FACILITIES_COLLAPSE_KEY, JSON.stringify(facilitiesCollapsed));
   } catch (err) { /* private mode — collapse still works for this session */ }
-  const root = document.getElementById(
-    scope === 'dashboard' ? 'dashboardFacilitiesCard' : 'expensesFacilitiesCard');
+  const root = document.getElementById('expensesFacilitiesCard');
   if (!root) return;
   const card = root.querySelector('.facilities-card');
   if (card) card.classList.toggle('collapsed', facilitiesCollapsed[scope]);
@@ -1906,8 +1804,6 @@ function toggleFacilitiesCollapse(scope) {
   if (head) head.setAttribute('aria-expanded', String(!facilitiesCollapsed[scope]));
 }
 
-let activeDashboardFacility = null;
-let activeDashboardType = null;
 let activeDashboardStatus = null;
 let activeExpensesFacility = null;
 let activeAnnualType = null;
@@ -1955,22 +1851,6 @@ function facilitiesTotal(sourceItems) {
   return sumNetExpenses(sourceItems.filter(e => FACILITIES.some(f => f.key === (e.costCategory || 'อื่น ๆ'))));
 }
 
-function renderDashboardFacilities() {
-  const el = document.getElementById('dashboardFacilitiesCard');
-  if (!el) return;
-  const {yr,mi} = getMonthFilter();
-  const month = `${yr}-${String(mi + 1).padStart(2, '0')}`;
-  const filtered = expenses.filter(e => e?.date && new Date(e.date).toISOString().slice(0,7) === month);
-  const grandTotal = facilitiesTotal(filtered);
-  const monthLabel = month ? `${MONTH_TH[parseInt(month.slice(5,7))-1]} ${month.slice(0,4)}` : 'ทั้งหมด';
-  el.innerHTML = `
-    <div class="facilities-card${facilitiesCollapsed.dashboard ? ' collapsed' : ''}">
-      ${facilitiesHeadHtml('dashboard', `${monthLabel}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}`,
-        activeDashboardFacility ? 'clearDashboardFacilityFilter' : '')}
-      ${facilityRows(filtered, activeDashboardFacility, 'toggleDashboardFacilityFilter')}
-    </div>`;
-}
-
 function renderExpensesFacilities() {
   const el = document.getElementById('expensesFacilitiesCard');
   if (!el) return;
@@ -1983,25 +1863,6 @@ function renderExpensesFacilities() {
         activeExpensesFacility ? 'clearExpensesFacilityFilter' : '')}
       ${facilityRows(yearly, activeExpensesFacility, 'toggleExpensesFacilityFilter')}
     </div>`;
-}
-
-function toggleDashboardFacilityFilter(key) {
-  activeDashboardFacility = activeDashboardFacility === key ? null : key;
-  renderDashboardFacilities();
-  renderMonthTxn();
-  if (activeDashboardFacility) scrollToFirstTxn('recentList');
-}
-
-function clearDashboardFacilityFilter() {
-  activeDashboardFacility = null;
-  renderDashboardFacilities();
-  renderMonthTxn();
-}
-
-function toggleDashboardTypeFilter(type) {
-  activeDashboardType = activeDashboardType === type ? null : type;
-  renderDashboard();
-  if (activeDashboardType) scrollToFirstTxn('recentList');
 }
 
 function toggleExpensesFacilityFilter(key) {
@@ -3301,7 +3162,6 @@ Object.assign(window, {
   removeSlip,
   previewSlip,
   renderDashboard,
-  renderDashboardFacilities,
   renderExpenses,
   renderExpensesFacilities,
   renderSearchSuggestions,
@@ -3314,15 +3174,11 @@ Object.assign(window, {
   setType,
   showPage,
   toggleAnnualTypeFilter,
-  toggleDashboardFacilityFilter,
-  toggleDashboardTypeFilter,
   toggleExpensesFacilityFilter,
   setDashboardStatusFilter,
   setExpensesStatusFilter,
   toggleFacilitiesCollapse,
-  toggleSummaryCollapse,
   clearAnnualTypeFilter,
-  clearDashboardFacilityFilter,
   clearExpensesFacilityFilter,
 });
 seedIfEmpty();
