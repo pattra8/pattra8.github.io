@@ -858,6 +858,7 @@
   .project-unassigned p { margin:4px 0 8px; color:var(--text-mid); font-size:12px; }
   .project-filter { margin:0 0 12px; padding:10px 14px; background:var(--accent-bg); border-radius:var(--r-md); }
   .project-filter[hidden] { display:none; }
+  #fabAdd[hidden] { display:none !important; }
   @media(max-width:520px) {
     .page-tab { padding-inline:4px; line-height:1.35; }
     .project-row { font-size:13px; }
@@ -1467,6 +1468,7 @@ function showPage(page, resetProject = false) {
   document.getElementById('pageDashboard').style.display = page === 'dashboard' ? '' : 'none';
   document.getElementById('pageExpenses').style.display = page === 'expenses' ? '' : 'none';
   document.getElementById('pageProjects').style.display = page === 'projects' ? '' : 'none';
+  document.getElementById('fabAdd').hidden = page === 'projects';
   document.querySelectorAll('.page-tab').forEach(tab => {
     const active = tab.dataset.page === page;
     tab.classList.toggle('active', active);
