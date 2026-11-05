@@ -746,66 +746,6 @@
   .login-input:focus { border-color:var(--accent); }
   .login-error { color:var(--rose); font-size:13px; margin-bottom:8px; display:none; }
 
-  /* ── FACILITIES DASHBOARD ── */
-  .facilities-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r-xl); padding: 10px 12px; margin-bottom: 14px;
-  }
-  .facilities-head {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    margin-bottom: 8px; cursor: pointer; user-select: none;
-  }
-  .facilities-card.collapsed .facilities-head { margin-bottom: 0; }
-  .facilities-card.collapsed .facilities-list,
-  .facilities-card.collapsed .facilities-empty { display: none; }
-  .facilities-head-main { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  /* Facilities collapse indicator. */
-  .collapse-caret {
-    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-lo); font-size: 11px; transition: transform .2s, color .15s;
-  }
-  .facilities-head:hover .collapse-caret { color: var(--accent); background: var(--accent-bg); }
-  .facilities-card.collapsed .collapse-caret { transform: rotate(-90deg); }
-  .facilities-head-text { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
-  .facilities-title { font-size: 15px; font-weight: 600; color: var(--text-hi); }
-  .facilities-sub   { font-size: 12px; color: var(--text-lo); }
-  .facilities-list  { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .facility-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 9px; border-radius: var(--r-sm);
-    border: 1.5px solid transparent; cursor: pointer;
-    transition: background .15s, border-color .15s;
-    background: var(--bg);
-  }
-  .facility-row:hover { background: var(--accent-bg); border-color: var(--border); }
-  .facility-row.active { background: var(--accent-bg); border-color: var(--accent); }
-  .facility-emoji { font-size: 16px; flex-shrink: 0; width: 24px; height: 24px; display:flex; align-items:center; justify-content:center; }
-  .facility-info  { flex: 1; min-width: 0; }
-  .facility-name  { font-size: 13px; font-weight: 600; color: var(--text-mid); margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .facility-amt   { font-size: 13px; font-weight: 700; color: var(--text-mid); white-space: nowrap; }
-  .facility-bar-track {
-    height: 4px; background: var(--border); border-radius: 99px; overflow: hidden;
-  }
-  .facility-bar-fill {
-    height: 100%; border-radius: 99px;
-    transition: width .4s cubic-bezier(.4,0,.2,1);
-  }
-  .facility-row.active .facility-name { color: var(--accent-dk); }
-  .facility-row.active .facility-amt  { color: var(--accent-dk); }
-  .facility-row.active .facility-bar-track { background: rgba(79,110,247,0.15); }
-  .facilities-empty { font-size: 13px; color: var(--text-lo); text-align: center; padding: 12px 0; }
-  @media(max-width:520px) {
-    .facilities-card { padding:9px; border-radius:var(--r-lg); }
-    .facilities-head-text { gap:5px; }
-    .facilities-title { font-size:14px; }
-    .facilities-sub { font-size:11px; }
-    .facility-row { gap:5px; padding:7px 6px; }
-    .facility-emoji { width:20px; height:22px; font-size:14px; }
-    .facility-name { display:block; font-size:12.5px; margin-bottom:4px; }
-    .facility-amt { display:block; margin-top:2px; font-size:12px; }
-  }
-
   /* ── FAB ── */
   .fab {
     display:none; position:fixed; bottom:28px; right:28px; z-index:150;
@@ -894,15 +834,38 @@
     header { padding:0 16px; }
     .fab { bottom:20px; right:20px; }
   }
-  .report-totals { display:flex; flex-wrap:wrap; gap:10px 22px; padding:12px 16px; border-bottom:1px solid var(--border); }
-  .report-totals strong { display:block; font-variant-numeric:tabular-nums; }
-  .report-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px 16px 0; }
+  .project-report { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; }
+  .project-overview { padding:clamp(18px,4vw,34px); background:var(--bg); border-bottom:1px solid var(--border); }
+  .project-toolbar, .project-list-head, .project-filter { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+  .project-toolbar h1, .project-list-head h2 { margin:0; font-family:var(--font-display); line-height:1.3; }
+  .project-toolbar h1 { font-size:clamp(20px,4vw,28px); }
+  .project-toolbar select { width:auto; }
+  .project-main-total { margin:22px 0 12px; color:var(--text-mid); font-size:13px; }
+  .project-main-total strong { display:block; color:var(--text-hi); font-size:clamp(28px,6vw,46px); line-height:1.25; font-variant-numeric:tabular-nums; }
+  .project-subtotals { display:flex; flex-wrap:wrap; gap:6px 22px; color:var(--text-mid); font-size:13px; }
+  .project-subtotals strong, .project-row strong, .project-unassigned strong { color:var(--text-hi); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .project-ledger { padding:clamp(16px,4vw,34px); }
+  .project-list-head { margin-bottom:8px; }
+  .project-list-head h2 { font-size:17px; }
+  .project-list-head p { margin:0; font-size:12px; color:var(--text-mid); }
+  .project-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px 12px; width:100%; padding:12px 0; text-align:left; font:inherit; color:var(--text-hi); border:0; border-bottom:1px solid var(--border); background:none; cursor:pointer; }
+  .project-row:hover, .project-row:focus-visible { color:var(--accent-dk); background:var(--accent-bg); }
+  .project-row strong { display:flex; gap:8px; align-items:center; }
+  .project-row strong span { color:var(--text-mid); font-weight:400; }
+  .project-bar { display:block; height:3px; border-radius:3px; background:var(--accent); }
+  .project-unassigned { margin-top:18px; padding:12px 14px; background:var(--bg); border-radius:var(--r-md); }
+  .project-unassigned .project-row { padding:4px 0; border:0; }
+  .project-unassigned p { margin:4px 0 8px; color:var(--text-mid); font-size:12px; }
+  .project-filter { margin:0 0 12px; padding:10px 14px; background:var(--accent-bg); border-radius:var(--r-md); }
+  .project-filter[hidden] { display:none; }
+  @media(max-width:520px) {
+    .page-tab { padding-inline:4px; line-height:1.35; }
+    .project-row { font-size:13px; }
+  }
   .report-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0; }
   .report-options label { display:flex; align-items:center; gap:7px; padding:8px; border:1px solid var(--border); border-radius:8px; cursor:pointer; }
   .report-options label:has(input:checked) { border-color:var(--accent); background:var(--accent-bg); }
   .report-options input { accent-color:var(--accent); flex:none; }
-  .report-row-button { width:100%; text-align:left; color:inherit; font:inherit; border:0; background:transparent; }
-  .report-row-button.active { background:var(--accent-bg); }
   .report-detail { white-space:pre-wrap; overflow-wrap:anywhere; margin:8px 0; }
   .report-actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:12px; }
 
@@ -948,8 +911,9 @@
 <!-- CONTAINER -->
 <div class="container">
   <div class="page-tabs">
-    <button class="page-tab active" onclick="showPage('dashboard')">รายจ่ายประจำเดือน</button>
-    <button class="page-tab"        onclick="showPage('expenses')">รายจ่ายทั้งหมด</button>
+    <button class="page-tab active" data-page="dashboard" aria-pressed="true" onclick="showPage('dashboard')">รายจ่ายประจำเดือน</button>
+    <button class="page-tab" data-page="expenses" aria-pressed="false" onclick="showPage('expenses', true)">รายจ่ายทั้งหมด</button>
+    <button class="page-tab" data-page="projects" aria-pressed="false" onclick="showPage('projects')">รายจ่ายตามโปรเจค</button>
   </div>
 
   <!-- DASHBOARD -->
@@ -988,7 +952,7 @@
     </div>
     <div id="expensesHeroCard"></div>
     <div id="annualBreakdownCard"></div>
-    <div id="expensesFacilitiesCard"></div>
+    <div class="project-filter" id="expenseProjectFilter" hidden></div>
     <div class="filters">
       <div class="search-wrap" id="expenseSearchWrap">
         <span class="search-icon">⌕</span>
@@ -1004,6 +968,7 @@
     </div>
     <div class="expense-list" id="expenseList"></div>
   </div>
+  <section id="pageProjects" style="display:none" aria-label="รายจ่ายตามโปรเจค"></section>
 </div>
 
 <div class="modal-overlay" id="reportReviewModal">
@@ -1246,6 +1211,7 @@ function refreshUI() {
   populateDashMonthFilter();
   if (isDashboardPageVisible()) renderDashboard();
   if (isExpensesPageVisible()) renderExpenses();
+  if (document.getElementById('pageProjects').style.display !== 'none') renderProjects();
 }
 function scheduleRefreshUI() {
   if (refreshQueued) return;
@@ -1496,13 +1462,19 @@ function isExpensesPageVisible() {
   const el = document.getElementById('pageExpenses');
   return !!el && el.style.display !== 'none';
 }
-function showPage(p) {
-  document.getElementById('pageDashboard').style.display = p==='dashboard'?'':'none';
-  document.getElementById('pageExpenses').style.display  = p==='expenses' ?'':'none';
-  document.querySelectorAll('.page-tab').forEach((t,i)=>
-    t.classList.toggle('active',(i===0&&p==='dashboard')||(i===1&&p==='expenses')));
-  if (p==='expenses') renderExpenses();
-  if (p==='dashboard') renderDashboard();
+function showPage(page, resetProject = false) {
+  if (resetProject && activeExpensesFacility) clearExpensesFacilityFilter(false);
+  document.getElementById('pageDashboard').style.display = page === 'dashboard' ? '' : 'none';
+  document.getElementById('pageExpenses').style.display = page === 'expenses' ? '' : 'none';
+  document.getElementById('pageProjects').style.display = page === 'projects' ? '' : 'none';
+  document.querySelectorAll('.page-tab').forEach(tab => {
+    const active = tab.dataset.page === page;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-pressed', String(active));
+  });
+  if (page === 'expenses') renderExpenses();
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'projects') renderProjects();
 }
 
 function fmt(n) { return '฿'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -1798,7 +1770,6 @@ const REPORT_CATEGORIES = {
 };
 const REPORT_UNASSIGNED = 'unassigned';
 const REPORT_LABELS = { ...REPORT_CATEGORIES, [REPORT_UNASSIGNED]: 'ยังไม่จัดหมวด' };
-const REPORT_COLORS = ['#716491','#436a83','#3d8291','#627b52','#ac7e46','#526985','#915e65','#466d63','#817265','#a19a8f'];
 let reportYear = String(new Date().getFullYear());
 
 // Use only clear descriptions or specific legacy tags. Generic landscaping
@@ -1829,44 +1800,6 @@ function reportPeriodItems() {
   return expenses.filter(e => reportYear === 'all' || e.date?.startsWith(reportYear + '-'));
 }
 
-const FACILITIES_COLLAPSE_KEY = 'pattra_expense_facilities_collapsed_v1';
-let facilitiesCollapsed = { expenses: false };
-try {
-  Object.assign(facilitiesCollapsed, JSON.parse(localStorage.getItem(FACILITIES_COLLAPSE_KEY) || '{}'));
-} catch (err) { /* corrupt value — keep the expanded default */ }
-
-function facilitiesHeadHtml(scope, subText, clearFnName) {
-  const clearBtn = clearFnName
-    ? `<button onclick="event.stopPropagation();${clearFnName}()" style="font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-bg);border:none;padding:4px 12px;border-radius:99px;cursor:pointer;flex-shrink:0;">✕ ล้าง filter</button>`
-    : '';
-  return `<div class="facilities-head" role="button" tabindex="0"
-      aria-expanded="${!facilitiesCollapsed[scope]}"
-      onclick="toggleFacilitiesCollapse('${scope}')"
-      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFacilitiesCollapse('${scope}');}">
-      <div class="facilities-head-main">
-        <span class="collapse-caret" aria-hidden="true">▼</span>
-        <div class="facilities-head-text">
-          <div class="facilities-title">รายจ่ายแยกตามหมวด</div>
-          <div class="facilities-sub">${subText}</div>
-        </div>
-      </div>
-      ${clearBtn}
-    </div>`;
-}
-
-function toggleFacilitiesCollapse(scope) {
-  facilitiesCollapsed[scope] = !facilitiesCollapsed[scope];
-  try {
-    localStorage.setItem(FACILITIES_COLLAPSE_KEY, JSON.stringify(facilitiesCollapsed));
-  } catch (err) { /* private mode — collapse still works for this session */ }
-  const root = document.getElementById('expensesFacilitiesCard');
-  if (!root) return;
-  const card = root.querySelector('.facilities-card');
-  if (card) card.classList.toggle('collapsed', facilitiesCollapsed[scope]);
-  const head = root.querySelector('.facilities-head');
-  if (head) head.setAttribute('aria-expanded', String(!facilitiesCollapsed[scope]));
-}
-
 let activeDashboardStatus = null;
 let activeExpensesFacility = null;
 let activeAnnualType = null;
@@ -1882,50 +1815,57 @@ function setExpensesStatusFilter(value) {
   renderExpenses();
 }
 
-function renderExpensesFacilities() {
+function renderProjects() {
   const items = reportPeriodItems();
   const paid = items.filter(e => e.status === 'paid');
+  const paidTotal = sumNetExpenses(paid);
   const unpaid = items.filter(e => e.status !== 'paid');
-  const categories = Object.entries(REPORT_LABELS).map(([key, label], index) => {
+  const categories = Object.entries(REPORT_CATEGORIES).map(([key, label]) => {
     const rows = paid.filter(e => reportCategory(e) === key);
-    return { key, label, count: rows.length, total: sumNetExpenses(rows), color: REPORT_COLORS[index] };
+    return { key, label, total: sumNetExpenses(rows) };
   }).sort((a, b) => b.total - a.total);
   const max = Math.max(1, ...categories.map(row => Math.abs(row.total)));
-  const remaining = items.filter(e => reportCategory(e) === REPORT_UNASSIGNED).length;
-  const years = [...new Set([String(new Date().getFullYear()), ...expenses.map(e => e.date?.slice(0,4)).filter(y => /^\d{4}$/.test(y))])].sort().reverse();
+  const unassigned = items.filter(e => reportCategory(e) === REPORT_UNASSIGNED);
+  const paidUnassigned = unassigned.filter(e => e.status === 'paid');
+  const years = [...new Set([String(new Date().getFullYear()), ...expenses.map(e => e.date?.slice(0, 4)).filter(y => /^\d{4}$/.test(y))])].sort().reverse();
   const rowsHtml = categories.map(row => `
-    <button type="button" class="facility-row report-row-button${activeExpensesFacility === row.key ? ' active' : ''}"
-        aria-pressed="${activeExpensesFacility === row.key}" onclick="toggleExpensesFacilityFilter('${row.key}')">
-      <span class="facility-info">
-        <span class="facility-name"><span>${row.label} · ${row.count}</span><span class="facility-amt">${fmtNet(row.total)}</span></span>
-        <span class="facility-bar-track" style="display:block"><span class="facility-bar-fill" style="display:block;width:${Math.abs(row.total)/max*100}%;background:${row.color}"></span></span>
-      </span>
+    <button type="button" class="project-row" onclick="openProjectExpenses('${row.key}')">
+      <span>${row.label}</span><strong>${fmtNet(row.total)} <span aria-hidden="true">›</span></strong>
+      <span class="project-bar" aria-hidden="true" style="width:${Math.abs(row.total) / max * 100}%"></span>
     </button>`).join('');
-  document.getElementById('expensesFacilitiesCard').innerHTML = `
-    <div class="facilities-card${facilitiesCollapsed.expenses ? ' collapsed' : ''}">
-      ${facilitiesHeadHtml('expenses', `${reportYear === 'all' ? 'ทุกปี' : 'ปี ' + reportYear} · สุทธิจ่ายแล้ว ${fmtNet(sumNetExpenses(paid))}`,
-        activeExpensesFacility ? 'clearExpensesFacilityFilter' : '')}
-      <div class="facilities-list">
-        <div class="report-totals">
-          <div>สุทธิจ่ายแล้ว<strong>${fmtNet(sumNetExpenses(paid))}</strong></div>
-          <div>รอดำเนินการ<strong>${fmtNet(sumNetExpenses(unpaid))}</strong></div>
-          <div>สุทธิรวมทุกรายการ<strong>${fmtNet(sumNetExpenses(items))}</strong></div>
+  document.getElementById('pageProjects').innerHTML = `
+    <div class="project-report">
+      <div class="project-overview">
+        <div class="project-toolbar">
+          <h1>รายจ่ายตามโปรเจค</h1>
+          <select class="month-filter-select" aria-label="ช่วงรายงาน" onchange="setReportYear(this.value)">
+            ${[...years, 'all'].map(y => `<option value="${y}" ${y === reportYear ? 'selected' : ''}>${y === 'all' ? 'ทุกปี' : 'ปี ' + y}</option>`).join('')}
+          </select>
         </div>
-        <div class="report-controls">
-          <label>ช่วงรายงาน <select class="month-filter-select" onchange="setReportYear(this.value)">
-            ${['all', ...years].map(y => `<option value="${y}" ${y === reportYear ? 'selected' : ''}>${y === 'all' ? 'ทุกปี' : y}</option>`).join('')}
-          </select></label>
-          ${isAdmin ? `<button class="btn btn-primary" onclick="startReportReview()" ${remaining ? '' : 'disabled'}>จัดหมวดที่เหลือ · ${remaining}</button>` : ''}
+        <div class="project-main-total">จ่ายแล้วสุทธิ<strong>${fmtNet(paidTotal)}</strong></div>
+        <div class="project-subtotals">
+          <span>รอดำเนินการ <strong>${fmtNet(sumNetExpenses(unpaid))}</strong></span>
+          <span>รวมสุทธิทุกรายการ <strong>${fmtNet(sumNetExpenses(items))}</strong></span>
         </div>
-        <div class="report-controls">ยอดแยกหมวดคิดจากรายการจ่ายแล้วและหักเงินคืน</div>
+      </div>
+      <div class="project-ledger">
+        <div class="project-list-head"><h2>จ่ายไปกับอะไรบ้าง</h2><p>ยอดจ่ายแล้วหลังหักเงินคืน</p></div>
         ${rowsHtml}
+        ${unassigned.length ? `<div class="project-unassigned">
+          <button type="button" class="project-row" onclick="openProjectExpenses('${REPORT_UNASSIGNED}')">
+            <span>จ่ายแล้วแต่ยังไม่จัดหมวด</span><strong>${fmtNet(sumNetExpenses(paidUnassigned))} <span aria-hidden="true">›</span></strong>
+          </button>
+          <p>จ่ายแล้ว ${paidUnassigned.length} รายการ · รอดำเนินการ ${unassigned.length - paidUnassigned.length} รายการ</p>
+          ${isAdmin ? `<button class="btn btn-primary" onclick="startReportReview()">จัดหมวดที่เหลือ · ${unassigned.length} รายการ</button>` : ''}
+        </div>` : ''}
       </div>
     </div>`;
 }
 
 function setReportYear(year) {
   reportYear = year;
-  renderExpenses();
+  renderProjects();
+  document.querySelector('#pageProjects select').focus();
 }
 
 let reviewQueue = [];
@@ -2021,15 +1961,22 @@ async function saveReportReview(form) {
   skipReportReview();
 }
 
-function toggleExpensesFacilityFilter(key) {
-  activeExpensesFacility = activeExpensesFacility === key ? null : key;
-  renderExpenses();
-  if (activeExpensesFacility) scrollToFirstTxn('expenseList');
+function openProjectExpenses(key) {
+  activeExpensesFacility = key;
+  activeAnnualType = null;
+  activeExpensesStatus = 'paid';
+  document.getElementById('expStatusFilter').value = 'paid';
+  document.getElementById('filterSearch').value = '';
+  closeSearchSuggestions('all');
+  showPage('expenses');
+  document.getElementById('expenseProjectFilter').scrollIntoView({block: 'nearest'});
 }
 
-function clearExpensesFacilityFilter() {
+function clearExpensesFacilityFilter(refresh = true) {
   activeExpensesFacility = null;
-  renderExpenses();
+  activeExpensesStatus = null;
+  document.getElementById('expStatusFilter').value = '';
+  if (refresh) renderExpenses();
 }
 
 function toggleAnnualTypeFilter(type) {
@@ -2327,9 +2274,18 @@ function renderExpenses() {
     return true;
   }).sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
   syncSearchUi('all');
-  renderExpensesHero(list);
-  renderExpensesFacilities();
-  renderAnnualBreakdown();
+  const projectFilter = document.getElementById('expenseProjectFilter');
+  projectFilter.hidden = !activeExpensesFacility;
+  projectFilter.innerHTML = activeExpensesFacility
+    ? `<strong>${REPORT_LABELS[activeExpensesFacility]} · ${reportYear === 'all' ? 'ทุกปี' : 'ปี ' + reportYear}</strong>
+       <button class="btn btn-ghost" onclick="clearExpensesFacilityFilter()">ล้างตัวกรองโปรเจค</button>`
+    : '';
+  document.getElementById('expensesHeroCard').hidden = !!activeExpensesFacility;
+  document.getElementById('annualBreakdownCard').hidden = !!activeExpensesFacility;
+  if (!activeExpensesFacility) {
+    renderExpensesHero(list);
+    renderAnnualBreakdown();
+  }
   // Drag-reorder only makes sense on the full, unfiltered, unsearched admin list.
   const reorderable = isAdmin && !q && !activeExpensesFacility && !activeAnnualType && !activeExpensesStatus;
   document.getElementById('expenseList').innerHTML=list.length
@@ -3329,7 +3285,7 @@ Object.assign(window, {
   previewSlip,
   renderDashboard,
   renderExpenses,
-  renderExpensesFacilities,
+  renderProjects,
   setReportYear,
   startReportReview,
   skipReportReview,
@@ -3344,10 +3300,9 @@ Object.assign(window, {
   setType,
   showPage,
   toggleAnnualTypeFilter,
-  toggleExpensesFacilityFilter,
+  openProjectExpenses,
   setDashboardStatusFilter,
   setExpensesStatusFilter,
-  toggleFacilitiesCollapse,
   clearAnnualTypeFilter,
   clearExpensesFacilityFilter,
 });
