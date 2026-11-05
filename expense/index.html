@@ -894,6 +894,18 @@
     header { padding:0 16px; }
     .fab { bottom:20px; right:20px; }
   }
+  .report-totals { display:flex; flex-wrap:wrap; gap:10px 22px; padding:12px 16px; border-bottom:1px solid var(--border); }
+  .report-totals strong { display:block; font-variant-numeric:tabular-nums; }
+  .report-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px 16px 0; }
+  .report-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0; }
+  .report-options label { display:flex; align-items:center; gap:7px; padding:8px; border:1px solid var(--border); border-radius:8px; cursor:pointer; }
+  .report-options label:has(input:checked) { border-color:var(--accent); background:var(--accent-bg); }
+  .report-options input { accent-color:var(--accent); flex:none; }
+  .report-row-button { width:100%; text-align:left; color:inherit; font:inherit; border:0; background:transparent; }
+  .report-row-button.active { background:var(--accent-bg); }
+  .report-detail { white-space:pre-wrap; overflow-wrap:anywhere; margin:8px 0; }
+  .report-actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:12px; }
+
   /* Drag-and-drop reorder (admin) */
   .expense-card[draggable="true"] { cursor:grab; }
   .expense-card[draggable="true"]:active { cursor:grabbing; }
@@ -994,6 +1006,16 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="reportReviewModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reportReviewTitle">
+    <div class="modal-head">
+      <div class="modal-title" id="reportReviewTitle">จัดหมวดสำหรับรายงาน</div>
+      <button class="modal-close" type="button" onclick="closeModal('reportReviewModal')" aria-label="ปิด">×</button>
+    </div>
+    <div id="reportReviewContent"></div>
+  </div>
+</div>
+
 <!-- ADD/EDIT MODAL -->
 <div class="modal-overlay" id="expenseModal">
   <div class="modal">
@@ -1050,7 +1072,12 @@
       <input class="form-input" id="fTitle" placeholder="">
     </div>
     <div class="form-row">
-      <div class="form-group">
+      <fieldset class="form-group" style="border:0;padding:0">
+      <legend class="form-label">หมวดสำหรับรายงาน</legend>
+      <div class="report-options" id="reportFormOptions"></div>
+      <small id="reportFormHint"></small>
+    </fieldset>
+    <div class="form-group">
         <label class="form-label">จำนวนเงิน (บาท) *</label>
         <input class="form-input" type="number" id="fAmount" placeholder="0">
         <div class="ocr-hint" id="ocrHint" style="display:none"></div>
@@ -1125,7 +1152,7 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, setDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getStorage, ref, uploadBytesResumable, uploadString, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import { getAuth, browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithCustomToken, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
@@ -1758,13 +1785,49 @@ function renderMonthTxn() {
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
-// `color` is the dashboard bar only — cards deliberately don't tint by facility.
-const FACILITIES = [
-  { key: 'สระว่ายน้ำ',        label: 'สระว่ายน้ำ',        emoji: '🏊', color: '#0EA5E9' },
-  { key: 'ฟิตเนส',            label: 'ฟิตเนส',            emoji: '🏋️', color: '#7C3AED' },
-  { key: 'สโมสร',             label: 'สโมสร',             emoji: '🏛️', color: '#4F6EF7' },
-  { key: 'สวน / ภูมิทัศน์',   label: 'สวน & ภูมิทัศน์',  emoji: '🌳', color: '#16A34A' },
-];
+const REPORT_CATEGORIES = {
+  fitness: 'Fitness',
+  clubhouse: 'Club House สโมสร',
+  pool: 'สระว่ายน้ำ',
+  park: 'สวนสาธารณะ',
+  entrance: 'ภูมิทัศน์หน้าโครงการ',
+  cctv: 'ระบบกล้องวงจรปิด',
+  gate: 'ระบบเข้า-ออกอัตโนมัติ',
+  operating: 'ค่าใช้จ่ายประจำ',
+  other: 'อื่น ๆ',
+};
+const REPORT_UNASSIGNED = 'unassigned';
+const REPORT_LABELS = { ...REPORT_CATEGORIES, [REPORT_UNASSIGNED]: 'ยังไม่จัดหมวด' };
+const REPORT_COLORS = ['#716491','#436a83','#3d8291','#627b52','#ac7e46','#526985','#915e65','#466d63','#817265','#a19a8f'];
+let reportYear = String(new Date().getFullYear());
+
+// Use only clear descriptions or specific legacy tags. Generic landscaping
+// and work spanning distinct facilities stay in the review queue.
+function suggestedReportCategory(e) {
+  const title = (e.title || '').normalize('NFC').toLowerCase();
+  const legacy = e.costCategory;
+  if (/สระว่าย.*(amphitheater|และสโมสร)|สโมสร.*สระว่าย|รปภ.*และสโมสร|access point|com\s*visitor|sunmi/.test(title)) return '';
+  if (/\blpr\b|อ่านป้ายทะเบียน|อ่านทะเบียน|ไม้กั้น|มอเตอร์ประตูเหล็ก|ล้อประตูเหล็กหน้าโครงการ/.test(title)) return 'gate';
+  if (legacy === 'ฟิตเนส' || /ฟิตเนส|fitness/.test(title)) return 'fitness';
+  if (legacy === 'สระว่ายน้ำ' || /สระว่าย|ระบบสระว่าย/.test(title)) return 'pool';
+  if (legacy === 'กล้องวงจรปิด' || /กล้องวงจรปิด|\bcctv\b/.test(title)) return 'cctv';
+  if (/ป้ายไฟหน้าโครงการ|ป้ายหน้าโครงการ|ป้ายโครงการอันใหม่|ไฟ.*หน้าโครงการ|หน้าโครงการ.*lighting|ปรับหน้าดิน หน้าโครงการ/.test(title)) return 'entrance';
+  if (/สวนสาธารณะ|กำจัดวัชพืชสวนใหญ่/.test(title)) return 'park';
+  if (/อินเทอร์เน็ต.*รายเดือน|อินเตอร์เน.*รายเดือน|internet.*(รายเดือน|หมู่บ้าน)|ทำความสะอาด.*รายเดือน|ค่าแม่บ้านรายเดือน|line official account|google cloud|ค่าขยะ.*(ลาดพร้าว|ทั้งโครงการ)|ค่ารักษาความปลอดภัย|ค่าระบบรักษาความปลอดภัย|ค่ารายเดือน รปภ|ค่า รปภ tac guard|สวัสดิการ.*รปภ/.test(title) &&
+      !/ตัดหญ้า|รดน้ำ/.test(title)) return 'operating';
+  if (legacy === 'สโมสร' || /สโมสร/.test(title)) return 'clubhouse';
+  if (/ลูกกระนาด|สีจราจร|ตีเส้นจราจร|ประกันอัคคีภัย|ถังดับเพลิง.*ทั่วโครงการ/.test(title)) return 'other';
+  return '';
+}
+
+function reportCategory(e) {
+  if (Object.hasOwn(REPORT_LABELS, e.reportCategory)) return e.reportCategory;
+  return suggestedReportCategory(e) || REPORT_UNASSIGNED;
+}
+
+function reportPeriodItems() {
+  return expenses.filter(e => reportYear === 'all' || e.date?.startsWith(reportYear + '-'));
+}
 
 const FACILITIES_COLLAPSE_KEY = 'pattra_expense_facilities_collapsed_v1';
 let facilitiesCollapsed = { expenses: false };
@@ -1783,7 +1846,7 @@ function facilitiesHeadHtml(scope, subText, clearFnName) {
       <div class="facilities-head-main">
         <span class="collapse-caret" aria-hidden="true">▼</span>
         <div class="facilities-head-text">
-          <div class="facilities-title">ค่าใช้จ่ายพื้นที่ส่วนกลาง</div>
+          <div class="facilities-title">รายจ่ายแยกตามหมวด</div>
           <div class="facilities-sub">${subText}</div>
         </div>
       </div>
@@ -1819,50 +1882,143 @@ function setExpensesStatusFilter(value) {
   renderExpenses();
 }
 
-function facilityRows(sourceItems, activeKey, clickFnName) {
-  const data = FACILITIES.map(f => {
-    const items = sourceItems.filter(e => (e.costCategory || 'อื่น ๆ') === f.key);
-    const total = sumNetExpenses(items);
-    return { ...f, total, count: items.length };
-  });
-  const maxAmt = Math.max(...data.map(d => Math.abs(d.total)), 1);
-  if (data.every(d => d.total === 0)) {
-    return '<div class="facilities-empty">ยังไม่มีข้อมูลค่าใช้จ่ายพื้นที่ส่วนกลางในช่วงนี้</div>';
-  }
-  return `<div class="facilities-list">${data.map(d => {
-    const pct = maxAmt > 0 ? (Math.abs(d.total) / maxAmt) * 100 : 0;
-    const isActive = activeKey === d.key;
-    return `<div class="facility-row${isActive ? ' active' : ''}" onclick="${clickFnName}('${d.key}')">
-      <div class="facility-emoji">${d.emoji}</div>
-      <div class="facility-info">
-        <div class="facility-name">
-          <span>${d.label}</span>
-          <span class="facility-amt">${d.total !== 0 ? fmtNet(d.total) : '—'}</span>
+function renderExpensesFacilities() {
+  const items = reportPeriodItems();
+  const paid = items.filter(e => e.status === 'paid');
+  const unpaid = items.filter(e => e.status !== 'paid');
+  const categories = Object.entries(REPORT_LABELS).map(([key, label], index) => {
+    const rows = paid.filter(e => reportCategory(e) === key);
+    return { key, label, count: rows.length, total: sumNetExpenses(rows), color: REPORT_COLORS[index] };
+  }).sort((a, b) => b.total - a.total);
+  const max = Math.max(1, ...categories.map(row => Math.abs(row.total)));
+  const remaining = items.filter(e => reportCategory(e) === REPORT_UNASSIGNED).length;
+  const years = [...new Set([String(new Date().getFullYear()), ...expenses.map(e => e.date?.slice(0,4)).filter(y => /^\d{4}$/.test(y))])].sort().reverse();
+  const rowsHtml = categories.map(row => `
+    <button type="button" class="facility-row report-row-button${activeExpensesFacility === row.key ? ' active' : ''}"
+        aria-pressed="${activeExpensesFacility === row.key}" onclick="toggleExpensesFacilityFilter('${row.key}')">
+      <span class="facility-info">
+        <span class="facility-name"><span>${row.label} · ${row.count}</span><span class="facility-amt">${fmtNet(row.total)}</span></span>
+        <span class="facility-bar-track" style="display:block"><span class="facility-bar-fill" style="display:block;width:${Math.abs(row.total)/max*100}%;background:${row.color}"></span></span>
+      </span>
+    </button>`).join('');
+  document.getElementById('expensesFacilitiesCard').innerHTML = `
+    <div class="facilities-card${facilitiesCollapsed.expenses ? ' collapsed' : ''}">
+      ${facilitiesHeadHtml('expenses', `${reportYear === 'all' ? 'ทุกปี' : 'ปี ' + reportYear} · สุทธิจ่ายแล้ว ${fmtNet(sumNetExpenses(paid))}`,
+        activeExpensesFacility ? 'clearExpensesFacilityFilter' : '')}
+      <div class="facilities-list">
+        <div class="report-totals">
+          <div>สุทธิจ่ายแล้ว<strong>${fmtNet(sumNetExpenses(paid))}</strong></div>
+          <div>รอดำเนินการ<strong>${fmtNet(sumNetExpenses(unpaid))}</strong></div>
+          <div>สุทธิรวมทุกรายการ<strong>${fmtNet(sumNetExpenses(items))}</strong></div>
         </div>
-        <div class="facility-bar-track">
-          <div class="facility-bar-fill" style="width:${pct}%;background:${d.color}"></div>
+        <div class="report-controls">
+          <label>ช่วงรายงาน <select class="month-filter-select" onchange="setReportYear(this.value)">
+            ${['all', ...years].map(y => `<option value="${y}" ${y === reportYear ? 'selected' : ''}>${y === 'all' ? 'ทุกปี' : y}</option>`).join('')}
+          </select></label>
+          ${isAdmin ? `<button class="btn btn-primary" onclick="startReportReview()" ${remaining ? '' : 'disabled'}>จัดหมวดที่เหลือ · ${remaining}</button>` : ''}
         </div>
+        <div class="report-controls">ยอดแยกหมวดคิดจากรายการจ่ายแล้วและหักเงินคืน</div>
+        ${rowsHtml}
       </div>
     </div>`;
-  }).join('')}</div>`;
 }
 
-function facilitiesTotal(sourceItems) {
-  return sumNetExpenses(sourceItems.filter(e => FACILITIES.some(f => f.key === (e.costCategory || 'อื่น ๆ'))));
+function setReportYear(year) {
+  reportYear = year;
+  renderExpenses();
 }
 
-function renderExpensesFacilities() {
-  const el = document.getElementById('expensesFacilitiesCard');
-  if (!el) return;
-  const year = new Date().getFullYear();
-  const yearly = expenses.filter(e => e?.date && new Date(e.date).getFullYear() === year);
-  const grandTotal = facilitiesTotal(yearly);
-  el.innerHTML = `
-    <div class="facilities-card${facilitiesCollapsed.expenses ? ' collapsed' : ''}">
-      ${facilitiesHeadHtml('expenses', `ปี ${year}${grandTotal !== 0 ? ' · ' + fmtNet(grandTotal) : ''}`,
-        activeExpensesFacility ? 'clearExpensesFacilityFilter' : '')}
-      ${facilityRows(yearly, activeExpensesFacility, 'toggleExpensesFacilityFilter')}
-    </div>`;
+let reviewQueue = [];
+let reviewSaving = false;
+
+function reportOptions(name, current, includeBlank = false) {
+  const options = includeBlank ? REPORT_LABELS : REPORT_CATEGORIES;
+  return Object.entries(options).map(([key, label]) =>
+    `<label><input type="radio" name="${name}" value="${key}" ${key === current ? 'checked' : ''}>${label}</label>`).join('');
+}
+
+function setReportForm(e) {
+  document.getElementById('reportFormOptions').innerHTML = reportOptions('expenseReportCategory', e ? reportCategory(e) : REPORT_UNASSIGNED, true);
+  document.getElementById('reportFormHint').textContent = e && !e.reportCategory && suggestedReportCategory(e)
+    ? 'ระบบเติมจากชื่อรายการหรือหมวดเดิม คุณแก้ไขได้'
+    : 'ใช้สรุปให้ลูกบ้าน เลือกได้หนึ่งหมวด';
+}
+
+function startReportReview() {
+  if (!isAdmin || reviewSaving) return;
+  reviewQueue = reportPeriodItems().filter(e => reportCategory(e) === REPORT_UNASSIGNED)
+    .sort((a, b) => Math.abs(expenseNetAmount(b)) - Math.abs(expenseNetAmount(a))).map(e => e.id);
+  renderReportReview();
+  document.getElementById('reportReviewModal').classList.add('open');
+  document.getElementById('reportReviewModal').querySelector('.modal-close').focus();
+}
+
+function renderReportReview() {
+  const root = document.getElementById('reportReviewContent');
+  const e = expenses.find(item => item.id === reviewQueue[0]);
+  if (!e) {
+    root.textContent = 'จบคิวรอบนี้ รายการที่ข้ามจะอยู่ในคิวเมื่อเปิดอีกครั้ง';
+    return;
+  }
+  root.innerHTML = `<form onsubmit="event.preventDefault(); saveReportReview(this)">
+    <div>${reviewQueue.length} รายการในคิว · ${fmtDateCard(e.date)} · ${fmtExpenseAmount(e)}</div>
+    <h3 class="report-detail">${escapeHtml(e.title)}</h3>
+    <div class="report-detail">${escapeHtml([costCategoryLabel(e), e.detail, e.note].filter(Boolean).join('\n'))}</div>
+    <fieldset class="form-group" style="border:0;padding:0"><legend class="form-label">เลือกหมวดเดียว</legend>
+      <div class="report-options">${reportOptions('reviewCategory', '')}</div>
+    </fieldset>
+    ${e.slips?.length ? `<div class="report-detail">${attachmentsHtml(e.slips, true)}</div>` : ''}
+    <div class="report-actions">
+      <button type="button" class="btn btn-ghost" onclick="skipReportReview()">ข้าม</button>
+      <button type="submit" class="btn btn-primary">บันทึกและไปต่อ</button>
+    </div>
+    <div data-review-message role="status"></div>
+  </form>`;
+  root.querySelector('input')?.setAttribute('required', '');
+}
+
+function skipReportReview() {
+  if (reviewSaving) return;
+  reviewQueue.shift();
+  while (reviewQueue.length && !expenses.some(e => e.id === reviewQueue[0] && reportCategory(e) === REPORT_UNASSIGNED)) reviewQueue.shift();
+  renderReportReview();
+  document.querySelector('#reportReviewContent input')?.focus();
+}
+
+async function saveReportReview(form) {
+  if (!isAdmin || reviewSaving) return;
+  const category = new FormData(form).get('reviewCategory');
+  const e = expenses.find(item => item.id === reviewQueue[0]);
+  if (!e || reportCategory(e) !== REPORT_UNASSIGNED) { skipReportReview(); return; }
+  if (!Object.hasOwn(REPORT_CATEGORIES, category)) return;
+  reviewSaving = true;
+  form.querySelector('fieldset').disabled = true;
+  form.querySelectorAll('button').forEach(button => { button.disabled = true; });
+  form.querySelector('[data-review-message]').textContent = 'กำลังบันทึก…';
+  try {
+    if (usingFirestore) {
+      const ref = doc(db, 'expenses', e.id);
+      await runTransaction(db, async transaction => {
+        const snapshot = await transaction.get(ref);
+        if (snapshot.exists() && reportCategory(snapshot.data()) === REPORT_UNASSIGNED) {
+          transaction.update(ref, { reportCategory: category });
+        }
+      });
+    } else {
+      e.reportCategory = category;
+      save();
+      refreshUI();
+    }
+  } catch (err) {
+    console.error(err);
+    form.querySelector('[data-review-message]').textContent = 'บันทึกไม่สำเร็จ ลองอีกครั้งได้';
+    form.querySelector('fieldset').disabled = false;
+    form.querySelectorAll('button').forEach(button => { button.disabled = false; });
+    return;
+  } finally {
+    reviewSaving = false;
+  }
+  skipReportReview();
 }
 
 function toggleExpensesFacilityFilter(key) {
@@ -2162,9 +2318,9 @@ function clearExpenseSearch(scope = 'all') {
 function renderExpenses() {
   const q=getExpenseSearchQuery('all');
   const list=[...expenses].filter(e=>{
-    if(activeExpensesFacility&&new Date(e.date).getFullYear()!==new Date().getFullYear())return false;
+    if(activeExpensesFacility && reportYear !== 'all' && !e.date?.startsWith(reportYear + '-')) return false;
     if(activeAnnualType&&new Date(e.date).getFullYear()!==new Date().getFullYear())return false;
-    if(activeExpensesFacility&&costCategoryValue(e)!==activeExpensesFacility)return false;
+    if(activeExpensesFacility && reportCategory(e) !== activeExpensesFacility) return false;
     if(activeAnnualType&&e.type!==activeAnnualType)return false;
     if(activeExpensesStatus&&e.status!==activeExpensesStatus)return false;
     if(!expenseMatchesSearch(e,q))return false;
@@ -2291,6 +2447,7 @@ function exportYearTransactions() {
     'ชื่อรายการ',
     'ประเภท',
     'หมวดค่าใช้จ่าย',
+    'หมวดสำหรับรายงาน',
     'สถานะ',
     'จำนวนเงิน',
     'รายละเอียด',
@@ -2304,6 +2461,7 @@ function exportYearTransactions() {
     e.title || '',
     expenseTypeText(e.type),
     costCategoryLabel(e),
+    REPORT_LABELS[reportCategory(e)],
     expenseStatusText(e.status, e.type),
     Number(e.amount || 0).toFixed(2),
     e.detail || '',
@@ -2543,6 +2701,7 @@ function openAddModal() {
   ['fTitle','fDetail'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
   setCostCategory('ส่วนกลาง');
+  setReportForm(null);
   document.getElementById('uploadPreview').innerHTML='';
   setOcrHint('');
   setExpenseSaveState(false);
@@ -2560,6 +2719,7 @@ function openEditModal(id) {
   document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=[e.detail,e.note].filter(Boolean).join('\n');
   document.getElementById('fStatus').value=e.status||'paid';
   setCostCategory(costCategoryValue(e));
+  setReportForm(e);
   setOcrHint('');
   setExpenseSaveState(false);
   setType(e.type||'recurring'); renderPreview(); showExpenseModal();
@@ -2573,6 +2733,7 @@ function getExpenseFormState() {
   });
   return {
     editingId: editingId || '',
+    reportCategory: document.querySelector('[name=expenseReportCategory]:checked').value,
     type: currentType,
     costCategory: document.getElementById('fCostCategory').value,
     title: document.getElementById('fTitle').value,
@@ -2810,11 +2971,14 @@ async function saveExpense() {
   try {
     const slips = usingFirestore ? await persistSlipAssets(expenseId, currentSlips) : [...currentSlips];
     setExpenseSaveProgress(92, editingId ? 'กำลังอัปเดตรายจ่าย...' : 'กำลังบันทึกรายจ่าย...', 'กำลังบันทึกข้อมูลรายการ...');
+    const formCategory = document.querySelector('[name=expenseReportCategory]:checked').value;
+    const reportCategoryChanged = formCategory !== JSON.parse(expenseFormSnapshot || "{}").reportCategory;
     const entry={title,type:currentType,amount:Math.abs(parseFloat(amount)),date,
       costCategory:document.getElementById('fCostCategory').value,
       detail:document.getElementById('fDetail').value.trim(),note:'',
       status:document.getElementById('fStatus').value,
       slips};
+    if (reportCategoryChanged) entry.reportCategory = formCategory;
     if (usingFirestore) {
       const existing = editingId ? expenses.find(x=>x.id===editingId) : null;
       await setDoc(doc(db,'expenses',expenseId), {
@@ -2823,7 +2987,7 @@ async function saveExpense() {
         updatedAt: serverTimestamp(),
       }, { merge: true });
     } else {
-      const localEntry = { id: expenseId, ...entry };
+      const localEntry = { ...expenses.find(e => e.id === editingId), id: expenseId, ...entry };
       if(editingId){expenses[expenses.findIndex(x=>x.id===editingId)]=localEntry;}else{expenses.unshift(localEntry);}
       save();
       refreshUI();
@@ -3015,6 +3179,7 @@ function openDetail(id) {
       <div class="detail-section"><div class="detail-label">วันที่</div><div class="detail-value">${fmtDate(e.date)}</div></div>
       <div class="detail-section"><div class="detail-label">สถานะ</div><div class="detail-value">${e.status === 'paid' ? '✅ ' : '⏳ '}${expenseStatusText(e.status, e.type)}</div></div>
     </div>
+    <div class="detail-section"><div class="detail-label">หมวดสำหรับรายงาน</div><div class="detail-value">${REPORT_LABELS[reportCategory(e)]}</div></div>
     ${detailHtml?`<div class="detail-section"><div class="detail-label">รายละเอียด</div><div class="detail-value detail-value-multiline">${detailHtml}</div></div>`:''}
     ${noteHtml?`<div class="detail-section"><div class="detail-label">หมายเหตุ</div><div class="detail-value detail-value-multiline">${noteHtml}</div></div>`:''}
     ${slipsHtml}`;
@@ -3049,6 +3214,7 @@ function openCurrentLightboxImage(){
   window.open(src, '_blank', 'noopener');
 }
 function closeModal(id, force = false){
+  if (id === 'reportReviewModal' && reviewSaving) return;
   if (!force && id === 'expenseModal' && isSavingExpense) return;
   if (!force && id === 'expenseModal' && isExpenseFormDirty() && !confirmDiscardExpenseForm()) return;
   document.getElementById(id).classList.remove('open');
@@ -3164,6 +3330,10 @@ Object.assign(window, {
   renderDashboard,
   renderExpenses,
   renderExpensesFacilities,
+  setReportYear,
+  startReportReview,
+  skipReportReview,
+  saveReportReview,
   renderSearchSuggestions,
   renderMonthTxn,
   saveCapMax,
