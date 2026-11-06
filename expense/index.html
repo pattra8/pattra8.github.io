@@ -109,7 +109,6 @@
   /* ── SECTION HEADER ── */
   .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .section-title  { font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif; font-size:18px; font-weight:600; color:var(--text-hi); line-height:1.35; letter-spacing:0; }
-  .section-title .title-month { font-family:var(--font-num); font-weight:600; font-size:0.92em; }
   .section-sub    { font-size:12px; color:var(--text-lo); margin-top:2px; }
 
   /* ── BUTTONS ── */
@@ -143,6 +142,18 @@
     width:140px; height:140px; border-radius:50%;
     background:rgba(196,122,44,0.04); pointer-events:none;
   }
+  .month-nav-hero {
+    display:grid; grid-template-columns:44px minmax(0,1fr) 44px;
+    gap:8px; text-align:center; padding-inline:12px;
+  }
+  .month-nav-hero > * { position:relative; z-index:1; }
+  .month-nav-hero .hero-label { margin-bottom:8px; }
+  .month-nav-button {
+    width:44px; height:44px; display:grid; place-items:center; padding:0;
+    border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface);
+    color:var(--accent-dk); cursor:pointer;
+  }
+  .month-nav-button:hover { background:var(--accent-bg); }
   .hero-heading-line { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
   .hero-label  { font-size:18px; font-weight:600; color:var(--accent-dk); letter-spacing:0; line-height:1.25; }
   .hero-month  { font-size:12px; font-weight:500; color:var(--text-lo); line-height:1.35; }
@@ -531,6 +542,22 @@
     .expense-card .expense-slips { display:none; }
     .expense-side { flex-direction:row; align-items:baseline; gap:0; }
     .expense-side .status-badge { display:none; }
+    #recentList .expense-card {
+      grid-template-columns:minmax(0,1fr) auto;
+      grid-template-areas:"name menu" "price price" "meta meta";
+      row-gap:4px;
+    }
+    #recentList .expense-info { display:contents; }
+    #recentList .expense-title-row { grid-area:name; overflow-wrap:anywhere; }
+    #recentList .expense-side { grid-area:price; }
+    #recentList .expense-meta { grid-area:meta; margin-top:0; }
+    #recentList .expense-meta::before {
+      content:''; width:5px; height:5px; border-radius:50%;
+      background:var(--rail,var(--text-lo)); margin-right:6px; flex:0 0 auto;
+    }
+    #recentList .tc-top { grid-template-columns:minmax(0,1fr); gap:4px; }
+    #recentList .tc-a { text-align:left; }
+    #recentList .day-date { padding-inline:8px 2px; font-size:12px; }
     .expense-card .expense-amount {
       font-size:16px; font-weight:600; letter-spacing:-.025em; line-height:1.3;
     }
@@ -834,40 +861,65 @@
     header { padding:0 16px; }
     .fab { bottom:20px; right:20px; }
   }
-  .project-report { --project-ink:#183a31; --project-gold:#e5cb91; }
-  .project-overview { padding:clamp(20px,4vw,36px); color:#fff9ea; background:var(--project-ink); border-radius:var(--r-xl) var(--r-xl) 0 0; }
-  .project-toolbar, .project-list-head, .project-filter { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
-  .project-toolbar h1, .project-list-head h2 { margin:0; font-family:var(--font-display); line-height:1.3; }
-  .project-toolbar h1 { font-size:clamp(20px,4vw,28px); }
-  .project-toolbar select { width:auto; background:#fff9ea; color:var(--project-ink); border-color:transparent; }
-  .project-main-total { margin:22px 0 12px; color:var(--project-gold); font-size:13px; }
-  .project-main-total strong { display:block; color:#fff9ea; font-size:clamp(27px,6vw,46px); line-height:1.25; font-variant-numeric:tabular-nums; }
-  .project-subtotals { display:flex; flex-wrap:wrap; gap:6px 22px; color:#f1e8d4; font-size:13px; }
-  .project-subtotals strong { color:#fff9ea; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .project-pending { background:#f8edda; color:#422f18; padding:14px clamp(16px,4vw,36px); border:1px solid #eadcc3; }
-  .project-pending summary { cursor:pointer; font-weight:700; }
-  .project-pending summary span { font-weight:500; margin-inline-start:5px; }
-  .project-pending p, .project-unassigned p { margin:5px 0 8px; font-size:12px; }
-  .project-ledger { padding:clamp(16px,4vw,36px); background:var(--surface); border:1px solid var(--border); border-top:0; border-radius:0 0 var(--r-xl) var(--r-xl); }
-  .project-list-head { margin-bottom:8px; }
-  .project-list-head h2 { font-size:18px; }
-  .project-list-head p { margin:0; font-size:12px; color:var(--text-mid); }
-  .project-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px 12px; width:100%; padding:12px 0; text-align:left; font:inherit; color:inherit; border:0; border-bottom:1px solid var(--border); background:none; cursor:pointer; }
-  .project-row:hover, .project-row:focus-visible { background:rgba(152,112,55,.10); }
-  .project-row strong { display:flex; gap:8px; align-items:center; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .project-row strong span { color:var(--text-mid); font-weight:400; }
-  .project-row strong .project-share { min-width:4.25em; padding:2px 5px; border-radius:6px; background:#eaf1ed; color:#214b3e; text-align:center; font-size:12px; font-weight:700; }
-  .project-row small { display:block; color:var(--text-mid); }
-  .project-bar { grid-column:1/-1; display:block; height:3px; border-radius:3px; background:#467163; }
-  .project-unassigned { margin-top:18px; padding:12px 14px; background:var(--bg); border-radius:var(--r-md); }
-  .project-unassigned .project-row { padding:4px 0; border:0; }
-  .project-unassigned p { color:var(--text-mid); }
+  .project-report { --pj-ink:#2A2218; --pj-mid:#6B5D4A; --pj-rose:#A2395B; --pj-bar:#D9534F; --pj-track:#EFE4D2; max-width:1040px; margin:0 auto; color:var(--pj-ink); font-family:'IBM Plex Sans Thai',sans-serif; font-variant-numeric:tabular-nums; }
+  .project-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .project-head h1 { margin:0; font-size:18px; font-weight:600; line-height:1.3; }
+  .project-year { appearance:none; -webkit-appearance:none; width:auto; height:38px; padding:0 30px 0 14px; font:inherit; font-size:14px; font-weight:600; color:var(--pj-ink); border:0; border-radius:999px; cursor:pointer;
+    background:#EFE4D2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232A2218' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 11px center; }
+  .project-year:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .project-hero { text-align:center; padding:22px 0 26px; }
+  .project-hero > span { font-size:13px; font-weight:500; color:var(--pj-mid); letter-spacing:.02em; }
+  .project-hero strong { display:block; margin-top:4px; font-size:clamp(40px,10vw,56px); font-weight:700; line-height:1.15; letter-spacing:-.015em; }
+  .project-hero small { display:block; margin-top:8px; font-size:13px; color:var(--pj-mid); }
+  .project-hero small b { color:var(--pj-ink); font-weight:600; }
+  .project-layout { display:grid; gap:28px; }
+  .project-map { display:flex; flex-direction:column; gap:3px; height:330px; border-radius:16px; overflow:hidden; }
+  .project-map-row { display:flex; gap:3px; min-height:0; }
+  .project-block { min-width:0; margin:0; border:0; border-radius:0; padding:var(--pad); display:flex; flex-direction:column; justify-content:space-between; text-align:left; font:inherit; cursor:pointer; overflow:hidden; transition:filter .15s; }
+  .project-block:hover { filter:brightness(1.06); }
+  .project-block:focus-visible { outline:3px solid var(--pj-ink); outline-offset:-3px; }
+  .project-block b { font-size:var(--pct); font-weight:700; line-height:1; }
+  .project-block span { font-size:var(--nm); font-weight:500; line-height:1.3; opacity:.92; }
+  .project-list { display:flex; flex-direction:column; gap:2px; }
+  .project-row { display:grid; grid-template-columns:40px minmax(0,1fr) auto; column-gap:12px; row-gap:9px; align-items:center; width:100%; padding:12px 6px; text-align:left; font:inherit; color:inherit; border:0; border-radius:12px; background:none; cursor:pointer; }
+  .project-row:hover { background:rgba(152,112,55,.07); }
+  .project-row:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .project-icon { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; }
+  .project-name { min-width:0; }
+  .project-name b { display:block; font-size:15px; font-weight:600; line-height:1.35; }
+  .project-name small { display:block; margin-top:1px; font-size:13px; color:var(--pj-mid); }
+  .project-pct { font-size:19px; font-weight:700; color:var(--pj-rose); }
+  .project-bar { grid-column:2/4; display:block; height:6px; background:var(--pj-track); border-radius:3px; overflow:hidden; }
+  .project-bar i { display:block; height:100%; border-radius:3px; background:var(--pj-bar); }
+  .project-items { margin:2px 0 12px 58px; padding:2px 14px; background:var(--surface); border-radius:12px; }
+  .project-items button { display:flex; gap:10px; align-items:baseline; width:100%; padding:10px 0; border:0; border-bottom:1px solid #F0E7D6; background:none; font:inherit; color:inherit; text-align:left; cursor:pointer; }
+  .project-items button:hover span { color:var(--accent-dk); }
+  .project-items button span { flex:1; min-width:0; font-size:13px; line-height:1.45; }
+  .project-items button small { display:block; font-size:12px; color:var(--pj-mid); }
+  .project-items button b { font-size:13px; font-weight:600; white-space:nowrap; }
+  .project-items .project-all { justify-content:center; align-items:center; min-height:44px; border-bottom:0; font-size:13px; font-weight:600; color:var(--accent-dk); }
+  .project-pending { margin:0 0 26px; background:#FAEEDA; border:1px solid #EBD3A8; border-radius:14px; }
+  .project-pending summary { display:flex; align-items:center; gap:10px; min-height:52px; padding:12px 16px; cursor:pointer; list-style:none; font-size:15px; font-weight:600; }
+  .project-pending summary::-webkit-details-marker { display:none; }
+  .project-pending summary i { width:8px; height:8px; border-radius:50%; background:var(--amber); flex:none; }
+  .project-pending summary span { flex:1; }
+  .project-pending .project-items { margin:0 16px 10px; padding:0; background:none; }
+  .project-pending .project-items button { border-bottom:0; border-top:1px solid #EBD3A8; }
+  .project-unassigned { margin-top:18px; padding:8px 10px 12px; background:#F3ECDD; border-radius:14px; }
+  .project-unassigned .project-pct { color:var(--pj-mid); }
+  .project-unassigned .project-bar i { background:#8C7C66; }
+  .project-unassigned .btn { width:100%; min-height:46px; margin-top:8px; justify-content:center; }
+  .project-note { margin:22px 0 0; text-align:center; font-size:12px; color:var(--text-lo); }
+  .project-empty { padding:40px 0; text-align:center; color:var(--pj-mid); }
+  @media(min-width:900px) {
+    .project-layout { grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:40px; align-items:start; }
+    .project-map { position:sticky; top:84px; height:440px; }
+  }
   .project-filter { margin:0 0 12px; padding:10px 14px; background:var(--accent-bg); border-radius:var(--r-md); }
   .project-filter[hidden] { display:none; }
   #fabAdd[hidden] { display:none !important; }
   @media(max-width:520px) {
     .page-tab { padding-inline:4px; line-height:1.35; }
-    .project-row { font-size:13px; }
   }
   .report-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0; }
   .report-options label { display:flex; align-items:center; gap:7px; padding:8px; border:1px solid var(--border); border-radius:8px; cursor:pointer; }
@@ -926,16 +978,27 @@
 
   <!-- DASHBOARD -->
   <div id="pageDashboard">
-    <div id="monthHeroCard"></div>
+    <div id="monthHeroCard" class="month-hero month-nav-hero">
+      <button type="button" class="month-nav-button" aria-label="เดือนก่อนหน้า" onclick="shiftDashboardMonth(-1)">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+      </button>
+      <div aria-live="polite" aria-atomic="true">
+        <div class="hero-label" id="dashboardMonthLabel"></div>
+        <div class="hero-amount" id="dashboardMonthAmount" aria-label="ยอดรายจ่ายสุทธิ"></div>
+      </div>
+      <button type="button" class="month-nav-button" aria-label="เดือนถัดไป" onclick="shiftDashboardMonth(1)">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </button>
+    </div>
 
     <div class="section-header">
-      <div class="section-title" id="txnSectionTitle">รายจ่ายเดือน —</div>
-      <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
+      <div class="section-title" id="txnSectionTitle">รายการ</div>
+      <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">เพิ่มรายจ่าย</button>
     </div>
     <div class="transaction-toolbar">
       <div class="search-wrap" id="monthSearchWrap">
         <span class="search-icon">⌕</span>
-        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่าย / จำนวนเงินทุกเดือน..." autocomplete="off">
+        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหาชื่อหรือยอดเงิน" aria-label="ค้นหาชื่อหรือยอดเงิน" autocomplete="off">
         <button type="button" class="search-clear" id="monthSearchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="monthSearchSuggestions"></div>
       </div>
@@ -1707,20 +1770,28 @@ function getMonthFilter() {
   return { yr, mi };
 }
 
+function shiftDashboardMonth(offset) {
+  const {yr,mi} = getMonthFilter();
+  const next = new Date(yr, mi + offset, 1);
+  const value = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+  const select = document.getElementById('dashMonthFilter');
+  if (![...select.options].some(option => option.value === value)) {
+    select.add(new Option(monthOptionLabel(value), value));
+  }
+  select.value = value;
+  populateDashMonthFilter();
+  closeSearchSuggestions('month');
+  renderDashboard();
+}
+
 function renderMonthHero() {
   const {yr,mi} = getMonthFilter();
-  const me  = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
-  const tot = sumNetExpenses(me);
-  document.getElementById('monthHeroCard').innerHTML = `
-    <div class="month-hero">
-      <div>
-        <div class="hero-heading-line">
-          <div class="hero-label">รายจ่ายสุทธิประจำเดือน</div>
-          <div class="hero-month">${MONTH_TH[mi]} ${yr}</div>
-        </div>
-        <div class="hero-amount">${heroAmountHtml(tot)}</div>
-      </div>
-    </div>`;
+  const monthly = expenses.filter(expense => {
+    const date = new Date(expense.date);
+    return date.getFullYear() === yr && date.getMonth() === mi;
+  });
+  document.getElementById('dashboardMonthLabel').textContent = `${MONTH_TH[mi]} ${yr}`;
+  document.getElementById('dashboardMonthAmount').innerHTML = heroAmountHtml(sumNetExpenses(monthly));
 }
 
 function dashboardExpenseMatchesActiveFilters(expense) {
@@ -1743,7 +1814,6 @@ function getMonthExpenseItems() {
 function renderMonthTxn() {
   const q = getExpenseSearchQuery('month');
   renderMonthHero();
-  const {yr,mi} = getMonthFilter();
   const searchAllMonths = !document.getElementById('dashMonthFilter')?.value;
   const sourceItems = q
     ? (searchAllMonths ? getDashboardSearchItems() : getMonthExpenseItems())
@@ -1751,18 +1821,14 @@ function renderMonthTxn() {
   const me = sourceItems
     .filter(e => expenseMatchesSearch(e, q))
     .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
-  const filterLabels = [
-    activeDashboardStatus ? expenseStatusText(activeDashboardStatus, 'general') : '',
-  ].filter(Boolean);
   syncSearchUi('month');
-  const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
-  document.getElementById('txnSectionTitle').innerHTML = q
-    ? `ผลการค้นหา <span class="title-month">${escapeHtml(searchAllMonths ? 'ทุกเดือน' : MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`
-    : `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
+  document.getElementById('txnSectionTitle').textContent = q
+    ? (searchAllMonths ? 'ผลค้นหาทุกเดือน' : 'ผลการค้นหา')
+    : 'รายการ';
   // Drag-reorder only when admin is viewing a clean month slice (no search or status filter).
   const reorderable = isAdmin && !q && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
-    ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus})
+    ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus, showTotal:!!q || !!activeDashboardStatus})
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
@@ -1829,58 +1895,138 @@ function fmtProjectBaht(amount) {
   return `${wholeBaht < 0 ? '-' : ''}฿${Math.abs(wholeBaht).toLocaleString('en-US')}`;
 }
 
+const PROJECT_RAMP = ['#5B2A5E', '#A2395B', '#D9534F', '#EE8A5B', '#F4B678', '#F7D2A0', '#E8A9B5', '#F3CCD2', '#FBE6E0'];
+const PROJECT_ICONS = {
+  pool: 'M3 18c2 0 2.2-1.5 4.5-1.5S9.7 18 12 18s2.2-1.5 4.5-1.5S19 18 21 18M9 14V4M15 14V4M9 7h6M9 10.5h6',
+  operating: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3M8 17h6',
+  entrance: 'M3 21h18M5 21V10M19 21V10M3 10h18M5 10l7-5 7 5M10 21v-5h4v5',
+  clubhouse: 'M3 11l9-7 9 7M5 10v10h14V10M10 20v-5h4v5',
+  cctv: 'M3 8l12-3 1.6 5.5L4.6 13.5zM16.6 9l3-1 1 3.2-3 .9M8.5 13l1 3.5H13M4 19v-4M4 17h5',
+  gate: 'M5 21V9M3 21h4M7 11h14v3H7zM11 11v3M15 11v3M19 11v3',
+  park: 'M12 21v-6M12 15a5 5 0 1 1 0-10a5 5 0 1 1 0 10M8 21h8',
+  fitness: 'M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12',
+  other: 'M5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M10.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M16 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0',
+  [REPORT_UNASSIGNED]: 'M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01'
+};
+let projectOpenKey = null;
+
+// White text only where it keeps >= 4.5:1 contrast; otherwise near-black.
+function projectTextColor(hex) {
+  const lum = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map(x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4))
+    .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+  return 1.05 / (lum + 0.05) >= 4.5 ? '#FFFFFF' : '#1E1A16';
+}
+
+function projectIcon(key, color) {
+  return `<svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${PROJECT_ICONS[key] || ''}"/></svg>`;
+}
+
+function toggleProject(key) {
+  projectOpenKey = projectOpenKey === key ? null : key;
+  renderProjects();
+  document.querySelector(`[data-project-row="${key}"]`)?.focus({preventScroll: true});
+}
+
+function openProjectFromMap(key) {
+  projectOpenKey = key;
+  renderProjects();
+  const row = document.querySelector(`[data-project-row="${key}"]`);
+  row?.scrollIntoView({block: 'center', behavior: 'smooth'});
+  row?.focus({preventScroll: true});
+}
+
 function renderProjects() {
   const items = reportPeriodItems();
   const paid = items.filter(e => e.status === 'paid');
   const paidTotal = sumNetExpenses(paid);
-  const share = amount => paidTotal > 0 ? amount / paidTotal * 100 : null;
-  const shareLabel = amount => paidTotal > 0 ? `${share(amount).toFixed(1)}%` : '—';
+  const shareLabel = amount => paidTotal > 0 ? `${(amount / paidTotal * 100).toFixed(1)}%` : '—';
   const unpaid = items.filter(e => e.status !== 'paid');
   const categories = Object.entries(REPORT_CATEGORIES).map(([key, label]) => {
     const rows = paid.filter(e => reportCategory(e) === key);
-    return { key, label, total: sumNetExpenses(rows) };
-  }).sort((a, b) => b.total - a.total);
+    return { key, label, rows, total: sumNetExpenses(rows) };
+  }).filter(c => c.rows.length).sort((a, b) => b.total - a.total);
+  categories.forEach((c, i) => {
+    c.color = PROJECT_RAMP[Math.min(i, PROJECT_RAMP.length - 1)];
+    c.fg = projectTextColor(c.color);
+  });
   const unassigned = items.filter(e => reportCategory(e) === REPORT_UNASSIGNED);
   const paidUnassigned = unassigned.filter(e => e.status === 'paid');
+  const unassignedTotal = sumNetExpenses(paidUnassigned);
   const years = [...new Set([String(new Date().getFullYear()), ...expenses.map(e => e.date?.slice(0, 4)).filter(y => /^\d{4}$/.test(y))])].sort().reverse();
-  const rowsHtml = categories.map(row => `
-    <button type="button" class="project-row" onclick="openProjectExpenses('${row.key}')">
-      <span>${row.label}</span><strong>${fmtProjectBaht(row.total)} <span class="project-share">${shareLabel(row.total)}</span><span aria-hidden="true">›</span></strong>
-      <span class="project-bar" aria-hidden="true" style="width:${Math.min(100, Math.max(0, share(row.total)))}%"></span>
-    </button>`).join('');
+  const maxTotal = Math.max(0, unassignedTotal, ...categories.map(c => c.total));
+  const barWidth = amount => maxTotal > 0 ? Math.max(1.5, Math.max(0, amount) / maxTotal * 100).toFixed(2) : 0;
+
+  const itemButton = (e, withMeta) => `<button type="button" data-expense-id="${escapeHtml(e.id)}" onclick="openDetail(this.dataset.expenseId)">
+      <span>${escapeHtml(e.title)}${withMeta ? `<small>${escapeHtml(e.date || '')} · ${REPORT_LABELS[reportCategory(e)]}</small>` : ''}</span>
+      <b>${fmtProjectBaht(expenseNetAmount(e))}</b>
+    </button>`;
+
+  const mapCats = categories.filter(c => c.total > 0);
+  const groups = [mapCats.slice(0, 2), mapCats.slice(2, 5), mapCats.slice(5)].filter(g => g.length);
+  const blockSize = i => i === 0 ? ['16px', '30px', '14px'] : i < 2 ? ['16px', '22px', '14px'] : i < 5 ? ['12px', '18px', '12px'] : ['9px', '14px', '11px'];
+  const mapHtml = groups.map(g => `<div class="project-map-row" style="flex:${g.reduce((s, c) => s + c.total, 0)} 1 0px">
+      ${g.map(c => {
+        const [pad, pct, name] = blockSize(mapCats.indexOf(c));
+        return `<button type="button" class="project-block" onclick="openProjectFromMap('${c.key}')" aria-label="${c.label} ${shareLabel(c.total)}" style="flex:${c.total} 1 0px;--pad:${pad};--pct:${pct};--nm:${name};background:${c.color};color:${c.fg}"><b>${shareLabel(c.total)}</b><span>${c.label}</span></button>`;
+      }).join('')}
+    </div>`).join('');
+
+  const rowsHtml = categories.map(c => {
+    const open = projectOpenKey === c.key;
+    const latest = c.rows.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 3);
+    return `<div>
+      <button type="button" class="project-row" data-project-row="${c.key}" aria-expanded="${open}" onclick="toggleProject('${c.key}')">
+        <span class="project-icon" style="background:${c.color}">${projectIcon(c.key, c.fg)}</span>
+        <span class="project-name"><b>${c.label}</b><small>${fmtProjectBaht(c.total)}</small></span>
+        <span class="project-pct">${shareLabel(c.total)}</span>
+        <span class="project-bar" aria-hidden="true"><i style="width:${barWidth(c.total)}%"></i></span>
+      </button>
+      ${open ? `<div class="project-items">
+        ${latest.map(e => itemButton(e, false)).join('')}
+        <button type="button" class="project-all" onclick="openProjectExpenses('${c.key}')">ดูทั้งหมด ${c.rows.length} รายการ ›</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
+  const pendingHtml = unpaid.length ? `<details class="project-pending"${unpaid.length === 1 ? ' open' : ''}>
+      <summary><i aria-hidden="true"></i><span>รอดำเนินการ · ${unpaid.length} รายการ</span><b>${fmtProjectBaht(sumNetExpenses(unpaid))}</b></summary>
+      <div class="project-items">${unpaid.map(e => itemButton(e, true)).join('')}</div>
+    </details>` : '';
+
+  const unassignedHtml = unassigned.length ? `<div class="project-unassigned">
+      <button type="button" class="project-row" onclick="openProjectExpenses('${REPORT_UNASSIGNED}')">
+        <span class="project-icon" style="background:#E6DCC7">${projectIcon(REPORT_UNASSIGNED, '#6B5D4A')}</span>
+        <span class="project-name"><b>ยังไม่จัดหมวด</b><small>${fmtProjectBaht(unassignedTotal)} · จ่ายแล้ว ${paidUnassigned.length} รายการ</small></span>
+        <span class="project-pct">${shareLabel(unassignedTotal)}</span>
+        <span class="project-bar" aria-hidden="true"><i style="width:${barWidth(unassignedTotal)}%"></i></span>
+      </button>
+      ${isAdmin ? `<button type="button" class="btn btn-primary" onclick="startReportReview()">จัดหมวดที่เหลือ · ${unassigned.length} รายการ</button>` : ''}
+    </div>` : '';
+
+  const hasData = categories.length || unassigned.length || unpaid.length;
   document.getElementById('pageProjects').innerHTML = `
     <div class="project-report">
-      <div class="project-overview">
-        <div class="project-toolbar">
-          <h1>รายจ่ายตามโปรเจค</h1>
-          <select class="month-filter-select" aria-label="ช่วงรายงาน" onchange="setReportYear(this.value)">
-            ${[...years, 'all'].map(y => `<option value="${y}" ${y === reportYear ? 'selected' : ''}>${y === 'all' ? 'ทุกปี' : 'ปี ' + y}</option>`).join('')}
-          </select>
-        </div>
-        <div class="project-main-total">จ่ายแล้วสุทธิ<strong>${fmtProjectBaht(paidTotal)}</strong></div>
-        <div class="project-subtotals">
-          <span>รวมสุทธิทุกรายการ <strong>${fmtProjectBaht(sumNetExpenses(items))}</strong></span>
-        </div>
+      <div class="project-head">
+        <h1>รายจ่ายตามโปรเจค</h1>
+        <select class="project-year" aria-label="ช่วงรายงาน" onchange="setReportYear(this.value)">
+          ${[...years, 'all'].map(y => `<option value="${y}" ${y === reportYear ? 'selected' : ''}>${y === 'all' ? 'ทุกปี' : y}</option>`).join('')}
+        </select>
       </div>
-      ${unpaid.length ? `<details class="project-pending" ${unpaid.length === 1 ? 'open' : ''}>
-        <summary>รอดำเนินการ <span>${fmtProjectBaht(sumNetExpenses(unpaid))} · ${unpaid.length} รายการ</span></summary>
-        <p>ยอดนี้รวมอยู่ในยอดสุทธิทุกรายการ และจะแสดงในยอดจ่ายแล้วเมื่อเปลี่ยนสถานะเป็นจ่ายแล้ว</p>
-        ${unpaid.map(e => `<button type="button" class="project-row" data-expense-id="${escapeHtml(e.id)}" onclick="openDetail(this.dataset.expenseId)">
-          <span>${escapeHtml(e.title)}<small>${escapeHtml(e.date || '')} · ${REPORT_LABELS[reportCategory(e)]}</small></span>
-          <strong>${fmtProjectBaht(expenseNetAmount(e))} <span aria-hidden="true">›</span></strong>
-        </button>`).join('')}
-      </details>` : ''}
-      <div class="project-ledger">
-        <div class="project-list-head"><h2>จ่ายไปกับอะไรบ้าง</h2><p>% เทียบกับยอดจ่ายแล้วสุทธิ · ยอดแสดงปัดขึ้นเป็นบาทเต็ม</p></div>
-        ${rowsHtml}
-        ${unassigned.length ? `<div class="project-unassigned">
-          <button type="button" class="project-row" onclick="openProjectExpenses('${REPORT_UNASSIGNED}')">
-            <span>จ่ายแล้วแต่ยังไม่จัดหมวด</span><strong>${fmtProjectBaht(sumNetExpenses(paidUnassigned))} <span class="project-share">${shareLabel(sumNetExpenses(paidUnassigned))}</span><span aria-hidden="true">›</span></strong>
-          </button>
-          <p>จ่ายแล้ว ${paidUnassigned.length} รายการ · รอดำเนินการ ${unassigned.length - paidUnassigned.length} รายการ</p>
-          ${isAdmin ? `<button class="btn btn-primary" onclick="startReportReview()">จัดหมวดที่เหลือ · ${unassigned.length} รายการ</button>` : ''}
-        </div>` : ''}
+      <div class="project-hero">
+        <span>จ่ายแล้วสุทธิ</span>
+        <strong>${fmtProjectBaht(paidTotal)}</strong>
+        ${unpaid.length ? `<small>รวมรอดำเนินการแล้วเป็น <b>${fmtProjectBaht(sumNetExpenses(items))}</b></small>` : ''}
       </div>
+      ${pendingHtml}
+      ${hasData ? `<div class="project-layout">
+        ${mapHtml ? `<div class="project-map" role="group" aria-label="สัดส่วนยอดจ่ายแล้วตามโปรเจค">${mapHtml}</div>` : ''}
+        <div>
+          <div class="project-list">${rowsHtml}</div>
+          ${unassignedHtml}
+          <p class="project-note">ปัดขึ้นเป็นบาทเต็ม · % จากยอดจริงเทียบยอดจ่ายแล้วสุทธิ</p>
+        </div>
+      </div>` : '<div class="project-empty">ยังไม่มีรายจ่ายในช่วงนี้</div>'}
     </div>`;
 }
 
@@ -2606,7 +2752,7 @@ function weekdayShort(d) {
 // cards stay direct children of .expense-list exactly as before.
 function listZoneHtml(label, total, variant='') {
   return `<div class="list-zone ${variant}"><span class="lz-l">${escapeHtml(label)}</span>` +
-    `<span class="lz-r">${fmt(Math.abs(total))}</span></div>`;
+    (total == null ? '' : `<span class="lz-r">${fmt(Math.abs(total))}</span>`) + '</div>';
 }
 function triageCardHtml(e) {
   const files = attachmentCount(e);
@@ -2633,7 +2779,7 @@ function expenseListHtml(list, showAdmin, reorderable, opts = {}) {
   const rest = list.filter((e) => e.status === 'paid');
   if (rest.length) {
     head += listZoneHtml(pending.length ? `จ่ายแล้ว · ${rest.length} รายการ` : `${rest.length} รายการ`,
-      sumNetExpenses(rest));
+      pending.length || opts.showTotal !== false ? sumNetExpenses(rest) : null);
   }
   // Day blocks cover the whole list so the desktop order is preserved; a block whose
   // items are all unpaid is hidden on mobile, where they already sit in the zone above.
@@ -3351,6 +3497,7 @@ Object.assign(window, {
   toggleAnnualTypeFilter,
   openProjectExpenses,
   setDashboardStatusFilter,
+  shiftDashboardMonth,
   setExpensesStatusFilter,
   clearAnnualTypeFilter,
   clearExpensesFacilityFilter,
