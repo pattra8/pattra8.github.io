@@ -856,6 +856,7 @@
   .project-row:hover, .project-row:focus-visible { background:rgba(152,112,55,.10); }
   .project-row strong { display:flex; gap:8px; align-items:center; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .project-row strong span { color:var(--text-mid); font-weight:400; }
+  .project-row strong .project-share { min-width:4.25em; padding:2px 5px; border-radius:6px; background:#eaf1ed; color:#214b3e; text-align:center; font-size:12px; font-weight:700; }
   .project-row small { display:block; color:var(--text-mid); }
   .project-bar { grid-column:1/-1; display:block; height:3px; border-radius:3px; background:#467163; }
   .project-unassigned { margin-top:18px; padding:12px 14px; background:var(--bg); border-radius:var(--r-md); }
@@ -1768,7 +1769,7 @@ function renderMonthTxn() {
 const REPORT_CATEGORIES = {
   fitness: 'Fitness',
   clubhouse: 'Club House สโมสร',
-  pool: 'สระว่ายน้ำ',
+  pool: 'สระว่ายน้ำ + Amphitheater',
   park: 'สวนสาธารณะ',
   entrance: 'ภูมิทัศน์หน้าโครงการ',
   cctv: 'ระบบกล้องวงจรปิด',
@@ -1823,23 +1824,29 @@ function setExpensesStatusFilter(value) {
   renderExpenses();
 }
 
+function fmtProjectBaht(amount) {
+  const wholeBaht = Math.ceil(Math.round(amount * 100) / 100);
+  return `${wholeBaht < 0 ? '-' : ''}฿${Math.abs(wholeBaht).toLocaleString('en-US')}`;
+}
+
 function renderProjects() {
   const items = reportPeriodItems();
   const paid = items.filter(e => e.status === 'paid');
   const paidTotal = sumNetExpenses(paid);
+  const share = amount => paidTotal > 0 ? amount / paidTotal * 100 : null;
+  const shareLabel = amount => paidTotal > 0 ? `${share(amount).toFixed(1)}%` : '—';
   const unpaid = items.filter(e => e.status !== 'paid');
   const categories = Object.entries(REPORT_CATEGORIES).map(([key, label]) => {
     const rows = paid.filter(e => reportCategory(e) === key);
     return { key, label, total: sumNetExpenses(rows) };
   }).sort((a, b) => b.total - a.total);
-  const max = Math.max(1, ...categories.map(row => Math.abs(row.total)));
   const unassigned = items.filter(e => reportCategory(e) === REPORT_UNASSIGNED);
   const paidUnassigned = unassigned.filter(e => e.status === 'paid');
   const years = [...new Set([String(new Date().getFullYear()), ...expenses.map(e => e.date?.slice(0, 4)).filter(y => /^\d{4}$/.test(y))])].sort().reverse();
   const rowsHtml = categories.map(row => `
     <button type="button" class="project-row" onclick="openProjectExpenses('${row.key}')">
-      <span>${row.label}</span><strong>${fmtNet(row.total)} <span aria-hidden="true">›</span></strong>
-      <span class="project-bar" aria-hidden="true" style="width:${Math.abs(row.total) / max * 100}%"></span>
+      <span>${row.label}</span><strong>${fmtProjectBaht(row.total)} <span class="project-share">${shareLabel(row.total)}</span><span aria-hidden="true">›</span></strong>
+      <span class="project-bar" aria-hidden="true" style="width:${Math.min(100, Math.max(0, share(row.total)))}%"></span>
     </button>`).join('');
   document.getElementById('pageProjects').innerHTML = `
     <div class="project-report">
@@ -1850,25 +1857,25 @@ function renderProjects() {
             ${[...years, 'all'].map(y => `<option value="${y}" ${y === reportYear ? 'selected' : ''}>${y === 'all' ? 'ทุกปี' : 'ปี ' + y}</option>`).join('')}
           </select>
         </div>
-        <div class="project-main-total">จ่ายแล้วสุทธิ<strong>${fmtNet(paidTotal)}</strong></div>
+        <div class="project-main-total">จ่ายแล้วสุทธิ<strong>${fmtProjectBaht(paidTotal)}</strong></div>
         <div class="project-subtotals">
-          <span>รวมสุทธิทุกรายการ <strong>${fmtNet(sumNetExpenses(items))}</strong></span>
+          <span>รวมสุทธิทุกรายการ <strong>${fmtProjectBaht(sumNetExpenses(items))}</strong></span>
         </div>
       </div>
       ${unpaid.length ? `<details class="project-pending" ${unpaid.length === 1 ? 'open' : ''}>
-        <summary>รอดำเนินการ <span>${fmtNet(sumNetExpenses(unpaid))} · ${unpaid.length} รายการ</span></summary>
+        <summary>รอดำเนินการ <span>${fmtProjectBaht(sumNetExpenses(unpaid))} · ${unpaid.length} รายการ</span></summary>
         <p>ยอดนี้รวมอยู่ในยอดสุทธิทุกรายการ และจะแสดงในยอดจ่ายแล้วเมื่อเปลี่ยนสถานะเป็นจ่ายแล้ว</p>
         ${unpaid.map(e => `<button type="button" class="project-row" data-expense-id="${escapeHtml(e.id)}" onclick="openDetail(this.dataset.expenseId)">
           <span>${escapeHtml(e.title)}<small>${escapeHtml(e.date || '')} · ${REPORT_LABELS[reportCategory(e)]}</small></span>
-          <strong>${fmtNet(expenseNetAmount(e))} <span aria-hidden="true">›</span></strong>
+          <strong>${fmtProjectBaht(expenseNetAmount(e))} <span aria-hidden="true">›</span></strong>
         </button>`).join('')}
       </details>` : ''}
       <div class="project-ledger">
-        <div class="project-list-head"><h2>จ่ายไปกับอะไรบ้าง</h2><p>ยอดจ่ายแล้วหลังหักเงินคืน</p></div>
+        <div class="project-list-head"><h2>จ่ายไปกับอะไรบ้าง</h2><p>% เทียบกับยอดจ่ายแล้วสุทธิ · ยอดแสดงปัดขึ้นเป็นบาทเต็ม</p></div>
         ${rowsHtml}
         ${unassigned.length ? `<div class="project-unassigned">
           <button type="button" class="project-row" onclick="openProjectExpenses('${REPORT_UNASSIGNED}')">
-            <span>จ่ายแล้วแต่ยังไม่จัดหมวด</span><strong>${fmtNet(sumNetExpenses(paidUnassigned))} <span aria-hidden="true">›</span></strong>
+            <span>จ่ายแล้วแต่ยังไม่จัดหมวด</span><strong>${fmtProjectBaht(sumNetExpenses(paidUnassigned))} <span class="project-share">${shareLabel(sumNetExpenses(paidUnassigned))}</span><span aria-hidden="true">›</span></strong>
           </button>
           <p>จ่ายแล้ว ${paidUnassigned.length} รายการ · รอดำเนินการ ${unassigned.length - paidUnassigned.length} รายการ</p>
           ${isAdmin ? `<button class="btn btn-primary" onclick="startReportReview()">จัดหมวดที่เหลือ · ${unassigned.length} รายการ</button>` : ''}
