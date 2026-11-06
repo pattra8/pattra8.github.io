@@ -109,6 +109,7 @@
   /* ── SECTION HEADER ── */
   .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .section-title  { font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif; font-size:18px; font-weight:600; color:var(--text-hi); line-height:1.35; letter-spacing:0; }
+  .section-title .title-month { font-family:var(--font-num); font-weight:600; font-size:0.92em; }
   .section-sub    { font-size:12px; color:var(--text-lo); margin-top:2px; }
 
   /* ── BUTTONS ── */
@@ -142,18 +143,6 @@
     width:140px; height:140px; border-radius:50%;
     background:rgba(196,122,44,0.04); pointer-events:none;
   }
-  .month-nav-hero {
-    display:grid; grid-template-columns:44px minmax(0,1fr) 44px;
-    gap:8px; text-align:center; padding-inline:12px;
-  }
-  .month-nav-hero > * { position:relative; z-index:1; }
-  .month-nav-hero .hero-label { margin-bottom:8px; }
-  .month-nav-button {
-    width:44px; height:44px; display:grid; place-items:center; padding:0;
-    border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface);
-    color:var(--accent-dk); cursor:pointer;
-  }
-  .month-nav-button:hover { background:var(--accent-bg); }
   .hero-heading-line { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:7px; }
   .hero-label  { font-size:18px; font-weight:600; color:var(--accent-dk); letter-spacing:0; line-height:1.25; }
   .hero-month  { font-size:12px; font-weight:500; color:var(--text-lo); line-height:1.35; }
@@ -542,22 +531,6 @@
     .expense-card .expense-slips { display:none; }
     .expense-side { flex-direction:row; align-items:baseline; gap:0; }
     .expense-side .status-badge { display:none; }
-    #recentList .expense-card {
-      grid-template-columns:minmax(0,1fr) auto;
-      grid-template-areas:"name menu" "price price" "meta meta";
-      row-gap:4px;
-    }
-    #recentList .expense-info { display:contents; }
-    #recentList .expense-title-row { grid-area:name; overflow-wrap:anywhere; }
-    #recentList .expense-side { grid-area:price; }
-    #recentList .expense-meta { grid-area:meta; margin-top:0; }
-    #recentList .expense-meta::before {
-      content:''; width:5px; height:5px; border-radius:50%;
-      background:var(--rail,var(--text-lo)); margin-right:6px; flex:0 0 auto;
-    }
-    #recentList .tc-top { grid-template-columns:minmax(0,1fr); gap:4px; }
-    #recentList .tc-a { text-align:left; }
-    #recentList .day-date { padding-inline:8px 2px; font-size:12px; }
     .expense-card .expense-amount {
       font-size:16px; font-weight:600; letter-spacing:-.025em; line-height:1.3;
     }
@@ -978,27 +951,16 @@
 
   <!-- DASHBOARD -->
   <div id="pageDashboard">
-    <div id="monthHeroCard" class="month-hero month-nav-hero">
-      <button type="button" class="month-nav-button" aria-label="เดือนก่อนหน้า" onclick="shiftDashboardMonth(-1)">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
-      </button>
-      <div aria-live="polite" aria-atomic="true">
-        <div class="hero-label" id="dashboardMonthLabel"></div>
-        <div class="hero-amount" id="dashboardMonthAmount" aria-label="ยอดรายจ่ายสุทธิ"></div>
-      </div>
-      <button type="button" class="month-nav-button" aria-label="เดือนถัดไป" onclick="shiftDashboardMonth(1)">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
-    </div>
+    <div id="monthHeroCard"></div>
 
     <div class="section-header">
-      <div class="section-title" id="txnSectionTitle">รายการ</div>
-      <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">เพิ่มรายจ่าย</button>
+      <div class="section-title" id="txnSectionTitle">รายจ่ายเดือน —</div>
+      <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
     </div>
     <div class="transaction-toolbar">
       <div class="search-wrap" id="monthSearchWrap">
         <span class="search-icon">⌕</span>
-        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหาชื่อหรือยอดเงิน" aria-label="ค้นหาชื่อหรือยอดเงิน" autocomplete="off">
+        <input type="text" class="filter-search" id="monthSearch" placeholder="ค้นหารายจ่าย / จำนวนเงินทุกเดือน..." autocomplete="off">
         <button type="button" class="search-clear" id="monthSearchClearBtn" aria-label="ล้างคำค้น">×</button>
         <div class="search-suggestions" id="monthSearchSuggestions"></div>
       </div>
@@ -1770,28 +1732,20 @@ function getMonthFilter() {
   return { yr, mi };
 }
 
-function shiftDashboardMonth(offset) {
-  const {yr,mi} = getMonthFilter();
-  const next = new Date(yr, mi + offset, 1);
-  const value = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
-  const select = document.getElementById('dashMonthFilter');
-  if (![...select.options].some(option => option.value === value)) {
-    select.add(new Option(monthOptionLabel(value), value));
-  }
-  select.value = value;
-  populateDashMonthFilter();
-  closeSearchSuggestions('month');
-  renderDashboard();
-}
-
 function renderMonthHero() {
   const {yr,mi} = getMonthFilter();
-  const monthly = expenses.filter(expense => {
-    const date = new Date(expense.date);
-    return date.getFullYear() === yr && date.getMonth() === mi;
-  });
-  document.getElementById('dashboardMonthLabel').textContent = `${MONTH_TH[mi]} ${yr}`;
-  document.getElementById('dashboardMonthAmount').innerHTML = heroAmountHtml(sumNetExpenses(monthly));
+  const me  = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
+  const tot = sumNetExpenses(me);
+  document.getElementById('monthHeroCard').innerHTML = `
+    <div class="month-hero">
+      <div>
+        <div class="hero-heading-line">
+          <div class="hero-label">รายจ่ายสุทธิประจำเดือน</div>
+          <div class="hero-month">${MONTH_TH[mi]} ${yr}</div>
+        </div>
+        <div class="hero-amount">${heroAmountHtml(tot)}</div>
+      </div>
+    </div>`;
 }
 
 function dashboardExpenseMatchesActiveFilters(expense) {
@@ -1814,6 +1768,7 @@ function getMonthExpenseItems() {
 function renderMonthTxn() {
   const q = getExpenseSearchQuery('month');
   renderMonthHero();
+  const {yr,mi} = getMonthFilter();
   const searchAllMonths = !document.getElementById('dashMonthFilter')?.value;
   const sourceItems = q
     ? (searchAllMonths ? getDashboardSearchItems() : getMonthExpenseItems())
@@ -1821,14 +1776,18 @@ function renderMonthTxn() {
   const me = sourceItems
     .filter(e => expenseMatchesSearch(e, q))
     .sort((a,b) => q ? expenseSearchScore(b,q) - expenseSearchScore(a,q) || compareExpensesManual(a,b) : compareExpensesManual(a,b));
+  const filterLabels = [
+    activeDashboardStatus ? expenseStatusText(activeDashboardStatus, 'general') : '',
+  ].filter(Boolean);
   syncSearchUi('month');
-  document.getElementById('txnSectionTitle').textContent = q
-    ? (searchAllMonths ? 'ผลค้นหาทุกเดือน' : 'ผลการค้นหา')
-    : 'รายการ';
+  const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
+  document.getElementById('txnSectionTitle').innerHTML = q
+    ? `ผลการค้นหา <span class="title-month">${escapeHtml(searchAllMonths ? 'ทุกเดือน' : MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`
+    : `รายจ่ายเดือน <span class="title-month">${escapeHtml(MONTH_TH[mi] + ' ' + yr)}</span>${escapeHtml(extra)}`;
   // Drag-reorder only when admin is viewing a clean month slice (no search or status filter).
   const reorderable = isAdmin && !q && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
-    ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus, showTotal:!!q || !!activeDashboardStatus})
+    ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus})
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
@@ -2752,7 +2711,7 @@ function weekdayShort(d) {
 // cards stay direct children of .expense-list exactly as before.
 function listZoneHtml(label, total, variant='') {
   return `<div class="list-zone ${variant}"><span class="lz-l">${escapeHtml(label)}</span>` +
-    (total == null ? '' : `<span class="lz-r">${fmt(Math.abs(total))}</span>`) + '</div>';
+    `<span class="lz-r">${fmt(Math.abs(total))}</span></div>`;
 }
 function triageCardHtml(e) {
   const files = attachmentCount(e);
@@ -2779,7 +2738,7 @@ function expenseListHtml(list, showAdmin, reorderable, opts = {}) {
   const rest = list.filter((e) => e.status === 'paid');
   if (rest.length) {
     head += listZoneHtml(pending.length ? `จ่ายแล้ว · ${rest.length} รายการ` : `${rest.length} รายการ`,
-      pending.length || opts.showTotal !== false ? sumNetExpenses(rest) : null);
+      sumNetExpenses(rest));
   }
   // Day blocks cover the whole list so the desktop order is preserved; a block whose
   // items are all unpaid is hidden on mobile, where they already sit in the zone above.
@@ -3499,7 +3458,6 @@ Object.assign(window, {
   toggleProject,
   openProjectFromMap,
   setDashboardStatusFilter,
-  shiftDashboardMonth,
   setExpensesStatusFilter,
   clearAnnualTypeFilter,
   clearExpensesFacilityFilter,
