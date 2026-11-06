@@ -834,28 +834,33 @@
     header { padding:0 16px; }
     .fab { bottom:20px; right:20px; }
   }
-  .project-report { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; }
-  .project-overview { padding:clamp(18px,4vw,34px); background:var(--bg); border-bottom:1px solid var(--border); }
+  .project-report { --project-ink:#183a31; --project-gold:#e5cb91; }
+  .project-overview { padding:clamp(20px,4vw,36px); color:#fff9ea; background:var(--project-ink); border-radius:var(--r-xl) var(--r-xl) 0 0; }
   .project-toolbar, .project-list-head, .project-filter { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
   .project-toolbar h1, .project-list-head h2 { margin:0; font-family:var(--font-display); line-height:1.3; }
   .project-toolbar h1 { font-size:clamp(20px,4vw,28px); }
-  .project-toolbar select { width:auto; }
-  .project-main-total { margin:22px 0 12px; color:var(--text-mid); font-size:13px; }
-  .project-main-total strong { display:block; color:var(--text-hi); font-size:clamp(28px,6vw,46px); line-height:1.25; font-variant-numeric:tabular-nums; }
-  .project-subtotals { display:flex; flex-wrap:wrap; gap:6px 22px; color:var(--text-mid); font-size:13px; }
-  .project-subtotals strong, .project-row strong, .project-unassigned strong { color:var(--text-hi); font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .project-ledger { padding:clamp(16px,4vw,34px); }
+  .project-toolbar select { width:auto; background:#fff9ea; color:var(--project-ink); border-color:transparent; }
+  .project-main-total { margin:22px 0 12px; color:var(--project-gold); font-size:13px; }
+  .project-main-total strong { display:block; color:#fff9ea; font-size:clamp(27px,6vw,46px); line-height:1.25; font-variant-numeric:tabular-nums; }
+  .project-subtotals { display:flex; flex-wrap:wrap; gap:6px 22px; color:#f1e8d4; font-size:13px; }
+  .project-subtotals strong { color:#fff9ea; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .project-pending { background:#f8edda; color:#422f18; padding:14px clamp(16px,4vw,36px); border:1px solid #eadcc3; }
+  .project-pending summary { cursor:pointer; font-weight:700; }
+  .project-pending summary span { font-weight:500; margin-inline-start:5px; }
+  .project-pending p, .project-unassigned p { margin:5px 0 8px; font-size:12px; }
+  .project-ledger { padding:clamp(16px,4vw,36px); background:var(--surface); border:1px solid var(--border); border-top:0; border-radius:0 0 var(--r-xl) var(--r-xl); }
   .project-list-head { margin-bottom:8px; }
-  .project-list-head h2 { font-size:17px; }
+  .project-list-head h2 { font-size:18px; }
   .project-list-head p { margin:0; font-size:12px; color:var(--text-mid); }
-  .project-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px 12px; width:100%; padding:12px 0; text-align:left; font:inherit; color:var(--text-hi); border:0; border-bottom:1px solid var(--border); background:none; cursor:pointer; }
-  .project-row:hover, .project-row:focus-visible { color:var(--accent-dk); background:var(--accent-bg); }
-  .project-row strong { display:flex; gap:8px; align-items:center; }
+  .project-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px 12px; width:100%; padding:12px 0; text-align:left; font:inherit; color:inherit; border:0; border-bottom:1px solid var(--border); background:none; cursor:pointer; }
+  .project-row:hover, .project-row:focus-visible { background:rgba(152,112,55,.10); }
+  .project-row strong { display:flex; gap:8px; align-items:center; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .project-row strong span { color:var(--text-mid); font-weight:400; }
-  .project-bar { display:block; height:3px; border-radius:3px; background:var(--accent); }
+  .project-row small { display:block; color:var(--text-mid); }
+  .project-bar { grid-column:1/-1; display:block; height:3px; border-radius:3px; background:#467163; }
   .project-unassigned { margin-top:18px; padding:12px 14px; background:var(--bg); border-radius:var(--r-md); }
   .project-unassigned .project-row { padding:4px 0; border:0; }
-  .project-unassigned p { margin:4px 0 8px; color:var(--text-mid); font-size:12px; }
+  .project-unassigned p { color:var(--text-mid); }
   .project-filter { margin:0 0 12px; padding:10px 14px; background:var(--accent-bg); border-radius:var(--r-md); }
   .project-filter[hidden] { display:none; }
   #fabAdd[hidden] { display:none !important; }
@@ -1847,10 +1852,17 @@ function renderProjects() {
         </div>
         <div class="project-main-total">จ่ายแล้วสุทธิ<strong>${fmtNet(paidTotal)}</strong></div>
         <div class="project-subtotals">
-          <span>รอดำเนินการ <strong>${fmtNet(sumNetExpenses(unpaid))}</strong></span>
           <span>รวมสุทธิทุกรายการ <strong>${fmtNet(sumNetExpenses(items))}</strong></span>
         </div>
       </div>
+      ${unpaid.length ? `<details class="project-pending" ${unpaid.length === 1 ? 'open' : ''}>
+        <summary>รอดำเนินการ <span>${fmtNet(sumNetExpenses(unpaid))} · ${unpaid.length} รายการ</span></summary>
+        <p>ยอดนี้รวมอยู่ในยอดสุทธิทุกรายการ และจะแสดงในยอดจ่ายแล้วเมื่อเปลี่ยนสถานะเป็นจ่ายแล้ว</p>
+        ${unpaid.map(e => `<button type="button" class="project-row" data-expense-id="${escapeHtml(e.id)}" onclick="openDetail(this.dataset.expenseId)">
+          <span>${escapeHtml(e.title)}<small>${escapeHtml(e.date || '')} · ${REPORT_LABELS[reportCategory(e)]}</small></span>
+          <strong>${fmtNet(expenseNetAmount(e))} <span aria-hidden="true">›</span></strong>
+        </button>`).join('')}
+      </details>` : ''}
       <div class="project-ledger">
         <div class="project-list-head"><h2>จ่ายไปกับอะไรบ้าง</h2><p>ยอดจ่ายแล้วหลังหักเงินคืน</p></div>
         ${rowsHtml}
