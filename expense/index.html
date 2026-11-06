@@ -868,6 +868,7 @@
   .report-options label:has(input:checked) { border-color:var(--accent); background:var(--accent-bg); }
   .report-options input { accent-color:var(--accent); flex:none; }
   .report-detail { white-space:pre-wrap; overflow-wrap:anywhere; margin:8px 0; }
+  .report-actions button[hidden] { display:none; }
   .report-actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:12px; }
 
   /* Drag-and-drop reorder (admin) */
@@ -1871,6 +1872,8 @@ function setReportYear(year) {
 }
 
 let reviewQueue = [];
+let reviewIndex = 0;
+const reviewSavedCategories = new Map();
 let reviewSaving = false;
 
 function reportOptions(name, current, includeBlank = false) {
@@ -1890,6 +1893,8 @@ function startReportReview() {
   if (!isAdmin || reviewSaving) return;
   reviewQueue = reportPeriodItems().filter(e => reportCategory(e) === REPORT_UNASSIGNED)
     .sort((a, b) => Math.abs(expenseNetAmount(b)) - Math.abs(expenseNetAmount(a))).map(e => e.id);
+  reviewIndex = 0;
+  reviewSavedCategories.clear();
   renderReportReview();
   document.getElementById('reportReviewModal').classList.add('open');
   document.getElementById('reportReviewModal').querySelector('.modal-close').focus();
@@ -1897,70 +1902,93 @@ function startReportReview() {
 
 function renderReportReview() {
   const root = document.getElementById('reportReviewContent');
-  const e = expenses.find(item => item.id === reviewQueue[0]);
+  const id = reviewQueue[reviewIndex];
+  const e = expenses.find(item => item.id === id);
+  const saved = reviewSavedCategories.get(id);
+  const backButton = `<button type="button" class="btn btn-ghost" onclick="moveReportReview(-1)" ${reviewIndex ? '' : 'disabled'}>← ย้อนกลับ</button>`;
+  const nextButton = id ? `<button type="button" class="btn btn-ghost" onclick="moveReportReview(1)">${saved ? 'ไปต่อ' : 'ข้าม'} →</button>` : '';
   if (!e) {
-    root.textContent = 'จบคิวรอบนี้ รายการที่ข้ามจะอยู่ในคิวเมื่อเปิดอีกครั้ง';
+    root.innerHTML = `<h3 tabindex="-1">${id ? 'รายการนี้ถูกลบแล้ว' : 'จบคิวรอบนี้'}</h3>
+      <div>${id ? 'ไปยังรายการถัดไปได้เลย' : 'รายการที่ข้ามจะอยู่ในคิวเมื่อเปิดอีกครั้ง'}</div>
+      <div class="report-actions">${backButton}${nextButton}</div>`;
     return;
   }
   root.innerHTML = `<form onsubmit="event.preventDefault(); saveReportReview(this)">
-    <div>${reviewQueue.length} รายการในคิว · ${fmtDateCard(e.date)} · ${fmtExpenseAmount(e)}</div>
-    <h3 class="report-detail">${escapeHtml(e.title)}</h3>
+    <div>รายการที่ ${reviewIndex + 1} จาก ${reviewQueue.length} · ${fmtDateCard(e.date)} · ${fmtExpenseAmount(e)}</div>
+    <h3 class="report-detail" tabindex="-1">${escapeHtml(e.title)}</h3>
     <div class="report-detail">${escapeHtml([costCategoryLabel(e), e.detail, e.note].filter(Boolean).join('\n'))}</div>
-    <fieldset class="form-group" style="border:0;padding:0"><legend class="form-label">เลือกหมวดเดียว</legend>
-      <div class="report-options">${reportOptions('reviewCategory', '')}</div>
+    <fieldset class="form-group" style="border:0;padding:0"><legend class="form-label">เลือกหมวดเพื่อบันทึกและไปต่อ</legend>
+      <div class="report-options" onchange="saveReportReview(this.closest('form'))">${reportOptions('reviewCategory', saved || '')}</div>
     </fieldset>
     ${e.slips?.length ? `<div class="report-detail">${attachmentsHtml(e.slips, true)}</div>` : ''}
     <div class="report-actions">
-      <button type="button" class="btn btn-ghost" onclick="skipReportReview()">ข้าม</button>
-      <button type="submit" class="btn btn-primary">บันทึกและไปต่อ</button>
+      ${backButton}${nextButton}
+      <button type="submit" class="btn btn-primary" hidden>ลองบันทึกอีกครั้ง</button>
     </div>
-    <div data-review-message role="status"></div>
+    <div data-review-message role="status">${saved ? 'บันทึกแล้ว · เลือกหมวดใหม่เพื่อแก้ไข' : ''}</div>
   </form>`;
-  root.querySelector('input')?.setAttribute('required', '');
 }
 
-function skipReportReview() {
-  if (reviewSaving) return;
-  reviewQueue.shift();
-  while (reviewQueue.length && !expenses.some(e => e.id === reviewQueue[0] && reportCategory(e) === REPORT_UNASSIGNED)) reviewQueue.shift();
+function moveReportReview(step) {
+  const next = reviewIndex + step;
+  if (reviewSaving || next < 0 || next > reviewQueue.length) return;
+  reviewIndex = next;
   renderReportReview();
-  document.querySelector('#reportReviewContent input')?.focus();
+  document.querySelector('#reportReviewModal .modal').scrollTop = 0;
+  document.querySelector('#reportReviewContent h3')?.focus({preventScroll: true});
 }
 
 async function saveReportReview(form) {
   if (!isAdmin || reviewSaving) return;
   const category = new FormData(form).get('reviewCategory');
-  const e = expenses.find(item => item.id === reviewQueue[0]);
-  if (!e || reportCategory(e) !== REPORT_UNASSIGNED) { skipReportReview(); return; }
-  if (!Object.hasOwn(REPORT_CATEGORIES, category)) return;
+  const id = reviewQueue[reviewIndex];
+  const e = expenses.find(item => item.id === id);
+  if (!e || !Object.hasOwn(REPORT_CATEGORIES, category)) return;
+  const previous = reviewSavedCategories.get(id);
+  const fieldset = form.querySelector('fieldset');
+  const buttons = [...form.querySelectorAll('.report-actions button')];
+  const retry = form.querySelector('[type=submit]');
+  const message = form.querySelector('[data-review-message]');
   reviewSaving = true;
-  form.querySelector('fieldset').disabled = true;
-  form.querySelectorAll('button').forEach(button => { button.disabled = true; });
-  form.querySelector('[data-review-message]').textContent = 'กำลังบันทึก…';
+  fieldset.disabled = true;
+  buttons.forEach(button => { button.disabled = true; });
+  retry.hidden = true;
+  message.textContent = 'กำลังบันทึก…';
+  let saved = false;
   try {
     if (usingFirestore) {
-      const ref = doc(db, 'expenses', e.id);
-      await runTransaction(db, async transaction => {
+      const ref = doc(db, 'expenses', id);
+      saved = await runTransaction(db, async transaction => {
         const snapshot = await transaction.get(ref);
-        if (snapshot.exists() && reportCategory(snapshot.data()) === REPORT_UNASSIGNED) {
-          transaction.update(ref, { reportCategory: category });
-        }
+        if (!snapshot.exists()) return false;
+        const current = snapshot.data();
+        if (previous ? current.reportCategory !== previous : reportCategory(current) !== REPORT_UNASSIGNED) return false;
+        transaction.update(ref, { reportCategory: category });
+        return true;
       });
     } else {
       e.reportCategory = category;
       save();
       refreshUI();
+      saved = true;
     }
+    if (!saved) message.textContent = 'รายการนี้ถูกแก้ไขหรือลบจากอีกหน้าต่าง กดข้ามเพื่อไปต่อ';
   } catch (err) {
     console.error(err);
-    form.querySelector('[data-review-message]').textContent = 'บันทึกไม่สำเร็จ ลองอีกครั้งได้';
-    form.querySelector('fieldset').disabled = false;
-    form.querySelectorAll('button').forEach(button => { button.disabled = false; });
-    return;
+    message.textContent = 'บันทึกไม่สำเร็จ ลองบันทึกอีกครั้งได้';
+    retry.hidden = false;
   } finally {
     reviewSaving = false;
   }
-  skipReportReview();
+  if (saved) {
+    reviewSavedCategories.set(id, category);
+    moveReportReview(1);
+    return;
+  }
+  fieldset.disabled = false;
+  buttons.forEach(button => { button.disabled = false; });
+  buttons[0].disabled = reviewIndex === 0;
+  if (!retry.hidden) retry.focus();
 }
 
 function openProjectExpenses(key) {
@@ -3290,7 +3318,7 @@ Object.assign(window, {
   renderProjects,
   setReportYear,
   startReportReview,
-  skipReportReview,
+  moveReportReview,
   saveReportReview,
   renderSearchSuggestions,
   renderMonthTxn,
