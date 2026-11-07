@@ -920,7 +920,9 @@
   .report-select.is-open .report-select-chevron { transform:rotate(180deg); }
   .report-select.is-unassigned .report-select-trigger { color:var(--text-mid); font-weight:400; }
   .report-select.is-unassigned .report-select-trigger .report-option-icon { background:#EFE7D8; color:var(--text-mid); }
-  .report-select-menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0; min-width:100%; width:max-content; max-width:min(360px, calc(100vw - 48px)); max-height:min(500px, 72vh); overflow:auto; padding:6px; border:1px solid var(--border); border-radius:14px; background:#fff; box-shadow:var(--shadow-lg); }
+  .report-select-menu { position:fixed; z-index:41; top:0; left:0; width:320px; max-height:min(500px, 72vh); overflow:auto; overscroll-behavior:contain; padding:6px; border:1px solid var(--border); border-radius:14px; background:#fff; box-shadow:var(--shadow-lg); }
+  .report-select-backdrop { display:none; position:fixed; z-index:40; inset:0; background:rgba(30,26,22,.38); }
+  .report-select-sheet-head { display:none; }
   .report-select-menu[hidden] { display:none; }
   .report-select-menu .report-option { min-height:44px; padding:6px 38px 6px 6px; border:0; border-radius:9px; background:transparent; box-shadow:none; font-size:14px; font-weight:400; }
   .report-select-menu .report-option:hover { background:#FBF5EC; }
@@ -932,10 +934,12 @@
   .report-select-menu .report-option.is-unassigned { margin-top:5px; border-top:1px solid var(--border); border-radius:0 0 9px 9px; background:transparent; }
   .report-select-menu .report-option.is-unassigned:has(input:checked) { background:#F4EEE3; box-shadow:none; }
   .report-select-menu .report-option.is-unassigned:has(input:checked) .report-option-check { background-color:var(--text-mid); }
-  @media(max-width:620px) {
-    .report-select-menu { width:100%; max-width:none; }
-  }
-  #reportFormHint { display:block; margin-top:6px; color:var(--text-lo); font-size:12px; }
+  .report-select.is-sheet.is-open .report-select-backdrop { display:block; }
+  .report-select.is-sheet .report-select-menu { top:auto; right:0; bottom:0; left:0; width:auto; max-height:80vh; padding:6px 10px calc(14px + env(safe-area-inset-bottom)); border:0; border-radius:20px 20px 0 0; animation:reportSheetUp .2s ease-out; }
+  .report-select.is-sheet .report-select-sheet-head { display:flex; flex-direction:column; align-items:center; gap:8px; padding:4px 0 10px; font-weight:600; font-size:15px; color:var(--text-hi); }
+  .report-select.is-sheet .report-select-sheet-head::before { content:''; width:38px; height:4px; border-radius:2px; background:var(--border2); }
+  .report-select.is-sheet .report-select-menu .report-option { min-height:50px; font-size:15px; }
+  @keyframes reportSheetUp { from { transform:translateY(24px); opacity:.6; } to { transform:none; opacity:1; } }
   @media(max-width:620px) {
     .report-options { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
     .report-option { gap:8px; min-height:50px; padding:7px 8px 7px 7px; font-size:13px; }
@@ -1117,7 +1121,6 @@
       <fieldset class="form-group report-field" style="border:0;padding:0">
       <legend class="form-label">โปรเจค</legend>
       <div class="report-select" id="reportFormOptions"></div>
-      <small id="reportFormHint"></small>
     </fieldset>
     <div class="form-group">
         <label class="form-label">จำนวนเงิน (บาท) *</label>
@@ -2057,7 +2060,8 @@ function reportSelectValue(key) {
 function renderReportSelect(current) {
   const root = document.getElementById('reportFormOptions');
   root.innerHTML = `<button type="button" class="report-select-trigger" aria-haspopup="true" aria-expanded="false" onclick="toggleReportSelect()">${reportSelectValue(current)}</button>
-    <div class="report-select-menu" role="radiogroup" aria-label="โปรเจค" hidden onchange="syncReportSelect()" onclick="closeReportSelectAfterPick(event)" onkeydown="reportSelectKey(event)">${reportOptions('expenseReportCategory', current, true)}</div>`;
+    <div class="report-select-backdrop" onclick="closeReportSelect(false)"></div>
+    <div class="report-select-menu" role="radiogroup" aria-label="โปรเจค" hidden onchange="syncReportSelect()" onclick="closeReportSelectAfterPick(event)" onkeydown="reportSelectKey(event)"><div class="report-select-sheet-head" aria-hidden="true">เลือกโปรเจค</div>${reportOptions('expenseReportCategory', current, true)}</div>`;
   root.classList.remove('is-open');
   root.classList.toggle('is-unassigned', current === REPORT_UNASSIGNED);
 }
@@ -2071,10 +2075,32 @@ function toggleReportSelect(open) {
   root.classList.toggle('is-open', next);
   root.querySelector('.report-select-trigger').setAttribute('aria-expanded', String(next));
   if (next) {
+    placeReportMenu(root, menu);
     const checked = menu.querySelector('input:checked') || menu.querySelector('input');
     checked.focus({ preventScroll: true });
-    checked.closest('.report-option').scrollIntoView({ block: 'nearest' });
+    const row = checked.closest('.report-option');
+    if (row.offsetTop + row.offsetHeight > menu.clientHeight) menu.scrollTop = row.offsetTop - menu.clientHeight / 2;
   }
+}
+
+// The menu floats above the scrolling modal: a bottom sheet on phones, a popover pinned to the trigger on wider screens.
+function placeReportMenu(root, menu) {
+  const sheet = window.matchMedia('(max-width:620px)').matches;
+  root.classList.toggle('is-sheet', sheet);
+  menu.style.cssText = '';
+  if (sheet) return;
+  const host = root.closest('.modal-overlay')?.getBoundingClientRect() || { left: 0, top: 0 };
+  const r = root.querySelector('.report-select-trigger').getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const width = Math.min(Math.max(r.width, 300), 360, vw - 24);
+  const below = vh - r.bottom - 14;
+  const above = r.top - 14;
+  const up = below < 300 && above > below;
+  menu.style.width = `${width}px`;
+  menu.style.left = `${Math.max(12, Math.min(r.left, vw - width - 12)) - host.left}px`;
+  menu.style.maxHeight = `${Math.min(500, up ? above : below)}px`;
+  menu.style.top = `${(up ? r.top - 6 - menu.offsetHeight : r.bottom + 6) - host.top}px`;
 }
 
 function closeReportSelect(focusTrigger = true) {
@@ -2106,10 +2132,17 @@ document.addEventListener('pointerdown', event => {
   const root = document.getElementById('reportFormOptions');
   if (root?.classList.contains('is-open') && !root.contains(event.target)) toggleReportSelect(false);
 });
+document.addEventListener('scroll', event => {
+  const root = document.getElementById('reportFormOptions');
+  if (root?.classList.contains('is-open') && !root.classList.contains('is-sheet') && !root.querySelector('.report-select-menu').contains(event.target)) toggleReportSelect(false);
+}, true);
+window.addEventListener('resize', () => {
+  const root = document.getElementById('reportFormOptions');
+  if (root?.classList.contains('is-open') && !root.classList.contains('is-sheet')) toggleReportSelect(false);
+});
 
 function setReportForm(e) {
   renderReportSelect(e ? reportCategory(e) : REPORT_UNASSIGNED);
-  document.getElementById('reportFormHint').textContent = 'ใช้สรุปให้ลูกบ้าน เลือกได้หนึ่งโปรเจค';
 }
 
 function startReportReview() {
@@ -3559,6 +3592,7 @@ Object.assign(window, {
   toggleReportSelect,
   syncReportSelect,
   closeReportSelectAfterPick,
+  closeReportSelect,
   reportSelectKey,
   setDashboardStatusFilter,
   setExpensesStatusFilter,
