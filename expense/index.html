@@ -894,7 +894,7 @@
   @media(max-width:520px) {
     .page-tab { padding-inline:4px; line-height:1.35; }
   }
-  .report-field { grid-column:1 / -1; min-width:0; }
+  .report-field { min-width:0; }
   .report-options { display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:8px; margin:8px 0 6px; }
   .report-option { position:relative; display:flex; align-items:center; gap:10px; min-height:52px; padding:8px 10px 8px 8px; border:1.5px solid var(--border); border-radius:12px; background:#fff; color:var(--text-hi); font-size:14px; line-height:1.3; cursor:pointer; transition:border-color .15s, background .15s, box-shadow .15s; }
   .report-option:hover { border-color:var(--border2); background:#FFFCF7; }
@@ -910,6 +910,31 @@
   .report-option.is-unassigned .report-option-icon { background:#EFE7D8; color:var(--text-mid); }
   .report-option.is-unassigned:has(input:checked) { border-style:solid; border-color:var(--text-mid); box-shadow:0 0 0 1px var(--text-mid) inset; background:#F4EEE3; color:var(--text-hi); }
   .report-option.is-unassigned:has(input:checked) .report-option-icon { background:var(--text-mid); color:#fff; }
+  .report-select { position:relative; margin:8px 0 6px; }
+  .report-select-trigger { width:100%; display:flex; align-items:center; gap:10px; min-height:50px; padding:7px 12px 7px 8px; border:1.5px solid var(--border); border-radius:12px; background:#fff; color:var(--text-hi); font:inherit; font-size:15px; font-weight:600; text-align:left; cursor:pointer; transition:border-color .15s, box-shadow .15s; }
+  .report-select-trigger:hover { border-color:var(--border2); }
+  .report-select-trigger:focus-visible, .report-select.is-open .report-select-trigger { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(196,122,44,.16); }
+  .report-select-trigger .report-option-icon { width:32px; height:32px; }
+  .report-select-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .report-select-chevron { flex:none; color:var(--text-lo); transition:transform .15s; }
+  .report-select.is-open .report-select-chevron { transform:rotate(180deg); }
+  .report-select.is-unassigned .report-select-trigger { color:var(--text-mid); font-weight:400; }
+  .report-select.is-unassigned .report-select-trigger .report-option-icon { background:#EFE7D8; color:var(--text-mid); }
+  .report-select-menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0; min-width:100%; width:max-content; max-width:min(360px, calc(100vw - 48px)); max-height:min(500px, 72vh); overflow:auto; padding:6px; border:1px solid var(--border); border-radius:14px; background:#fff; box-shadow:var(--shadow-lg); }
+  .report-select-menu[hidden] { display:none; }
+  .report-select-menu .report-option { min-height:44px; padding:6px 38px 6px 6px; border:0; border-radius:9px; background:transparent; box-shadow:none; font-size:14px; font-weight:400; }
+  .report-select-menu .report-option:hover { background:#FBF5EC; }
+  .report-select-menu .report-option-icon { width:30px; height:30px; border-radius:8px; }
+  .report-select-menu .report-option:has(input:checked) { background:var(--accent-bg); box-shadow:none; font-weight:600; }
+  .report-select-menu .report-option:has(input:focus-visible) { outline:2px solid var(--accent); outline-offset:-2px; }
+  .report-select-menu .report-option-check { top:50%; left:auto; right:10px; margin-top:-9px; border:0; }
+  .report-select-menu .report-option:has(input:checked) .report-option-check { background-color:var(--accent); }
+  .report-select-menu .report-option.is-unassigned { margin-top:5px; border-top:1px solid var(--border); border-radius:0 0 9px 9px; background:transparent; }
+  .report-select-menu .report-option.is-unassigned:has(input:checked) { background:#F4EEE3; box-shadow:none; }
+  .report-select-menu .report-option.is-unassigned:has(input:checked) .report-option-check { background-color:var(--text-mid); }
+  @media(max-width:620px) {
+    .report-select-menu { width:100%; max-width:none; }
+  }
   #reportFormHint { display:block; color:var(--text-lo); font-size:12px; }
   @media(max-width:620px) {
     .report-options { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
@@ -1091,7 +1116,7 @@
     <div class="form-row">
       <fieldset class="form-group report-field" style="border:0;padding:0">
       <legend class="form-label">หมวดสำหรับรายงาน</legend>
-      <div class="report-options" id="reportFormOptions"></div>
+      <div class="report-select" id="reportFormOptions"></div>
       <small id="reportFormHint"></small>
     </fieldset>
     <div class="form-group">
@@ -2025,8 +2050,65 @@ function reportOptions(name, current, includeBlank = false) {
     `<label class="report-option${key === REPORT_UNASSIGNED ? ' is-unassigned' : ''}"><input type="radio" name="${name}" value="${key}" ${key === current ? 'checked' : ''}><span class="report-option-icon">${projectIcon(key, 'currentColor')}</span><span class="report-option-text">${label}</span><span class="report-option-check" aria-hidden="true"></span></label>`).join('');
 }
 
+function reportSelectValue(key) {
+  return `<span class="report-option-icon">${projectIcon(key, 'currentColor')}</span><span class="report-select-label">${REPORT_LABELS[key]}</span><svg class="report-select-chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+}
+
+function renderReportSelect(current) {
+  const root = document.getElementById('reportFormOptions');
+  root.innerHTML = `<button type="button" class="report-select-trigger" aria-haspopup="true" aria-expanded="false" onclick="toggleReportSelect()">${reportSelectValue(current)}</button>
+    <div class="report-select-menu" role="radiogroup" aria-label="หมวดสำหรับรายงาน" hidden onchange="syncReportSelect()" onclick="closeReportSelectAfterPick(event)" onkeydown="reportSelectKey(event)">${reportOptions('expenseReportCategory', current, true)}</div>`;
+  root.classList.remove('is-open');
+  root.classList.toggle('is-unassigned', current === REPORT_UNASSIGNED);
+}
+
+function toggleReportSelect(open) {
+  const root = document.getElementById('reportFormOptions');
+  const menu = root?.querySelector('.report-select-menu');
+  if (!menu) return;
+  const next = open ?? menu.hidden;
+  menu.hidden = !next;
+  root.classList.toggle('is-open', next);
+  root.querySelector('.report-select-trigger').setAttribute('aria-expanded', String(next));
+  if (next) {
+    const checked = menu.querySelector('input:checked') || menu.querySelector('input');
+    checked.focus({ preventScroll: true });
+    checked.closest('.report-option').scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function closeReportSelect(focusTrigger = true) {
+  toggleReportSelect(false);
+  if (focusTrigger) document.querySelector('#reportFormOptions .report-select-trigger')?.focus();
+}
+
+function syncReportSelect() {
+  const root = document.getElementById('reportFormOptions');
+  const key = root.querySelector('input:checked')?.value || REPORT_UNASSIGNED;
+  root.querySelector('.report-select-trigger').innerHTML = reportSelectValue(key);
+  root.classList.toggle('is-unassigned', key === REPORT_UNASSIGNED);
+}
+
+// Pointer picks close the menu; arrow-key moves (detail 0) only change the value.
+function closeReportSelectAfterPick(event) {
+  if (event.target.matches('input') && event.detail === 0) return;
+  if (event.target.closest('.report-option')) setTimeout(() => closeReportSelect(), 90);
+}
+
+function reportSelectKey(event) {
+  if (!['Escape', 'Enter', ' ', 'Tab'].includes(event.key)) return;
+  if (event.key !== 'Tab') event.preventDefault();
+  event.stopPropagation();
+  closeReportSelect(event.key !== 'Tab');
+}
+
+document.addEventListener('pointerdown', event => {
+  const root = document.getElementById('reportFormOptions');
+  if (root?.classList.contains('is-open') && !root.contains(event.target)) toggleReportSelect(false);
+});
+
 function setReportForm(e) {
-  document.getElementById('reportFormOptions').innerHTML = reportOptions('expenseReportCategory', e ? reportCategory(e) : REPORT_UNASSIGNED, true);
+  renderReportSelect(e ? reportCategory(e) : REPORT_UNASSIGNED);
   document.getElementById('reportFormHint').textContent = e && !e.reportCategory && suggestedReportCategory(e)
     ? 'ระบบเติมจากชื่อรายการหรือหมวดเดิม คุณแก้ไขได้'
     : 'ใช้สรุปให้ลูกบ้าน เลือกได้หนึ่งหมวด';
@@ -3476,6 +3558,10 @@ Object.assign(window, {
   openProjectExpenses,
   toggleProject,
   openProjectFromMap,
+  toggleReportSelect,
+  syncReportSelect,
+  closeReportSelectAfterPick,
+  reportSelectKey,
   setDashboardStatusFilter,
   setExpensesStatusFilter,
   clearAnnualTypeFilter,
