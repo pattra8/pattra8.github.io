@@ -1017,7 +1017,7 @@
     <div id="monthHeroCard"></div>
 
     <div class="section-header">
-      <div class="section-title" id="txnSectionTitle">รายการรายจ่าย</div>
+      <div class="section-title" id="txnSectionTitle">รายจ่าย</div>
       <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
     </div>
     <div class="transaction-toolbar">
@@ -1842,7 +1842,7 @@ function renderMonthTxn() {
   const extra = filterLabels.length ? ' · ' + filterLabels.join(' · ') : '';
   const title = q
     ? (searchAllMonths ? 'ผลการค้นหาทุกเดือน' : 'ผลการค้นหา')
-    : 'รายการรายจ่าย';
+    : 'รายจ่าย';
   document.getElementById('txnSectionTitle').textContent = title + extra;
   // Drag-reorder only when admin is viewing a clean month slice (no search or status filter).
   const reorderable = isAdmin && !q && !activeDashboardStatus;
