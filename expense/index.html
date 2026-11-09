@@ -154,14 +154,13 @@
     padding:22px 26px; margin-bottom:18px;
   }
   .month-card #monthHeroCard { min-width:0; }
-  .mc-month { margin:0; font-size:15px; font-weight:600; color:var(--accent-dk); line-height:1.35; }
-  .mc-month span { margin-left:4px; font-weight:500; color:var(--text-lo); }
+  .mc-month { margin:0; font-size:15px; font-weight:500; color:var(--text-mid); line-height:1.35; }
+  .mc-month b { font-weight:600; color:var(--accent-dk); }
   .mc-amount {
     margin-top:4px; font-family:var(--font-num); font-size:44px; font-weight:700;
     color:var(--text-hi); line-height:1.05; letter-spacing:-.02em; font-variant-numeric:tabular-nums;
   }
-  .mc-cur { margin-right:6px; font-size:20px; font-weight:600; color:var(--accent-dk); vertical-align:14px; }
-  .mc-label { margin-top:2px; font-size:13px; color:var(--text-lo); }
+  .mc-unit { margin-left:8px; font-family:'IBM Plex Sans Thai',sans-serif; font-size:18px; font-weight:600; color:var(--text-mid); letter-spacing:0; }
   .month-card-add { flex-shrink:0; height:42px; padding:0 18px; border-radius:12px; font-size:14px; white-space:nowrap; }
   #pageDashboard > .section-header[hidden] { display:none; }
   #pageDashboard > .section-header .section-title { font-size:14px; font-weight:500; color:var(--text-mid); }
@@ -1810,9 +1809,8 @@ function renderMonthHero() {
   const whole = Math.round(Math.abs(Number(tot || 0))).toLocaleString('en-US');
   const sign = Math.round(Number(tot || 0)) < 0 ? '-' : '';
   document.getElementById('monthHeroCard').innerHTML = `
-    <h1 class="mc-month">${MONTH_TH[mi]}<span>${yr}</span></h1>
-    <div class="mc-amount" aria-label="ยอดรายจ่ายสุทธิ">${sign}<span class="mc-cur">฿</span>${whole}</div>
-    <div class="mc-label">รายจ่ายสุทธิ</div>`;
+    <h1 class="mc-month">รายจ่ายสุทธิ เดือน<b>${MONTH_TH[mi]}</b> ${yr}</h1>
+    <div class="mc-amount">${sign}${whole}<span class="mc-unit">บาท</span></div>`;
 }
 
 function dashboardExpenseMatchesActiveFilters(expense) {
