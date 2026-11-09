@@ -355,7 +355,7 @@
           <option value="food_delivery">ส่งอาหาร (Food Delivery)</option>
           <option value="delivery">ส่งพัสดุ/ขนส่ง (Delivery)</option>
           <option value="pickup">รับ-ส่ง (Grab/แท็กซี่)</option>
-          <option value="contractor">ช่าง/ซ่อมบำรุง (Contractor)</option>
+          <option value="contractor">ช่างและบริการ</option>
           <option value="utility">หน่วยงานสาธารณูปโภค</option>
           <option value="office">ติดต่อนิติ</option>
           <option value="other">อื่น ๆ</option>
@@ -475,7 +475,7 @@
     if (r.status === 'pending_text') return 'รอข้อมูลเพิ่มเติม';
     return 'รอตรวจสอบข้อมูล';
   }
-    function categoryLabel(s){return {laundry:'ซักรีด/รับ–ส่งผ้า',food_delivery:'ส่งอาหาร (Food Delivery)',delivery:'ส่งพัสดุ/ขนส่ง (Delivery)',pickup:'รับ-ส่ง (Grab/แท็กซี่)',contractor:'ช่าง/ซ่อมบำรุง (Contractor)',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
+    function categoryLabel(s){return {laundry:'ซักรีด/รับ–ส่งผ้า',food_delivery:'ส่งอาหาร (Food Delivery)',delivery:'ส่งพัสดุ/ขนส่ง (Delivery)',pickup:'รับ-ส่ง (Grab/แท็กซี่)',contractor:'ช่างและบริการ',utility:'หน่วยงานสาธารณูปโภค',office:'ติดต่อนิติ',contact:'มาติดต่อ',guest:'มาหาลูกบ้าน',other:'อื่น ๆ',unknown:'ไม่ทราบ'}[s]||s||'ไม่ทราบ';}
     function imageKind(k){return k==='document_vehicle'?'บัตรและทะเบียนรถ':k==='document'?'บัตรประชาชน / ใบขับขี่':k==='vehicle'?'รูปรถ':'รูปภาพ';}
     function normalizeProvince(v){return String(v||'').replace(/กรุงเทพมหานคร/g,'กรุงเทพ');}
     function plateParts(v){
@@ -518,6 +518,7 @@
     function purposeDisplay(r){
       var c=String(r.purposeCategory||'unknown');
       if(c==='other'||c==='unknown') return r.purposeText||categoryLabel(c);
+      if(c==='contractor'&&r.purposeDetail) return categoryLabel(c)+' · '+r.purposeDetail;
       return categoryLabel(c);
     }
     var QUIET_WARNING_CODES = {
