@@ -147,21 +147,28 @@
   .hero-month  { font-size:12px; font-weight:500; color:var(--text-lo); line-height:1.35; }
   .hero-amount { font-family:var(--font-num); font-size:32px; font-weight:700; color:var(--text-hi); line-height:1.02; letter-spacing:-.01em; }
   .hero-amount span { font-size:15px; font-weight:600; margin-right:4px; color:var(--accent-dk); vertical-align:10%; }
-  .dashboard-month-header {
-    display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between;
-    gap:12px 16px; padding:2px 0 16px; margin-bottom:18px;
-    border-bottom:1px solid var(--border2);
+  .month-card {
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    box-shadow:0 1px 2px rgba(42,34,24,.04), 0 8px 24px rgba(42,34,24,.06);
+    padding:22px 26px; margin-bottom:18px;
   }
-  .dashboard-month-title {
-    display:flex; flex-wrap:wrap; align-items:baseline; gap:0 .35em;
-    margin:0; font-size:clamp(22px, 4vw, 36px); font-weight:700;
-    color:var(--text-hi); line-height:1.2;
+  .month-card #monthHeroCard { min-width:0; }
+  .mc-month { margin:0; font-size:15px; font-weight:600; color:var(--accent-dk); line-height:1.35; }
+  .mc-month span { margin-left:4px; font-weight:500; color:var(--text-lo); }
+  .mc-amount {
+    margin-top:4px; font-family:var(--font-num); font-size:44px; font-weight:700;
+    color:var(--text-hi); line-height:1.05; letter-spacing:-.02em; font-variant-numeric:tabular-nums;
   }
-  .dashboard-month-year { font-family:var(--font-num); font-size:.65em; font-weight:600; color:var(--text-mid); }
-  .dashboard-month-total { margin-inline-start:auto; text-align:end; }
-  .dashboard-month-caption { margin-bottom:4px; font-size:12px; font-weight:600; color:var(--text-mid); line-height:1.35; }
-  .dashboard-month-total .hero-amount {
-    font-size:clamp(22px, 3.4vw, 32px); font-variant-numeric:tabular-nums;
+  .mc-cur { margin-right:6px; font-size:20px; font-weight:600; color:var(--accent-dk); vertical-align:14px; }
+  .mc-label { margin-top:2px; font-size:13px; color:var(--text-lo); }
+  .month-card-add { flex-shrink:0; height:42px; padding:0 18px; border-radius:12px; font-size:14px; white-space:nowrap; }
+  #pageDashboard > .section-header[hidden] { display:none; }
+  #pageDashboard > .section-header .section-title { font-size:14px; font-weight:500; color:var(--text-mid); }
+  @media(max-width:620px) {
+    .month-card { padding:18px; margin-bottom:12px; }
+    .mc-amount { font-size:36px; }
+    .month-card-add { display:none !important; }
   }
   .hero-chips  { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
   .hero-chip {
@@ -832,7 +839,7 @@
     .page-tabs { width:100%; margin-bottom:14px; }
     .page-tab { flex:1; padding:7px 10px; }
     #pageDashboard { display:flex; flex-direction:column; }
-    #monthHeroCard { order:1; }
+    #pageDashboard > .month-card { order:1; }
     #pageDashboard > .section-header { order:2; margin-bottom:10px; }
     #pageDashboard > .transaction-toolbar { order:3; margin-bottom:10px; }
     #recentList { order:4; }
@@ -1014,11 +1021,13 @@
 
   <!-- DASHBOARD -->
   <div id="pageDashboard">
-    <div id="monthHeroCard"></div>
+    <section class="month-card">
+      <div id="monthHeroCard" aria-live="polite" aria-atomic="true"></div>
+      <button class="btn btn-primary month-card-add" id="addBtnDashboard" style="display:none" onclick="openAddModal()">＋ เพิ่มรายจ่าย</button>
+    </section>
 
-    <div class="section-header">
-      <div class="section-title" id="txnSectionTitle">รายจ่าย</div>
-      <button class="btn btn-primary" id="addBtnDashboard" style="display:none" onclick="openAddModal()">Add Expense</button>
+    <div class="section-header" hidden>
+      <div class="section-title" id="txnSectionTitle"></div>
     </div>
     <div class="transaction-toolbar">
       <div class="search-wrap" id="monthSearchWrap">
@@ -1798,14 +1807,12 @@ function renderMonthHero() {
   const {yr,mi} = getMonthFilter();
   const me  = expenses.filter(e=>{ const d=new Date(e.date); return d.getFullYear()===yr&&d.getMonth()===mi; });
   const tot = sumNetExpenses(me);
+  const whole = Math.round(Math.abs(Number(tot || 0))).toLocaleString('en-US');
+  const sign = Math.round(Number(tot || 0)) < 0 ? '-' : '';
   document.getElementById('monthHeroCard').innerHTML = `
-    <div class="dashboard-month-header">
-      <h1 class="dashboard-month-title">${MONTH_TH[mi]} <span class="dashboard-month-year">${yr}</span></h1>
-      <div class="dashboard-month-total">
-        <div class="dashboard-month-caption">รายจ่ายสุทธิ</div>
-        <div class="hero-amount">${heroAmountHtml(tot)}</div>
-      </div>
-    </div>`;
+    <h1 class="mc-month">${MONTH_TH[mi]}<span>${yr}</span></h1>
+    <div class="mc-amount" aria-label="ยอดรายจ่ายสุทธิ">${sign}<span class="mc-cur">฿</span>${whole}</div>
+    <div class="mc-label">รายจ่ายสุทธิ</div>`;
 }
 
 function dashboardExpenseMatchesActiveFilters(expense) {
@@ -1843,7 +1850,9 @@ function renderMonthTxn() {
   const title = q
     ? (searchAllMonths ? 'ผลการค้นหาทุกเดือน' : 'ผลการค้นหา')
     : 'รายจ่าย';
-  document.getElementById('txnSectionTitle').textContent = title + extra;
+  const txnTitle = document.getElementById('txnSectionTitle');
+  txnTitle.textContent = (q || filterLabels.length) ? title + extra : '';
+  txnTitle.parentElement.hidden = !(q || filterLabels.length);
   // Drag-reorder only when admin is viewing a clean month slice (no search or status filter).
   const reorderable = isAdmin && !q && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
