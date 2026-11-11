@@ -2959,10 +2959,10 @@ function showExpenseModal() {
 function openAddModal() {
   if (!isAdmin) return;
   if (isSavingExpense) return;
-  editingId=null; currentSlips=[]; resetOcrSession();
+  editingId=null; currentSlips=[]; resetOcrSession('pending');
   document.getElementById('modalTitle').textContent='เพิ่มรายจ่ายใหม่';
   ['fTitle','fDetail'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fAmount').value=''; document.getElementById('fStatus').value='paid';
+  document.getElementById('fAmount').value=''; document.getElementById('fStatus').value=ocrInitialStatus;
   setCostCategory('ส่วนกลาง');
   setReportForm(null);
   document.getElementById('uploadPreview').innerHTML='';
@@ -2976,11 +2976,11 @@ function openEditModal(id) {
   if (!isAdmin) return;
   if (isSavingExpense) return;
   const e=expenses.find(x=>x.id===id); if(!e)return;
-  editingId=id; currentSlips=[...(e.slips||[])]; resetOcrSession();
+  editingId=id; currentSlips=[...(e.slips||[])]; resetOcrSession(e.status || 'paid');
   document.getElementById('modalTitle').textContent='แก้ไขรายจ่าย';
   document.getElementById('fTitle').value=e.title||''; document.getElementById('fAmount').value=e.amount||'';
   document.getElementById('fDate').value=e.date||''; document.getElementById('fDetail').value=[e.detail,e.note].filter(Boolean).join('\n');
-  document.getElementById('fStatus').value=e.status||'paid';
+  document.getElementById('fStatus').value=ocrInitialStatus;
   setCostCategory(costCategoryValue(e));
   setReportForm(e);
   setOcrHint('');
@@ -3225,9 +3225,14 @@ async function deleteSlipAssets(slips) {
 async function saveExpense() {
   if (!isAdmin) return;
   if (isSavingExpense) return;
+  if (queuedOcrImages.length && !ocrStatusEdited) {
+    alert('กำลังอ่านรูปที่แนบ รอสักครู่แล้วลองบันทึกอีกครั้ง');
+    return;
+  }
   const title=document.getElementById('fTitle').value.trim(), amount=document.getElementById('fAmount').value, date=document.getElementById('fDate').value;
   if(!title||!amount||!date){alert('กรุณากรอก: ชื่อรายการ, จำนวนเงิน, วันที่');return;}
   if(Number(amount) <= 0){alert('จำนวนเงินต้องมากกว่า 0 บาท');return;}
+  const status = document.getElementById('fStatus').value;
   const expenseId = editingId || makeExpenseId();
   setExpenseSaveState(true);
   setExpenseSaveProgress(5, editingId ? 'กำลังอัปเดตรายจ่าย...' : 'กำลังบันทึกรายจ่าย...', 'กำลังตรวจสอบข้อมูล...');
@@ -3239,7 +3244,7 @@ async function saveExpense() {
     const entry={title,type:currentType,amount:Math.abs(parseFloat(amount)),date,
       costCategory:document.getElementById('fCostCategory').value,
       detail:document.getElementById('fDetail').value.trim(),note:'',
-      status:document.getElementById('fStatus').value,
+      status,
       slips};
     if (reportCategoryChanged) entry.reportCategory = formCategory;
     if (usingFirestore) {
@@ -3301,7 +3306,8 @@ function processFiles(files){
   renderPreview();
   const images = files.filter(file => (file.type || '').startsWith('image/'));
   if (images.length) {
-    queuedOcrImages.push(...images);
+    for (const file of images) queuedOcrImages.push({ file });
+    setOcrHint('กำลังอ่านรูปที่แนบ…', 'loading');
     tryAutofillFromQueuedSlips();
   }
 }
@@ -3309,9 +3315,28 @@ function processFiles(files){
 let ocrInFlight = false;
 let queuedOcrImages = [];
 let ocrSessionId = 0;
-function resetOcrSession(){
+let ocrInitialStatus = 'pending';
+let ocrStatusEdited = false;
+let ocrDateEdited = false;
+let ocrResults = new Map();
+let lastAutofilledSlip = null;
+
+document.getElementById('fStatus').addEventListener('change', () => {
+  ocrStatusEdited = true;
+  applyAttachmentOcr();
+});
+document.getElementById('fDate').addEventListener('input', () => {
+  ocrDateEdited = true;
+});
+
+function resetOcrSession(initialStatus = 'pending'){
   ocrSessionId += 1;
   queuedOcrImages = [];
+  ocrInitialStatus = initialStatus;
+  ocrStatusEdited = false;
+  ocrDateEdited = false;
+  ocrResults = new Map();
+  lastAutofilledSlip = null;
   setOcrHint('');
 }
 // วันที่จากสลิปต้องไม่อยู่อนาคต และไม่เก่ากว่า ~1 ปี ไม่งั้นถือว่า OCR อ่านปีเพี้ยน ไม่เอามาทับ
@@ -3347,65 +3372,96 @@ async function requestSlipOcr(file, idToken){
   if (!res.ok || !data.ok) throw new Error(data.error || 'ocr_failed');
   return data;
 }
+function applyAttachmentOcr(){
+  const results = [...ocrResults.values()];
+  const slip = results.find(result => result?.documentType === 'bank_slip');
+  const paid = Boolean(slip) || results.some(result => result?.paymentStatus === 'paid');
+  const pending = results.some(result => result?.paymentStatus === 'pending');
+  const detectedStatus = slip ? 'paid' : paid === pending ? '' : paid ? 'paid' : 'pending';
+  if (!ocrStatusEdited) {
+    document.getElementById('fStatus').value = detectedStatus || ocrInitialStatus;
+  }
+
+  const filled = [];
+  if (slip && slip !== lastAutofilledSlip) {
+    const amountEl = document.getElementById('fAmount');
+    if (slip.amount > 0 && !amountEl.value) {
+      amountEl.value = slip.amount;
+      filled.push('ยอดเงิน');
+    }
+    const titleEl = document.getElementById('fTitle');
+    if (slip.memo && !titleEl.value.trim()) {
+      titleEl.value = slip.memo;
+      filled.push(currentType === 'refund' ? 'ชื่อรายการคืนเงิน' : 'ชื่อรายจ่าย');
+    }
+    const detailEl = document.getElementById('fDetail');
+    if (slip.payee && !detailEl.value.trim()) {
+      detailEl.value = (currentType === 'refund' ? 'รับเงินคืนจาก: ' : 'จ่ายให้: ') + slip.payee;
+      filled.push('รายละเอียด');
+    }
+    if (!editingId && !ocrDateEdited && slip.date && /^\d{4}-\d{2}-\d{2}$/.test(slip.date) && isPlausibleSlipDate(slip.date)) {
+      const dateEl = document.getElementById('fDate');
+      if (dateEl.value !== slip.date) {
+        dateEl.value = slip.date;
+        filled.push('วันที่');
+      }
+    }
+    if (slip.category && COST_CATEGORY_EMOJI[slip.category]) {
+      if (document.getElementById('fCostCategory').value !== slip.category) {
+        setCostCategory(slip.category);
+        filled.push('หมวด');
+      }
+    }
+    lastAutofilledSlip = slip;
+  }
+  if (queuedOcrImages.length) return;
+  if (!detectedStatus && paid && pending) {
+    setOcrHint('สถานะการชำระเงินในรูปขัดกัน · ตรวจสอบแล้วเลือกสถานะ', 'warn');
+  } else if (detectedStatus) {
+    const refund = currentType === 'refund';
+    const status = paid ? (refund ? 'ได้รับเงินแล้ว' : 'จ่ายแล้ว') : (refund ? 'รอรับเงิน' : 'ยังไม่จ่าย');
+    const evidence = slip ? 'อ่านสลิปธนาคารได้' : 'พบสถานะการชำระเงินในรูป';
+    const statusHint = ocrStatusEdited ? ' · ใช้สถานะที่คุณเลือก' : '';
+    const filledHint = filled.length ? ' · เติม ' + filled.join(', ') : '';
+    const unreadable = results.includes(null) ? ' · บางรูปอ่านไม่สำเร็จ' : '';
+    setOcrHint(evidence + ' · ' + status + statusHint + filledHint + unreadable, 'ok');
+  } else if (results.includes(null)) {
+    setOcrHint('แนบรูปแล้ว แต่บางรูปอ่านอัตโนมัติไม่สำเร็จ · ตรวจสอบสถานะและข้อมูลได้เอง', 'warn');
+  } else if (results.length) {
+    setOcrHint('แนบรูปแล้ว · ระบุสถานะการชำระเงินจากรูปไม่ได้', 'warn');
+  } else {
+    setOcrHint('');
+  }
+}
+
 async function tryAutofillFromQueuedSlips(){
-  if (!usingFirestore || !auth || !auth.currentUser) return;
-  if (ocrInFlight) return;
-  if (!queuedOcrImages.length) return;
+  if (ocrInFlight || !queuedOcrImages.length) return;
   const sessionId = ocrSessionId;
   ocrInFlight = true;
   try {
-    const idToken = await auth.currentUser.getIdToken();
-    let data = null;
-    let checked = 0;
+    const idToken = usingFirestore && auth?.currentUser
+      ? await auth.currentUser.getIdToken().catch(() => null)
+      : null;
     while (queuedOcrImages.length && sessionId === ocrSessionId) {
-      const file = queuedOcrImages.shift();
-      checked += 1;
-      setOcrHint(`กำลังค้นหาสลิปธนาคารในรูปที่ ${checked}…`, 'loading');
-      const result = await requestSlipOcr(file, idToken);
+      const entry = queuedOcrImages[0];
+      let result = null;
+      if (idToken) {
+        try {
+          result = await requestSlipOcr(entry.file, idToken);
+        } catch (err) {
+          console.warn('OCR autofill failed', err);
+        }
+      }
       if (sessionId !== ocrSessionId) return;
-      if (result.documentType === 'bank_slip') {
-        data = result;
-        queuedOcrImages = [];
-        break;
+      queuedOcrImages = queuedOcrImages.filter(item => item !== entry);
+      if (currentSlips.some(item => item.file === entry.file)) {
+        ocrResults.set(entry.file, result);
       }
+      if (!isSavingExpense) applyAttachmentOcr();
     }
-    if (sessionId !== ocrSessionId) return;
-    if (!data) {
-      setOcrHint('ไม่พบสลิปธนาคาร — วันที่และยอดยังคงเดิม', 'warn');
-      return;
-    }
-    const amountEl = document.getElementById('fAmount');
-    const filled = [];
-    if (data.amount > 0 && !(amountEl.value && Number(amountEl.value) > 0)){
-      amountEl.value = data.amount; filled.push('ยอดเงิน');
-    }
-    const titleEl = document.getElementById('fTitle');
-    if (data.memo && !titleEl.value.trim()){ titleEl.value = data.memo; filled.push(currentType === 'refund' ? 'ชื่อรายการคืนเงิน' : 'ชื่อรายจ่าย'); }
-    const detailEl = document.getElementById('fDetail');
-    if (data.payee && !detailEl.value.trim()){ detailEl.value = (currentType === 'refund' ? 'รับเงินคืนจาก: ' : 'จ่ายให้: ') + data.payee; filled.push('รายละเอียด'); }
-    // วันที่: ใช้ตามสลิป แต่เฉพาะเมื่อ "สมเหตุสมผล" (กัน OCR อ่านปีผิดแล้วทับวันที่)
-    if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date) && isPlausibleSlipDate(data.date)){
-      const dateEl = document.getElementById('fDate');
-      if (dateEl.value !== data.date){ dateEl.value = data.date; filled.push('วันที่'); }
-    }
-    // หมวด: ใช้ตามที่เดาจากสลิป (ถ้าอยู่ในรายการที่มี)
-    if (data.category && COST_CATEGORY_EMOJI[data.category]){
-      if (document.getElementById('fCostCategory').value !== data.category){
-        setCostCategory(data.category); filled.push('หมวด');
-      }
-    }
-    if (filled.length) setOcrHint('พบสลิปธนาคาร · เติมให้แล้ว: ' + filled.join(', ') + ' — ตรวจสอบอีกครั้งได้', 'ok');
-    else setOcrHint('พบสลิปธนาคารแล้ว — ข้อมูลในฟอร์มตรงกัน', 'ok');
-  } catch (err){
-    console.warn('OCR autofill failed', err);
-    setOcrHint('อ่านสลิปอัตโนมัติไม่สำเร็จ — กรอกยอดเอง', 'warn');
   } finally {
     ocrInFlight = false;
     if (queuedOcrImages.length) tryAutofillFromQueuedSlips();
-    setTimeout(()=>{
-      const el = document.getElementById('ocrHint');
-      if (el && el.classList.contains('ok')) setOcrHint('');
-    }, 6000);
   }
 }
 function renderPreview(){
@@ -3419,7 +3475,15 @@ function renderPreview(){
   }).join('');
 }
 function previewSlip(i){ openAttachment(currentSlips, i); }
-function removeSlip(i){currentSlips.splice(i,1);renderPreview();}
+function removeSlip(i){
+  const [removed] = currentSlips.splice(i, 1);
+  renderPreview();
+  if (removed?.file) {
+    queuedOcrImages = queuedOcrImages.filter(entry => entry.file !== removed.file);
+    ocrResults.delete(removed.file);
+    applyAttachmentOcr();
+  }
+}
 
 function openDetail(id) {
   const e=expenses.find(x=>x.id===id); if(!e)return;
