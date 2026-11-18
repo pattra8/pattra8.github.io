@@ -21,7 +21,7 @@
   });
   };
   const css = document.createElement('link');
-  css.rel = 'stylesheet'; css.href = '/assets/resident-header.css?v=20261118';
+  css.rel = 'stylesheet'; css.href = '/assets/resident-header.css?v=20261118-2';
   document.head.appendChild(css);
   apply();
   new MutationObserver(apply).observe(document.body, {childList:true, subtree:true});
