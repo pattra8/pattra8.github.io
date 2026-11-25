@@ -977,9 +977,25 @@
   .report-actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:12px; }
 
   /* Drag-and-drop reorder (admin) */
-  .expense-card[draggable="true"] { cursor:grab; }
-  .expense-card[draggable="true"]:active { cursor:grabbing; }
-  .expense-card.dragging { opacity:.45; box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  .reorder-active, .reorder-active * { cursor:grabbing !important; user-select:none !important; }
+  .reorder-active .expense-card { transition:none; }
+  .reorder-active .expense-card:hover { transform:none; }
+  .expense-card.dragging {
+    position:relative; background:var(--accent-bg); border:2px dashed var(--accent);
+    box-shadow:none; transform:none; opacity:1;
+  }
+  .expense-card.dragging > * { visibility:hidden; }
+  .expense-card.dragging::before { display:none; }
+  .expense-card.dragging::after {
+    content:'วางที่นี่'; position:absolute; inset:0; display:grid; place-items:center;
+    color:var(--accent); font-size:13px; font-weight:600;
+  }
+  .expense-card.reorder-ghost {
+    position:fixed; margin:0; z-index:10000; pointer-events:none; box-sizing:border-box;
+    background:var(--surface); border:1px solid var(--accent); border-radius:14px;
+    box-shadow:0 16px 40px rgba(58,42,22,.2); transition:none; opacity:.97;
+    will-change:transform; overflow:hidden;
+  }
   .drag-handle {
     flex-shrink:0; align-self:center;
     display:flex; align-items:center; justify-content:center;
@@ -2613,14 +2629,16 @@ function bindReorder() {
   ['expenseList', 'recentList'].forEach(id => {
     const container = document.getElementById(id);
     if (!container) return;
-    container.addEventListener('dragstart', onReorderDragStart);
-    container.addEventListener('dragover', onReorderDragOver);
-    container.addEventListener('drop', onReorderDrop);
-    container.addEventListener('dragend', onReorderDragEnd);
     container.addEventListener('pointerdown', onReorderPointerDown);
     container.addEventListener('pointermove', onReorderPointerMove);
     container.addEventListener('pointerup', onReorderPointerEnd);
     container.addEventListener('pointercancel', onReorderPointerEnd);
+    container.addEventListener('lostpointercapture', e => {
+      if (reorderPointer?.id === e.pointerId) finishReorderPointer(false);
+    });
+    container.addEventListener('dragstart', e => {
+      if (e.target.closest('.drag-handle')) e.preventDefault();
+    });
     container.addEventListener('click', e => {
       if (container._suppressReorderClick) {
         e.preventDefault();
@@ -2628,90 +2646,114 @@ function bindReorder() {
       }
     }, true);
   });
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && reorderPointer) { e.preventDefault(); finishReorderPointer(false); }
+  });
+  window.addEventListener('blur', () => { if (reorderPointer) finishReorderPointer(false); });
 }
-function onReorderDragStart(e) {
-  const card = e.target.closest('.expense-card[draggable="true"]');
-  if (!card || !isAdmin || reorderSaving || reorderPointer || e.target.closest('img, a, button, .card-menu-wrap')) {
-    e.preventDefault();
-    return;
-  }
-  reorderDragId = card.dataset.id;
-  card.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  try { e.dataTransfer.setData('text/plain', reorderDragId); } catch (_) {}
+function reorderCardBox(card) {
+  const box = card.getBoundingClientRect();
+  // Hit testing uses the final layout, independent of the slide animation.
+  const transform = getComputedStyle(card).transform;
+  const dy = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42;
+  return { top: box.top - dy, height: box.height };
 }
 function reorderAfterElement(container, y) {
-  const cards = [...container.querySelectorAll('.expense-card:not(.dragging)')].filter(card => card.getClientRects().length);
-  return cards.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) return { offset, element: child };
-    return closest;
-  }, { offset: -Infinity }).element;
-}
-function onReorderDragOver(e) {
-  if (reorderDragId === null) return;
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  const container = e.currentTarget;
-  const dragging = container.querySelector('.expense-card.dragging');
-  if (!dragging) return;
-  const after = reorderAfterElement(container, e.clientY);
-  moveReorderCard(container, dragging, after);
-}
-function onReorderDrop(e) {
-  if (reorderDragId === null) return;
-  e.preventDefault();
-  persistReorder(e.currentTarget);
-}
-function onReorderDragEnd(e) {
-  const card = e.target.closest('.expense-card');
-  if (card) card.classList.remove('dragging');
-  reorderDragId = null;
-  refreshUI();
+  return [...container.querySelectorAll('.expense-card:not(.dragging)')]
+    .filter(card => card.getClientRects().length)
+    .find(card => { const box = reorderCardBox(card); return y < box.top + box.height / 2; });
 }
 function moveReorderCard(container, card, after) {
-  // Cards live inside date sections, not directly inside the list.
+  const cards = [...container.querySelectorAll('.expense-card')];
+  const index = cards.indexOf(card);
+  if (cards[index + 1] === after || (!after && index === cards.length - 1)) return;
+  const before = new Map(cards.map(item => [item, item.getBoundingClientRect().top]));
+  cards.forEach(item => item.getAnimations().forEach(animation => animation.cancel()));
   if (after) after.parentNode.insertBefore(card, after);
-  else {
-    const last = [...container.querySelectorAll('.expense-card')].filter(c => c !== card).pop();
-    if (last) last.after(card);
-  }
+  else cards.filter(item => item !== card).pop()?.after(card);
   container.querySelectorAll('.day-block').forEach(block => {
     block.style.display = block.querySelector('.expense-card') ? '' : 'none';
   });
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    cards.filter(item => item !== card).forEach(item => {
+      const dy = before.get(item) - item.getBoundingClientRect().top;
+      if (Math.abs(dy) > 1) item.animate([
+        { transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' },
+      ], { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    });
+  }
 }
 function onReorderPointerDown(e) {
   const handle = e.target.closest('.drag-handle');
-  if (!handle || e.button !== 0 || !isAdmin || reorderSaving) return;
+  if (!handle || e.button !== 0 || !e.isPrimary || !isAdmin || reorderSaving || reorderDragId !== null || reorderPointer) return;
   const card = handle.closest('.expense-card');
+  const box = card.getBoundingClientRect();
   e.preventDefault();
-  handle.setPointerCapture(e.pointerId);
-  reorderPointer = { id: e.pointerId, handle, card, container: e.currentTarget, y: e.clientY, moved: false };
+  // Capture on the stationary list, so moving the placeholder cannot lose capture.
+  e.currentTarget.setPointerCapture(e.pointerId);
+  reorderPointer = { id: e.pointerId, card, container: e.currentTarget,
+    x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY,
+    grabY: e.clientY - box.top, box, moved: false, frame: null, ghost: null };
 }
 function onReorderPointerMove(e) {
   const state = reorderPointer;
   if (!state || state.id !== e.pointerId) return;
-  if (!state.moved && Math.abs(e.clientY - state.y) < 5) return;
+  state.x = e.clientX; state.y = e.clientY;
+  if (!state.moved && Math.hypot(state.x - state.startX, state.y - state.startY) < 6) return;
   e.preventDefault();
-  state.moved = true;
-  reorderDragId = state.card.dataset.id;
-  state.card.classList.add('dragging');
-  moveReorderCard(state.container, state.card, reorderAfterElement(state.container, e.clientY));
-  state.handle.setPointerCapture(e.pointerId);
-  if (e.clientY < 80) window.scrollBy(0, -24);
-  else if (e.clientY > window.innerHeight - 80) window.scrollBy(0, 24);
+  if (!state.moved) {
+    state.moved = true;
+    reorderDragId = state.card.dataset.id;
+    state.ghost = state.card.cloneNode(true);
+    state.ghost.classList.add('reorder-ghost');
+    state.ghost.removeAttribute('data-id');
+    state.ghost.removeAttribute('onclick');
+    state.ghost.setAttribute('aria-hidden', 'true');
+    state.ghost.style.cssText += `;left:${state.box.left}px;top:${state.box.top}px;width:${state.box.width}px;height:${state.box.height}px`;
+    document.body.appendChild(state.ghost);
+    state.card.classList.add('dragging');
+    document.body.classList.add('reorder-active');
+    state.frame = requestAnimationFrame(tickReorderPointer);
+  }
+}
+function tickReorderPointer() {
+  const state = reorderPointer;
+  if (!state?.moved) return;
+  // Keep the exact grab point under the pointer; horizontal movement stays in the list.
+  state.ghost.style.transform = `translateY(${state.y - state.startY}px)`;
+  const edge = 72;
+  const speed = state.y < edge ? -Math.min(18, (edge - state.y) / 4)
+    : state.y > innerHeight - edge ? Math.min(18, (state.y - innerHeight + edge) / 4) : 0;
+  if (speed) window.scrollBy(0, speed);
+  const center = state.y - state.grabY + state.box.height / 2;
+  moveReorderCard(state.container, state.card, reorderAfterElement(state.container, center));
+  state.frame = requestAnimationFrame(tickReorderPointer);
 }
 function onReorderPointerEnd(e) {
+  if (reorderPointer?.id !== e.pointerId) return;
+  finishReorderPointer(e.type === 'pointerup');
+}
+async function finishReorderPointer(commit) {
   const state = reorderPointer;
-  if (!state || state.id !== e.pointerId) return;
+  if (!state) return;
+  if (state.moved && commit) tickReorderPointer();
   reorderPointer = null;
-  reorderDragId = null;
-  state.card.classList.remove('dragging');
-  if (state.handle.hasPointerCapture(e.pointerId)) state.handle.releasePointerCapture(e.pointerId);
+  cancelAnimationFrame(state.frame);
+  if (state.container.hasPointerCapture(state.id)) state.container.releasePointerCapture(state.id);
   state.container._suppressReorderClick = true;
   setTimeout(() => { state.container._suppressReorderClick = false; }, 0);
-  if (state.moved && e.type === 'pointerup') persistReorder(state.container);
+  if (state.ghost && commit && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const target = state.card.getBoundingClientRect();
+    await state.ghost.animate([
+      { transform: state.ghost.style.transform },
+      { transform: `translate(${target.left - state.box.left}px, ${target.top - state.box.top}px)` },
+    ], { duration: 130, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => {});
+  }
+  state.ghost?.remove();
+  state.card.classList.remove('dragging');
+  document.body.classList.remove('reorder-active');
+  reorderDragId = null;
+  if (state.moved && commit) await persistReorder(state.container);
   else refreshUI();
 }
 async function persistReorder(container) {
@@ -2994,7 +3036,7 @@ function expenseCardHtml(e,showAdmin,reorderable=false) {
     ?`<div class="card-menu-wrap" onclick="event.stopPropagation()"><button class="card-kebab" title="แก้ไข / ลบ" onclick="toggleCardMenu(this)">⋯</button><div class="card-menu"><button onclick="closeCardMenus();openEditModal('${e.id}')">✏️ แก้ไข</button><button class="menu-danger" onclick="closeCardMenus();deleteExpense('${e.id}')">🗑 ลบ</button></div></div>`:'';
   const sd = `<span class="status-badge ${e.status === 'paid' ? 'paid' : 'pending'}"><span class="status-dot ${e.status === 'paid' ? 'dot-paid' : 'dot-pending'}"></span>${expenseStatusText(e.status, e.type)}</span>`;
   const handleHtml = reorderable ? `<span class="drag-handle" title="ลากเพื่อจัดเรียง" onclick="event.stopPropagation()">⠿</span>` : '';
-  return `<div class="expense-card${e.status === 'paid' ? '' : ' status-pending'}" data-id="${e.id}" style="--rail:${typeRailColor(e.type)}"${reorderable?' draggable="true"':''} onclick="openDetail('${e.id}')">
+  return `<div class="expense-card${e.status === 'paid' ? '' : ' status-pending'}" data-id="${e.id}" style="--rail:${typeRailColor(e.type)}"${reorderable?' data-reorderable="true"':''} onclick="openDetail('${e.id}')">
     ${handleHtml}<div class="expense-info">
       <div class="expense-title-row">
         <span class="expense-title">${escapeHtml(e.title)}</span>
