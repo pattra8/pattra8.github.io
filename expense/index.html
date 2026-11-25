@@ -511,7 +511,11 @@
     .expense-card:hover { box-shadow:none; transform:none; border-color:transparent; }
     .expense-card + .expense-card { border-top:1px solid var(--border); }
     .day-sheet.has-triage .expense-card.status-pending { display:none; }
-    .expense-card > .drag-handle { display:none; }
+    .expense-card:has(> .drag-handle) {
+      grid-template-columns:24px minmax(0,1fr) auto auto;
+      grid-template-areas:"handle info side menu"; column-gap:8px;
+    }
+    .expense-card > .drag-handle { display:flex; grid-area:handle; width:24px; min-height:44px; }
     .expense-card > .expense-info { grid-area:info; }
     .expense-card > .expense-side { grid-area:side; }
     .expense-card > .card-menu-wrap { grid-area:menu; align-self:start; margin:-3px -6px 0 -2px; }
@@ -1221,7 +1225,7 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, setDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, setDoc, runTransaction, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getStorage, ref, uploadBytesResumable, uploadString, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import { getAuth, browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithCustomToken, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
@@ -1322,6 +1326,7 @@ function scheduleRefreshUI() {
   refreshQueued = true;
   requestAnimationFrame(() => {
     refreshQueued = false;
+    if (reorderDragId !== null) return;
     refreshUI();
   });
 }
@@ -1855,7 +1860,7 @@ function renderMonthTxn() {
   // Drag-reorder only when admin is viewing a clean month slice (no search or status filter).
   const reorderable = isAdmin && !q && !activeDashboardStatus;
   document.getElementById('recentList').innerHTML = me.length
-    ? expenseListHtml(me,false,reorderable,{triage:!activeDashboardStatus})
+    ? expenseListHtml(me,false,reorderable,{triage:!reorderable && !activeDashboardStatus})
     : `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${q ? `ไม่พบรายการ${searchAllMonths ? 'จากทุกเดือน' : 'ในเดือนนี้'}` : 'ไม่มีรายการในเดือนนี้'}</div></div>`;
 }
 
@@ -2596,12 +2601,14 @@ function renderExpenses() {
   // Drag-reorder only makes sense on the full, unfiltered, unsearched admin list.
   const reorderable = isAdmin && !q && !activeExpensesFacility && !activeAnnualType && !activeExpensesStatus;
   document.getElementById('expenseList').innerHTML=list.length
-    ?expenseListHtml(list,true,reorderable,{triage:!activeExpensesStatus})
+    ?expenseListHtml(list,true,reorderable,{triage:!reorderable && !activeExpensesStatus})
     :'<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">ไม่พบรายการ</div></div>';
 }
 
 // ---- Drag-and-drop reorder ----
 let reorderDragId = null;
+let reorderPointer = null;
+let reorderSaving = false;
 function bindReorder() {
   ['expenseList', 'recentList'].forEach(id => {
     const container = document.getElementById(id);
@@ -2610,18 +2617,31 @@ function bindReorder() {
     container.addEventListener('dragover', onReorderDragOver);
     container.addEventListener('drop', onReorderDrop);
     container.addEventListener('dragend', onReorderDragEnd);
+    container.addEventListener('pointerdown', onReorderPointerDown);
+    container.addEventListener('pointermove', onReorderPointerMove);
+    container.addEventListener('pointerup', onReorderPointerEnd);
+    container.addEventListener('pointercancel', onReorderPointerEnd);
+    container.addEventListener('click', e => {
+      if (container._suppressReorderClick) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    }, true);
   });
 }
 function onReorderDragStart(e) {
   const card = e.target.closest('.expense-card[draggable="true"]');
-  if (!card) return;
+  if (!card || !isAdmin || reorderSaving || reorderPointer || e.target.closest('img, a, button, .card-menu-wrap')) {
+    e.preventDefault();
+    return;
+  }
   reorderDragId = card.dataset.id;
   card.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
   try { e.dataTransfer.setData('text/plain', reorderDragId); } catch (_) {}
 }
 function reorderAfterElement(container, y) {
-  const cards = [...container.querySelectorAll('.expense-card:not(.dragging)')];
+  const cards = [...container.querySelectorAll('.expense-card:not(.dragging)')].filter(card => card.getClientRects().length);
   return cards.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
@@ -2637,8 +2657,7 @@ function onReorderDragOver(e) {
   const dragging = container.querySelector('.expense-card.dragging');
   if (!dragging) return;
   const after = reorderAfterElement(container, e.clientY);
-  if (!after) container.appendChild(dragging);
-  else container.insertBefore(dragging, after);
+  moveReorderCard(container, dragging, after);
 }
 function onReorderDrop(e) {
   if (reorderDragId === null) return;
@@ -2649,12 +2668,60 @@ function onReorderDragEnd(e) {
   const card = e.target.closest('.expense-card');
   if (card) card.classList.remove('dragging');
   reorderDragId = null;
+  refreshUI();
 }
-function persistReorder(container) {
-  if (!isAdmin) return;
+function moveReorderCard(container, card, after) {
+  // Cards live inside date sections, not directly inside the list.
+  if (after) after.parentNode.insertBefore(card, after);
+  else {
+    const last = [...container.querySelectorAll('.expense-card')].filter(c => c !== card).pop();
+    if (last) last.after(card);
+  }
+  container.querySelectorAll('.day-block').forEach(block => {
+    block.style.display = block.querySelector('.expense-card') ? '' : 'none';
+  });
+}
+function onReorderPointerDown(e) {
+  const handle = e.target.closest('.drag-handle');
+  if (!handle || e.button !== 0 || !isAdmin || reorderSaving) return;
+  const card = handle.closest('.expense-card');
+  e.preventDefault();
+  handle.setPointerCapture(e.pointerId);
+  reorderPointer = { id: e.pointerId, handle, card, container: e.currentTarget, y: e.clientY, moved: false };
+}
+function onReorderPointerMove(e) {
+  const state = reorderPointer;
+  if (!state || state.id !== e.pointerId) return;
+  if (!state.moved && Math.abs(e.clientY - state.y) < 5) return;
+  e.preventDefault();
+  state.moved = true;
+  reorderDragId = state.card.dataset.id;
+  state.card.classList.add('dragging');
+  moveReorderCard(state.container, state.card, reorderAfterElement(state.container, e.clientY));
+  state.handle.setPointerCapture(e.pointerId);
+  if (e.clientY < 80) window.scrollBy(0, -24);
+  else if (e.clientY > window.innerHeight - 80) window.scrollBy(0, 24);
+}
+function onReorderPointerEnd(e) {
+  const state = reorderPointer;
+  if (!state || state.id !== e.pointerId) return;
+  reorderPointer = null;
+  reorderDragId = null;
+  state.card.classList.remove('dragging');
+  if (state.handle.hasPointerCapture(e.pointerId)) state.handle.releasePointerCapture(e.pointerId);
+  state.container._suppressReorderClick = true;
+  setTimeout(() => { state.container._suppressReorderClick = false; }, 0);
+  if (state.moved && e.type === 'pointerup') persistReorder(state.container);
+  else refreshUI();
+}
+async function persistReorder(container) {
+  if (!isAdmin || reorderSaving) return;
   // New visual sequence of just the cards in this container (may be a month subset).
   const visibleIds = [...container.querySelectorAll('.expense-card')].map(c => c.dataset.id);
   if (!visibleIds.length) return;
+  const previous = new Map(expenses.map(exp => [exp.id, exp.order]));
+  const currentIds = [...expenses].sort(compareExpensesManual).filter(exp => visibleIds.includes(exp.id)).map(exp => exp.id);
+  if (currentIds.every((id, i) => id === visibleIds[i])) { refreshUI(); return; }
   const visibleSet = new Set(visibleIds);
   // Walk the full globally-sorted list; wherever a visible item sits, drop in the next
   // id from the new sequence. Non-visible items keep their absolute slots, so reordering
@@ -2669,13 +2736,21 @@ function persistReorder(container) {
     if (exp && exp.order !== idx) { exp.order = idx; changed.push(exp); }
   });
   if (!changed.length) return;
-  if (usingFirestore) {
-    Promise.all(changed.map(exp =>
-      updateDoc(doc(db, 'expenses', exp.id), { order: exp.order })
-        .catch(err => console.error('Failed to persist order for', exp.id, err))
-    ));
-  } else {
-    saveLocal();
+  reorderSaving = true;
+  try {
+    if (usingFirestore) {
+      // One commit avoids snapshots that briefly contain only part of the new order.
+      if (changed.length > 500) throw new Error('Too many expenses for one reorder');
+      const batch = writeBatch(db);
+      changed.forEach(exp => batch.update(doc(db, 'expenses', exp.id), { order: exp.order }));
+      await batch.commit();
+    } else saveLocal();
+  } catch (err) {
+    expenses.forEach(exp => { exp.order = previous.get(exp.id); });
+    console.error('Failed to save expense order:', err);
+    alert('บันทึกลำดับไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+  } finally {
+    reorderSaving = false;
     refreshUI();
   }
 }
@@ -2888,7 +2963,7 @@ function expenseListHtml(list, showAdmin, reorderable, opts = {}) {
     head += listZoneHtml(`ต้องจัดการ · ${pending.length} รายการ`, sumNetExpenses(pending), 'due');
     head += pending.map(triageCardHtml).join('');
   }
-  const rest = list.filter((e) => e.status === 'paid');
+  const rest = opts.triage === false ? list : list.filter((e) => e.status === 'paid');
   if (rest.length) {
     head += listZoneHtml(pending.length ? `จ่ายแล้ว · ${rest.length} รายการ` : `${rest.length} รายการ`,
       sumNetExpenses(rest));
